@@ -1,37 +1,26 @@
 {
   "project_info": {
-    "project_number": "SEU_PROJECT_NUMBER",
-    "firebase_url": "https://SEU-PROJETO.firebaseio.com",
-    "project_id": "SEU-PROJETO",
-    "storage_bucket": "SEU-PROJETO.appspot.com"
+    "project_number": "841128243215",
+    "project_id": "mentorfinanceiro",
+    "storage_bucket": "mentorfinanceiro.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:SEU_PROJECT_NUMBER:android:SEU_HASH",
+        "mobilesdk_app_id": "1:841128243215:android:3d956f69bcfb67d12ef37a",
         "android_client_info": {
-          "package_name": "com.example.mentor_financeiro"
+          "package_name": "com.example.mentor_fincanceiro"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "SEU_CLIENT_ID.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBY0xYOxFk6VgqZVcsj79n9kK0ca-L0Vlo"
+          "current_key": "AIzaSyAb2ar5SCQEq3VlK5GGaaWdR4WvHgOlS00"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "SEU_CLIENT_ID.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
