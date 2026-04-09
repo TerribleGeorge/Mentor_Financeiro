@@ -1,11 +1,44 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 
 class FirebaseService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+
+  static Future<void> inicializarMessaging() async {
+    NotificationSettings settings = await _messaging.requestPermission();
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      String? token = await _messaging.getToken();
+      if (kDebugMode) print("FCM Token: $token");
+    }
+
+    FirebaseMessaging.onBackgroundMessage(_mensagemBackground);
+    FirebaseMessaging.onMessage.listen(_mensagemForeground);
+  }
+
+  static Future<void> _mensagemBackground(RemoteMessage message) async {
+    if (kDebugMode)
+      print("Mensagem em background: ${message.notification?.title}");
+  }
+
+  static void _mensagemForeground(RemoteMessage message) {
+    if (kDebugMode)
+      print("Mensagem em foreground: ${message.notification?.title}");
+  }
+
+  static Future<void> salvarTokenMessaging(String uid) async {
+    String? token = await _messaging.getToken();
+    if (token != null) {
+      await _firestore.collection('usuarios').doc(uid).update({
+        'fcmToken': token,
+      });
+    }
+  }
 
   static User? get usuarioAtual => _auth.currentUser;
 

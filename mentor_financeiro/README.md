@@ -1,17 +1,43 @@
-# mentor_financeiro
+# Mentor Financeiro
 
-A new Flutter project.
+O app de controle financeiro pessoal com inteligência artificial.
 
-## Getting Started
+## 📱 Funcionalidades
 
-This project is a starting point for a Flutter application.
+- **Karine IA**: Assistente virtual que ajuda a controlar suas finanças
+- **Controle de Gastos**: Registro diário de gastos com categorias
+- **Metas Financeiras**: Planeje seus sonhos e objetivos
+- **Limite Diário**: Cálculo automático based nas suas receitas e despesas
+- **Login Seguro**: Google ou conta anônima
+- **Dados na Nuvem**: Sincronizado com Firebase
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Tecnologias
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- **Flutter** - Framework multiplataforma
+- **Firebase** - Backend (Auth, Firestore, Analytics, Messaging)
+- **Google AI** - Gemini API para a Karine
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🚀 Começando
+
+1. Clone o repositório
+2. Execute `flutter pub get`
+3. Configure o Firebase (veja abaixo)
+4. Execute `flutter run`
+
+## 🔧 Configuração Firebase
+
+1. Crie um projeto no [Firebase Console](https://console.firebase.google.com/)
+2. Adicione um app Android com package: `com.example.mentor_financeiro`
+3. Baixe o `google-services.json` e coloque em `android/app/`
+4. Ative **Authentication** (Google + Anônimo)
+5. Crie o banco **Firestore** (São Paulo)
+
+## 📋 requirements
+
+- Flutter SDK 3.x
+- Dart 3.x
+- Conta Google para Firebase
+
+## 📄 Licença
+
+MIT License
