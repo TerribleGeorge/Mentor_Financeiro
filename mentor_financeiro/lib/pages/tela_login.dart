@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_service.dart';
 import 'tela_configuracao.dart';
 
 class TelaLogin extends StatefulWidget {
@@ -15,6 +17,7 @@ class _TelaLoginState extends State<TelaLogin> {
   int _paginaAtual = 0;
   bool _carregando = false;
   String? _metodoLogin;
+  User? _usuarioFirebase;
 
   @override
   Widget build(BuildContext context) {
@@ -495,8 +498,17 @@ class _TelaLoginState extends State<TelaLogin> {
   }
 
   Future<void> _loginGoogle() async {
-    setState(() => _metodoLogin = "google");
-    _pageController.jumpToPage(2);
+    setState(() => _carregando = true);
+    final user = await FirebaseService.loginGoogle();
+    setState(() {
+      _carregando = false;
+      if (user != null) {
+        _usuarioFirebase = user;
+        _metodoLogin = "google";
+        _nomeController.text = user.displayName ?? '';
+        _pageController.jumpToPage(2);
+      }
+    });
   }
 
   Future<void> _loginApple() async {
@@ -510,16 +522,35 @@ class _TelaLoginState extends State<TelaLogin> {
   }
 
   Future<void> _loginAnonimo() async {
-    setState(() => _metodoLogin = "anonimo");
-    _pageController.jumpToPage(2);
+    setState(() => _carregando = true);
+    final user = await FirebaseService.loginAnonimo();
+    setState(() {
+      _carregando = false;
+      if (user != null) {
+        _usuarioFirebase = user;
+        _metodoLogin = "anonimo";
+        _pageController.jumpToPage(2);
+      }
+    });
   }
 
   Future<void> _finalizarLogin() async {
     setState(() => _carregando = true);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('nome_usuario', _nomeController.text.trim());
+    final nome = _nomeController.text.trim();
+    await prefs.setString('nome_usuario', nome);
     await prefs.setString('metodo_login', _metodoLogin ?? "anonimo");
     await prefs.setBool('configurado', false);
+
+    if (_usuarioFirebase != null) {
+      await FirebaseService.salvarDadosUsuario(
+        uid: _usuarioFirebase!.uid,
+        nome: nome,
+        email: _usuarioFirebase!.email,
+        metodoLogin: _metodoLogin ?? "anonimo",
+      );
+      await prefs.setString('uid', _usuarioFirebase!.uid);
+    }
 
     if (mounted) {
       Navigator.of(context).pushReplacement(

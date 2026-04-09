@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/firebase_service.dart';
 import 'tela_home.dart';
 
 class TelaConfiguracao extends StatefulWidget {
@@ -122,15 +123,27 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     setState(() => _salvando = true);
 
     final prefs = await SharedPreferences.getInstance();
+    final uid = prefs.getString('uid');
+
+    final Map<String, dynamic> configuracoes = {};
     for (var campo in _campos) {
-      await prefs.setString(
-        'valor_${campo.nome}',
-        _controllers[campo.nome]?.text ?? '0',
-      );
+      final valor = _controllers[campo.nome]?.text ?? '0';
+      await prefs.setString('valor_${campo.nome}', valor);
       await prefs.setBool(
         'ativo_${campo.nome}',
         _camposAtivos[campo.nome] ?? false,
       );
+
+      if (_camposAtivos[campo.nome] ?? false) {
+        configuracoes[campo.nome] = {
+          'valor': double.tryParse(valor.replaceAll(',', '.')) ?? 0,
+          'ativo': true,
+        };
+      }
+    }
+
+    if (uid != null) {
+      await FirebaseService.atualizarConfiguracoes(uid, configuracoes);
     }
 
     await prefs.setBool('configurado', true);
