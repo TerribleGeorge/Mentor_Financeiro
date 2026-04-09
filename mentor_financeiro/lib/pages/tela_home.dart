@@ -42,6 +42,19 @@ class _TelaHomeState extends State<TelaHome> {
 
   void _iniciarKarine() {
     _model = GenerativeModel(model: 'gemini-pro', apiKey: _apiKey);
+    _chat = _model?.startChat(
+      history: [
+        Content.text('''
+Você é a Karine, mentora do George.
+George tem 32 anos, mora em Uberlândia-MG e tem diabetes tipo 1.
+O limite diário dele é apertado por causa das despesas fixas (mínimo R\$ 50,00 por dia).
+Seja humana, direta e firme.
+Ajude ele a controlar o dinheiro para garantir a segurança financeira e a saúde dele.
+Nunca diga que é uma IA.
+Responda em português brasileiro, de forma curta e prática.
+'''),
+      ],
+    );
   }
 
   Future<void> _carregarDados() async {
