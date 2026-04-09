@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,7 +16,8 @@ class KarineService {
   }
 
   void _iniciarKarine() {
-    _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: _apiKey);
+    _model = GenerativeModel(model: 'gemini-pro', apiKey: _apiKey);
+
     _chat = _model?.startChat(
       history: [
         Content.text('''
@@ -63,23 +65,31 @@ Situação financeira atual:
         : mensagem;
 
     try {
+      debugPrint("LOG: Tentando falar com a Karine...");
       final resposta = await _chat!.sendMessage(Content.text(promptCompleto));
+      debugPrint("LOG: Resposta recebida com sucesso!");
 
       if (resposta.text != null && resposta.text!.isNotEmpty) {
         _modoOffline = false;
         return resposta.text!;
       } else {
-        return 'George, não consegui resposta. Tente novamente.';
+        return 'George, recebi uma resposta vazia do Google.';
       }
-    } on SocketException {
+    } on SocketException catch (e) {
+      debugPrint("LOG: Erro de Rede: $e");
       _modoOffline = true;
-      return 'George, estou sem sinal agora.';
-    } on IOException {
+      return 'Sem internet no emulador, George.';
+    } on IOException catch (e) {
+      debugPrint("LOG: Erro de IO: $e");
       _modoOffline = true;
-      return 'George, estou sem sinal agora.';
+      return 'Erro de entrada/saída de dados.';
     } catch (e) {
+      debugPrint("LOG: ERRO DETECTADO: $e");
       _modoOffline = true;
-      return 'George, estou sem sinal agora.';
+      String erroAmigavel = e.toString().contains('not found')
+          ? 'Modelo não encontrado. Verifique a versão da API.'
+          : e.toString();
+      return 'Erro Técnico: ${erroAmigavel.substring(0, erroAmigavel.length > 60 ? 60 : erroAmigavel.length)}';
     }
   }
 

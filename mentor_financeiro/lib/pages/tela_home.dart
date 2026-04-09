@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +12,7 @@ class TelaHome extends StatefulWidget {
 class _TelaHomeState extends State<TelaHome> {
   static const String _apiKey = 'AIzaSyBY0xYOxFk6VgqZVcsj79n9kK0ca-L0Vlo';
 
+  // ignore: unused_field
   GenerativeModel? _model;
   ChatSession? _chat;
   double _limiteDiario = 0;
@@ -41,18 +41,7 @@ class _TelaHomeState extends State<TelaHome> {
   }
 
   void _iniciarKarine() {
-    _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: _apiKey);
-    _chat = _model?.startChat(
-      history: [
-        Content.text('''
-Você é a Karine, mentora do George (32 anos, Uberlândia). 
-Ele tem diabetes tipo 1, então seja rigorosa com o limite financeiro para garantir a segurança dele.
-Responda de forma humana, curta e direta ao que ele perguntar.
-Nunca diga que é uma IA ou chatbot.
-Responda em português brasileiro.
-'''),
-      ],
-    );
+    _model = GenerativeModel(model: 'gemini-pro', apiKey: _apiKey);
   }
 
   Future<void> _carregarDados() async {
@@ -161,54 +150,18 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
         setState(() {
           _mensagens.add(_Mensagem(texto: resposta.text!, ehUsuario: false));
         });
-      } else if (mounted) {
-        setState(() {
-          _mensagens.add(
-            _Mensagem(
-              texto: 'George, não consegui uma resposta. Tente novamente.',
-              ehUsuario: false,
-            ),
-          );
-        });
-      }
-    } on SocketException {
-      if (mounted) {
-        setState(() {
-          _mensagens.add(
-            _Mensagem(
-              texto:
-                  'George, tive um problema de conexão técnica. Verifique o console de debug.',
-              ehUsuario: false,
-            ),
-          );
-        });
-        debugPrint('Karine Erro Socket: conexão falha');
-      }
-    } on IOException catch (e) {
-      if (mounted) {
-        setState(() {
-          _mensagens.add(
-            _Mensagem(
-              texto:
-                  'George, tive um problema de conexão técnica. Verifique o console de debug.',
-              ehUsuario: false,
-            ),
-          );
-        });
-        debugPrint('Karine Erro IO: $e');
       }
     } catch (e) {
       if (mounted) {
+        debugPrint('KARINE ERRO: $e');
         setState(() {
           _mensagens.add(
             _Mensagem(
-              texto:
-                  'George, tive um problema de conexão técnica. Verifique o console de debug.',
+              texto: 'Erro Técnico: ${e.toString().split(':').last.trim()}',
               ehUsuario: false,
             ),
           );
         });
-        debugPrint('Karine Erro: $e');
       }
     } finally {
       if (mounted) {
@@ -416,18 +369,12 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              _corLimite().withValues(alpha: 0.15),
-              _corLimite().withValues(alpha: 0.05),
-            ],
+            colors: [_corLimite().withAlpha(40), _corLimite().withAlpha(15)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: _corLimite().withValues(alpha: 0.3),
-            width: 1,
-          ),
+          border: Border.all(color: _corLimite().withAlpha(75), width: 1),
         ),
         child: Column(
           children: [
@@ -459,20 +406,13 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
                 fontWeight: FontWeight.bold,
               ),
             ),
-            if (_limiteDiario > 0 && _limiteDiario < 50) ...[
-              const SizedBox(height: 8),
-              const Text(
-                '⚠️ Abaixo do mínimo!',
-                style: TextStyle(color: Colors.orange, fontSize: 11),
-              ),
-            ],
             const SizedBox(height: 15),
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 value: _porcentagem,
                 minHeight: 8,
-                backgroundColor: Colors.white.withValues(alpha: 0.1),
+                backgroundColor: Colors.white12,
                 color: _corLimite(),
               ),
             ),
@@ -506,7 +446,7 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00D9FF).withValues(alpha: 0.2),
+                      color: const Color(0xFF00D9FF).withAlpha(50),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
@@ -540,21 +480,17 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
             const Divider(color: Colors.white12, height: 1),
             Expanded(
               child: _mensagens.isEmpty
-                  ? Center(
+                  ? const Center(
                       child: Text(
                         'Digite para a Karine...',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.4),
-                          fontSize: 13,
-                        ),
+                        style: TextStyle(color: Colors.white38, fontSize: 13),
                       ),
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.all(10),
                       itemCount: _mensagens.length,
-                      itemBuilder: (context, index) {
-                        return _mensagemBubble(_mensagens[index]);
-                      },
+                      itemBuilder: (context, index) =>
+                          _mensagemBubble(_mensagens[index]),
                     ),
             ),
             const Divider(color: Colors.white12, height: 1),
@@ -568,8 +504,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Digite para a Karine...',
-                        hintStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.4),
+                        hintStyle: const TextStyle(
+                          color: Colors.white38,
                           fontSize: 13,
                         ),
                         filled: true,
@@ -600,8 +536,6 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
                         color: Color(0xFF0F172A),
                         size: 20,
                       ),
-                      padding: const EdgeInsets.all(8),
-                      constraints: const BoxConstraints(),
                     ),
                   ),
                 ],
@@ -621,7 +555,7 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: msg.ehUsuario
-              ? const Color(0xFF00D9FF).withValues(alpha: 0.15)
+              ? const Color(0xFF00D9FF).withAlpha(40)
               : const Color(0xFF0F172A),
           borderRadius: BorderRadius.circular(15),
         ),
@@ -673,9 +607,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: cor.withValues(alpha: 0.1),
+          color: cor.withAlpha(25),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: cor.withValues(alpha: 0.3)),
+          border: Border.all(color: cor.withAlpha(75)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
