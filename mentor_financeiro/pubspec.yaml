@@ -1,41 +1,170 @@
+# ==============================================================================
+# ARQUIVO DE CONFIGURAÇÃO DO PUBSPEC.YAML
+# ==============================================================================
+# Este arquivo é o coração do projeto Flutter. Ele define:
+# - Nome e descrição do app
+# - Versão do app
+# - Dependências necessárias (pacotes externos)
+# - Configurações de assets (imagens, fontes, etc)
+# - Configurações do Flutter em si
+# ==============================================================================
+
+# Nome do projeto (identificador único no pub.dev)
 name: mentor_financeiro
+
+# Descrição breve do app (aparecerá no pub.dev)
 description: "Mentor Financeiro - O melhor app de organização financeira do Brasil"
+
+# Publish to 'none' indica que este app não será publicado no pub.dev
 publish_to: 'none'
+
+# Versão do app no formato semântico: MAJOR.MINOR.PATCH+1
 version: 1.0.0+1
 
+# ==============================================================================
+# AMBIENTE DE EXECUÇÃO
+# ==============================================================================
+# Define a versão mínima do Dart SDK necessária para rodar o app
+# O acento ^ permite versões compatíveis (ex: ^3.11.3 aceita 3.11.3, 3.11.4, etc)
+# Impacto: Se o ambiente tiver uma versão do Dart incompatível, o app não compila
+# ==============================================================================
 environment:
   sdk: ^3.11.3
 
+# ==============================================================================
+# DEPENDÊNCIAS DO PROJETO (dependencies)
+# ==============================================================================
+# Pacotes externos necessários para o app funcionar
+# O acento ^ indica aceitar versões compatíveis (ex: ^1.0.8 aceptan 1.0.8 até 1.9.9)
+# Importante: Sempre verifique compatibilidade antes de atualizar versões
+# ==============================================================================
 dependencies:
+  # Flutter SDK (obrigatório - sem isso não é um projeto Flutter)
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
-  shared_preferences: ^2.5.5
-  http: ^1.6.0
-  flutter_secure_storage: ^9.2.4
-  in_app_update: ^4.1.1
-  url_launcher: ^6.2.4
-  google_generative_ai: 
-  firebase_core: ^3.12.1
-  firebase_auth: ^5.5.2
-  cloud_firestore: ^5.6.6
-  firebase_messaging: ^15.2.5
-  firebase_analytics: ^11.6.0
-  google_sign_in: ^6.2.2
 
+  # Ícones do Cupertino (iOS-style icons)
+  # Usado para interfaces que seguem o guia de estilo iOS
+  cupertino_icons: ^1.0.8
+
+  # SharedPreferences: Armazenamento local chave-valor
+  # Importance: Salva dados simples localmente (ex: preferências do usuário, cache)
+  # Impacto: Persistência de dados sem necessidade de backend
+  shared_preferences: ^2.5.5
+
+  # HTTP: Requisições web
+  # Importance: Permite comunicação com APIs externas
+  # Impacto: essencial para integrar com serviços REST
+  http: ^1.6.0
+
+  # Flutter Secure Storage: Armazenamento seguro cryptografado
+  # Importance: Protege dados sensíveis (tokens, senhas, chaves API)
+  # Impacto: Segurança dos dados do usuário em dispositivo
+  flutter_secure_storage: ^10.0.0
+
+  # In App Update: Atualizações dentro do app
+  # Importance: Permite force update ou flexible update pela Play Store/App Store
+  # Impacto: Garante que usuários estejam na versão mais recente
+  in_app_update: ^4.1.1
+
+  # URL Launcher: Abre URLs no navegador ou outros apps
+  # Importance: Permite abrir links externos, WhatsApp, e-mail, etc
+  # Impacto: Integração com apps externos do dispositivo
+  url_launcher: ^6.2.4
+
+  # Google Generative AI: Integração com Google AI Studio/Gemini
+  # Importance: Permite usar IA Generativa do Google no app
+  # Impacto: Funcionalidades de IA (chat, análise, geração de conteúdo)
+  # Nota: Versão FIXA em 0.4.0 (sem ^ para evitar breaking changes)
+  google_generative_ai: ^0.4.7
+
+  # Firebase Core: Configuração base do Firebase
+  # Importance: Inicializa serviços Firebase no app
+  # Impacto: Obrigatório para usar qualquer serviço Firebase
+  firebase_core: ^4.6.0
+
+  # Firebase Auth: Autenticação Firebase
+  # Importance: Login com e-mail/senha, Google, Apple, Facebook, etc
+  # Impacto: Sistema de authentication completo gerenciado pelo Firebase
+  firebase_auth: ^6.3.0
+
+  # Cloud Firestore: Banco de dados NoSQL em nuvem
+  # Importance: Armazenamento de dados em tempo real na nuvem
+  # Impacto: Sincronização de dados entre dispositivos e usuários
+  cloud_firestore: ^6.2.0
+
+  # Firebase Messaging: Notificações push
+  # Importance: Envio de notificações via Firebase Cloud Messaging (FCM)
+  # Impacto: Engajamento do usuário com notificações em tempo real
+  firebase_messaging: ^16.1.3
+
+  # Firebase Analytics: Análise de uso
+  # Importance: Tracking de eventos e análise de comportamento do usuário
+  # Impacto: Dados para melhorar o app based em uso real
+  firebase_analytics: ^12.2.0
+
+  # Google Sign In: Login com conta Google
+  # Importance: Authentication rápido usando conta Google existente
+  # Impacto: Aumenta taxa de conversão de login (usuário não precisa criar senha)
+  google_sign_in: ^6.2.2
+  # firebase_ai: ^3.10.0  # Temporariamente desativado
+
+# ==============================================================================
+# DEPENDÊNCIAS DE DESENVOLVIMENTO (dev_dependencies)
+# ==============================================================================
+# Pacotes usados apenas durante desenvolvimento (não incluídos no app final)
+# Importante: Servem para debugging, testing, e ferramentas辅助
+# ==============================================================================
 dev_dependencies:
+  # Flutter Test: Framework de testes unitários e de widget
+  # Importance: Permite escrever e rodar testes automatizados
+  # Impacto: Qualidade do código e detecção de bugs
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
-  flutter_launcher_icons: ^0.13.1
 
+  # Flutter Lints: Regras de linting/análise de código
+  # Importance: Padroniza o código e evita erros comuns
+  # Impacto: Código mais limpo e manutenível
+  flutter_lints: ^6.0.0
+
+  # Flutter Launcher Icons: Gera ícones de launcher automáticamente
+  # Importance: Cria ícones para Android/iOS a partir de uma imagem
+  # Impacto: Ícone do app na tela inicial do dispositivo
+  flutter_launcher_icons: ^0.14.4
+
+# ==============================================================================
+# CONFIGURAÇÃO DOS ÍCONES DO APP
+# ==============================================================================
+# Define como os ícones de launcher serão gerados
+# ==============================================================================
 flutter_launcher_icons:
+  # Prefixo do nome do ícone para Android
   android: "launcher_icon"
+
+  # Gera ícone para iOS também
   ios: true
+
+  # Caminho da imagem base para gerar os ícones
+  # Importante: A imagem deve ter pelo menos 1024x1024 pixels
   image_path: "assets/icon/app_icon.png"
+
+  # Versão mínima do Android SDK para gerar ícones
+  # Impacto: Ícones adaptativos requerem Android 8+ (API 21)
   min_sdk_android: 21
 
+# ==============================================================================
+# CONFIGURAÇÕES DO FLUTTER
+# ==============================================================================
 flutter:
+  # Usa Material Design (GUI do Google)
+  # Importance: Define o estilo visual padrão do app
+  # Impacto: Aparência consistente com guidelines do Material Design
   uses-material-design: true
+
+  # Arquivos estáticos (assets) incluídos no app
+  # Importance: Imagens, fontes, arquivos que müssen estar no bundle
+  # Impacto: Recursos disponíveis offline sem necessidade de download
   assets:
+    # Diretório dos ícones do app
     - assets/icon/
+    # Removi a linha de images para não dar erro de diretório não encontrado

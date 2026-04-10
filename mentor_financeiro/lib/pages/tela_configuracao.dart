@@ -1,8 +1,32 @@
+// ==============================================================================
+// TELA CONFIGURAÇÃO - CONFIGURAÇÃO FINANCEIRA
+// ==============================================================================
+// Tela para usuário configurar suas finanças pessoais.
+//
+// Permite configurar:
+// - Renda Fixa (salário)
+// - Renda Extra (freelance, gorjetas)
+// - Gastos Fixos (aluguel, luz, internet, etc)
+//
+// Importance: Configuração inicial essencial
+// Impacto: Sem ela, app não consegue calcular limite
+// ==============================================================================
+
+// Flutter Material
 import 'package:flutter/material.dart';
+
+// Armazenamento local
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Serviço Firebase (para backup na nuvem)
 import '../services/firebase_service.dart';
+
+// Tela Principal
 import 'tela_home.dart';
 
+// ==============================================================================
+// WIDGET STATEFUL
+// ==============================================================================
 class TelaConfiguracao extends StatefulWidget {
   const TelaConfiguracao({super.key});
 
@@ -10,17 +34,41 @@ class TelaConfiguracao extends StatefulWidget {
   State<TelaConfiguracao> createState() => _TelaConfiguracaoState();
 }
 
+// ==============================================================================
+// ESTADO DA TELA CONFIGURAÇÃO
+// ==============================================================================
 class _TelaConfiguracaoState extends State<TelaConfiguracao> {
+  // ==============================================================================
+  // FORM KEY
+  // ==============================================================================
+  // Validação do formulário
   final _formKey = GlobalKey<FormState>();
+
+  // ==============================================================================
+  // CONTROLADORES
+  // ==============================================================================
+  // Map de controllers para cada campo
   final Map<String, TextEditingController> _controllers = {};
+
+  // ==============================================================================
+  // CAMPOS ATIVOS
+  // ==============================================================================
+  // Controla quais campos estão ativos (marcados)
   final Map<String, bool> _camposAtivos = {};
+
+  // Estado de salvamento
   bool _salvando = false;
 
+  // ==============================================================================
+  // DEFINIÇÃO DOS CAMPOS
+  // ==============================================================================
+  // Lista de campos de configuração
   final List<_CampoConfig> _campos = [
+    //RENDA
     const _CampoConfig(
       'Renda Fixa',
       'Seu salário mensal',
-      true,
+      true, // Obrigatório
       ehRenda: true,
       cor: Colors.greenAccent,
     ),
@@ -31,6 +79,7 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
       ehRenda: true,
       cor: Colors.tealAccent,
     ),
+    // GASTOS
     const _CampoConfig(
       'Aluguel',
       'Valor do aluguel',
@@ -95,29 +144,46 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     ),
   ];
 
+  // ==============================================================================
+  // CICLO DE VIDA
+  // ==============================================================================
+
   @override
   void initState() {
     super.initState();
+    // Inicializa controllers
     for (var campo in _campos) {
       _controllers[campo.nome] = TextEditingController();
       _camposAtivos[campo.nome] = campo.obrigatorio;
     }
+    // Carrega dados salvos
     _carregarDados();
   }
 
+  // ==============================================================================
+  // CARREGAR DADOS
+  // ==============================================================================
+  // Carrega valores salvos anteriormente
   Future<void> _carregarDados() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       for (var campo in _campos) {
+        // Busca valor salvo
         _controllers[campo.nome]?.text =
             prefs.getString('valor_${campo.nome}') ?? '';
+        // Busca ativo/inativo
         _camposAtivos[campo.nome] =
             prefs.getBool('ativo_${campo.nome}') ?? campo.obrigatorio;
       }
     });
   }
 
+  // ==============================================================================
+  // SALVAR DADOS
+  // ==============================================================================
+  // Salva todas as configurações
   Future<void> _salvarDados() async {
+    // Valida formulário
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _salvando = true);
@@ -125,7 +191,10 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     final prefs = await SharedPreferences.getInstance();
     final uid = prefs.getString('uid');
 
+    // Prepara configurações para Firestore
     final Map<String, dynamic> configuracoes = {};
+
+    // Salva cada campo
     for (var campo in _campos) {
       final valor = _controllers[campo.nome]?.text ?? '0';
       await prefs.setString('valor_${campo.nome}', valor);
@@ -134,6 +203,7 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
         _camposAtivos[campo.nome] ?? false,
       );
 
+      // Adiciona às configurações se ativo
       if (_camposAtivos[campo.nome] ?? false) {
         configuracoes[campo.nome] = {
           'valor': double.tryParse(valor.replaceAll(',', '.')) ?? 0,
@@ -142,12 +212,15 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
       }
     }
 
+    // Faz backup no Firestore
     if (uid != null) {
       await FirebaseService.atualizarConfiguracoes(uid, configuracoes);
     }
 
+    // Marca como configurado
     await prefs.setBool('configurado', true);
 
+    // Navega para tela principal
     if (mounted) {
       Navigator.of(
         context,
@@ -155,6 +228,9 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     }
   }
 
+  // ==============================================================================
+  // BUILD (CONSTRUÇÃO DA UI)
+  // ==============================================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -172,20 +248,27 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+            // Seção: RENDA
             _secao(
               '💰 SUA RENDA',
               const Color(0xFF00D9FF),
               _campos.where((c) => c.ehRenda).toList(),
             ),
             const SizedBox(height: 30),
+
+            // Seção: GASTOS
             _secao(
               '📋 SEUS GASTOS FIXOS',
               Colors.redAccent,
               _campos.where((c) => !c.ehRenda).toList(),
             ),
             const SizedBox(height: 30),
+
+            // Resumo financeiro
             _resumoFinanceiro(),
             const SizedBox(height: 30),
+
+            // Botão salvar
             SizedBox(
               height: 60,
               child: ElevatedButton(
@@ -219,6 +302,9 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     );
   }
 
+  // ==============================================================================
+  // SEÇÃO (AGRUPAMENTO)
+  // ==============================================================================
   Widget _secao(String titulo, Color cor, List<_CampoConfig> campos) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,7 +324,11 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     );
   }
 
+  // ==============================================================================
+  // CAMPO DE INPUT
+  // ==============================================================================
   Widget _campoInput(_CampoConfig campo) {
+    // Verifica se campo está ativo
     bool ativo = _camposAtivos[campo.nome] ?? true;
 
     return Padding(
@@ -247,6 +337,7 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
         decoration: BoxDecoration(
           color: const Color(0xFF1E293B),
           borderRadius: BorderRadius.circular(12),
+          // Bordacolorida se ativo
           border: ativo
               ? Border.all(color: campo.cor.withValues(alpha: 0.5))
               : Border.all(
@@ -327,6 +418,7 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
                     ),
                   ),
                   validator: (value) {
+                    // Valida se campo obrigatório está vazio
                     if ((_camposAtivos[campo.nome] ?? false) &&
                         (value == null || value.isEmpty)) {
                       return 'Preencha ${campo.nome}';
@@ -341,10 +433,15 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     );
   }
 
+  // ==============================================================================
+  // RESUMO FINANCEIRO
+  // ==============================================================================
+  // Calcula e exibe resumo: renda total, gastos total, sobra/déficit
   Widget _resumoFinanceiro() {
     double rendaTotal = 0;
     double gastosTotais = 0;
 
+    // Soma valores ativos
     for (var campo in _campos) {
       if (_camposAtivos[campo.nome] ?? false) {
         double valor =
@@ -360,7 +457,9 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
       }
     }
 
+    // Calcula sobra
     double sobra = rendaTotal - gastosTotais;
+    // Positivo ou negativo
     bool positivo = sobra >= 0;
 
     return Container(
@@ -384,6 +483,7 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
       ),
       child: Column(
         children: [
+          // Label
           Text(
             positivo ? 'SOBRA MENSAL' : 'DÉFICIT MENSAL',
             style: TextStyle(
@@ -393,6 +493,8 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
             ),
           ),
           const SizedBox(height: 10),
+
+          // Valor
           Text(
             'R\$ ${sobra.toStringAsFixed(2)}',
             style: TextStyle(
@@ -402,6 +504,8 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
             ),
           ),
           const SizedBox(height: 10),
+
+          // Detalhes
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -414,6 +518,9 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     );
   }
 
+  // ==============================================================================
+  // ITEM DO RESUMO
+  // ==============================================================================
   Widget _resumoItem(String label, double valor, Color cor) {
     return Column(
       children: [
@@ -429,6 +536,9 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     );
   }
 
+  // ==============================================================================
+  // LIMPEZA
+  // ==============================================================================
   @override
   void dispose() {
     for (var controller in _controllers.values) {
@@ -438,6 +548,11 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
   }
 }
 
+// ==============================================================================
+// CLASSE DE CONFIGURAÇÃO DE CAMPO
+// ==============================================================================
+// Modelo para armazenar configuração de cada campo
+// ==============================================================================
 class _CampoConfig {
   final String nome;
   final String hint;

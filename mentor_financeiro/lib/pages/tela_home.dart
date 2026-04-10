@@ -1,7 +1,31 @@
+// ==============================================================================
+// TELA HOME - TELA PRINCIPAL
+// ==============================================================================
+// Tela principal do app após login.
+// Exibe:
+//
+// - Cabeçalho com saudação e nome do usuário
+// - Card do limite diário disponível
+// - Chat com a Karine (assistente IA)
+// - Botões de registro de saída/entrada
+// - Resumo do dia (gastos e ganhos)
+//
+// Importance: Dashboard principal do usuário
+// Impacto: Primeira tela após login, maior engajamento
+// ==============================================================================
+
+// Flutter Material
 import 'package:flutter/material.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
+
+// Armazenamento local
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Serviço da Karine (IA)
+import '../services/karine_service.dart';
+
+// ==============================================================================
+// WIDGET STATEFUL
+// ==============================================================================
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
 
@@ -9,30 +33,65 @@ class TelaHome extends StatefulWidget {
   State<TelaHome> createState() => _TelaHomeState();
 }
 
+// ==============================================================================
+// ESTADO DA TELA HOME
+// ==============================================================================
 class _TelaHomeState extends State<TelaHome> {
-  static const String _apiKey = 'AIzaSyBY0xYOxFk6VgqZVcsj79n9kK0ca-L0Vlo';
+  // ==============================================================================
+  // SERVIÇOS
+  // ==============================================================================
 
-  // ignore: unused_field
-  GenerativeModel? _model;
-  ChatSession? _chat;
+  // Karine: Assistente financeira IA
+  final KarineService _karineService = KarineService();
+
+  // ==============================================================================
+  // VARIÁVEIS DE ESTADO
+  // ==============================================================================
+
+  // Limite diário disponível hoje
   double _limiteDiario = 0;
+
+  // Total gasto hoje
   double _gastosHoje = 0;
+
+  // Total recebido hoje
   double _ganhosHoje = 0;
+
+  // Porcentagem do limite usada (0.0 - 1.0)
   double _porcentagem = 0;
+
+  // Nome do usuário
   String _nomeUsuario = 'Usuário';
+
+  // Estado de carregamento
   bool _carregando = false;
 
+  // ==============================================================================
+  // CONTROLADORES
+  // ==============================================================================
+
+  // Campo de texto do chat
   final TextEditingController _mensagemController = TextEditingController();
+
+  // Scroll do chat
   final ScrollController _scrollController = ScrollController();
+
+  // Lista de mensagens do chat
   final List<_Mensagem> _mensagens = [];
+
+  // ==============================================================================
+  // CICLO DE VIDA
+  // ==============================================================================
 
   @override
   void initState() {
     super.initState();
+    // Inicializa Karine e carrega dados
     _iniciarKarine();
     _carregarDados();
   }
 
+  // Cleanup
   @override
   void dispose() {
     _mensagemController.dispose();
@@ -40,44 +99,70 @@ class _TelaHomeState extends State<TelaHome> {
     super.dispose();
   }
 
+  // ==============================================================================
+  // INICIALIZAÇÃO DA KARINE
+  // ==============================================================================
   void _iniciarKarine() {
-    _model = GenerativeModel(model: 'gemini-pro', apiKey: _apiKey);
-    _chat = _model?.startChat(
-      history: [
-        Content.text('''
-Você é a Karine, mentora do George.
-George tem 32 anos, mora em Uberlândia-MG e tem diabetes tipo 1.
-O limite diário dele é apertado por causa das despesas fixas (mínimo R\$ 50,00 por dia).
-Seja humana, direta e firme.
-Ajude ele a controlar o dinheiro para garantir a segurança financeira e a saúde dele.
-Nunca diga que é uma IA.
-Responda em português brasileiro, de forma curta e prática.
-'''),
-      ],
-    );
+    _karineService.limparHistorico();
   }
 
+  // ==============================================================================
+  // CARREGAR DADOS FINANCEIROS
+  // ==============================================================================
+  // Calcula limite diário baseado em:
+  // - Renda fixa + extra
+  // - Gastos fixos mensais
+  // - Reserva de emergência
+  // - Dias restantes no mês
+  //
+  // Importance:核心功能 do app
+  // Impacto: Controle financeiro automático
+  // ==============================================================================
   Future<void> _carregarDados() async {
     final prefs = await SharedPreferences.getInstance();
     _nomeUsuario = prefs.getString('nome_usuario') ?? 'Usuário';
 
+    // ==============================================================================
+    // CÁLCULO DE DIAS
+    // ==============================================================================
+
+    // Data atual
     final hoje = DateTime.now();
+
+    // Total de dias neste mês
     final diasNoMes = DateTime(hoje.year, hoje.month + 1, 0).day;
+
+    // Dias restantes (incluindo hoje)
     final diasRestantes = diasNoMes - hoje.day + 1;
 
+    // ==============================================================================
+    // RENDA
+    // ==============================================================================
+
+    // Renda fixa mensal
     double rendaFixa =
         double.tryParse(
           prefs.getString('valor_Renda Fixa')?.replaceAll(',', '.') ?? '0',
         ) ??
         0;
+
+    // Renda extra/mensal
     double rendaExtra =
         double.tryParse(
           prefs.getString('valor_Renda Extra')?.replaceAll(',', '.') ?? '0',
         ) ??
         0;
+
+    // Renda total mensal
     double totalRenda = rendaFixa + rendaExtra;
 
+    // ==============================================================================
+    // GASTOS FIXOS
+    // ==============================================================================
+
     double gastosFixos = 0;
+
+    // Lista de gastos fixos típicos
     const List<String> gastos = [
       'Aluguel',
       'Pensão',
@@ -91,6 +176,8 @@ Responda em português brasileiro, de forma curta e prática.
       'Seguro',
       'Transporte',
     ];
+
+    // Soma todos os gastos
     for (final g in gastos) {
       gastosFixos +=
           double.tryParse(
@@ -99,6 +186,10 @@ Responda em português brasileiro, de forma curta e prática.
           0;
     }
 
+    // ==============================================================================
+    // RESERVA DE EMERGÊNCIA
+    // ==============================================================================
+
     double reservaEmergencia =
         double.tryParse(
           prefs.getString('valor_Reserva Emergência')?.replaceAll(',', '.') ??
@@ -106,27 +197,53 @@ Responda em português brasileiro, de forma curta e prática.
         ) ??
         0;
 
+    // ==============================================================================
+    // CÁLCULO DO LIMITE
+    // ==============================================================================
+
+    // Sobra mensal disponível
     double sobraMensal = totalRenda - gastosFixos - reservaEmergencia;
+
+    // Limite diário base
     double limiteBase = sobraMensal > 0 ? sobraMensal / diasRestantes : 0;
 
+    // ==============================================================================
+    // GASTOS DE HOJE
+    // ==============================================================================
+
+    // Chave baseada na data (yyyy-MM-dd)
     final dataHoje = hoje.toIso8601String().split('T')[0];
     _gastosHoje = prefs.getDouble('gastos_$dataHoje') ?? 0;
     _ganhosHoje = prefs.getDouble('ganhos_$dataHoje') ?? 0;
 
+    // Limite atual: base + ganhos - gastos
     double limiteAtual = limiteBase - _gastosHoje + _ganhosHoje;
 
+    // ==============================================================================
+    // LIMITE MÍNIMO
+    // ==============================================================================
+
+    // Garante mínimo de R$ 50 se tiver algo positivo
     if (limiteAtual < 50 && limiteAtual >= 0) {
       limiteAtual = 50;
     }
 
+    // ==============================================================================
+    // PORCENTAGEM USADA
+    // ==============================================================================
+
     double porcentagem = 0;
     if (limiteAtual > 0) {
+      // Porcentagem usada
       porcentagem = _gastosHoje / limiteAtual;
+      // Máximo 100%
       if (porcentagem > 1) porcentagem = 1;
     } else if (limiteAtual < 0) {
+      // Estouro = 100%
       porcentagem = 1;
     }
 
+    // Atualiza UI
     if (mounted) {
       setState(() {
         _limiteDiario = limiteAtual;
@@ -135,36 +252,42 @@ Responda em português brasileiro, de forma curta e prática.
     }
   }
 
+  // ==============================================================================
+  // ENVIAR MENSAGEM PARA KARINE
+  // ==============================================================================
   Future<void> _enviarMensagem() async {
     final texto = _mensagemController.text.trim();
-    if (texto.isEmpty || _carregando || _chat == null) return;
+    if (texto.isEmpty || _carregando) return;
 
+    // Limpa campo
     _mensagemController.clear();
+
+    // Adiciona mensagem do usuário
     setState(() {
       _carregando = true;
       _mensagens.add(_Mensagem(texto: texto, ehUsuario: true));
     });
+
+    // Scroll para fim
     _rolarParaFim();
 
-    String dadosFinancas =
-        '''
-Saldo Atual: R\$ ${(_limiteDiario - _gastosHoje + _ganhosHoje).toStringAsFixed(2)}
-Limite Diario: R\$ ${_limiteDiario.toStringAsFixed(2)}
-Gastos Hoje: R\$ ${_gastosHoje.toStringAsFixed(2)}
-Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
-''';
-
-    String promptCompleto = 'George pergunta: $texto\n\n$dadosFinancas';
-
     try {
-      final resposta = await _chat!.sendMessage(Content.text(promptCompleto));
+      // Envia para Karine com contexto financeiro
+      final resposta = await _karineService.enviarMensagem(
+        texto,
+        limiteDiario: _limiteDiario,
+        gastosHoje: _gastosHoje,
+        ganhosHoje: _ganhosHoje,
+      );
 
-      if (mounted && resposta.text != null && resposta.text!.isNotEmpty) {
+      // Adiciona resposta
+      if (mounted) {
         setState(() {
-          _mensagens.add(_Mensagem(texto: resposta.text!, ehUsuario: false));
+          _mensagens.add(_Mensagem(texto: resposta, ehUsuario: false));
         });
       }
     } catch (e) {
+      // Erro técnico
       if (mounted) {
         debugPrint('KARINE ERRO: $e');
         setState(() {
@@ -177,6 +300,7 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
         });
       }
     } finally {
+      // Finaliza carregamento
       if (mounted) {
         setState(() => _carregando = false);
         _rolarParaFim();
@@ -184,6 +308,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     }
   }
 
+  // ==============================================================================
+  // SCROLL PARA FIM DO CHAT
+  // ==============================================================================
   void _rolarParaFim() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
@@ -196,6 +323,14 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     });
   }
 
+  // ==============================================================================
+  // COR DO LIMITE
+  // ==============================================================================
+  // Retorna cor baseada no status do limite:
+  // - Verde: < 50% usado
+  // - Laranja: 50-80% usado
+  // - Vermelho: > 80% ou negativado
+  // ==============================================================================
   Color _corLimite() {
     if (_limiteDiario < 0) return Colors.redAccent;
     if (_porcentagem < 0.5) return Colors.greenAccent;
@@ -203,6 +338,12 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     return Colors.redAccent;
   }
 
+  // ==============================================================================
+  // REGISTRAR MOVIMENTAÇÃO
+  // ==============================================================================
+  // Bottom sheet para registrar saída ou entrada
+  // Importance: Registro rápido de transações
+  // ==============================================================================
   void _registrarMovimentacao(bool isGasto) {
     final controller = TextEditingController();
     showModalBottomSheet(
@@ -222,6 +363,7 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Handle visual
             Container(
               width: 40,
               height: 4,
@@ -231,6 +373,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
               ),
             ),
             const SizedBox(height: 20),
+
+            // Título
             Text(
               isGasto ? 'REGISTRAR SAÍDA' : 'REGISTRAR ENTRADA',
               style: const TextStyle(
@@ -240,6 +384,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
               ),
             ),
             const SizedBox(height: 20),
+
+            // Campo de valor
             TextField(
               controller: controller,
               keyboardType: const TextInputType.numberWithOptions(
@@ -256,6 +402,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
               ),
             ),
             const SizedBox(height: 20),
+
+            // Botão confirmar
             SizedBox(
               width: double.infinity,
               height: 55,
@@ -274,7 +422,7 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
                         : 'ganhos_$dataHoje';
                     final atual = prefs.getDouble(chave) ?? 0;
                     await prefs.setDouble(chave, atual + valor);
-                    _carregarDados();
+                    _carregarDados(); // Recalcula limite
                   }
                   if (ctx.mounted) Navigator.pop(ctx);
                 },
@@ -299,6 +447,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     );
   }
 
+  // ==============================================================================
+  // BUILD (CONSTRUÇÃO DA UI)
+  // ==============================================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -327,6 +478,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     );
   }
 
+  // ==============================================================================
+  // CABEÇALHO
+  // ==============================================================================
   Widget _cabecalho() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -337,7 +491,7 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _gerarSaudacao(),
+                _gerarSaudacao(), // "Bom dia/tarde/noite"
                 style: const TextStyle(color: Colors.white54, fontSize: 14),
               ),
               const SizedBox(height: 4),
@@ -351,6 +505,7 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
               ),
             ],
           ),
+          // Ícone de notificações
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -367,6 +522,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     );
   }
 
+  // ==============================================================================
+  // SAUDAÇÃO POR HORÁRIO
+  // ==============================================================================
   String _gerarSaudacao() {
     final hora = DateTime.now().hour;
     if (hora < 12) return 'Bom dia!';
@@ -374,6 +532,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     return 'Boa noite!';
   }
 
+  // ==============================================================================
+  // CARD DO LIMITE
+  // ==============================================================================
   Widget _cardLimite() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -391,6 +552,7 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
         ),
         child: Column(
           children: [
+            // Label "LIMITE HOJE"
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -411,6 +573,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
               ],
             ),
             const SizedBox(height: 10),
+
+            // Valor do limite
             Text(
               'R\$ ${_limiteDiario.toStringAsFixed(2)}',
               style: TextStyle(
@@ -420,6 +584,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
               ),
             ),
             const SizedBox(height: 15),
+
+            // Barra de progresso
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
@@ -430,6 +596,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
               ),
             ),
             const SizedBox(height: 8),
+
+            // Porcentagem texto
             Text(
               '${(_porcentagem * 100).toStringAsFixed(0)}% usado',
               style: TextStyle(color: _corLimite(), fontSize: 12),
@@ -440,6 +608,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     );
   }
 
+  // ==============================================================================
+  // ÁREA DO CHAT (KARINE)
+  // ==============================================================================
   Widget _chatArea() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -451,10 +622,12 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
         ),
         child: Column(
           children: [
+            // Header do chat
             Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
+                  // Avatar da Karine
                   Container(
                     width: 36,
                     height: 36,
@@ -478,6 +651,7 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
                     ),
                   ),
                   const Spacer(),
+                  // Indicador de carregamento
                   if (_carregando)
                     const SizedBox(
                       width: 16,
@@ -491,6 +665,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
               ),
             ),
             const Divider(color: Colors.white12, height: 1),
+
+            // Lista de mensagens
             Expanded(
               child: _mensagens.isEmpty
                   ? const Center(
@@ -507,6 +683,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
                     ),
             ),
             const Divider(color: Colors.white12, height: 1),
+
+            // Campo de input
             Padding(
               padding: const EdgeInsets.all(10),
               child: Row(
@@ -537,6 +715,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
                     ),
                   ),
                   const SizedBox(width: 8),
+
+                  // Botão enviar
                   Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFF00D9FF),
@@ -560,6 +740,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     );
   }
 
+  // ==============================================================================
+  // BOLHA DE MENSAGEM
+  // ==============================================================================
   Widget _mensagemBubble(_Mensagem msg) {
     return Align(
       alignment: msg.ehUsuario ? Alignment.centerRight : Alignment.centerLeft,
@@ -586,11 +769,15 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     );
   }
 
+  // ==============================================================================
+  // BOTÕES DE AÇÃO
+  // ==============================================================================
   Widget _botoesAcao() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
+          // Botão SAÍDA
           Expanded(
             child: _botao(
               Icons.arrow_downward,
@@ -600,6 +787,8 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
             ),
           ),
           const SizedBox(width: 12),
+
+          // Botão ENTRADA
           Expanded(
             child: _botao(
               Icons.arrow_upward,
@@ -613,6 +802,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     );
   }
 
+  // ==============================================================================
+  // BOTÃO CUSTOMIZADO
+  // ==============================================================================
   Widget _botao(IconData icone, String texto, Color cor, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
@@ -643,6 +835,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     );
   }
 
+  // ==============================================================================
+  // RESUMO DO DIA
+  // ==============================================================================
   Widget _resumoDia() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -678,6 +873,9 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
     );
   }
 
+  // ==============================================================================
+  // ITEM DO RESUMO
+  // ==============================================================================
   Widget _resumoItem(String label, double valor, Color cor) {
     return Column(
       children: [
@@ -699,6 +897,11 @@ Ganhos Hoje: R\$ ${_ganhosHoje.toStringAsFixed(2)}
   }
 }
 
+// ==============================================================================
+// CLASSE DE MENSAGEM
+// ==============================================================================
+// Modelo simples para representar uma mensagem no chat
+// ==============================================================================
 class _Mensagem {
   final String texto;
   final bool ehUsuario;

@@ -1,42 +1,28 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class KarineService {
-  static const String _apiKey = 'AIzaSyBY0xYOxFk6VgqZVcsj79n9kK0ca-L0Vlo';
+  static const String _apiKey = 'AIzaSyD_tOzL65bYP9z9qFlCgnjI9fBNqvvOYrg';
 
-  GenerativeModel? _model;
-  ChatSession? _chat;
-  String _nomeUsuario = '';
-  bool _modoOffline = false;
+  late GenerativeModel _model;
+  late ChatSession _chat;
 
   KarineService() {
-    _iniciarKarine();
-  }
-
-  void _iniciarKarine() {
-    _model = GenerativeModel(model: 'gemini-pro', apiKey: _apiKey);
-
-    _chat = _model?.startChat(
+    _model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: _apiKey);
+    _chat = _model.startChat(
       history: [
-        Content.text('''
-Você é a Karine, mentora do George.
-George tem 32 anos, mora em Uberlândia-MG e tem diabetes tipo 1.
-O limite diário dele é apertado por causa das despesas fixas (mínimo R\$ 50,00 por dia).
-Seja humana, direta e firme.
-Ajude ele a controlar o dinheiro para garantir a segurança financeira e a saúde dele.
-Nunca diga que é uma IA.
-Responda em português brasileiro, de forma curta e prática.
-'''),
+        Content.text(
+          '''Você é a Karine, assistente financeira do app Mentor Financeiro.
+Responda SEMPRE em português brasileiro (pt-BR).
+Use linguagem friendly e casual.
+Seja helpful e prática nas dicas.
+Quando der números, use formato brasileiro (R\$ 1.000,00).
+Foque em ajudar com finanças pessoais.
+''',
+        ),
       ],
     );
-  }
-
-  Future<void> setNomeUsuario(String nome) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('nome_usuario', nome);
-    _nomeUsuario = nome;
+    debugPrint("[KARINE] Modelo iniciado!");
   }
 
   Future<String> enviarMensagem(
@@ -45,62 +31,39 @@ Responda em português brasileiro, de forma curta e prática.
     double? gastosHoje,
     double? ganhosHoje,
   }) async {
-    if (_chat == null) {
-      _iniciarKarine();
-    }
-
-    String dadosFinancas = '';
-    if (limiteDiario != null || gastosHoje != null || ganhosHoje != null) {
-      dadosFinancas =
-          '''
-Situação financeira atual:
-- Limite Diário: R\$ ${limiteDiario?.toStringAsFixed(2) ?? 'N/A'}
-- Gastos Hoje: R\$ ${gastosHoje?.toStringAsFixed(2) ?? '0'}
-- Ganhos Hoje: R\$ ${ganhosHoje?.toStringAsFixed(2) ?? '0'}
-''';
-    }
-
-    String promptCompleto = dadosFinancas.isNotEmpty
-        ? '$mensagem\n\n$dadosFinancas'
-        : mensagem;
-
     try {
-      debugPrint("LOG: Tentando falar com a Karine...");
-      final resposta = await _chat!.sendMessage(Content.text(promptCompleto));
-      debugPrint("LOG: Resposta recebida com sucesso!");
+      String contexto = '';
 
-      if (resposta.text != null && resposta.text!.isNotEmpty) {
-        _modoOffline = false;
-        return resposta.text!;
-      } else {
-        return 'George, recebi uma resposta vazia do Google.';
+      if (limiteDiario != null || gastosHoje != null || ganhosHoje != null) {
+        contexto =
+            '''
+
+Situação financeira de HOJE:
+- Limite disponível: R\$ ${limiteDiario?.toStringAsFixed(2) ?? '0'}
+- Gastos: R\$ ${gastosHoje?.toStringAsFixed(2) ?? '0'}
+- Recebido: R\$ ${ganhosHoje?.toStringAsFixed(2) ?? '0'}
+
+''';
       }
-    } on SocketException catch (e) {
-      debugPrint("LOG: Erro de Rede: $e");
-      _modoOffline = true;
-      return 'Sem internet no emulador, George.';
-    } on IOException catch (e) {
-      debugPrint("LOG: Erro de IO: $e");
-      _modoOffline = true;
-      return 'Erro de entrada/saída de dados.';
-    } catch (e) {
-      debugPrint("LOG: ERRO DETECTADO: $e");
-      _modoOffline = true;
-      String erroAmigavel = e.toString().contains('not found')
-          ? 'Modelo não encontrado. Verifique a versão da API.'
-          : e.toString();
-      return 'Erro Técnico: ${erroAmigavel.substring(0, erroAmigavel.length > 60 ? 60 : erroAmigavel.length)}';
-    }
-  }
 
-  void limparConversa() {
-    _iniciarKarine();
+      final prompt = Content.text('$mensagem$contexto');
+      debugPrint("[KARINE] Enviando...");
+
+      final response = await _chat.sendMessage(prompt);
+
+      if (response.text != null) {
+        debugPrint("[KARINE] OK!");
+        return response.text!;
+      }
+
+      return "Sem resposta.";
+    } catch (e) {
+      debugPrint("[KARINE] ERRO: $e");
+      return "Erro: ${e.toString()}";
+    }
   }
 
   void limparHistorico() {
-    limparConversa();
+    _chat = _model.startChat();
   }
-
-  String get nomeUsuario => _nomeUsuario;
-  bool get modoOffline => _modoOffline;
 }
