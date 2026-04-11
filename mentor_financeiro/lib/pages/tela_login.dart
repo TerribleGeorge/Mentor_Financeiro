@@ -1,6 +1,3 @@
-// ==============================================================================
-// TELA LOGIN - TELA DE LOGIN/CADASTRO
-// ==============================================================================
 // Tela de onboarding e autenticação do app.
 //
 // Fluxo de páginas (PageView):
@@ -9,9 +6,6 @@
 // 3. Nome - Cadastro do nome do usuário
 // 4. Plano - Escolha do plano (Free/Premium)
 //
-// Importance: Primeira autenticação e configuração
-// Impacto: Taxa de conversão e engajamento inicial
-// ==============================================================================
 
 // Flutter Material
 import 'package:flutter/material.dart';
@@ -28,9 +22,7 @@ import '../services/firebase_service.dart';
 // Tela de configuração (próxima etapa)
 import 'tela_configuracao.dart';
 
-// ==============================================================================
 // WIDGET STATEFUL
-// ==============================================================================
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
 
@@ -38,9 +30,7 @@ class TelaLogin extends StatefulWidget {
   State<TelaLogin> createState() => _TelaLoginState();
 }
 
-// ==============================================================================
 // ESTADO DA TELA LOGIN
-// ==============================================================================
 class _TelaLoginState extends State<TelaLogin> {
   // ==============================================================================
   // CONTROLADORES

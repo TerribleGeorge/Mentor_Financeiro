@@ -1,15 +1,10 @@
-// ==============================================================================
 // FIREBASE SERVICE - SERVIÇOS DO FIREBASE
-// ==============================================================================
 // Este arquivo contém todas as integrações com o Firebase:
 // - Firebase Auth (autenticação)
 // - Firebase Firestore (banco de dados)
 // - Firebase Messaging (notificações push)
 // - Google Sign In (login com Google)
 //
-// Importance: Centraliza toda a lógica de backend e dados
-// Impacto: Sem isso, app não funciona com login nem salva dados
-// ==============================================================================
 
 // Pacotes Firebase para autenticação
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,12 +21,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 // Utilities de debug
 import 'package:flutter/foundation.dart';
 
-// ==============================================================================
 // CLASSE FIREBASE SERVICE
-// ==============================================================================
 // Singleton: Uma única instância para todo o app
-// Por quê? Evita criar múltiplas conexões com Firebase
-// ==============================================================================
 class FirebaseService {
   // ==============================================================================
   // INSTÂNCIAS DOS SERVIÇOS FIREBASE

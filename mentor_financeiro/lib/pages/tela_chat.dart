@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/karine_service.dart';
 
 class TelaChat extends StatefulWidget {
@@ -9,17 +10,28 @@ class TelaChat extends StatefulWidget {
 }
 
 class _TelaChatState extends State<TelaChat> {
-  final KarineService _karineService = KarineService();
+  late KarineService _karineService;
   final TextEditingController _mensagemController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<_Mensagem> _mensagens = [];
   bool _carregando = false;
+  String _nomeUsuario = '';
 
   @override
   void initState() {
     super.initState();
+    _iniciarKarine();
+  }
+
+  Future<void> _iniciarKarine() async {
+    final prefs = await SharedPreferences.getInstance();
+    _nomeUsuario = prefs.getString('nome_usuario') ?? '';
+    _karineService = KarineService();
+    _karineService.configurar(_nomeUsuario);
     _adicionarMensagem(
-      "Olá! Sou a Karine, sua mentora financeira! 💕\n\nComo posso te ajudar hoje?",
+      _nomeUsuario.isEmpty
+          ? "Olá! Sou a Karine, sua mentora financeira! 💕\n\nComo posso te ajudar hoje?"
+          : "Olá, $_nomeUsuario! Sou a Karine, sua mentora financeira! 💕\n\nComo posso te ajudar hoje?",
     );
   }
 

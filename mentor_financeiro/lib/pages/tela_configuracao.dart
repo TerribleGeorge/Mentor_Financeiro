@@ -1,6 +1,3 @@
-// ==============================================================================
-// TELA CONFIGURAÇÃO - CONFIGURAÇÃO FINANCEIRA
-// ==============================================================================
 // Tela para usuário configurar suas finanças pessoais.
 //
 // Permite configurar:
@@ -8,9 +5,6 @@
 // - Renda Extra (freelance, gorjetas)
 // - Gastos Fixos (aluguel, luz, internet, etc)
 //
-// Importance: Configuração inicial essencial
-// Impacto: Sem ela, app não consegue calcular limite
-// ==============================================================================
 
 // Flutter Material
 import 'package:flutter/material.dart';
@@ -24,9 +18,7 @@ import '../services/firebase_service.dart';
 // Tela Principal
 import 'tela_home.dart';
 
-// ==============================================================================
 // WIDGET STATEFUL
-// ==============================================================================
 class TelaConfiguracao extends StatefulWidget {
   const TelaConfiguracao({super.key});
 
@@ -34,9 +26,7 @@ class TelaConfiguracao extends StatefulWidget {
   State<TelaConfiguracao> createState() => _TelaConfiguracaoState();
 }
 
-// ==============================================================================
 // ESTADO DA TELA CONFIGURAÇÃO
-// ==============================================================================
 class _TelaConfiguracaoState extends State<TelaConfiguracao> {
   // ==============================================================================
   // FORM KEY
@@ -548,11 +538,8 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
   }
 }
 
-// ==============================================================================
 // CLASSE DE CONFIGURAÇÃO DE CAMPO
-// ==============================================================================
 // Modelo para armazenar configuração de cada campo
-// ==============================================================================
 class _CampoConfig {
   final String nome;
   final String hint;

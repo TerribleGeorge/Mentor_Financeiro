@@ -78,6 +78,9 @@ dependencies:
   # Nota: Versão FIXA em 0.4.0 (sem ^ para evitar breaking changes)
   google_generative_ai: ^0.4.7
 
+  # flutter_dotenv: Carrega variáveis de ambiente do arquivo .env
+  flutter_dotenv: ^5.2.1
+
   # Firebase Core: Configuração base do Firebase
   # Importance: Inicializa serviços Firebase no app
   # Impacto: Obrigatório para usar qualquer serviço Firebase
@@ -164,7 +167,6 @@ flutter:
   # Arquivos estáticos (assets) incluídos no app
   # Importance: Imagens, fontes, arquivos que müssen estar no bundle
   # Impacto: Recursos disponíveis offline sem necessidade de download
-  assets:
-    # Diretório dos ícones do app
-    - assets/icon/
-    # Removi a linha de images para não dar erro de diretório não encontrado
+assets:
+  - .env
+  - assets/.env
