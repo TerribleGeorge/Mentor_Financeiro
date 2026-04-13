@@ -1,89 +1,73 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
-import 'api_config.dart';
+import 'package:http/http.dart' as http;
 
 class KarineService {
-  String _getApiKey() => ApiConfig.geminiApiKey;
-
-  GenerativeModel? _model;
-  ChatSession? _chat;
-  bool _inicializado = false;
+  List<Map<String, String>> _history = [];
   String _nomeUsuario = '';
 
   KarineService() {
-    debugPrint('[KARINE] Instanciado');
+    debugPrint('[KARINE] Instanciado (Ollama)');
   }
 
   void configurar(String nomeUsuario) {
-    if (_nomeUsuario != nomeUsuario) {
-      _nomeUsuario = nomeUsuario;
-      _inicializado = false;
-      _chat = null;
+    _nomeUsuario = nomeUsuario;
+  }
+
+  Future<String> enviarMensagem(String mensagem) async {
+    try {
+      final prompt = _construirPrompt(mensagem);
+
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:11434/api/generate'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'model': 'llama3',
+          'prompt': prompt,
+          'stream': false,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final text = data['response'] ?? 'Entendi!';
+
+        _history.add({'role': 'user', 'content': mensagem});
+        _history.add({'role': 'assistant', 'content': text});
+
+        debugPrint('[KARINE] OK');
+        return text;
+      } else {
+        debugPrint('[KARINE] ERRO: ${response.statusCode} - ${response.body}');
+        return 'Erro: ${response.statusCode}';
+      }
+    } catch (e) {
+      debugPrint('[KARINE] ERRO: $e');
+      return 'Erro: $e';
     }
   }
 
-  Future<String> enviarMensagem(
-    String mensagem, {
-    double? limiteDiario,
-    double? gastosHoje,
-    double? ganhosHoje,
-  }) async {
-    if (!_inicializado || _chat == null) {
-      try {
-        final key = _getApiKey();
-        if (key.isEmpty) {
-          return 'Karine offline: chave API não encontrada';
-        }
+  String _construirPrompt(String mensagem) {
+    final nome = _nomeUsuario.isEmpty ? 'amigo' : _nomeUsuario;
+    final saudacao = 'Olá, $nome! Sou a Karine, sua assistente financeira.';
+    final instruction =
+        'IMPORTANTE: Sempre use o nome "$nome" ao cumprimentar. Responda em português brasileiro de forma friendly e útil.';
 
-        _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: key);
-
-        final saudacao = _nomeUsuario.isEmpty
-            ? 'Bem-vindo(a)!'
-            : 'Bem-vindo(a), $_nomeUsuario!';
-
-        _chat = _model!.startChat(
-          history: [
-            Content.text(
-              '''Você é a Karine, assistente financeira do app Mentor Financeiro.
-$saudacao
-Responda SEMPRE em português brasileiro (pt-BR).
-Use linguagem friendly e casual.
-Seja helpful e prática nas dicas.
-Quando der números, use formato brasileiro (R\$ 1.000,00).
-Foque em ajudar com finanças pessoais.''',
-            ),
-          ],
-        );
-        _inicializado = true;
-        debugPrint('[KARINE] Iniciado com gemini-1.5-flash');
-      } catch (e) {
-        return 'Erro ao carregar Karine: $e';
-      }
+    if (_history.isEmpty) {
+      return '$saudacao $instruction\n\nUsuário: $mensagem\nKarine:';
     }
 
-    try {
-      String contexto = '';
-      if (limiteDiario != null || gastosHoje != null || ganhosHoje != null) {
-        contexto =
-            '''
-Situação financeira de HOJE:
-- Limite disponível: R\$ ${limiteDiario?.toStringAsFixed(2) ?? '0'}
-- Gastos: R\$ ${gastosHoje?.toStringAsFixed(2) ?? '0'}
-- Recebido: R\$ ${ganhosHoje?.toStringAsFixed(2) ?? '0'}
-''';
-      }
+    final chatHistory = _history
+        .map((msg) {
+          final role = msg['role'] == 'user' ? 'Usuário' : 'Karine';
+          return '$role: ${msg['content']}';
+        })
+        .join('\n');
 
-      final prompt = Content.text('$mensagem$contexto');
-      final response = await _chat!.sendMessage(prompt);
-      return response.text ?? "Sem resposta.";
-    } catch (e) {
-      return "Erro: ${e.toString()}";
-    }
+    return '$saudacao $instruction\n\n$chatHistory\n\nUsuário: $mensagem\nKarine:';
   }
 
   void limparHistorico() {
-    if (_model != null) {
-      _chat = _model!.startChat();
-    }
+    _history = [];
   }
 }
