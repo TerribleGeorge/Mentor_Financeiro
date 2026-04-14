@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "841128243215",
+    "project_id": "mentorfinanceiro",
+    "storage_bucket": "mentorfinanceiro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841128243215:android:3d956f69bcfb67d12ef37a",
+        "android_client_info": {
+          "package_name": "com.example.mentor_financeiro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfarrNMuT_ia67VIA8ACKikcGDKOOEUDY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
