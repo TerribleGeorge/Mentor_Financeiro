@@ -297,6 +297,75 @@ class _TelaHomeState extends State<TelaHome> {
                   ),
                 ),
               ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, '/simulado'),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF00D9FF).withAlpha(40),
+                          const Color(0xFF00D9FF).withAlpha(15),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: const Color(0xFF00D9FF).withAlpha(128),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.psychology, color: Color(0xFF00D9FF)),
+                        SizedBox(width: 12),
+                        Text(
+                          "Descobrir meu Perfil",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, '/conhecimento'),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: Colors.indigo.withAlpha(75)),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.school, color: Colors.indigo),
+                        SizedBox(width: 12),
+                        Text(
+                          "Conhecimento Financeiro",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

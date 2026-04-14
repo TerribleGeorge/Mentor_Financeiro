@@ -297,7 +297,7 @@ class _TelaLoginState extends State<TelaLogin> {
   // PÁGINA 3: NOME
   // ==============================================================================
   Widget _paginaNome() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(30),
       child: Column(
         children: [
