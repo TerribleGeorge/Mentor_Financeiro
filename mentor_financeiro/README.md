@@ -7,7 +7,10 @@ O app de controle financeiro pessoal com inteligência artificial.
 - **Karine IA**: Assistente virtual que ajuda a controlar suas finanças
 - **Controle de Gastos**: Registro diário de gastos com categorias
 - **Metas Financeiras**: Planeje seus sonhos e objetivos
-- **Limite Diário**: Cálculo automático based nas suas receitas e despesas
+- **Limite Diário**: Cálculo automático baseado nas suas receitas e despesas
+- **Simulado de Perfil**: Questionnaire para descobrir seu perfil de investidor (conservador, moderado ou arrojado)
+- **Simulado de Conhecimento**: Quiz técnico com 12 perguntas sobre investimentos
+- **Hub de Conhecimento**: Artigos e guias sobre investimentos, estratégias, dicionário financeiro e mais
 - **Login Seguro**: Google ou conta anônima
 - **Dados na Nuvem**: Sincronizado com Firebase
 
