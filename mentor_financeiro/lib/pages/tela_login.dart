@@ -376,7 +376,7 @@ class _TelaLoginState extends State<TelaLogin> {
           const SizedBox(height: 20),
 
           // Plano Premium
-          _planoCard("PREMIUM", "R\$ 19,90/mês", Colors.amber, [
+          _planoCard("PREMIUM", "R\$ 9,90/mês", Colors.amber, [
             "✨ Tudo do Free",
             "✨ Karine IA ILIMITADA",
             "✨ Análises personalizadas",
@@ -657,13 +657,19 @@ class _TelaLoginState extends State<TelaLogin> {
 
     // Salva no Firestore se usuário logado
     if (_usuarioFirebase != null) {
-      await FirebaseService.salvarDadosUsuario(
-        uid: _usuarioFirebase!.uid,
-        nome: nome,
-        email: _usuarioFirebase!.email,
-        metodoLogin: _metodoLogin ?? "anonimo",
+      final jaExiste = await FirebaseService.usuarioExiste(
+        _usuarioFirebase!.uid,
       );
+      if (!jaExiste) {
+        await FirebaseService.criarUsuarioPrimeiroLogin(
+          uid: _usuarioFirebase!.uid,
+          nome: nome,
+          email: _usuarioFirebase!.email,
+          metodoLogin: _metodoLogin ?? "google",
+        );
+      }
       await prefs.setString('uid', _usuarioFirebase!.uid);
+      await prefs.setString('email_usuario', _usuarioFirebase!.email ?? '');
     }
 
     // Navega para tela de configuração

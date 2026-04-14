@@ -84,7 +84,7 @@ dependencies:
   # Firebase Core: Configuração base do Firebase
   # Importance: Inicializa serviços Firebase no app
   # Impacto: Obrigatório para usar qualquer serviço Firebase
-  firebase_core: ^4.6.0
+  firebase_core: ^4.7.0
 
   # Firebase Auth: Autenticação Firebase
   # Importance: Login com e-mail/senha, Google, Apple, Facebook, etc

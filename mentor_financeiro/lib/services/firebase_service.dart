@@ -174,6 +174,15 @@ class FirebaseService {
   // DADOS DO USUÁRIO (FIRESTORE)
   // ==============================================================================
 
+  // Email do administrador (substitua pelo seu email)
+  static const String emailAdmin = "george.guimares@gmail.com";
+
+  // Verifica se é admin pelo email
+  static bool verificarAdmin(String? email) {
+    if (email == null) return false;
+    return email.toLowerCase() == emailAdmin.toLowerCase();
+  }
+
   // Salva dados do usuário no Firestore
   // Importância: Persiste dados do perfil
   // Impacto: Dados disponíveis em múltiplos dispositivos
@@ -183,14 +192,69 @@ class FirebaseService {
     String? email,
     required String metodoLogin,
     Map<String, dynamic>? configuracoes,
+    bool isPrimeiroLogin = false,
   }) async {
+    if (!isPrimeiroLogin) {
+      await _firestore.collection('usuarios').doc(uid).set({
+        'nome': nome,
+        'email': email,
+        'metodoLogin': metodoLogin,
+        'configuracoes': configuracoes ?? {},
+        'criadoEm': DateTime.now(),
+      }, SetOptions(merge: true));
+      return;
+    }
+
+    final isAdmin = verificarAdmin(email);
+    final isPremium = isAdmin;
+
     await _firestore.collection('usuarios').doc(uid).set({
+      'uid': uid,
       'nome': nome,
       'email': email,
+      'displayName': nome,
       'metodoLogin': metodoLogin,
+      'isPremium': isPremium,
+      'isAdmin': isAdmin,
       'configuracoes': configuracoes ?? {},
       'criadoEm': DateTime.now(),
     }, SetOptions(merge: true));
+  }
+
+  // Verifica se usuário já existe no Firestore
+  static Future<bool> usuarioExiste(String uid) async {
+    final doc = await _firestore.collection('usuarios').doc(uid).get();
+    return doc.exists;
+  }
+
+  // Cria usuário no primeiro login
+  static Future<void> criarUsuarioPrimeiroLogin({
+    required String uid,
+    required String nome,
+    String? email,
+    required String metodoLogin,
+  }) async {
+    final isAdmin = verificarAdmin(email);
+    final isPremium = isAdmin;
+
+    await _firestore.collection('usuarios').doc(uid).set({
+      'uid': uid,
+      'nome': nome,
+      'email': email,
+      'displayName': nome,
+      'metodoLogin': metodoLogin,
+      'isPremium': isPremium,
+      'isAdmin': isAdmin,
+      'configuracoes': {},
+      'criadoEm': DateTime.now(),
+    });
+  }
+
+  // Atualiza status premium do usuário
+  static Future<void> atualizarPremium(String uid, bool isPremium) async {
+    await _firestore.collection('usuarios').doc(uid).update({
+      'isPremium': isPremium,
+    });
   }
 
   // Busca dados do usuário no Firestore
@@ -202,6 +266,27 @@ class FirebaseService {
     } catch (e) {
       return null;
     }
+  }
+
+  // Busca stream de dados do usuário (tempo real)
+  static Stream<Map<String, dynamic>?> buscarDadosUsuarioStream(String uid) {
+    return _firestore
+        .collection('usuarios')
+        .doc(uid)
+        .snapshots()
+        .map((doc) => doc.data());
+  }
+
+  // Obtém status isPremium em tempo real
+  static Future<bool> verificarPremium(String uid) async {
+    final doc = await _firestore.collection('usuarios').doc(uid).get();
+    return doc.get('isPremium') ?? false;
+  }
+
+  // Obtém status isAdmin em tempo real
+  static Future<bool> verificarAdminUid(String uid) async {
+    final doc = await _firestore.collection('usuarios').doc(uid).get();
+    return doc.get('isAdmin') ?? false;
   }
 
   // Atualiza configurações do usuário

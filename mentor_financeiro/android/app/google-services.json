@@ -12,15 +12,33 @@
           "package_name": "com.example.mentor_financeiro"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "841128243215-id8uuuk78s0ikdfpiiiv7gs34hn59svf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mentor_financeiro",
+            "certificate_hash": "3a41bc28f3045561f60a41d8badfff70dfe81e92"
+          }
+        },
+        {
+          "client_id": "841128243215-t5lkthv9odaect1sj7heodftkv200dni.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAfarrNMuT_ia67VIA8ACKikcGDKOOEUDY"
+          "current_key": "AIzaSyAb2ar5SCQEq3VlK5GGaaWdR4WvHgOlS00"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "841128243215-t5lkthv9odaect1sj7heodftkv200dni.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

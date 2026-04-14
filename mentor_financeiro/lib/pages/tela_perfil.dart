@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'tela_configuracao.dart';
 import 'tela_splash.dart';
+import 'tela_upgrade.dart';
 
 class TelaPerfil extends StatefulWidget {
   const TelaPerfil({super.key});
@@ -209,89 +210,9 @@ class _TelaPerfilState extends State<TelaPerfil> {
   }
 
   void _mostrarPlanos() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1E293B),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(25),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "Nossos Planos",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            _planoCard("FREE", "R\$ 0/mês", const Color(0xFF00D9FF), [
-              "✅ Configuração básica",
-              "✅ Cálculo de limite diário",
-              "✅ Karine (respostas limitadas)",
-              "✅ Registro de gastos",
-            ]),
-            const SizedBox(height: 15),
-            _planoCard("PRO", "R\$ 19,90/mês", Colors.amber, [
-              "✨ Tudo do Free",
-              "✨ Karine ILIMITADA",
-              "✨ Análises avançadas",
-              "✨ Estratégias personalizadas",
-              "✨ Suporte prioritário",
-            ], isPro: true),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _planoCard(
-    String titulo,
-    String preco,
-    Color cor,
-    List<String> beneficios, {
-    bool isPro = false,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: cor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                titulo,
-                style: TextStyle(
-                  color: cor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(preco, style: const TextStyle(color: Colors.white70)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ...beneficios.map(
-            (b) => Padding(
-              padding: const EdgeInsets.only(bottom: 5),
-              child: Text(
-                b,
-                style: const TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-            ),
-          ),
-        ],
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const TelaUpgrade()),
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/karine_service.dart';
 
@@ -16,6 +17,16 @@ class _TelaChatState extends State<TelaChat> {
   final List<_Mensagem> _mensagens = [];
   bool _carregando = false;
   String _nomeUsuario = '';
+  bool _mostrarSugestoes = true;
+
+  final List<String> _sugestoes = [
+    "O que é investimento?",
+    "Como começar a investir?",
+    "Qual o melhor investimento para iniciantes?",
+    "O que é renda fixa?",
+    "O que é renda variável?",
+    "Como definir minhas metas financeiras?",
+  ];
 
   @override
   void initState() {
@@ -30,14 +41,24 @@ class _TelaChatState extends State<TelaChat> {
     _karineService.configurar(_nomeUsuario);
     _adicionarMensagem(
       _nomeUsuario.isEmpty
-          ? "Olá! Sou a Karine, sua mentora financeira! 💕\n\nComo posso te ajudar hoje?"
-          : "Olá, $_nomeUsuario! Sou a Karine, sua mentora financeira! 💕\n\nComo posso te ajudar hoje?",
+          ? "Olá! Sou a Karine, sua mentora financeira!\n\nComo posso te ajudar hoje?"
+          : "Olá, $_nomeUsuario! Sou a Karine, sua mentora financeira!\n\nComo posso te ajudar hoje?",
+      false,
     );
   }
 
-  void _adicionarMensagem(String texto) {
+  void _adicionarMensagem(String texto, bool ehUsuario) {
     setState(() {
-      _mensagens.add(_Mensagem(texto: texto, ehUsuario: false));
+      _mensagens.add(
+        _Mensagem(
+          texto: texto,
+          ehUsuario: ehUsuario,
+          timestamp: DateTime.now(),
+        ),
+      );
+      if (ehUsuario) {
+        _mostrarSugestoes = false;
+      }
     });
     _rolarParaFim();
   }
@@ -60,8 +81,11 @@ class _TelaChatState extends State<TelaChat> {
 
     _mensagemController.clear();
     setState(() {
-      _mensagens.add(_Mensagem(texto: texto, ehUsuario: true));
+      _mensagens.add(
+        _Mensagem(texto: texto, ehUsuario: true, timestamp: DateTime.now()),
+      );
       _carregando = true;
+      _mostrarSugestoes = false;
     });
     _rolarParaFim();
 
@@ -69,9 +93,40 @@ class _TelaChatState extends State<TelaChat> {
 
     setState(() {
       _carregando = false;
-      _mensagens.add(_Mensagem(texto: resposta, ehUsuario: false));
+      _mensagens.add(
+        _Mensagem(texto: resposta, ehUsuario: false, timestamp: DateTime.now()),
+      );
     });
     _rolarParaFim();
+  }
+
+  void _enviarSugestao(String texto) {
+    _mensagemController.text = texto;
+    _enviarMensagem();
+  }
+
+  void _copiarMensagem(String texto) {
+    Clipboard.setData(ClipboardData(text: texto));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Mensagem copiada!"),
+        duration: Duration(seconds: 1),
+        backgroundColor: Color(0xFF00D9FF),
+      ),
+    );
+  }
+
+  String _formatarTimestamp(DateTime timestamp) {
+    final hora = timestamp.hour.toString().padLeft(2, '0');
+    final minuto = timestamp.minute.toString().padLeft(2, '0');
+    return "$hora:$minuto";
+  }
+
+  String _formatarMensagem(String texto) {
+    String formatted = texto;
+    formatted = formatted.replaceAll(RegExp(r'\*\*([^*]+)\*\*'), r'💡 $1');
+    formatted = formatted.replaceAll(RegExp(r'\*([^*]+)\*'), r'• $1');
+    return formatted;
   }
 
   @override
@@ -118,8 +173,10 @@ class _TelaChatState extends State<TelaChat> {
               _karineService.limparHistorico();
               setState(() {
                 _mensagens.clear();
+                _mostrarSugestoes = true;
                 _adicionarMensagem(
                   "Conversa reiniciada! Como posso te ajudar? 😊",
+                  false,
                 );
               });
             },
@@ -135,40 +192,24 @@ class _TelaChatState extends State<TelaChat> {
               itemCount: _mensagens.length + (_carregando ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == _mensagens.length && _carregando) {
-                  return _mensagemKarine("...");
+                  return _indicadorDigitando();
                 }
                 if (index >= _mensagens.length) return const SizedBox();
                 final msg = _mensagens[index];
                 return msg.ehUsuario
-                    ? _mensagemUsuario(msg.texto)
-                    : _mensagemKarine(msg.texto);
+                    ? _mensagemUsuario(msg.texto, msg.timestamp)
+                    : _mensagemKarine(msg.texto, msg.timestamp);
               },
             ),
           ),
+          if (_mostrarSugestoes && _mensagens.isNotEmpty) _sugestoesWidget(),
           _campoEnvio(),
         ],
       ),
     );
   }
 
-  Widget _mensagemUsuario(String texto) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF00D9FF).withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(
-            20,
-          ).copyWith(bottomRight: const Radius.circular(4)),
-        ),
-        child: Text(texto, style: const TextStyle(color: Colors.white)),
-      ),
-    );
-  }
-
-  Widget _mensagemKarine(String texto) {
+  Widget _indicadorDigitando() {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -176,9 +217,7 @@ class _TelaChatState extends State<TelaChat> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(
-            20,
-          ).copyWith(bottomLeft: const Radius.circular(4)),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -197,8 +236,142 @@ class _TelaChatState extends State<TelaChat> {
               ),
             ),
             const SizedBox(width: 10),
-            Flexible(
-              child: Text(texto, style: const TextStyle(color: Colors.white70)),
+            Row(
+              children: [
+                _pontoAnimado(0),
+                const SizedBox(width: 4),
+                _pontoAnimado(1),
+                const SizedBox(width: 4),
+                _pontoAnimado(2),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _pontoAnimado(int index) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 600),
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              color: Color(0xFF00D9FF),
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _sugestoesWidget() {
+    return Container(
+      height: 50,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: _sugestoes.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ActionChip(
+              label: Text(
+                _sugestoes[index],
+                style: const TextStyle(color: Color(0xFF00D9FF), fontSize: 12),
+              ),
+              backgroundColor: const Color(0xFF1E293B),
+              side: const BorderSide(color: Color(0xFF00D9FF)),
+              onPressed: () => _enviarSugestao(_sugestoes[index]),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _mensagemUsuario(String texto, DateTime timestamp) {
+    return GestureDetector(
+      onLongPress: () => _copiarMensagem(texto),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(bottom: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00D9FF).withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(
+                  20,
+                ).copyWith(bottomRight: const Radius.circular(4)),
+              ),
+              child: Text(texto, style: const TextStyle(color: Colors.white)),
+            ),
+            Text(
+              _formatarTimestamp(timestamp),
+              style: const TextStyle(color: Colors.white38, fontSize: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _mensagemKarine(String texto, DateTime timestamp) {
+    return GestureDetector(
+      onLongPress: () => _copiarMensagem(texto),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(bottom: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(
+                  20,
+                ).copyWith(bottomLeft: const Radius.circular(4)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00D9FF).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.person,
+                      color: Color(0xFF00D9FF),
+                      size: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      _formatarMensagem(texto),
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              _formatarTimestamp(timestamp),
+              style: const TextStyle(color: Colors.white38, fontSize: 10),
             ),
           ],
         ),
@@ -266,5 +439,10 @@ class _TelaChatState extends State<TelaChat> {
 class _Mensagem {
   final String texto;
   final bool ehUsuario;
-  _Mensagem({required this.texto, required this.ehUsuario});
+  final DateTime timestamp;
+  _Mensagem({
+    required this.texto,
+    required this.ehUsuario,
+    required this.timestamp,
+  });
 }

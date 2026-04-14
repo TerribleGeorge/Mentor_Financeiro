@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'firebase_options.dart';
 import 'services/firebase_service.dart';
 import 'app_pages.dart';
-import 'pages/quiz_conhecimento_page.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
@@ -11,7 +11,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
     debugPrint('Firebase ERRO: $e');
   }
@@ -91,6 +93,8 @@ class MentorFinanceiroApp extends StatelessWidget {
             return MaterialPageRoute(
               builder: (_) => const QuizConhecimentoPage(),
             );
+          case '/upgrade':
+            return MaterialPageRoute(builder: (_) => const TelaUpgrade());
           default:
             return MaterialPageRoute(builder: (_) => const TelaSplash());
         }

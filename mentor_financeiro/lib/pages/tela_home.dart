@@ -22,6 +22,14 @@ class _TelaHomeState extends State<TelaHome> {
     _carregarDados();
   }
 
+  void _abrirChat() {
+    Navigator.pushNamed(context, '/chat');
+  }
+
+  void _abrirSimulado() {
+    Navigator.pushNamed(context, '/simulado');
+  }
+
   Future<void> _carregarDados() async {
     final prefs = await SharedPreferences.getInstance();
     _nomeUsuario = prefs.getString('nome_usuario') ?? 'Usuário';
@@ -271,7 +279,7 @@ class _TelaHomeState extends State<TelaHome> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GestureDetector(
-                  onTap: () => Navigator.pushNamed(context, '/chat'),
+                  onTap: _abrirChat,
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
@@ -301,7 +309,7 @@ class _TelaHomeState extends State<TelaHome> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GestureDetector(
-                  onTap: () => Navigator.pushNamed(context, '/simulado'),
+                  onTap: _abrirSimulado,
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),

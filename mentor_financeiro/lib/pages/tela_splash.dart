@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_service.dart';
 
 class TelaSplash extends StatefulWidget {
   const TelaSplash({super.key});
@@ -16,8 +19,35 @@ class _TelaSplashState extends State<TelaSplash> {
 
   Future<void> _iniciarApp() async {
     await Future.delayed(const Duration(seconds: 2));
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('uid', user.uid);
+    await prefs.setString('email_usuario', user.email ?? '');
+
+    final usuarioExiste = await FirebaseService.usuarioExiste(user.uid);
+    if (!usuarioExiste) {
+      await FirebaseService.criarUsuarioPrimeiroLogin(
+        uid: user.uid,
+        nome: user.displayName ?? 'Usuário',
+        email: user.email,
+        metodoLogin: 'google',
+      );
+    }
+
+    final isPremium = await FirebaseService.verificarPremium(user.uid);
+    await prefs.setBool('isPremium', isPremium);
+
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/login');
+      Navigator.of(context).pushReplacementNamed('/principal');
     }
   }
 

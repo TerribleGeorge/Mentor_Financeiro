@@ -27,3 +27,5 @@ export 'pages/conhecimento/impostos_detalhe_page.dart';
 export 'pages/conhecimento/perigos_page.dart';
 export 'pages/conhecimento/ferramentas_page.dart';
 export 'pages/simulado_page.dart';
+export 'pages/tela_upgrade.dart';
+export 'pages/quiz_conhecimento_page.dart';
