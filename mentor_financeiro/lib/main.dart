@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'services/firebase_service.dart';
-import 'pages/tela_splash.dart';
-import 'pages/tela_login.dart';
-import 'pages/tela_configuracao.dart';
-import 'pages/tela_home.dart';
-import 'pages/tela_perfil.dart';
-import 'pages/tela_metas.dart';
-import 'pages/tela_chat.dart';
+import 'app_pages.dart';
+import 'pages/quiz_conhecimento_page.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
@@ -66,6 +61,36 @@ class MentorFinanceiroApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const TelaMetas());
           case '/chat':
             return MaterialPageRoute(builder: (_) => const TelaChat());
+          case '/investimentos':
+            return MaterialPageRoute(builder: (_) => const TelaInvestimentos());
+          case '/estrategias':
+            return MaterialPageRoute(builder: (_) => const TelaEstrategias());
+          case '/conhecimento':
+            return MaterialPageRoute(builder: (_) => const ConhecimentoHub());
+          case '/conhecimento/investimentos':
+            return MaterialPageRoute(builder: (_) => const InvestimentosMenu());
+          case '/conhecimento/estrategias':
+            return MaterialPageRoute(builder: (_) => const EstrategiasMenu());
+          case '/conhecimento/dicionario':
+            return MaterialPageRoute(builder: (_) => const DicionarioPage());
+          case '/conhecimento/primeiros-passos':
+            return MaterialPageRoute(
+              builder: (_) => const PrimeirosPassosPage(),
+            );
+          case '/conhecimento/impostos':
+            return MaterialPageRoute(
+              builder: (_) => const ImpostosDetalhePage(),
+            );
+          case '/conhecimento/perigos':
+            return MaterialPageRoute(builder: (_) => const PerigosPage());
+          case '/conhecimento/ferramentas':
+            return MaterialPageRoute(builder: (_) => const FerramentasPage());
+          case '/simulado':
+            return MaterialPageRoute(builder: (_) => const SimuladoPage());
+          case '/quiz-conhecimento':
+            return MaterialPageRoute(
+              builder: (_) => const QuizConhecimentoPage(),
+            );
           default:
             return MaterialPageRoute(builder: (_) => const TelaSplash());
         }
