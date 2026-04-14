@@ -162,7 +162,6 @@ class _QuizConhecimentoPageState extends State<QuizConhecimentoPage> {
           const SizedBox(height: 32),
           ...question.options.asMap().entries.map((entry) {
             final option = entry.value;
-            final isSelected = _selectedOption == option.isCorrect;
             return _buildOptionButton(
               option.text,
               entry.key,
