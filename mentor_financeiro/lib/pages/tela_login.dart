@@ -159,8 +159,8 @@ class _TelaLoginState extends State<TelaLogin> {
           // Cards de funcionalidades
           _cartaoFuncionalidade(
             Icons.auto_awesome,
-            "Karine IA",
-            "Sua mentora financeira pessoal",
+            "Mentor Financeiro",
+            "O Mentor Financeiro está pronto para guiar sua jornada.",
           ),
           const SizedBox(height: 12),
           _cartaoFuncionalidade(
@@ -369,7 +369,7 @@ class _TelaLoginState extends State<TelaLogin> {
           _planoCard("FREE", "R\$ 0/mês", const Color(0xFF00D9FF), [
             "✅ Configuração básica",
             "✅ Cálculo automático de limite",
-            "✅ Karine IA (respostas limitadas)",
+            "✅ Conteúdo educacional",
             "✅ Registro de gastos diário",
             "✅ Simulador de metas",
           ]),
@@ -378,7 +378,7 @@ class _TelaLoginState extends State<TelaLogin> {
           // Plano Premium
           _planoCard("PREMIUM", "R\$ 9,90/mês", Colors.amber, [
             "✨ Tudo do Free",
-            "✨ Karine IA ILIMITADA",
+            "✨ Mentoria completa",
             "✨ Análises personalizadas",
             "✨ Estratégias avançadas",
             "✨ Relatórios mensais",
@@ -660,16 +660,27 @@ class _TelaLoginState extends State<TelaLogin> {
       final jaExiste = await FirebaseService.usuarioExiste(
         _usuarioFirebase!.uid,
       );
+      final photoUrl = _usuarioFirebase?.photoURL;
       if (!jaExiste) {
         await FirebaseService.criarUsuarioPrimeiroLogin(
           uid: _usuarioFirebase!.uid,
           nome: nome,
           email: _usuarioFirebase!.email,
           metodoLogin: _metodoLogin ?? "google",
+          photoUrl: photoUrl,
+        );
+      } else {
+        await FirebaseService.atualizarDadosUsuario(
+          uid: _usuarioFirebase!.uid,
+          nome: nome,
+          photoUrl: photoUrl,
         );
       }
       await prefs.setString('uid', _usuarioFirebase!.uid);
       await prefs.setString('email_usuario', _usuarioFirebase!.email ?? '');
+      if (photoUrl != null && photoUrl.isNotEmpty) {
+        await prefs.setString('photo_url', photoUrl);
+      }
     }
 
     // Navega para tela de configuração

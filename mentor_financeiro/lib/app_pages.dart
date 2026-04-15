@@ -1,4 +1,6 @@
 export 'pages/tela_splash.dart';
+export 'pages/tela_onboarding.dart';
+export 'pages/tela_meu_perfil.dart';
 export 'pages/tela_login.dart';
 export 'pages/tela_configuracao.dart';
 export 'pages/tela_home.dart';
@@ -6,6 +8,7 @@ export 'pages/tela_perfil.dart';
 export 'pages/tela_metas.dart';
 export 'pages/tela_chat.dart';
 export 'pages/tela_investimentos.dart';
+export 'pages/tela_plataformas.dart';
 export 'pages/tela_estrategias.dart';
 
 export 'pages/conhecimento/conhecimento_hub.dart';

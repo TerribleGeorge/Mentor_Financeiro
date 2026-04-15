@@ -110,6 +110,7 @@ dependencies:
   # Importance: Authentication rápido usando conta Google existente
   # Impacto: Aumenta taxa de conversão de login (usuário não precisa criar senha)
   google_sign_in: ^6.2.2
+  flutter_local_notifications: ^18.0.1
   # firebase_ai: ^3.10.0  # Temporariamente desativado
 
 # ==============================================================================

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/firebase_service.dart';
 
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
@@ -20,6 +21,11 @@ class _TelaHomeState extends State<TelaHome> {
   void initState() {
     super.initState();
     _carregarDados();
+    _solicitarPermissaoNotificacoes();
+  }
+
+  Future<void> _solicitarPermissaoNotificacoes() async {
+    await FirebaseService.inicializarMessaging();
   }
 
   void _abrirChat() {
@@ -290,10 +296,10 @@ class _TelaHomeState extends State<TelaHome> {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.chat, color: Color(0xFF0F172A)),
+                        Icon(Icons.school, color: Color(0xFF0F172A)),
                         SizedBox(width: 12),
                         Text(
-                          "Falar com a Karine",
+                          "Explorar Conhecimento",
                           style: TextStyle(
                             color: Color(0xFF0F172A),
                             fontSize: 16,

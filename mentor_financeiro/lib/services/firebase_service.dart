@@ -34,7 +34,9 @@ class FirebaseService {
 
   // Google Sign In: Permite login com conta Google
   // Importância: SSO - usuário não precisa criar senha
-  static final GoogleSignIn _googleSignIn = GoogleSignIn();
+  static final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: <String>['email', 'profile'],
+  );
 
   // Firestore: Banco de dados principal
   // Importância: Persistência de dados do usuário
@@ -96,6 +98,79 @@ class FirebaseService {
     if (kDebugMode) {
       debugPrint("Mensagem em foreground: ${message.notification?.title}");
     }
+  }
+
+  // ==============================================================================
+  // CÁLCULO DE RENDIMENTO
+  // ==============================================================================
+  static String calcularRendimento(
+    double percentualCdi, {
+    double capital = 1000.0,
+  }) {
+    final rendimento = capital * (percentualCdi / 100);
+    final valorFinal = capital + rendimento;
+    return 'R\$ ${valorFinal.toStringAsFixed(2)}';
+  }
+
+  // ==============================================================================
+  // PERFIL DE INVESTIDOR E TÓPICOS
+  // ==============================================================================
+  static const List<String> perfisInvestidor = [
+    'conservador',
+    'moderado',
+    'arrojado',
+  ];
+
+  static Future<void> inscricaoTopico(String perfil) async {
+    if (_messaging == null) return;
+    if (!perfisInvestidor.contains(perfil)) return;
+    await _messaging!.subscribeToTopic('perfil_$perfil');
+  }
+
+  static Future<void> cancelarInscricaoTopico(String perfil) async {
+    if (_messaging == null) return;
+    if (!perfisInvestidor.contains(perfil)) return;
+    await _messaging!.unsubscribeFromTopic('perfil_$perfil');
+  }
+
+  // ==============================================================================
+  // TRADUTORA DE TAXAS
+  // ==============================================================================
+  static String traduzTaxa({
+    required double taxa,
+    required String tipoTaxa,
+    required String perfilInvestidor,
+  }) {
+    final isRendaFixa =
+        tipoTaxa.toLowerCase() == 'renda fixa' ||
+        tipoTaxa.toLowerCase() == 'cdi' ||
+        tipoTaxa.toLowerCase() == 'selic' ||
+        tipoTaxa.toLowerCase() == 'ipca';
+
+    if (isRendaFixa) {
+      return 'Nova taxa de $tipoTaxa em ${taxa}%! '
+          'Essa é uma opção mais segura para construir patrimônio.';
+    }
+
+    if (perfilInvestidor == 'moderado' || perfilInvestidor == 'arrojado') {
+      return 'Atenção: $tipoTaxa em ${taxa}%! '
+          'Esse tipo de investimento requer conhecimento e tolerância ao risco.';
+    }
+
+    return 'Taxa informada: ${taxa}%';
+  }
+
+  // ==============================================================================
+  // MENSAGEM DE IMPACTO
+  // ==============================================================================
+  static String gerarMensagemImpacto({
+    required double taxa,
+    double capital = 1000.0,
+  }) {
+    final rendimentoMensal = capital * (taxa / 100) / 12;
+    return 'Com a nova taxa de ${taxa}%, seus R\$ ${capital.toStringAsFixed(0)} '
+        'rendem aproximadamente R\$ ${rendimentoMensal.toStringAsFixed(2)} por mês '
+        'com mais segurança que a poupança.';
   }
 
   // ==============================================================================
@@ -233,6 +308,7 @@ class FirebaseService {
     required String nome,
     String? email,
     required String metodoLogin,
+    String? photoUrl,
   }) async {
     final isAdmin = verificarAdmin(email);
     final isPremium = isAdmin;
@@ -242,9 +318,12 @@ class FirebaseService {
       'nome': nome,
       'email': email,
       'displayName': nome,
+      'photoURL': photoUrl,
       'metodoLogin': metodoLogin,
       'isPremium': isPremium,
       'isAdmin': isAdmin,
+      'perfilInvestidor': '',
+      'onboardingCompleto': false,
       'configuracoes': {},
       'criadoEm': DateTime.now(),
     });
@@ -256,6 +335,61 @@ class FirebaseService {
       'isPremium': isPremium,
     });
   }
+
+  // Salva perfil de investidor no Firestore
+  static Future<void> salvarPerfilInvestidor(String uid, String perfil) async {
+    final email = (await buscarDadosUsuario(uid))?['email'];
+    final isAdmin = verificarAdmin(email);
+    await _firestore.collection('usuarios').doc(uid).update({
+      'perfilInvestidor': perfil.toLowerCase(),
+      'isPremium': isAdmin ? true : FieldValue.delete(),
+    });
+  }
+
+  // Completa onboarding no Firestore
+  static Future<void> completarOnboarding(String uid) async {
+    final email = (await buscarDadosUsuario(uid))?['email'];
+    final isAdmin = verificarAdmin(email);
+    await _firestore.collection('usuarios').doc(uid).update({
+      'onboardingCompleto': true,
+      'isPremium': isAdmin ? true : FieldValue.delete(),
+    });
+  }
+
+  // Atualiza dados do usuário (sync)
+  static Future<void> atualizarDadosUsuario({
+    required String uid,
+    String? nome,
+    String? photoUrl,
+  }) async {
+    final updates = <String, dynamic>{};
+    if (nome != null) updates['nome'] = nome;
+    if (photoUrl != null) updates['photoURL'] = photoUrl;
+    if (nome != null) updates['displayName'] = nome;
+    await _firestore.collection('usuarios').doc(uid).update(updates);
+  }
+
+  // Salva perfil completo do usuário
+  static Future<void> salvarPerfilCompleto({
+    required String uid,
+    String? profissao,
+    String? perfilInvestidor,
+    String? objetivos,
+  }) async {
+    final email = (await buscarDadosUsuario(uid))?['email'];
+    final isAdmin = verificarAdmin(email);
+    final updates = <String, dynamic>{};
+    if (profissao != null) updates['profissao'] = profissao;
+    if (perfilInvestidor != null)
+      updates['perfilInvestidor'] = perfilInvestidor.toLowerCase();
+    if (objetivos != null) updates['objetivos'] = objetivos;
+    if (isAdmin) updates['isPremium'] = true;
+    updates['perfilCompleto'] = true;
+    await _firestore.collection('usuarios').doc(uid).update(updates);
+  }
+
+  // Getter público para Firestore
+  static FirebaseFirestore get firestore => _firestore;
 
   // Busca dados do usuário no Firestore
   // Importance: Carrega perfil do usuário
