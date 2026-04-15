@@ -56,31 +56,31 @@ class TelaEstrategias extends StatelessWidget {
             icone: Icons.pie_chart,
             titulo: 'Diversificação de Investimentos',
             descricao:
-                'Não coloque todos os ovos na mesma cesta. Diversifique entre renda fixa, variável e在国际市场上. Reduz risco e aumentaresilience.',
+                'Não coloque todos os ovos na mesma cesta. Diversifique entre renda fixa e variável para reduzir riscos e aumentar a resiliência.',
           ),
           _ExpansionTopico(
             icone: Icons.sports_score,
             titulo: 'Método Acelerado',
             descricao:
-                'Pague dívidas com juros mais altos primeiro (snowball avalanche).after quitando, redirect esse pagamento para investments.',
+                'Pague primeiras as dívidas com juros mais altos. Depois, redirecione esse pagamento para investimentos.',
           ),
           _ExpansionTopico(
             icone: Icons.calendar_month,
             titulo: 'Revisão Mensal',
             descricao:
-                'No mesmo dia todo mês, revise seu orçamento. Compare planejado vs realizado. Ajuste para o próximo mês. Consistência é chave para o sucesso.',
+                'No mesmo dia todo mês, revise seu orçamento. Compare o planejado com o realizado e aja para o próximo mês.',
           ),
           _ExpansionTopico(
             icone: Icons.security,
             titulo: 'Reserva de Emergência',
             descricao:
-                'Guarde 3-6 meses de despesas em renda fixa de alta liquidez. Só use em emergências reais.失业, médicos, konsumo essenciais.',
+                'Guarde 3-6 meses de despesas em renda fixa de alta liquidez. Use apenas em emergências reais como perda de emprego ou despesas médicas.',
           ),
           _ExpansionTopico(
             icone: Icons.graphic_eq,
             titulo: 'Juros Compostos',
             descricao:
-                'Os juros rendem juros.投资的回报 reinvestidos. Pequenas quantias becomes grandes valores no longo prazo. Tempo é seu maior aliado.',
+                'Os juros rendem juros. Os rendimentos são reinvestidos. Pequenas quantias se tornam grandes valores no longo prazo. O tempo é seu maior aliado.',
           ),
         ],
       ),

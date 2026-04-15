@@ -80,7 +80,7 @@ class FirebaseService {
     FirebaseMessaging.onBackgroundMessage(_mensagemBackground);
 
     // Configura handler para mensagens em foreground
-    // Por quê? Quando app está aberto, precisa另行 tratamento
+    // Por quê? Quando app está aberto, precisa de tratamento adicional
     FirebaseMessaging.onMessage.listen(_mensagemForeground);
   }
 
@@ -198,7 +198,7 @@ class FirebaseService {
   static User? get usuarioAtual => _auth.currentUser;
 
   // Login com Google
-  // Importance: SSO -快速 login sem senha
+  // Importance: SSO - login rápido sem senha
   // Impacto: Aumenta taxa de conversão de login
   static Future<User?> loginGoogle() async {
     try {
