@@ -1,6 +1,7 @@
 export 'pages/tela_splash.dart';
 export 'pages/tela_onboarding.dart';
 export 'pages/tela_meu_perfil.dart';
+export 'pages/questionario_page.dart';
 export 'pages/tela_login.dart';
 export 'pages/tela_configuracao.dart';
 export 'pages/tela_home.dart';

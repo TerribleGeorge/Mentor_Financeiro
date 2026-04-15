@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_service.dart';
 import 'onboarding_page.dart';
+import 'questionario_page.dart';
 
 class TelaSplash extends StatefulWidget {
   const TelaSplash({super.key});
@@ -55,7 +56,16 @@ class _TelaSplashState extends State<TelaSplash> {
       final onboardingCompleto = dadosUsuario['onboardingCompleto'] ?? false;
       await prefs.setBool('onboarding_completo', onboardingCompleto);
 
-      if (!onboardingCompleto) {
+      final perfilCompleto = dadosUsuario['perfilCompleto'] ?? false;
+
+      if (!perfilCompleto) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const QuestionarioPage()),
+          );
+        }
+        return;
+      } else if (!onboardingCompleto) {
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const OnboardingPage()),

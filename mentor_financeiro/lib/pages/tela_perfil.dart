@@ -574,7 +574,16 @@ Para dúvidas sobre privacidade: privacidade@mentorfinanceiro.app
             ),
             SizedBox(height: 15),
             Text(
-              "💻 Desenvolvido com Flutter",
+              "void main() => DevVoid();",
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 12,
+                fontFamily: 'monospace',
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              "💻 Desenvolvido por DevVoid",
               style: TextStyle(color: Colors.white54, fontSize: 12),
             ),
           ],
