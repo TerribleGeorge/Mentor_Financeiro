@@ -148,16 +148,16 @@ class FirebaseService {
         tipoTaxa.toLowerCase() == 'ipca';
 
     if (isRendaFixa) {
-      return 'Nova taxa de $tipoTaxa em ${taxa}%! '
+      return 'Nova taxa de $tipoTaxa em $taxa%! '
           'Essa é uma opção mais segura para construir patrimônio.';
     }
 
     if (perfilInvestidor == 'moderado' || perfilInvestidor == 'arrojado') {
-      return 'Atenção: $tipoTaxa em ${taxa}%! '
+      return 'Atenção: $tipoTaxa em $taxa%! '
           'Esse tipo de investimento requer conhecimento e tolerância ao risco.';
     }
 
-    return 'Taxa informada: ${taxa}%';
+    return 'Taxa informada: $taxa%';
   }
 
   // ==============================================================================
@@ -168,7 +168,7 @@ class FirebaseService {
     double capital = 1000.0,
   }) {
     final rendimentoMensal = capital * (taxa / 100) / 12;
-    return 'Com a nova taxa de ${taxa}%, seus R\$ ${capital.toStringAsFixed(0)} '
+    return 'Com a nova taxa de $taxa%, seus R\$ ${capital.toStringAsFixed(0)} '
         'rendem aproximadamente R\$ ${rendimentoMensal.toStringAsFixed(2)} por mês '
         'com mais segurança que a poupança.';
   }
@@ -380,8 +380,9 @@ class FirebaseService {
     final isAdmin = verificarAdmin(email);
     final updates = <String, dynamic>{};
     if (profissao != null) updates['profissao'] = profissao;
-    if (perfilInvestidor != null)
+    if (perfilInvestidor != null) {
       updates['perfilInvestidor'] = perfilInvestidor.toLowerCase();
+    }
     if (objetivos != null) updates['objetivos'] = objetivos;
     if (isAdmin) updates['isPremium'] = true;
     updates['perfilCompleto'] = true;

@@ -128,6 +128,7 @@ class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
+                // ignore: deprecated_member_use
                 value: _perfilInvestidor.isEmpty ? null : _perfilInvestidor,
                 dropdownColor: const Color(0xFF1E293B),
                 style: const TextStyle(color: Colors.white),

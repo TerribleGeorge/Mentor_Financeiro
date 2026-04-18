@@ -1,0 +1,287 @@
+{
+  "@@locale": "pt",
+  "appTitle": "Mentor Financeiro",
+  "@appTitle": {
+    "description": "App title"
+  },
+  "saldo": "Saldo",
+  "@saldo": {
+    "description": "Balance"
+  },
+  "gastosDiarios": "Gastos Diários",
+  "@gastosDiarios": {
+    "description": "Daily expenses"
+  },
+  "confirmarTransacao": "Confirmar Transação",
+  "@confirmarTransacao": {
+    "description": "Confirm transaction"
+  },
+  "extrato": "Extrato",
+  "@extrato": {
+    "description": "Statement"
+  },
+  "transferencias": "Transferências",
+  "@transferencias": {
+    "description": "Transfers"
+  },
+  "investimentos": "Investimentos",
+  "@investimentos": {
+    "description": "Investments"
+  },
+  "configuracoes": "Configurações",
+  "@configuracoes": {
+    "description": "Settings"
+  },
+  "perfil": "Perfil",
+  "@perfil": {
+    "description": "Profile"
+  },
+  "sair": "Sair",
+  "@sair": {
+    "description": "Logout"
+  },
+  "entrar": "Entrar",
+  "@entrar": {
+    "description": "Login"
+  },
+  "cadastrar": "Cadastrar",
+  "@cadastrar": {
+    "description": "Register"
+  },
+  "email": "E-mail",
+  "@email": {
+    "description": "Email"
+  },
+  "senha": "Senha",
+  "@senha": {
+    "description": "Password"
+  },
+  "nome": "Nome",
+  "@nome": {
+    "description": "Name"
+  },
+  "cpf": "CPF",
+  "@cpf": {
+    "description": "CPF number"
+  },
+  "telefone": "Telefone",
+  "@telefone": {
+    "description": "Phone"
+  },
+  "continuar": "Continuar",
+  "@continuar": {
+    "description": "Continue"
+  },
+  "voltar": "Voltar",
+  "@voltar": {
+    "description": "Back"
+  },
+  "cancelar": "Cancelar",
+  "@cancelar": {
+    "description": "Cancel"
+  },
+  "salvar": "Salvar",
+  "@salvar": {
+    "description": "Save"
+  },
+  "editar": "Editar",
+  "@editar": {
+    "description": "Edit"
+  },
+  "excluir": "Excluir",
+  "@excluir": {
+    "description": "Delete"
+  },
+  "sucesso": "Sucesso",
+  "@sucesso": {
+    "description": "Success"
+  },
+  "erro": "Erro",
+  "@erro": {
+    "description": "Error"
+  },
+  "carregando": "Carregando...",
+  "@carregando": {
+    "description": "Loading"
+  },
+  "semDados": "Sem dados",
+  "@semDados": {
+    "description": "No data"
+  },
+  "tentarNovamente": "Tentar novamente",
+  "@tentarNovamente": {
+    "description": "Try again"
+  },
+  "relatorios": "Relatórios",
+  "@relatorios": {
+    "description": "Reports"
+  },
+  "gastosPorCategoria": "Gastos por Categoria",
+  "@gastosPorCategoria": {
+    "description": "Expenses by category"
+  },
+  "ultimosSeteDias": "Últimos 7 Dias",
+  "@ultimosSeteDias": {
+    "description": "Last 7 days"
+  },
+  "totalGasto": "Total Gasto",
+  "@totalGasto": {
+    "description": "Total spent"
+  },
+  "transacoes": "Transações",
+  "@transacoes": {
+    "description": "Transactions"
+  },
+  "categoria": "Categoria",
+  "@categoria": {
+    "description": "Category"
+  },
+  "data": "Data",
+  "@data": {
+    "description": "Date"
+  },
+  "valor": "Valor",
+  "@valor": {
+    "description": "Value"
+  },
+  "descricao": "Descrição",
+  "@descricao": {
+    "description": "Description"
+  },
+  "alimentacao": "Alimentação",
+  "@alimentacao": {
+    "description": "Food"
+  },
+  "transporte": "Transporte",
+  "@transporte": {
+    "description": "Transport"
+  },
+  "lazer": "Lazer",
+  "@lazer": {
+    "description": "Leisure"
+  },
+  "saude": "Saúde",
+  "@saude": {
+    "description": "Health"
+  },
+  "outros": "Outros",
+  "@outros": {
+    "description": "Others"
+  },
+  "notificacoes": "Notificações",
+  "@notificacoes": {
+    "description": "Notifications"
+  },
+  "permissaoNotificacoes": "Permissão de Notificações",
+  "@permissaoNotificacoes": {
+    "description": "Notification permission"
+  },
+  "ativarMonitoramento": "Ativar Monitoramento de Gastos",
+  "@ativarMonitoramento": {
+    "description": "Enable expense monitoring"
+  },
+  "descricaoMonitoramento": " Permite que o app monitore automaticamente suas transações bancárias para organizar suas finanças.",
+  "@descricaoMonitoramento": {
+    "description": "Monitoring description"
+  },
+  "idioma": "Idioma",
+  "@idioma": {
+    "description": "Language"
+  },
+  "moeda": "Moeda",
+  "@moeda": {
+    "description": "Currency"
+  },
+  "compararInvestimentos": "Comparar Investimentos",
+  "@compararInvestimentos": {
+    "description": "Compare investments"
+  },
+  "descricaoLocalizacao": "Para comparar investimentos locais (CDB/CDI) com taxas internacionais, precisamos saber sua localização.",
+  "@descricaoLocalizacao": {
+    "description": "Location description"
+  },
+  "permissaoLocalizacao Necessaria": "Permissão de Localização Necessária",
+  "@permissaoLocalizacao Necessaria": {
+    "description": "Location permission required"
+  },
+  "rendaFixa": "Renda Fixa",
+  "@rendaFixa": {
+    "description": "Fixed income"
+  },
+  "rendaVariavel": "Renda Variável",
+  "@rendaVariavel": {
+    "description": "Variable income"
+  },
+  "tesouroDireto": "Tesouro Direto",
+  "@tesouroDireto": {
+    "description": "Treasury direct"
+  },
+  "cdb": "CDB",
+  "@cdb": {
+    "description": "CDB"
+  },
+  "lci": "LCI",
+  "@lci": {
+    "description": "LCI"
+  },
+  "lca": "LCA",
+  "@lca": {
+    "description": "LCA"
+  },
+  "acoes": "Ações",
+  "@acoes": {
+    "description": "Stocks"
+  },
+  "fiis": "FIIs",
+  "@fiis": {
+    "description": "FIIs"
+  },
+  "criptomoedas": "Criptomoedas",
+  "@criptomoedas": {
+    "description": "Cryptocurrencies"
+  },
+  "rendimento": "Rendimento",
+  "@rendimento": {
+    "description": "Return"
+  },
+  "rentabilidade": "Rentabilidade",
+  "@rentabilidade": {
+    "description": "Profitability"
+  },
+  "aplicar": "Aplicar",
+  "@aplicar": {
+    "description": "Apply"
+  },
+  "resgatar": "Resgatar",
+  "@resgatar": {
+    "description": "Redeem"
+  },
+  "simular": "Simular",
+  "@simular": {
+    "description": "Simulate"
+  },
+  "metas": "Metas",
+  "@metas": {
+    "description": "Goals"
+  },
+  "estrategias": "Estratégias",
+  "@estrategias": {
+    "description": "Strategies"
+  },
+  "conhecimento": "Conhecimento",
+  "@conhecimento": {
+    "description": "Knowledge"
+  },
+  "chat": "Chat",
+  "@chat": {
+    "description": "Chat"
+  },
+  "enviarMensagem": "Enviar mensagem",
+  "@enviarMensagem": {
+    "description": "Send message"
+  },
+  "digiteMensagem": "Digite uma mensagem...",
+  "@digiteMensagem": {
+    "description": "Type a message"
+  }
+}

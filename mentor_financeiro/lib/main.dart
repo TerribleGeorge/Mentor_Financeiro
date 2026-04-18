@@ -1,11 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'firebase_options.dart';
 import 'services/firebase_service.dart';
+import 'services/subscription_provider.dart';
+import 'services/app_theme_controller.dart';
 import 'app_pages.dart';
+import 'pages/relatorios_screen.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
+const String revenueCatApiKey = 'test_pibcZvswDiwSwzDHPGiRBKIKnLZ';
+const String mentorProEntitlementId = 'Mentor Financeiro Pro';
+
+Future<void> initializeRevenueCat(String? uid) async {
+  await Purchases.setLogLevel(LogLevel.debug);
+
+  final configuration = PurchasesConfiguration(revenueCatApiKey);
+  await Purchases.configure(configuration);
+
+  if (uid != null) {
+    await Purchases.logIn(uid);
+    debugPrint('RevenueCat inicializado para o usuário: $uid');
+  }
+}
+
+Future<void> verificarStatusAssinatura(
+  SubscriptionProvider subscriptionProvider,
+  AppThemeController themeController,
+) async {
+  try {
+    final customerInfo = await Purchases.getCustomerInfo();
+    final entitlements = customerInfo.entitlements;
+    final allEntitlements = entitlements.all;
+
+    bool isPro = false;
+    for (final entry in allEntitlements.entries) {
+      if (entry.key == mentorProEntitlementId && entry.value.isActive) {
+        isPro = true;
+        break;
+      }
+    }
+
+    await subscriptionProvider.updatePremiumStatus(isPro);
+    themeController.setPremiumStatus(isPro);
+
+    debugPrint('Status Premium atualizado: $isPro');
+  } catch (e) {
+    debugPrint('Erro ao verificar assinatura: $e');
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +69,8 @@ void main() async {
   } catch (e) {
     debugPrint('Messaging ERRO: $e');
   }
+
+  await initializeRevenueCat(null);
 
   runApp(const MentorFinanceiroApp());
 }
@@ -95,6 +143,8 @@ class MentorFinanceiroApp extends StatelessWidget {
             );
           case '/upgrade':
             return MaterialPageRoute(builder: (_) => const TelaUpgrade());
+          case '/relatorios':
+            return MaterialPageRoute(builder: (_) => const DashboardScreen());
           default:
             return MaterialPageRoute(builder: (_) => const TelaSplash());
         }
