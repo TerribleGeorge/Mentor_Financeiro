@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import '../services/firebase_service.dart';
+import 'tela_login.dart';
+import 'questionario_page.dart';
+import 'tela_configuracao.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -164,7 +168,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     final label = item['label'] as String;
 
     return GestureDetector(
-      onTap: () {},
+      onTap: () => _onMenuItemTap(label),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(16),
@@ -187,5 +191,162 @@ class _PerfilScreenState extends State<PerfilScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _onMenuItemTap(String label) async {
+    switch (label) {
+      case 'Editar Perfil':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const QuestionarioPage()),
+        );
+        break;
+      case 'Configurações':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const TelaConfiguracao()),
+        );
+        break;
+      case 'Notificações':
+        _showNotificationSettings();
+        break;
+      case 'Sair':
+        await _fazerLogout();
+        break;
+      case 'Ajuda':
+        _showAjuda();
+        break;
+    }
+  }
+
+  void _showNotificationSettings() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Notificações',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: const Icon(Icons.receipt_long, color: Color(0xFF00D9FF)),
+              title: const Text(
+                'Leitura de Transações',
+                style: TextStyle(color: Colors.white),
+              ),
+              subtitle: const Text(
+                'Monitorar gastos via notifications',
+                style: TextStyle(color: Colors.white54),
+              ),
+              trailing: Switch(
+                value: true,
+                activeTrackColor: const Color(0xFF00D9FF),
+                onChanged: (value) {},
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAjuda() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Ajuda',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Mentor Financeiro v1.0.0',
+              style: TextStyle(color: Colors.white70),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Precisa de pomoc? Entre em contato pelo email: soport@mentorfinanceiro.com',
+              style: TextStyle(color: Colors.white54),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _fazerLogout() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        title: const Text('Sair', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Tem certeza que deseja sair?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.white54),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Sair',
+              style: TextStyle(color: Color(0xFFFC5C65)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true && mounted) {
+      try {
+        await FirebaseService.logout();
+        await Purchases.logOut();
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const TelaLogin()),
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Erro ao sair: $e')));
+        }
+      }
+    }
   }
 }
