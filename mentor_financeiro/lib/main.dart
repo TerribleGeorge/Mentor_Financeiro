@@ -20,8 +20,10 @@ Future<void> initializeRevenueCat(String? uid) async {
   await Purchases.configure(configuration);
 
   if (uid != null) {
+    // Garante que o appUserID do RevenueCat seja igual ao UID do Firebase
     await Purchases.logIn(uid);
-    debugPrint('RevenueCat inicializado para o usuário: $uid');
+    debugPrint('RevenueCat ID: ${Purchases.appUserID}');
+    debugPrint('Firebase UID: $uid');
   }
 }
 
@@ -73,20 +75,25 @@ void main() async {
   runApp(const MentorFinanceiroApp());
 }
 
+final _themeController = AppThemeController();
+
 class MentorFinanceiroApp extends StatelessWidget {
   const MentorFinanceiroApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final themeController = AppThemeController();
-
     return ListenableBuilder(
-      listenable: themeController,
+      listenable: _themeController,
       builder: (context, _) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Mentor Financeiro',
-          theme: themeController.currentTheme,
+          theme: _themeController.currentTheme,
+          themeMode: _themeController.themeMode == AppThemeMode.light
+              ? ThemeMode.light
+              : _themeController.themeMode == AppThemeMode.medium
+              ? ThemeMode.dark
+              : ThemeMode.dark,
           initialRoute: '/',
           onGenerateRoute: (settings) {
             switch (settings.name) {
