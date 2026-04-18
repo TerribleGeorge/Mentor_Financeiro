@@ -109,8 +109,6 @@ class MentorFinanceiroApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const TelaPerfil());
           case '/metas':
             return MaterialPageRoute(builder: (_) => const TelaMetas());
-          case '/chat':
-            return MaterialPageRoute(builder: (_) => const TelaChat());
           case '/investimentos':
             return MaterialPageRoute(builder: (_) => const TelaInvestimentos());
           case '/estrategias':

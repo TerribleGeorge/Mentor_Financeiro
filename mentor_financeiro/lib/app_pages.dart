@@ -7,10 +7,15 @@ export 'pages/tela_configuracao.dart';
 export 'pages/tela_home.dart';
 export 'pages/tela_perfil.dart';
 export 'pages/tela_metas.dart';
-export 'pages/tela_chat.dart';
 export 'pages/tela_investimentos.dart';
 export 'pages/tela_plataformas.dart';
 export 'pages/tela_estrategias.dart';
+
+export 'pages/home_screen.dart';
+export 'pages/relatorios_screen.dart';
+export 'pages/historico_screen.dart';
+export 'pages/perfil_screen.dart';
+export 'pages/main_navigation.dart';
 
 export 'pages/conhecimento/conhecimento_hub.dart';
 export 'pages/conhecimento/investimentos_menu.dart';

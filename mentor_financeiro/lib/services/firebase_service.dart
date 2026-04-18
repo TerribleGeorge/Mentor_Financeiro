@@ -325,6 +325,8 @@ class FirebaseService {
       'perfilInvestidor': '',
       'onboardingCompleto': false,
       'configuracoes': {},
+      'limiteTotalCartao': 0.0,
+      'diaFechamentoFatura': 0,
       'criadoEm': DateTime.now(),
     });
   }

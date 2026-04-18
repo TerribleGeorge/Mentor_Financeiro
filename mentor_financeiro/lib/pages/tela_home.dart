@@ -28,10 +28,6 @@ class _TelaHomeState extends State<TelaHome> {
     await FirebaseService.inicializarMessaging();
   }
 
-  void _abrirChat() {
-    Navigator.pushNamed(context, '/chat');
-  }
-
   void _abrirSimulado() {
     Navigator.pushNamed(context, '/simulado');
   }
@@ -285,7 +281,7 @@ class _TelaHomeState extends State<TelaHome> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GestureDetector(
-                  onTap: _abrirChat,
+                  onTap: () => Navigator.pushNamed(context, '/conhecimento'),
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
@@ -383,11 +379,6 @@ class _TelaHomeState extends State<TelaHome> {
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, '/chat'),
-        backgroundColor: const Color(0xFF00D9FF),
-        child: const Icon(Icons.chat, color: Color(0xFF0F172A)),
       ),
     );
   }

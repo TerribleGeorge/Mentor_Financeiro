@@ -223,6 +223,53 @@ class CategoriaTransacao {
   static String extrairNomeEstabelecimento(String texto) {
     return _limparNomeEstabelecimento(texto);
   }
+
+  static TipoPagamento identificarTipoPagamento(String texto) {
+    final lower = texto.toLowerCase();
+
+    final keywordsCredito = [
+      'cartão',
+      'cartao',
+      'crédito',
+      'credito',
+      'credit',
+      'parcelado',
+      'parcelamento',
+      'x vezes',
+      'débito parcelado',
+      'fatura',
+      'compra no crédito',
+      'compra no cartao',
+      'final',
+      'valores Parc',
+      'parcelas',
+    ];
+
+    if (keywordsCredito.any((kw) => lower.contains(kw))) {
+      return TipoPagamento.credito;
+    }
+
+    return TipoPagamento.debito;
+  }
+
+  static double? extrairLimiteDisponivel(String texto) {
+    final lower = texto.toLowerCase();
+
+    final regexLimite = RegExp(
+      r'(?:limite|disponível|disponivel|restante|saldo disponível|saldo disponivel)\s*(?:de\s*)?(?:R\$|€|\$)?\s*(\d+(?:[.,]\d{1,2})?)',
+      caseSensitive: false,
+    );
+
+    final match = regexLimite.firstMatch(lower);
+    if (match != null) {
+      final valorStr = match.group(1)?.replaceAll('.', '').replaceAll(',', '.');
+      if (valorStr != null) {
+        return double.tryParse(valorStr);
+      }
+    }
+
+    return null;
+  }
 }
 
 class NotificationParserService {
@@ -328,6 +375,57 @@ class NotificationParserService {
     return estabelecimento;
   }
 
+  static TipoPagamento identificarTipoPagamento(String texto) {
+    final lower = texto.toLowerCase();
+    final keywordsCredito = [
+      'cartão',
+      'cartão de crédito',
+      'credito',
+      'credit',
+      'final',
+      'visa',
+      'mastercard',
+      'hipercard',
+      'elo crédito',
+    ];
+    for (final kw in keywordsCredito) {
+      if (lower.contains(kw)) {
+        return TipoPagamento.credito;
+      }
+    }
+    return TipoPagamento.debito;
+  }
+
+  static double? extrairLimiteDisponivel(String texto) {
+    final patterns = [
+      RegExp(
+        r'limite[sd]?[aio]?\s*(?:disponível|disponivel)?\s*:?\s*R\$\s*([\d.,]+)',
+        caseSensitive: false,
+      ),
+      RegExp(
+        r'R\$\s*([\d.,]+)\s*de\s*(?:limite|disponível)',
+        caseSensitive: false,
+      ),
+      RegExp(r'disponível[sd]?\s*:?\s*R\$\s*([\d.,]+)', caseSensitive: false),
+    ];
+    for (final pattern in patterns) {
+      final match = pattern.firstMatch(texto);
+      if (match != null) {
+        final valorStr = match
+            .group(1)
+            ?.replaceAll('.', '')
+            .replaceAll(',', '.');
+        if (valorStr != null) {
+          final valor = double.tryParse(valorStr);
+          if (valor != null && valor > 0) {
+            return valor;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   static TransacaoData? parse(
     String notificationText, {
     String currencyCode = 'BRL',
@@ -343,12 +441,16 @@ class NotificationParserService {
         extrairEstabelecimento(notificationText) ?? 'Transação bancária';
 
     final categoria = CategoriaTransacao.definirCategoria(notificationText);
+    final tipoPagamento = identificarTipoPagamento(notificationText);
+    final limiteDisponivel = extrairLimiteDisponivel(notificationText);
 
     return TransacaoData(
       valor: valor,
       descricao: descricao,
       data: DateTime.now(),
       categoria: categoria,
+      tipoPagamento: tipoPagamento,
+      limiteDisponivel: limiteDisponivel,
     );
   }
 }
@@ -358,12 +460,16 @@ class TransacaoData {
   final String descricao;
   final DateTime data;
   final String? categoria;
+  final TipoPagamento tipoPagamento;
+  final double? limiteDisponivel;
 
   TransacaoData({
     required this.valor,
     required this.descricao,
     required this.data,
     this.categoria,
+    this.tipoPagamento = TipoPagamento.debito,
+    this.limiteDisponivel,
   });
 }
 

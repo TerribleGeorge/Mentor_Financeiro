@@ -5,6 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../models/transacao_model.dart';
 import '../services/localization_service.dart';
+import '../services/mentoria_service.dart';
+import '../widgets/dica_card.dart';
+import '../widgets/nota_saude_circle.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -16,6 +19,9 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   DateTime _selectedMonth = DateTime.now();
   final double _metaDiaria = 150.0;
+  String? _filtroTipoPagamento;
+  List<DicaFinanceira> _dicas = [];
+  NotaSaudeFinanceira? _notaSaude;
 
   String _formatarMoeda(double valor) {
     return LocalizationService.formatCurrency(valor);
@@ -117,19 +123,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
             return _buildEmptyState();
           }
 
-          final transacoes = snapshot.data!.docs
+          final transacoesAll = snapshot.data!.docs
               .map(
                 (doc) =>
                     TransacaoModel.fromMap(doc.data() as Map<String, dynamic>),
               )
               .toList();
 
+          var transacoes = transacoesAll;
+          if (_filtroTipoPagamento != null) {
+            transacoes = transacoesAll.where((t) {
+              if (_filtroTipoPagamento == 'debito') {
+                return t.tipoPagamento == TipoPagamento.debito;
+              } else if (_filtroTipoPagamento == 'credito') {
+                return t.tipoPagamento == TipoPagamento.credito;
+              }
+              return true;
+            }).toList();
+          }
+
+          MentoriaService.gerarDicas(
+            uid: user.uid,
+            transacoes: transacoesAll,
+          ).then((dicas) {
+            if (mounted && dicas.isNotEmpty) {
+              setState(() {
+                _dicas = dicas;
+              });
+            }
+          });
+
+          MentoriaService.calcularNotaSaude(
+            uid: user.uid,
+            transacoes: transacoesAll,
+          ).then((nota) {
+            if (mounted) {
+              setState(() {
+                _notaSaude = nota;
+              });
+            }
+          });
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (_notaSaude != null) ...[
+                  NotaSaudeCard(notaSaude: _notaSaude!),
+                  const SizedBox(height: 20),
+                ],
+                if (_dicas.isNotEmpty) ...[
+                  DicaCarousel(dicas: _dicas),
+                  const SizedBox(height: 20),
+                ],
                 _buildMonthSelector(),
+                const SizedBox(height: 16),
+                _buildTipoPagamentoFilter(),
                 const SizedBox(height: 20),
                 _buildTotalCard(transacoes),
                 const SizedBox(height: 24),
@@ -166,6 +216,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTipoPagamentoFilter() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildFilterChip('Tudo', null),
+          const SizedBox(width: 8),
+          _buildFilterChip('Débito', 'debito'),
+          const SizedBox(width: 8),
+          _buildFilterChip('Crédito', 'credito'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, String? tipo) {
+    final isSelected = _filtroTipoPagamento == tipo;
+    return GestureDetector(
+      onTap: () => setState(() {
+        _filtroTipoPagamento = tipo;
+      }),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF00D9FF) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF00D9FF) : Colors.white30,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.black : Colors.white70,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 12,
+          ),
+        ),
       ),
     );
   }

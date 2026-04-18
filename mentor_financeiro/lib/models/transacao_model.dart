@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum TipoPagamento { debito, credito }
+
 class TransacaoModel {
   final double valor;
   final String descricao;
@@ -7,6 +9,8 @@ class TransacaoModel {
   final String metodo;
   final String? categoria;
   final String? banco;
+  final TipoPagamento tipoPagamento;
+  final double? limiteDisponivel;
 
   TransacaoModel({
     required this.valor,
@@ -15,9 +19,19 @@ class TransacaoModel {
     required this.metodo,
     this.categoria,
     this.banco,
+    this.tipoPagamento = TipoPagamento.debito,
+    this.limiteDisponivel,
   });
 
   factory TransacaoModel.fromMap(Map<String, dynamic> map) {
+    TipoPagamento tipo = TipoPagamento.debito;
+    if (map['tipoPagamento'] != null) {
+      final tipoStr = map['tipoPagamento'] as String;
+      tipo = tipoStr == 'credito'
+          ? TipoPagamento.credito
+          : TipoPagamento.debito;
+    }
+
     return TransacaoModel(
       valor: (map['valor'] as num?)?.toDouble() ?? 0.0,
       descricao: map['descricao'] as String? ?? '',
@@ -27,6 +41,8 @@ class TransacaoModel {
       metodo: map['metodo'] as String? ?? '',
       categoria: map['categoria'] as String?,
       banco: map['banco'] as String?,
+      tipoPagamento: tipo,
+      limiteDisponivel: (map['limiteDisponivel'] as num?)?.toDouble(),
     );
   }
 
@@ -38,8 +54,15 @@ class TransacaoModel {
       'metodo': metodo,
       'categoria': categoria,
       'banco': banco,
+      'tipoPagamento': tipoPagamento == TipoPagamento.credito
+          ? 'credito'
+          : 'debito',
+      'limiteDisponivel': limiteDisponivel,
     };
   }
+
+  bool get isCredito => tipoPagamento == TipoPagamento.credito;
+  bool get isDebito => tipoPagamento == TipoPagamento.debito;
 }
 
 class CategoriaTransacao {

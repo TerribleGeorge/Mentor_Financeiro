@@ -283,5 +283,83 @@
   "digiteMensagem": "Digite uma mensagem...",
   "@digiteMensagem": {
     "description": "Type a message"
+  },
+  "alertaGastos": "Alerta de Gastos",
+  "@alertaGastos": {
+    "description": "Alert about spending"
+  },
+  "alertaGastosMsg": "Você já usou {percent}% do seu limite de crédito.",
+  "@alertaGastosMsg": {
+    "description": "Alert about spending percentage",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "fechamentoFatura": "Fechamento da Fatura",
+  "@fechamentoFatura": {
+    "description": "Invoice closing"
+  },
+  "fechamentoFaturaMsg": "Amanhã é o dia do fechamento. Ótimo momento para revisar seus gastos.",
+  "@fechamentoFaturaMsg": {
+    "description": "Invoice closing message"
+  },
+  "faturaVencendo": "Atenção: Fatura vencendo",
+  "@faturaVencendo": {
+    "description": "Invoice due warning"
+  },
+  "faturaVencendoMsg": "Sua fatura vence em {dias} dia(s). Verifique seu saldo.",
+  "@faturaVencendoMsg": {
+    "description": "Invoice due message",
+    "placeholders": {
+      "dias": {
+        "type": "int"
+      }
+    }
+  },
+  "regra30": "Dica: Regra dos 30%",
+  "@regra30": {
+    "description": "30% rule tip"
+  },
+  "regra30Msg": "Tente manter seu uso abaixo de 30% para melhorar seu Score Bancário.",
+  "@regra30Msg": {
+    "description": "30% rule message"
+  },
+  "diaDeOuro": "Dia de Ouro!",
+  "@diaDeOuro": {
+    "description": "Golden day tip"
+  },
+  "diaDeOuroMsg": "Suas compras hoje só serão pagas daqui a 40 dias!",
+  "@diaDeOuroMsg": {
+    "description": "Golden day message"
+  },
+  "alertaJuros": "Cuidado: Juros",
+  "@alertaJuros": {
+    "description": "Interest alert"
+  },
+  "alertaJurosMsg": "Seu saldo não cobre a fatura. Evite o crédito rotativo!",
+  "@alertaJurosMsg": {
+    "description": "Interest alert message"
+  },
+  "notaSaude": "Saúde Financeira",
+  "@notaSaude": {
+    "description": "Financial health score"
+  },
+  "notaExcelente": "Excelente! Você tem saúde financeira.",
+  "@notaExcelente": {
+    "description": "Excellent health"
+  },
+  "notaBom": "Bom, mas pode melhorar.",
+  "@notaBom": {
+    "description": "Good health"
+  },
+  "notaAtencao": "Atenção aos gastos.",
+  "@notaAtencao": {
+    "description": "Need attention"
+  },
+  "notaRevisar": "Revise suas finanças.",
+  "@notaRevisar": {
+    "description": "Need to review"
   }
 }
