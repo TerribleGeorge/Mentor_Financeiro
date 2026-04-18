@@ -11,6 +11,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   double _limiteDiario = 0;
   double _gastosHoje = 0;
+  // ignore: unused_field - Reservado para uso futuro (exibir ganhos do dia)
   double _ganhosHoje = 0;
   double _porcentagem = 0;
   String _nomeUsuario = 'Usuário';
