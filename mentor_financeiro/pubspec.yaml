@@ -170,6 +170,9 @@ flutter_launcher_icons:
 # CONFIGURAÇÕES DO FLUTTER
 # ==============================================================================
 flutter:
+  # Gera código de localização automaticamente
+  generate: true
+
   # Usa Material Design (GUI do Google)
   # Importance: Define o estilo visual padrão do app
   # Impacto: Aparência consistente com guidelines do Material Design

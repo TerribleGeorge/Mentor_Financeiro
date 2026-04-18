@@ -200,8 +200,8 @@
   "@descricaoLocalizacao": {
     "description": "Location description"
   },
-  "permissaoLocalizacao Necessaria": "Permissão de Localização Necessária",
-  "@permissaoLocalizacao Necessaria": {
+  "permissaoLocalizacaoNecessaria": "Permissão de Localização Necessária",
+  "@permissaoLocalizacaoNecessaria": {
     "description": "Location permission required"
   },
   "rendaFixa": "Renda Fixa",
