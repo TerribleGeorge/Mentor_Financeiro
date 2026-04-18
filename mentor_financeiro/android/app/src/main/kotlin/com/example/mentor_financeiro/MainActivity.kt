@@ -9,8 +9,13 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : FlutterActivity() {
+    companion object {
+        lateinit var instance: MainActivity
+    }
+    
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        instance = this
         NotificationChannels.register(flutterEngine.dartExecutor.binaryMessenger)
     }
 }
@@ -89,7 +94,11 @@ class CustomNotificationListener : NotificationListenerService() {
 
         fun getEnabledListeners(): String {
             return try {
-                android.provider.Settings.Secure.getString(contentResolver, "enabled_notification_listeners") ?: ""
+                val context = MainActivity.instance
+                android.provider.Settings.Secure.getString(
+                    context.contentResolver,
+                    "enabled_notification_listeners"
+                ) ?: ""
             } catch (e: Exception) { "" }
         }
     }
