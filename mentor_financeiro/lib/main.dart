@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'firebase_options.dart';
 import 'services/firebase_service.dart';
 import 'services/subscription_provider.dart';
 import 'services/app_theme_controller.dart';
 import 'app_pages.dart';
-import 'pages/relatorios_screen.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
