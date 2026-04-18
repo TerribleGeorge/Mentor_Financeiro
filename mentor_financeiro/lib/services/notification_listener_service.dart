@@ -482,6 +482,12 @@ class TransacaoRepository {
       return false;
     }
 
+    final validacao = await validarSaldo(user.uid, transacao);
+    if (!validacao.podeSalvar) {
+      debugPrint('Transação negada: ${validacao.mensagem}');
+      return false;
+    }
+
     try {
       await _firestore
           .collection('usuarios')
@@ -494,6 +500,66 @@ class TransacaoRepository {
       return false;
     }
   }
+
+  Future<ResultadoValidacao> validarSaldo(
+    String uid,
+    TransacaoModel transacao,
+  ) async {
+    final dadosUsuario = await _firestore.collection('usuarios').doc(uid).get();
+    final saldoConta =
+        (dadosUsuario.get('saldoConta') as num?)?.toDouble() ?? 0.0;
+    final limiteCartao =
+        (dadosUsuario.get('limiteTotalCartao') as num?)?.toDouble() ?? 0.0;
+
+    if (transacao.tipoPagamento == TipoPagamento.debito) {
+      if (saldoConta >= transacao.valor) {
+        return ResultadoValidacao(
+          podeSalvar: true,
+          mensagem: 'Saldo suficiente',
+        );
+      }
+      return ResultadoValidacao(
+        podeSalvar: false,
+        mensagem: 'Saldo insuficiente',
+        saldoAtual: saldoConta,
+        valorTransacao: transacao.valor,
+        tipo: 'debito',
+      );
+    } else {
+      final limiteUtilizado =
+          (dadosUsuario.get('limiteUtilizado') as num?)?.toDouble() ?? 0.0;
+      final limiteDisponivel = limiteCartao - limiteUtilizado;
+      if (limiteDisponivel >= transacao.valor) {
+        return ResultadoValidacao(
+          podeSalvar: true,
+          mensagem: 'Limite suficiente',
+        );
+      }
+      return ResultadoValidacao(
+        podeSalvar: false,
+        mensagem: 'Limite insuficiente',
+        saldoAtual: limiteDisponivel,
+        valorTransacao: transacao.valor,
+        tipo: 'credito',
+      );
+    }
+  }
+}
+
+class ResultadoValidacao {
+  final bool podeSalvar;
+  final String mensagem;
+  final double saldoAtual;
+  final double valorTransacao;
+  final String tipo;
+
+  ResultadoValidacao({
+    required this.podeSalvar,
+    required this.mensagem,
+    this.saldoAtual = 0,
+    this.valorTransacao = 0,
+    this.tipo = 'debito',
+  });
 }
 
 class NotificationListenerService {

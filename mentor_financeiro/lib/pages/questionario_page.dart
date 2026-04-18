@@ -57,63 +57,62 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFF0F172A),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 40),
-              Text(
+              const SizedBox(height: 40),
+              const Text(
                 "Conte-nos sobre você",
                 style: TextStyle(
-                  color: Colors.grey.shade800,
+                  color: Colors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Text(
                 "Essas informações nos ajudam a personalizar sua experiência.",
-                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               TextField(
                 onChanged: (v) => _profissao = v,
-                style: TextStyle(color: Colors.grey[800], fontSize: 16),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
                 decoration: InputDecoration(
                   labelText: "Qual é a sua profissão?",
                   hintText: "Ex: Desenvolvedor, Professor, Empresário...",
-                  labelStyle: TextStyle(color: Colors.grey[600]),
-                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: TextStyle(color: Colors.white38),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: const Color(0xFF1E293B),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: Colors.white24),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: Colors.white24),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF00D9FF)),
+                    borderSide: const BorderSide(color: Color(0xFF00D9FF)),
                   ),
                 ),
               ),
-              SizedBox(height: 24),
-              Text(
+              const SizedBox(height: 24),
+              const Text(
                 "Qual é o seu perfil de investidor?",
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: Colors.white70,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Row(
                 children: List.generate(_perfis.length, (index) {
                   final perfil = _perfis[index];
@@ -128,12 +127,12 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? const Color(0xFF00D9FF)
-                                : Colors.white,
+                                : const Color(0xFF1E293B),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isSelected
                                   ? const Color(0xFF00D9FF)
-                                  : Colors.grey[300]!,
+                                  : Colors.white24,
                             ),
                           ),
                           child: Column(
@@ -146,15 +145,15 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                                     : Icons.show_chart,
                                 color: isSelected
                                     ? Colors.white
-                                    : Colors.grey[600],
+                                    : Colors.white70,
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
                                 perfil,
                                 style: TextStyle(
                                   color: isSelected
                                       ? Colors.white
-                                      : Colors.grey[800],
+                                      : Colors.white70,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -167,33 +166,33 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                   );
                 }),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               TextField(
                 onChanged: (v) => _objetivos = v,
-                style: TextStyle(color: Colors.grey[800], fontSize: 16),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
                 maxLines: 2,
                 decoration: InputDecoration(
                   labelText: "Quais são os seus objetivos financeiros?",
                   hintText: "Ex: Aposentar cedo, comprar casa...",
-                  labelStyle: TextStyle(color: Colors.grey[600]),
-                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: TextStyle(color: Colors.white38),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: const Color(0xFF1E293B),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: Colors.white24),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: Colors.white24),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF00D9FF)),
+                    borderSide: const BorderSide(color: Color(0xFF00D9FF)),
                   ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 height: 56,
