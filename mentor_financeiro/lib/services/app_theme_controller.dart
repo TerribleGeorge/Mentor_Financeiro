@@ -9,14 +9,17 @@ enum AppThemeMode { light, dark, medium }
 class AppThemeController extends ChangeNotifier {
   static const String _themeKey = 'app_theme_mode';
   static const String _backgroundImageKey = 'background_image_path';
+  static const String _isPremiumKey = 'is_premium';
 
   AppThemeMode _themeMode = AppThemeMode.dark;
   String? _backgroundImagePath;
   bool _isLoading = false;
+  bool _isPremium = false;
 
   AppThemeMode get themeMode => _themeMode;
   String? get backgroundImagePath => _backgroundImagePath;
   bool get isLoading => _isLoading;
+  bool get isPremium => _isPremium;
   bool get hasBackgroundImage =>
       _backgroundImagePath != null && File(_backgroundImagePath!).existsSync();
 
@@ -78,9 +81,21 @@ class AppThemeController extends ChangeNotifier {
     final themeIndex = prefs.getInt(_themeKey) ?? 2;
     _themeMode = AppThemeMode.values[themeIndex];
     _backgroundImagePath = prefs.getString(_backgroundImageKey);
+    _isPremium = prefs.getBool(_isPremiumKey) ?? false;
+
+    debugPrint('AppThemeController initialized - isPremium: $_isPremium');
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> setPremiumStatus(bool isPremium) async {
+    _isPremium = isPremium;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_isPremiumKey, isPremium);
+    debugPrint('Premium status updated: $isPremium');
   }
 
   Future<void> setThemeMode(AppThemeMode mode) async {
@@ -138,10 +153,6 @@ class AppThemeController extends ChangeNotifier {
       case AppThemeMode.medium:
         return 'Médio';
     }
-  }
-
-  void setPremiumStatus(bool isPremium) {
-    notifyListeners();
   }
 }
 

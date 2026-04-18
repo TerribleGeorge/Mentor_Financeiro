@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/app_theme_controller.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -14,24 +15,25 @@ class _SettingsPageState extends State<SettingsPage> {
   String _moedaSelecionada = 'BRL';
   int _temaSelecionado = 2;
   bool _isPremium = false;
+  final _themeController = AppThemeController();
 
   @override
   void initState() {
     super.initState();
     _carregarPreferencias();
+    _themeController.initialize();
   }
 
   Future<void> _carregarPreferencias() async {
     final prefs = await SharedPreferences.getInstance();
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      final dados = prefs.getString('isPremium_${user.uid}');
       if (mounted) {
         setState(() {
           _idiomaSelecionado = prefs.getString('idioma') ?? 'pt';
           _moedaSelecionada = prefs.getString('moeda') ?? 'BRL';
-          _temaSelecionado = prefs.getInt('tema') ?? 2;
-          _isPremium = dados == 'true';
+          _temaSelecionado = _themeController.themeMode.index;
+          _isPremium = _themeController.isPremium;
         });
       }
     }
@@ -39,112 +41,132 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _salvarPreferencia(String chave, dynamic valor) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(chave, valor.toString());
+    if (valor is int) {
+      await prefs.setInt(chave, valor);
+    } else {
+      await prefs.setString(chave, valor.toString());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
-        title: const Text(
-          'Configurações',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionTitle('Aparência'),
-            const SizedBox(height: 12),
-            _buildCard([
-              _buildThemeSelector(),
-              const Divider(color: Colors.white12),
-              _buildListTile(
-                icon: Icons.wallpaper,
-                title: 'Personalizar Fundo',
-                subtitle: _isPremium ? 'Ativo' : 'Somente Premium',
-                trailing: _isPremium
-                    ? const Icon(Icons.check_circle, color: Color(0xFF26DE81))
-                    : const Icon(Icons.lock, color: Colors.white38),
-                onTap: _isPremium ? () {} : () => _showPremiumDialog(),
+    return ListenableBuilder(
+      listenable: _themeController,
+      builder: (context, _) {
+        _isPremium = _themeController.isPremium;
+        _temaSelecionado = _themeController.themeMode.index;
+
+        return Scaffold(
+          backgroundColor: const Color(0xFF0F172A),
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF0F172A),
+            title: const Text(
+              'Configurações',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
-            ]),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Conta'),
-            const SizedBox(height: 12),
-            _buildCard([
-              _buildListTile(
-                icon: Icons.email_outlined,
-                title: 'E-mail',
-                subtitle:
-                    FirebaseAuth.instance.currentUser?.email ?? 'Não conectado',
-                onTap: () {},
-              ),
-              const Divider(color: Colors.white12),
-              _buildListTile(
-                icon: Icons.lock_outline,
-                title: 'Alterar Senha',
-                subtitle: 'Redefinir sua senha',
-                onTap: () => _showTrocarSenha(),
-              ),
-            ]),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Preferências'),
-            const SizedBox(height: 12),
-            _buildCard([
-              _buildListTile(
-                icon: Icons.language,
-                title: 'Idioma',
-                subtitle: _getIdiomaNome(_idiomaSelecionado),
-                trailing: const Icon(
-                  Icons.chevron_right,
-                  color: Colors.white38,
-                ),
-                onTap: _showSelectorIdioma,
-              ),
-              const Divider(color: Colors.white12),
-              _buildListTile(
-                icon: Icons.attach_money,
-                title: 'Unidade Monetária',
-                subtitle: _getMoedaNome(_moedaSelecionada),
-                trailing: const Icon(
-                  Icons.chevron_right,
-                  color: Colors.white38,
-                ),
-                onTap: _showSelectorMoeda,
-              ),
-            ]),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Jurídico'),
-            const SizedBox(height: 12),
-            _buildCard([
-              _buildListTile(
-                icon: Icons.privacy_tip_outlined,
-                title: 'Privacidade',
-                subtitle: 'Nossa política de privacidade',
-                onTap: () =>
-                    _openUrl('https://mentorfinanceiro.com/privacidade'),
-              ),
-              const Divider(color: Colors.white12),
-              _buildListTile(
-                icon: Icons.description_outlined,
-                title: 'Termos de Uso',
-                subtitle: 'Termos e condições',
-                onTap: () => _openUrl('https://mentorfinanceiro.com/termos'),
-              ),
-            ]),
-            const SizedBox(height: 40),
-          ],
-        ),
-      ),
+            ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('Aparência'),
+                const SizedBox(height: 12),
+                _buildCard([
+                  _buildThemeSelector(),
+                  const Divider(color: Colors.white12),
+                  _buildListTile(
+                    icon: Icons.wallpaper,
+                    title: 'Personalizar Fundo',
+                    subtitle: _isPremium ? 'Ativo' : 'Somente Premium',
+                    trailing: _isPremium
+                        ? const Icon(
+                            Icons.check_circle,
+                            color: Color(0xFF26DE81),
+                          )
+                        : const Icon(Icons.lock, color: Colors.white38),
+                    onTap: _isPremium
+                        ? () => _themeController.pickBackgroundImage()
+                        : _showPremiumDialog,
+                  ),
+                ]),
+                const SizedBox(height: 24),
+                _buildSectionTitle('Conta'),
+                const SizedBox(height: 12),
+                _buildCard([
+                  _buildListTile(
+                    icon: Icons.email_outlined,
+                    title: 'E-mail',
+                    subtitle:
+                        FirebaseAuth.instance.currentUser?.email ??
+                        'Não conectado',
+                    onTap: () {},
+                  ),
+                  const Divider(color: Colors.white12),
+                  _buildListTile(
+                    icon: Icons.lock_outline,
+                    title: 'Alterar Senha',
+                    subtitle: 'Redefinir sua senha',
+                    onTap: _showTrocarSenha,
+                  ),
+                ]),
+                const SizedBox(height: 24),
+                _buildSectionTitle('Preferências'),
+                const SizedBox(height: 12),
+                _buildCard([
+                  _buildListTile(
+                    icon: Icons.language,
+                    title: 'Idioma',
+                    subtitle: _getIdiomaNome(_idiomaSelecionado),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: Colors.white38,
+                    ),
+                    onTap: _showSelectorIdioma,
+                  ),
+                  const Divider(color: Colors.white12),
+                  _buildListTile(
+                    icon: Icons.attach_money,
+                    title: 'Unidade Monetária',
+                    subtitle: _getMoedaNome(_moedaSelecionada),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: Colors.white38,
+                    ),
+                    onTap: _showSelectorMoeda,
+                  ),
+                ]),
+                const SizedBox(height: 24),
+                _buildSectionTitle('Jurídico'),
+                const SizedBox(height: 12),
+                _buildCard([
+                  _buildListTile(
+                    icon: Icons.privacy_tip_outlined,
+                    title: 'Privacidade',
+                    subtitle: 'Nossa política de privacidade',
+                    onTap: () {},
+                  ),
+                  const Divider(color: Colors.white12),
+                  _buildListTile(
+                    icon: Icons.description_outlined,
+                    title: 'Termos de Uso',
+                    subtitle: 'Termos e condições',
+                    onTap: () {},
+                  ),
+                ]),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -198,6 +220,7 @@ class _SettingsPageState extends State<SettingsPage> {
       onTap: () {
         setState(() => _temaSelecionado = tema);
         _salvarPreferencia('tema', tema);
+        _themeController.setThemeMode(AppThemeMode.values[tema]);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -356,7 +379,7 @@ class _SettingsPageState extends State<SettingsPage> {
           style: TextStyle(color: Colors.white),
         ),
         content: const Text(
-          'Faça upgrade para Premium para desbloquear está e muitas outras funcionalidades!',
+          'Faça upgrade para Premium!',
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -370,7 +393,6 @@ class _SettingsPageState extends State<SettingsPage> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              // Navigate to upgrade page
             },
             child: const Text(
               'Upgrade',
@@ -426,11 +448,5 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       ),
     );
-  }
-
-  void _openUrl(String url) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Abrindo: $url')));
   }
 }
