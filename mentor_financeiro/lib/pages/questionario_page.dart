@@ -60,7 +60,7 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.grey[50],
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
