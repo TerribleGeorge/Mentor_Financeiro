@@ -4,7 +4,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import '../services/firebase_service.dart';
 import 'tela_login.dart';
 import 'questionario_page.dart';
-import 'tela_configuracao.dart';
+import 'settings_page.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -204,7 +204,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
       case 'Configurações':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const TelaConfiguracao()),
+          MaterialPageRoute(builder: (_) => const SettingsPage()),
         );
         break;
       case 'Notificações':
