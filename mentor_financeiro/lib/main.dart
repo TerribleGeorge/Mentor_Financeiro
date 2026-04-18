@@ -4,7 +4,6 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'firebase_options.dart';
 import 'services/firebase_service.dart';
-import 'services/subscription_provider.dart';
 import 'services/app_theme_controller.dart';
 import 'app_pages.dart';
 
@@ -13,6 +12,8 @@ FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 const String revenueCatApiKey = 'test_pibcZvswDiwSwzDHPGiRBKIKnLZ';
 const String mentorProEntitlementId = 'Mentor Financeiro Pro';
 
+final themeController = AppThemeController();
+
 Future<void> initializeRevenueCat(String? uid) async {
   await Purchases.setLogLevel(LogLevel.debug);
 
@@ -20,34 +21,29 @@ Future<void> initializeRevenueCat(String? uid) async {
   await Purchases.configure(configuration);
 
   if (uid != null) {
-    // Garante que o appUserID do RevenueCat seja igual ao UID do Firebase
     await Purchases.logIn(uid);
-    debugPrint('RevenueCat ID: ${Purchases.appUserID}');
+    debugPrint('=== REVENUECAT DEBUG ===');
     debugPrint('Firebase UID: $uid');
+    debugPrint('RevenueCat ID: ${Purchases.appUserID}');
+    debugPrint('======================');
   }
 }
 
-Future<void> verificarStatusAssinatura(
-  SubscriptionProvider subscriptionProvider,
-  AppThemeController themeController,
-) async {
+Future<void> verificarStatusAssinatura() async {
   try {
     final customerInfo = await Purchases.getCustomerInfo();
-    final entitlements = customerInfo.entitlements;
-    final allEntitlements = entitlements.all;
+    final entitlements = customerInfo.entitlements.all;
 
-    bool isPro = false;
-    for (final entry in allEntitlements.entries) {
-      if (entry.key == mentorProEntitlementId && entry.value.isActive) {
-        isPro = true;
-        break;
-      }
+    bool isPremium = false;
+    if (entitlements.containsKey(mentorProEntitlementId)) {
+      isPremium = entitlements[mentorProEntitlementId]!.isActive;
     }
 
-    await subscriptionProvider.updatePremiumStatus(isPro);
-    themeController.setPremiumStatus(isPro);
+    await themeController.setPremiumStatus(isPremium);
 
-    debugPrint('Status Premium atualizado: $isPro');
+    debugPrint('=== PREMIUM DEBUG ===');
+    debugPrint('USUÁRIO É MESTRE? $isPremium');
+    debugPrint('====================');
   } catch (e) {
     debugPrint('Erro ao verificar assinatura: $e');
   }
@@ -71,11 +67,16 @@ void main() async {
   }
 
   await initializeRevenueCat(null);
+  await verificarStatusAssinatura();
+
+  await themeController.initialize();
+
+  debugPrint('=== TEMA DEBUG ===');
+  debugPrint('O TEMA ATUAL É: ${themeController.themeMode}');
+  debugPrint('================');
 
   runApp(const MentorFinanceiroApp());
 }
-
-final _themeController = AppThemeController();
 
 class MentorFinanceiroApp extends StatelessWidget {
   const MentorFinanceiroApp({super.key});
@@ -83,17 +84,24 @@ class MentorFinanceiroApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _themeController,
+      listenable: themeController,
       builder: (context, _) {
+        final modoTema = themeController.themeMode;
+        ThemeMode flutterThemeMode;
+
+        if (modoTema == AppThemeMode.light) {
+          flutterThemeMode = ThemeMode.light;
+        } else if (modoTema == AppThemeMode.medium) {
+          flutterThemeMode = ThemeMode.dark;
+        } else {
+          flutterThemeMode = ThemeMode.dark;
+        }
+
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Mentor Financeiro',
-          theme: _themeController.currentTheme,
-          themeMode: _themeController.themeMode == AppThemeMode.light
-              ? ThemeMode.light
-              : _themeController.themeMode == AppThemeMode.medium
-              ? ThemeMode.dark
-              : ThemeMode.dark,
+          theme: themeController.currentTheme,
+          themeMode: flutterThemeMode,
           initialRoute: '/',
           onGenerateRoute: (settings) {
             switch (settings.name) {
