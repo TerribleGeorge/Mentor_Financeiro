@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/transacao_model.dart';
 
 class CategoriaTransacao {
@@ -572,6 +573,8 @@ class NotificationListenerService {
 
   StreamSubscription? _subscription;
   final TransacaoRepository _repository = TransacaoRepository();
+  static const _dedupeKey = 'notification_dedupe_ids';
+  static const _dedupeMax = 80;
 
   Future<bool> verificarPermissao() async {
     try {
@@ -628,6 +631,7 @@ class NotificationListenerService {
     final title = event['title'] as String? ?? '';
     final text = event['text'] as String? ?? '';
     final packageName = event['package'] as String? ?? '';
+    final timestamp = (event['timestamp'] as num?)?.toInt() ?? 0;
 
     final notificationText = '$packageName $title $text';
 
@@ -635,10 +639,72 @@ class NotificationListenerService {
       return;
     }
 
-    _processarNotificacao(notificationText);
+    _processarNotificacao(
+      notificationText,
+      packageName: packageName,
+      timestamp: timestamp,
+    );
   }
 
-  Future<void> _processarNotificacao(String texto) async {
+  String? _inferirBanco(String packageName, String texto) {
+    final combined = '$packageName $texto'.toLowerCase();
+    final bancos = <String, List<String>>{
+      'Nubank': ['nubank', 'com.nu.'],
+      'Inter': ['inter', 'bancointer', 'br.com.inter'],
+      'Caixa': ['caixa', 'br.com.caixa'],
+      'Itaú': ['itau', 'itaú', 'com.itau', 'br.com.itau'],
+      'Bradesco': ['bradesco', 'br.com.bradesco'],
+      'Banco do Brasil': ['banco do brasil', 'bancodobrasil', ' bb ', 'br.com.bb'],
+      'Santander': ['santander', 'br.com.santander'],
+      'Sicredi': ['sicredi'],
+      'Sicoob': ['sicoob'],
+      'C6 Bank': ['c6', 'c6bank', 'com.c6bank'],
+      'Neon': ['neon'],
+      'PagBank': ['pagbank', 'pagseguro', 'com.pagseguro'],
+      'Mercado Pago': ['mercadopago', 'mercado pago', 'com.mercadopago'],
+      'PicPay': ['picpay', 'com.picpay'],
+    };
+    for (final entry in bancos.entries) {
+      if (entry.value.any((k) => combined.contains(k))) return entry.key;
+    }
+    return null;
+  }
+
+  Future<bool> _jaProcessada({
+    required String uid,
+    required String packageName,
+    required String texto,
+    required int timestamp,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = '$uid|$timestamp|$packageName|$texto';
+    final ids = prefs.getStringList(_dedupeKey) ?? <String>[];
+    if (ids.contains(id)) return true;
+    ids.add(id);
+    if (ids.length > _dedupeMax) {
+      ids.removeRange(0, ids.length - _dedupeMax);
+    }
+    await prefs.setStringList(_dedupeKey, ids);
+    return false;
+  }
+
+  Future<void> _processarNotificacao(
+    String texto, {
+    required String packageName,
+    required int timestamp,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    if (await _jaProcessada(
+      uid: user.uid,
+      packageName: packageName,
+      texto: texto,
+      timestamp: timestamp,
+    )) {
+      return;
+    }
+
     final transacaoData = NotificationParserService.parse(texto);
     if (transacaoData == null) {
       return;
@@ -650,6 +716,9 @@ class NotificationListenerService {
       data: transacaoData.data,
       metodo: 'Notificação Bancária',
       categoria: transacaoData.categoria,
+      banco: _inferirBanco(packageName, texto),
+      tipoPagamento: transacaoData.tipoPagamento,
+      limiteDisponivel: transacaoData.limiteDisponivel,
     );
 
     final sucesso = await _repository.salvarTransacao(transacao);

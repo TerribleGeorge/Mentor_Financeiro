@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../services/notification_listener_service.dart';
 import 'home_screen.dart';
 import 'relatorios_screen.dart';
 import 'historico_screen.dart';
@@ -14,6 +15,7 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
+  final _notificationListener = NotificationListenerService();
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -21,6 +23,20 @@ class _MainNavigationState extends State<MainNavigation> {
     const HistoricoScreen(),
     const PerfilScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Tenta iniciar captura automática via notificações (Android).
+    // Se não tiver permissão, o sistema abre a tela de configuração.
+    _notificationListener.iniciar();
+  }
+
+  @override
+  void dispose() {
+    _notificationListener.parar();
+    super.dispose();
+  }
 
   void _onTabTapped(int index) {
     if (index != _currentIndex) {

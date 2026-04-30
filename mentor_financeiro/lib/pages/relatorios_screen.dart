@@ -249,6 +249,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 24),
                 _buildPieChart(transacoes),
                 const SizedBox(height: 24),
+                _buildCardUsageChart(transacoes),
+                const SizedBox(height: 24),
                 PremiumWrapper(
                   feature: 'Análise avançada (últimos 7 dias)',
                   child: _buildCandleStickChart(transacoes),
@@ -595,6 +597,160 @@ class _DashboardScreenState extends State<DashboardScreen> {
           }).toList(),
         ),
       ],
+    );
+  }
+
+  Widget _buildCardUsageChart(List<TransacaoModel> transacoes) {
+    final credito = transacoes.where((t) => t.isCredito).toList();
+    final debito = transacoes.where((t) => t.isDebito).toList();
+    final totalCredito = credito.fold<double>(0, (acc, t) => acc + t.valor);
+    final totalDebito = debito.fold<double>(0, (acc, t) => acc + t.valor);
+    final maxY = (totalCredito > totalDebito ? totalCredito : totalDebito);
+
+    if (totalCredito == 0 && totalDebito == 0) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.credit_card, color: Colors.white70, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'USO DO CARTÃO (CRÉDITO VS DÉBITO)',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _buildStatChip(
+                'Crédito: ${_formatarMoeda(totalCredito)} (${credito.length})',
+                Icons.credit_card,
+              ),
+              _buildStatChip(
+                'Débito: ${_formatarMoeda(totalDebito)} (${debito.length})',
+                Icons.account_balance_wallet,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 200,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: maxY <= 0 ? 1 : (maxY * 1.15),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  horizontalInterval: maxY <= 0 ? 1 : (maxY / 4),
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    strokeWidth: 1,
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 42,
+                      getTitlesWidget: (value, meta) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Text(
+                            value == 0 ? '0' : _formatarMoeda(value),
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.55),
+                              fontSize: 10,
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        final label = value.toInt() == 0 ? 'Crédito' : 'Débito';
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            label,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                barGroups: [
+                  BarChartGroupData(
+                    x: 0,
+                    barRods: [
+                      BarChartRodData(
+                        toY: totalCredito,
+                        width: 22,
+                        borderRadius: BorderRadius.circular(8),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF00D9FF), Color(0xFF3B82F6)],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                    ],
+                  ),
+                  BarChartGroupData(
+                    x: 1,
+                    barRods: [
+                      BarChartRodData(
+                        toY: totalDebito,
+                        width: 22,
+                        borderRadius: BorderRadius.circular(8),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF22C55E), Color(0xFF16A34A)],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
