@@ -52,7 +52,9 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
               primary: Color(0xFF00D9FF),
               surface: Color(0xFF1E293B),
             ),
-            dialogBackgroundColor: const Color(0xFF0F172A),
+            dialogTheme: const DialogThemeData(
+              backgroundColor: Color(0xFF0F172A),
+            ),
           ),
           child: child!,
         );

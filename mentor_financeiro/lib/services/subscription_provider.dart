@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/subscription_constants.dart';
 
@@ -22,6 +23,8 @@ class SubscriptionProvider extends ChangeNotifier {
       _subscriptionEndDate != null &&
       _subscriptionEndDate!.isAfter(DateTime.now());
 
+  bool get _firebaseReady => Firebase.apps.isNotEmpty;
+
   Future<void> initialize() async {
     _isLoading = true;
     notifyListeners();
@@ -33,6 +36,12 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   Future<void> _loadPremiumStatus() async {
+    if (!_firebaseReady) {
+      final prefs = await SharedPreferences.getInstance();
+      _isPremium = prefs.getBool('is_premium') ?? false;
+      return;
+    }
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       final prefs = await SharedPreferences.getInstance();
@@ -71,6 +80,12 @@ class SubscriptionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (!_firebaseReady) {
+        _errorMessage = 'Firebase não inicializado';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         _errorMessage = 'Usuário não autenticado';
@@ -111,6 +126,12 @@ class SubscriptionProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (!_firebaseReady) {
+        _errorMessage = 'Firebase não inicializado';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         _errorMessage = 'Usuário não autenticado';
@@ -176,6 +197,11 @@ class SubscriptionProvider extends ChangeNotifier {
   Future<void> updatePremiumStatus(bool isPremium) async {
     _isPremium = isPremium;
     notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_premium', isPremium);
+
+    if (!_firebaseReady) return;
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {

@@ -24,6 +24,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? _filtroTipoPagamento;
   List<DicaFinanceira> _dicas = [];
   NotaSaudeFinanceira? _notaSaude;
+  /// Evita recalcular mentoria a cada frame quando os dados não mudaram.
+  String? _mentoriaCacheKey;
 
   String _formatarMoeda(double valor) {
     return LocalizationService.formatCurrency(valor);
@@ -132,6 +134,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
             );
           }
 
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.cloud_off, color: Colors.white54, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Não foi possível carregar os relatórios.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${snapshot.error}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return _buildEmptyState();
           }
@@ -155,27 +189,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
             }).toList();
           }
 
-          MentoriaService.gerarDicas(
-            uid: user.uid,
-            transacoes: transacoesAll,
-          ).then((dicas) {
-            if (mounted && dicas.isNotEmpty) {
-              setState(() {
-                _dicas = dicas;
+          final checksum = transacoesAll.fold<double>(
+            0,
+            (running, t) =>
+                running + t.valor + (t.data.millisecondsSinceEpoch % 10009),
+          );
+          final mentoriaKey =
+              '${user.uid}|${startOfMonth.millisecondsSinceEpoch}|${transacoesAll.length}|$checksum';
+          if (_mentoriaCacheKey != mentoriaKey) {
+            _mentoriaCacheKey = mentoriaKey;
+            // Evita setState durante build; só agenda quando o snapshot mudou de fato.
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              MentoriaService.gerarDicas(
+                uid: user.uid,
+                transacoes: transacoesAll,
+              ).then((dicas) {
+                if (!mounted) return;
+                setState(() => _dicas = dicas);
               });
-            }
-          });
-
-          MentoriaService.calcularNotaSaude(
-            uid: user.uid,
-            transacoes: transacoesAll,
-          ).then((nota) {
-            if (mounted) {
-              setState(() {
-                _notaSaude = nota;
+              MentoriaService.calcularNotaSaude(
+                uid: user.uid,
+                transacoes: transacoesAll,
+              ).then((nota) {
+                if (!mounted) return;
+                setState(() => _notaSaude = nota);
               });
-            }
-          });
+            });
+          }
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -199,6 +240,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildMonthSelector(),
                 const SizedBox(height: 16),
                 _buildTipoPagamentoFilter(),
+                if (transacoes.isEmpty && transacoesAll.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _buildFiltroVazioBanner(),
+                ],
                 const SizedBox(height: 20),
                 _buildTotalCard(transacoes),
                 const SizedBox(height: 24),
@@ -214,6 +259,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildFiltroVazioBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.filter_alt_off, color: Colors.amber.withValues(alpha: 0.9)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Nenhuma transação com este filtro. Use “Tudo” ou escolha outro tipo.',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.85),
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
