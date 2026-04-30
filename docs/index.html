@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Política de Privacidade — Mentor Financeiro</title>
+  <meta name="description" content="Política de Privacidade do aplicativo Mentor Financeiro para Android.">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --fg: #1a1a1a;
+      --bg: #fafafa;
+      --muted: #555;
+      --link: #0066cc;
+      --border: #ddd;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --fg: #e8e8e8;
+        --bg: #121212;
+        --muted: #aaa;
+        --link: #6eb3ff;
+        --border: #333;
+      }
+    }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+      line-height: 1.6;
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+      color: var(--fg);
+      background: var(--bg);
+    }
+    h1 { font-size: 1.65rem; margin-bottom: 0.25rem; }
+    .meta { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+    h2 { font-size: 1.2rem; margin-top: 1.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; }
+    h3 { font-size: 1.05rem; margin-top: 1.25rem; }
+    a { color: var(--link); }
+    ul { padding-left: 1.25rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 0.75rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
+    th { background: rgba(127,127,127,0.12); }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Política de Privacidade — Mentor Financeiro</h1>
+  <p class="meta">
+    <strong>Última atualização:</strong> 30 de abril de 2026<br>
+    <strong>Pacote:</strong> <code>com.georgeguimares.mentorfinanceiro</code>
+  </p>
+
+  <h2>1. Quem somos</h2>
+  <p>O aplicativo <strong>Mentor Financeiro</strong> (“App”) é oferecido pelo desenvolvedor responsável pela conta na Google Play. Esta política descreve como tratamos dados pessoais na versão Android do App, em conformidade com a Lei Geral de Proteção de Dados (LGPD – Lei nº 13.709/2018), quando aplicável.</p>
+
+  <h2>2. Resumo em linguagem simples</h2>
+  <ul>
+    <li>O App permite organizar finanças, metas e conteúdos educativos.</li>
+    <li>Para funcionar, pode ser necessário <strong>criar conta ou entrar</strong> (e-mail/senha, conta Google ou modo anônimo via Firebase).</li>
+    <li><strong>Dados financeiros que você registra</strong> (como gastos e metas) podem ser armazenados na nuvem (Firebase) associados à sua conta.</li>
+    <li>Usamos <strong>Firebase</strong> (Google) para autenticação, banco de dados, notificações e estatísticas de uso.</li>
+    <li>Assinaturas podem ser processadas via <strong>Google Play</strong> e <strong>RevenueCat</strong>.</li>
+    <li>Se você <strong>ativar</strong> o recurso opcional de leitura de <strong>notificações de apps bancários</strong>, o App poderá <strong>processar</strong> o texto dessas notificações <strong>no próprio dispositivo</strong> para funcionalidades relacionadas à organização financeira — apenas quando você conceder a permissão específica do Android para “acesso às notificações”.</li>
+    <li>A <strong>localização</strong> é <strong>opcional</strong> e usada apenas para contextualizar comparações de investimentos (por exemplo, saber se você está no Brasil), quando você autorizar.</li>
+    <li>Imagens escolhidas por você (por exemplo, para personalização) podem ficar <strong>armazenadas localmente</strong> no aparelho.</li>
+  </ul>
+
+  <h2>3. Dados que podemos tratar</h2>
+  <p>Conforme você usa o App, podem ser tratados:</p>
+
+  <h3>3.1 Conta e perfil</h3>
+  <ul>
+    <li>Nome, e-mail, identificador de usuário (UID), método de login.</li>
+    <li>URL da foto de perfil quando você usa login Google e esta informação é disponibilizada pelo provedor.</li>
+    <li>Informações opcionais de perfil que você preencher (por exemplo, profissão, objetivos, perfil de investidor).</li>
+  </ul>
+
+  <h3>3.2 Dados financeiros inseridos por você</h3>
+  <ul>
+    <li>Registros de <strong>gastos</strong>, <strong>metas</strong>, limites e preferências relacionadas à organização financeira.</li>
+    <li>Esses dados ficam vinculados à sua conta quando você está autenticado e são sincronizados por meio dos serviços descritos na seção 5.</li>
+  </ul>
+
+  <h3>3.3 Identificadores e dispositivo</h3>
+  <ul>
+    <li>Token de <strong>notificações push</strong> (FCM), quando aceito, para envio de comunicações do App.</li>
+    <li>Dados de uso coletados por <strong>Firebase Analytics</strong> (por exemplo, eventos agregados de uso do aplicativo), conforme configuração padrão do SDK.</li>
+  </ul>
+
+  <h3>3.4 Localização</h3>
+  <ul>
+    <li><strong>Coordenadas aproximadas</strong> somente se você conceder permissão de localização, para funcionalidades que dependem de saber se você está no Brasil ou não.</li>
+  </ul>
+
+  <h3>3.5 Notificações (recurso opcional)</h3>
+  <ul>
+    <li>Se você habilitar o serviço de <strong>detecção de notificações</strong> na configuração do sistema Android, o App poderá receber <strong>título e texto</strong> de notificações de aplicativos instalados no dispositivo que se enquadrem nos filtros definidos pelo App (por exemplo, instituições financeiras e palavras-chave relacionadas a transações).</li>
+    <li>O tratamento visa apoiar funcionalidades do App; <strong>recomendamos avaliar os riscos</strong> de exposição de informações sensíveis antes de conceder essa permissão.</li>
+  </ul>
+
+  <h3>3.6 Compras e assinaturas</h3>
+  <ul>
+    <li>Informações de <strong>status de assinatura</strong> e identificadores necessários para validar compras via Google Play e RevenueCat.</li>
+  </ul>
+
+  <h3>3.7 Armazenamento local</h3>
+  <ul>
+    <li>Preferências (tema, imagem de fundo local, flags como status premium em cache) por meio de armazenamento local do Android.</li>
+  </ul>
+
+  <h2>4. Finalidades e bases legais (LGPD)</h2>
+  <p>Tratamos dados para:</p>
+  <table>
+    <thead><tr><th>Finalidade</th><th>Exemplo</th></tr></thead>
+    <tbody>
+      <tr><td>Prestação do serviço do App</td><td>Login, sincronização de gastos/metas, perfil</td></tr>
+      <tr><td>Melhorias e segurança</td><td>Analytics agregado, diagnóstico de erros via provedores</td></tr>
+      <tr><td>Comunicações</td><td>Notificações push, quando aceitas</td></tr>
+      <tr><td>Assinaturas</td><td>Verificação de plano pago</td></tr>
+      <tr><td>Funcionalidades opcionais</td><td>Localização; leitura de notificações apenas com permissão explícita</td></tr>
+    </tbody>
+  </table>
+  <p>As bases podem incluir <strong>execução de contrato ou procedimentos preliminares</strong> (uso do App), <strong>consentimento</strong> (localização, notificações push, leitor de notificações) e <strong>legítimo interesse</strong> em certos casos (segurança, melhoria do produto), observados seus direitos na seção 9.</p>
+
+  <h2>5. Com quem compartilhamos dados</h2>
+  <p>Utilizamos prestadores que podem processar dados em nome do App ou como controladores autônomos, conforme seus termos:</p>
+  <ul>
+    <li><strong>Google LLC / Google Ireland Limited</strong> — Firebase (Authentication, Cloud Firestore, Cloud Messaging, Analytics), login Google. Políticas: <a href="https://policies.google.com/privacy" rel="noopener noreferrer">Privacidade Google</a>.</li>
+    <li><strong>RevenueCat, Inc.</strong> — gestão de assinaturas e entitlement. Política: <a href="https://www.revenuecat.com/privacy" rel="noopener noreferrer">https://www.revenuecat.com/privacy</a>.</li>
+    <li><strong>Google Play</strong> — processamento de pagamentos e termos da loja.</li>
+  </ul>
+  <p>Para <strong>câmbio</strong>, o App pode consultar APIs públicas de taxas (por exemplo, serviços como Open Exchange Rates / endpoints compatíveis); essas consultas <strong>não enviam</strong> seus dados financeiros cadastrais, apenas moedas solicitadas.</p>
+  <p>Não vendemos seus dados pessoais.</p>
+
+  <h2>6. Transferência internacional</h2>
+  <p>Serviços como Firebase e RevenueCat podem processar dados <strong>fora do Brasil</strong>. Ao usar o App, você reconhece essa possibilidade, nos termos dos provedores citados.</p>
+
+  <h2>7. Retenção</h2>
+  <ul>
+    <li>Mantemos os dados enquanto sua conta existir ou enquanto forem necessários para a finalidade.</li>
+    <li>Você pode solicitar exclusão conforme a seção 9; alguns registros podem ser mantidos pelo tempo exigido por lei ou para resolução de disputas.</li>
+  </ul>
+
+  <h2>8. Segurança</h2>
+  <p>Adotamos medidas razoáveis (controle de acesso via conta, comunicação criptografada com os serviços em nuvem, permissões solicitadas apenas quando necessárias). <strong>Nenhum sistema é 100% seguro.</strong> Proteja sua conta com senha forte e não compartilhe o dispositivo sem bloqueio.</p>
+
+  <h2>9. Seus direitos (titular de dados)</h2>
+  <p>Dependendo da lei aplicável, você pode solicitar:</p>
+  <ul>
+    <li>Confirmação de tratamento e acesso;</li>
+    <li>Correção de dados incompletos ou desatualizados;</li>
+    <li>Anonimização, bloqueio ou eliminação de dados desnecessários;</li>
+    <li>Informação sobre compartilhamentos;</li>
+    <li>Revogação de consentimento, quando o tratamento depender dele.</li>
+  </ul>
+  <p>Envie pedidos para <a href="mailto:george.guimares@gmail.com?subject=LGPD%20%E2%80%93%20Mentor%20Financeiro">george.guimares@gmail.com</a> com assunto “LGPD – Mentor Financeiro”. Também poderão existir ferramentas na própria Google Play / conta Google para gerenciar dados vinculados ao login Google.</p>
+
+  <h2>10. Crianças e adolescentes</h2>
+  <p>O App <strong>não é direcionado</strong> a menores de 13 anos. Se você é responsável legal e acredita que uma criança nos enviou dados, contate <a href="mailto:george.guimares@gmail.com">george.guimares@gmail.com</a> para que possamos avaliar a exclusão.</p>
+
+  <h2>11. Alterações</h2>
+  <p>Podemos atualizar esta política. A data no topo indica a versão vigente. Alterações relevantes podem ser comunicadas no App ou por outros meios razoáveis.</p>
+
+  <h2>12. Contato</h2>
+  <p><strong>E-mail:</strong> <a href="mailto:george.guimares@gmail.com">george.guimares@gmail.com</a><br>
+  <strong>Política publicada em:</strong> <a href="https://terriblegeorge.github.io/Mentor_Financeiro/">https://terriblegeorge.github.io/Mentor_Financeiro/</a></p>
+
+  <hr>
+  <p class="meta"><a href="https://github.com/TerribleGeorge/Mentor_Financeiro">Repositório no GitHub</a></p>
+</body>
+</html>
