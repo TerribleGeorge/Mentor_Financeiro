@@ -42,6 +42,9 @@ class _TelaLoginState extends State<TelaLogin> {
   // TextField: controlller para campo de nome
   final TextEditingController _nomeController = TextEditingController();
 
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _senhaController = TextEditingController();
+
   // Página atual do PageView (0-3)
   int _paginaAtual = 0;
 
@@ -224,6 +227,15 @@ class _TelaLoginState extends State<TelaLogin> {
             "Continuar com Apple",
             Colors.black,
             _loginApple,
+          ),
+          const SizedBox(height: 15),
+
+          // Botão login Email/Senha
+          _botaoLogin(
+            const Icon(Icons.email_outlined, color: Colors.white),
+            "Continuar com Email",
+            const Color(0xFF10B981),
+            _loginEmailSenha,
           ),
           const SizedBox(height: 15),
 
@@ -642,6 +654,79 @@ class _TelaLoginState extends State<TelaLogin> {
     });
   }
 
+  Future<void> _loginEmailSenha() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        title: const Text(
+          'Entrar com Email',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: 'Email',
+                hintStyle: TextStyle(color: Colors.white38),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _senhaController,
+              obscureText: true,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: 'Senha',
+                hintStyle: TextStyle(color: Colors.white38),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Entrar'),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true) return;
+
+    setState(() => _carregando = true);
+    final email = _emailController.text.trim();
+    final senha = _senhaController.text;
+
+    var user = await FirebaseService.loginEmailSenha(email: email, senha: senha);
+    user ??= await FirebaseService.cadastrarEmailSenha(
+      email: email,
+      senha: senha,
+    );
+
+    setState(() {
+      _carregando = false;
+      if (user != null) {
+        _usuarioFirebase = user;
+        _metodoLogin = "email";
+        _nomeController.text = user.displayName ?? _nomeController.text;
+        _pageController.jumpToPage(2);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Falha ao autenticar.')),
+        );
+      }
+    });
+  }
+
   // ==============================================================================
   // FINALIZAR LOGIN
   // ==============================================================================
@@ -698,6 +783,8 @@ class _TelaLoginState extends State<TelaLogin> {
   void dispose() {
     _pageController.dispose();
     _nomeController.dispose();
+    _emailController.dispose();
+    _senhaController.dispose();
     super.dispose();
   }
 }

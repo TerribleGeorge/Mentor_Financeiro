@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'services/firebase_service.dart';
 import 'services/app_theme_controller.dart';
@@ -11,15 +13,29 @@ import 'app_pages.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
-const String revenueCatApiKey = 'test_pibcZvswDiwSwzDHpGIrBKIkNLZ';
+// Fallbacks caso .env não esteja configurado.
+const String revenueCatAndroidApiKey = 'test_pibcZvswDiwSwzDHpGIrBKIkNLZ';
+const String revenueCatIosApiKey = 'test_pibcZvswDiwSwzDHpGIrBKIkNLZ';
 const String mentorProEntitlementId = 'Mentor Financeiro Pro';
 
 final themeController = AppThemeController();
 
 Future<void> initializeRevenueCat(String? uid) async {
+  if (kIsWeb) {
+    // RevenueCat não é suportado no Flutter Web neste app.
+    return;
+  }
+
   await Purchases.setLogLevel(LogLevel.debug);
 
-  final configuration = PurchasesConfiguration(revenueCatApiKey);
+  final envAndroid = dotenv.env['REVENUECAT_ANDROID_API_KEY']?.trim();
+  final envIos = dotenv.env['REVENUECAT_IOS_API_KEY']?.trim();
+
+  final apiKey = defaultTargetPlatform == TargetPlatform.iOS
+      ? (envIos?.isNotEmpty == true ? envIos! : revenueCatIosApiKey)
+      : (envAndroid?.isNotEmpty == true ? envAndroid! : revenueCatAndroidApiKey);
+
+  final configuration = PurchasesConfiguration(apiKey);
   await Purchases.configure(configuration);
 
   if (uid != null) {
@@ -53,6 +69,12 @@ Future<void> verificarStatusAssinatura() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    debugPrint('dotenv ERRO: $e');
+  }
 
   try {
     await Firebase.initializeApp(

@@ -238,6 +238,40 @@ class FirebaseService {
     }
   }
 
+  // Login com e-mail e senha (Firebase Auth)
+  static Future<User?> loginEmailSenha({
+    required String email,
+    required String senha,
+  }) async {
+    try {
+      final cred = await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: senha,
+      );
+      return cred.user;
+    } catch (e) {
+      if (kDebugMode) debugPrint("Erro no login email/senha: $e");
+      return null;
+    }
+  }
+
+  // Cadastro com e-mail e senha (Firebase Auth)
+  static Future<User?> cadastrarEmailSenha({
+    required String email,
+    required String senha,
+  }) async {
+    try {
+      final cred = await _auth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: senha,
+      );
+      return cred.user;
+    } catch (e) {
+      if (kDebugMode) debugPrint("Erro no cadastro email/senha: $e");
+      return null;
+    }
+  }
+
   // Logout (sair da conta)
   // Importance: Seguraança - usuário pode sair
   static Future<void> logout() async {
