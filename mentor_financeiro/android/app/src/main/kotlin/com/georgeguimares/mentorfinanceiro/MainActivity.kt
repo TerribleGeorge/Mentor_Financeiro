@@ -1,21 +1,21 @@
-package com.example.mentor_financeiro
+package com.georgeguimares.mentorfinanceiro
 
 import android.app.Notification
 import android.content.ComponentName
 import android.content.Intent
+import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.provider.Settings
+import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : FlutterActivity() {
     companion object {
         lateinit var instance: MainActivity
     }
-    
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         instance = this
@@ -77,7 +77,6 @@ object NotificationChannels {
     }
 
     private fun isBankingNotification(packageName: String, title: String, text: String): Boolean {
-        // Heurística: keywords comuns em apps/notificações de bancos e cartões.
         val apps = listOf(
             "nubank",
             "nu",
@@ -106,7 +105,6 @@ object NotificationChannels {
             "crédito",
             "credito",
             "compra aprovada",
-            "compra aprovada no",
             "pagamento aprovado",
             "pagamento realizado",
             "pix",
@@ -120,21 +118,19 @@ class CustomNotificationListener : NotificationListenerService() {
     companion object {
         private var isRunning = false
 
-        // Lista curta de apps mais comuns (heurística); o filtro final é feito por keywords.
-        // Importante: manter permissivo para não quebrar bancos que mudam pacote.
         private val knownBankPackages = setOf(
-            "com.nu.production",              // Nubank
-            "br.com.inter.banking",           // Inter
-            "br.com.caixa.mobi",              // Caixa
-            "br.com.bradesco.nativov2",       // Bradesco
-            "com.itau",                       // Itaú (varia por app)
-            "br.com.bb.android",              // Banco do Brasil (comum)
-            "br.com.santander.app",           // Santander (varia)
-            "com.c6bank.app",                 // C6 (varia)
-            "com.neon",                       // Neon (varia)
-            "com.pagseguro",                  // PagBank (varia)
-            "com.mercadopago.wallet",         // Mercado Pago
-            "com.picpay",                     // PicPay
+            "com.nu.production",
+            "br.com.inter.banking",
+            "br.com.caixa.mobi",
+            "br.com.bradesco.nativov2",
+            "com.itau",
+            "br.com.bb.android",
+            "br.com.santander.app",
+            "com.c6bank.app",
+            "com.neon",
+            "com.pagseguro",
+            "com.mercadopago.wallet",
+            "com.picpay",
         )
 
         fun isServiceRunning(): Boolean = isRunning
@@ -155,18 +151,19 @@ class CustomNotificationListener : NotificationListenerService() {
         }
 
         fun isAuthorizedPackage(packageName: String): Boolean {
-            // Se for conhecido, passa; se não for, ainda pode passar (o filtro final é por keyword).
             return knownBankPackages.any { packageName.equals(it, ignoreCase = true) } || packageName.isNotBlank()
         }
 
         fun getEnabledListeners(): String {
             return try {
                 val context = MainActivity.instance
-                android.provider.Settings.Secure.getString(
+                Settings.Secure.getString(
                     context.contentResolver,
                     "enabled_notification_listeners"
                 ) ?: ""
-            } catch (e: Exception) { "" }
+            } catch (e: Exception) {
+                ""
+            }
         }
     }
 
@@ -182,12 +179,9 @@ class CustomNotificationListener : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         sbn ?: return
-        
+
         val packageName = sbn.packageName ?: return
-        
-        if (!isAuthorizedPackage(packageName)) {
-            return
-        }
+        if (!isAuthorizedPackage(packageName)) return
 
         val notification = sbn.notification ?: return
         val extras = notification.extras ?: return
@@ -201,3 +195,4 @@ class CustomNotificationListener : NotificationListenerService() {
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {}
 }
+

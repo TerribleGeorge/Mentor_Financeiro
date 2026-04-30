@@ -7,7 +7,7 @@ plugins {
 import java.util.Properties
 
 android {
-    namespace = "com.example.mentor_financeiro"
+    namespace = "com.georgeguimares.mentorfinanceiro"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.mentor_financeiro"
+        applicationId = "com.georgeguimares.mentorfinanceiro"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
