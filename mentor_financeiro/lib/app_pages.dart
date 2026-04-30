@@ -14,6 +14,7 @@ export 'pages/tela_estrategias.dart';
 export 'pages/home_screen.dart';
 export 'pages/relatorios_screen.dart';
 export 'pages/graficos_screen.dart';
+export 'pages/cambio_screen.dart';
 export 'pages/historico_screen.dart';
 export 'pages/perfil_screen.dart';
 export 'pages/main_navigation.dart';

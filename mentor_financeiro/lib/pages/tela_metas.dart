@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'dart:math';
+
+import '../services/exchange_rate_service.dart';
 
 class TelaMetas extends StatefulWidget {
   const TelaMetas({super.key});
@@ -37,41 +37,14 @@ class _TelaMetasState extends State<TelaMetas> {
   }
 
   Future<void> _buscarCotacao() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final hoje = DateTime.now().toIso8601String().split('T')[0];
-      final ultimaAtualizacao =
-          prefs.getString('ultima_atualizacao_dolar') ?? '';
-
-      if (ultimaAtualizacao == hoje) {
-        final salvo = prefs.getString('cotacao_dolar_salva');
-        if (salvo != null) {
-          setState(() => _cotacaoDolar = salvo);
-          return;
-        }
-      }
-
-      final response = await http.get(
-        Uri.parse('https://open.er-api.com/v6/latest/USD'),
-      );
-
-      if (response.statusCode == 200) {
-        final dados = json.decode(response.body);
-        final cotacao = dados['rates']['BRL'];
-        final formatted = "USD: R\$ ${cotacao.toStringAsFixed(2)}";
-
-        await prefs.setString('ultima_atualizacao_dolar', hoje);
-        await prefs.setString('cotacao_dolar_salva', formatted);
-
-        setState(() => _cotacaoDolar = formatted);
-      } else {
-        setState(() => _cotacaoDolar = "Erro");
-      }
-    } catch (e) {
-      final prefs = await SharedPreferences.getInstance();
-      final salvo = prefs.getString('cotacao_dolar_salva');
-      setState(() => _cotacaoDolar = salvo ?? "Offline");
+    final snap = await ExchangeRateService.getLatest(base: 'USD');
+    if (!mounted) return;
+    final brl = snap?.rateTo('BRL');
+    if (brl == null) {
+      setState(() => _cotacaoDolar = 'Offline');
+      return;
     }
+    setState(() => _cotacaoDolar = 'USD: R\$ ${brl.toStringAsFixed(2)}');
   }
 
   Future<void> _salvarDados() async {

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../models/transacao_model.dart';
 import '../services/localization_service.dart';
 import '../services/mentoria_service.dart';
+import '../services/exchange_rate_service.dart';
 import 'adicionar_transacao_page.dart';
 import '../widgets/premium_wrapper.dart';
 import '../widgets/dica_card.dart';
@@ -253,6 +254,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildMonthSelector(),
                 const SizedBox(height: 16),
                 _buildTipoPagamentoFilter(),
+                if (widget.chartsOnly) ...[
+                  const SizedBox(height: 16),
+                  _buildExchangeRatesCard(),
+                  const SizedBox(height: 24),
+                  _buildMoneyUsedLineChart(transacoes),
+                ],
                 if (transacoes.isEmpty && transacoesAll.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   _buildFiltroVazioBanner(),
@@ -276,6 +283,210 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildExchangeRatesCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: FutureBuilder<ExchangeRatesSnapshot?>(
+        future: ExchangeRateService.getLatest(base: 'USD'),
+        builder: (context, snap) {
+          final data = snap.data;
+          final usdBrl = data?.rateTo('BRL');
+          final usdEur = data?.rateTo('EUR');
+          final usdGbp = data?.rateTo('GBP');
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.currency_exchange, color: Colors.white70, size: 20),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'CÂMBIO (ATUALIZA 1x/DIA)',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pushNamed(context, '/cambio'),
+                    child: const Text('Ver todas'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              if (snap.connectionState == ConnectionState.waiting)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: LinearProgressIndicator(minHeight: 3),
+                )
+              else if (data == null || usdBrl == null)
+                Text(
+                  'Sem dados (offline). Abra “Ver todas” quando estiver com internet.',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+                )
+              else
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    _buildStatChip('USD→BRL: ${usdBrl.toStringAsFixed(2)}', Icons.attach_money),
+                    if (usdEur != null)
+                      _buildStatChip('USD→EUR: ${usdEur.toStringAsFixed(4)}', Icons.euro),
+                    if (usdGbp != null)
+                      _buildStatChip('USD→GBP: ${usdGbp.toStringAsFixed(4)}', Icons.currency_pound),
+                  ],
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMoneyUsedLineChart(List<TransacaoModel> transacoes) {
+    final daysInMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0).day;
+    final daily = List<double>.filled(daysInMonth, 0);
+
+    for (final t in transacoes) {
+      if (t.data.year != _selectedMonth.year || t.data.month != _selectedMonth.month) continue;
+      final idx = t.data.day - 1;
+      if (idx >= 0 && idx < daily.length) daily[idx] += t.valor;
+    }
+
+    final total = daily.fold<double>(0, (acc, v) => acc + v);
+    final maxY = daily.isEmpty ? 1.0 : daily.reduce((a, b) => a > b ? a : b);
+
+    if (total <= 0) return const SizedBox.shrink();
+
+    final spots = <FlSpot>[];
+    for (int i = 0; i < daily.length; i++) {
+      spots.add(FlSpot(i.toDouble() + 1, daily[i]));
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.show_chart, color: Colors.white70, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'DINHEIRO USADO (POR DIA)',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            _formatarMoeda(total),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 210,
+            child: LineChart(
+              LineChartData(
+                minX: 1,
+                maxX: daily.length.toDouble(),
+                minY: 0,
+                maxY: maxY <= 0 ? 1 : (maxY * 1.2),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    strokeWidth: 1,
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 42,
+                      getTitlesWidget: (value, meta) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Text(
+                          value == 0 ? '0' : _formatarMoeda(value),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.55),
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: (daily.length / 6).clamp(1, 10).toDouble(),
+                      getTitlesWidget: (value, meta) {
+                        final v = value.toInt();
+                        if (v < 1 || v > daily.length) return const SizedBox.shrink();
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            v.toString(),
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.6),
+                              fontSize: 10,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: spots,
+                    isCurved: true,
+                    barWidth: 3,
+                    color: const Color(0xFF00D9FF),
+                    dotData: const FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: const Color(0xFF00D9FF).withValues(alpha: 0.12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

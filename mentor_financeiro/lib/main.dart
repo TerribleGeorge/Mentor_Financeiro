@@ -194,6 +194,8 @@ class MentorFinanceiroApp extends StatelessWidget {
                       chartsOnly: true,
                     ),
                   );
+                case '/cambio':
+                  return MaterialPageRoute(builder: (_) => const CambioScreen());
                 default:
                   return MaterialPageRoute(builder: (_) => const TelaSplash());
               }
