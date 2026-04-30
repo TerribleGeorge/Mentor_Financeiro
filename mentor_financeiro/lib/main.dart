@@ -11,7 +11,7 @@ import 'app_pages.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
-const String revenueCatApiKey = 'test_pibcZvswDiwSwzDHPGiRBKIKnLZ';
+const String revenueCatApiKey = 'test_pibcZvswDiwSwzDHpGIrBKIkNLZ';
 const String mentorProEntitlementId = 'Mentor Financeiro Pro';
 
 final themeController = AppThemeController();
