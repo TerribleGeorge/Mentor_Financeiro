@@ -174,7 +174,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               Icons.receipt_long,
                               'Transações',
                               const Color(0xFF00D9FF),
-                              () {},
+                              () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/principal',
+                                  arguments: 2,
+                                );
+                              },
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -183,7 +189,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               Icons.pie_chart,
                               'Gráficos',
                               const Color(0xFF26DE81),
-                              () {},
+                              () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/principal',
+                                  arguments: 1,
+                                );
+                              },
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -192,7 +204,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               Icons.history,
                               'Histórico',
                               const Color(0xFFFECA57),
-                              () {},
+                              () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/principal',
+                                  arguments: 2,
+                                );
+                              },
                             ),
                           ),
                         ],

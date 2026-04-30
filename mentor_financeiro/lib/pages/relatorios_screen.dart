@@ -12,7 +12,16 @@ import '../widgets/dica_card.dart';
 import '../widgets/nota_saude_circle.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final String title;
+  final bool showBackButton;
+  final bool chartsOnly;
+
+  const DashboardScreen({
+    super.key,
+    this.title = 'Dashboard Financeiro',
+    this.showBackButton = true,
+    this.chartsOnly = false,
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -88,15 +97,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
-        title: const Text(
-          'Dashboard Financeiro',
+        title: Text(
+          widget.title,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: widget.showBackButton
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white70),
@@ -223,19 +234,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (_notaSaude != null) ...[
-                  PremiumWrapper(
-                    feature: 'Nota de Saúde Financeira',
-                    child: NotaSaudeCard(notaSaude: _notaSaude!),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-                if (_dicas.isNotEmpty) ...[
-                  PremiumWrapper(
-                    feature: 'Mentoria (dicas personalizadas)',
-                    child: DicaCarousel(dicas: _dicas),
-                  ),
-                  const SizedBox(height: 20),
+                if (!widget.chartsOnly) ...[
+                  if (_notaSaude != null) ...[
+                    PremiumWrapper(
+                      feature: 'Nota de Saúde Financeira',
+                      child: NotaSaudeCard(notaSaude: _notaSaude!),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                  if (_dicas.isNotEmpty) ...[
+                    PremiumWrapper(
+                      feature: 'Mentoria (dicas personalizadas)',
+                      child: DicaCarousel(dicas: _dicas),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ],
                 _buildMonthSelector(),
                 const SizedBox(height: 16),
@@ -255,8 +268,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   feature: 'Análise avançada (últimos 7 dias)',
                   child: _buildCandleStickChart(transacoes),
                 ),
-                const SizedBox(height: 24),
-                _buildRecentTransactions(transacoes.take(5).toList()),
+                if (!widget.chartsOnly) ...[
+                  const SizedBox(height: 24),
+                  _buildRecentTransactions(transacoes.take(5).toList()),
+                ],
               ],
             ),
           );

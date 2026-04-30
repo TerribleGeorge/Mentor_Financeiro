@@ -2,24 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/notification_listener_service.dart';
 import 'home_screen.dart';
-import 'relatorios_screen.dart';
+import 'graficos_screen.dart';
 import 'historico_screen.dart';
 import 'perfil_screen.dart';
 
 class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+  final int initialIndex;
+
+  const MainNavigation({super.key, this.initialIndex = 0});
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
 }
 
 class _MainNavigationState extends State<MainNavigation> {
-  int _currentIndex = 0;
+  late int _currentIndex;
   final _notificationListener = NotificationListenerService();
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const DashboardScreen(),
+    const GraficosScreen(),
     const HistoricoScreen(),
     const PerfilScreen(),
   ];
@@ -27,6 +29,7 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex.clamp(0, _screens.length - 1);
     // Tenta iniciar captura automática via notificações (Android).
     // Se não tiver permissão, o sistema abre a tela de configuração.
     _notificationListener.iniciar();

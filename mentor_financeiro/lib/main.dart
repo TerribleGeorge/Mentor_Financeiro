@@ -122,8 +122,11 @@ class MentorFinanceiroApp extends StatelessWidget {
                     builder: (_) => const TelaConfiguracao(),
                   );
                 case '/principal':
+                  final idx = (settings.arguments is int)
+                      ? (settings.arguments as int)
+                      : 0;
                   return MaterialPageRoute(
-                    builder: (_) => const MainNavigation(),
+                    builder: (_) => MainNavigation(initialIndex: idx),
                   );
                 case '/perfil':
                   return MaterialPageRoute(builder: (_) => const TelaPerfil());
@@ -177,7 +180,19 @@ class MentorFinanceiroApp extends StatelessWidget {
                   return MaterialPageRoute(builder: (_) => const TelaUpgrade());
                 case '/relatorios':
                   return MaterialPageRoute(
-                    builder: (_) => const DashboardScreen(),
+                    builder: (_) => const DashboardScreen(
+                      title: 'Relatórios',
+                      showBackButton: true,
+                      chartsOnly: false,
+                    ),
+                  );
+                case '/graficos':
+                  return MaterialPageRoute(
+                    builder: (_) => const DashboardScreen(
+                      title: 'Gráficos',
+                      showBackButton: true,
+                      chartsOnly: true,
+                    ),
                   );
                 default:
                   return MaterialPageRoute(builder: (_) => const TelaSplash());
