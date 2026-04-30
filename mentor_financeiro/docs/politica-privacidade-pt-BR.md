@@ -72,7 +72,7 @@ Tratamos dados para:
 | Assinaturas | Verificação de plano pago |
 | Funcionalidades opcionais | Localização; leitura de notificações apenas com permissão explícita |
 
-As bases podem incluir **execução de contrato ou procedimentos preliminares** (uso do App), **consentimento** (localização, notificações push, leitor de notificações) e **legítimo interesse** em certos casos (segurança, melhoria do produto), observados seus direitos na seção 9.
+As bases podem incluir **execução de contrato ou procedimentos preliminares** (uso do App), **consentimento** (localização, notificações push, leitor de notificações) e **legítimo interesse** em certos casos (segurança, melhoria do produto), observados seus direitos nas seções 9 e 10.
 
 ## 5. Com quem compartilhamos dados
 
@@ -93,15 +93,46 @@ Serviços como Firebase e RevenueCat podem processar dados **fora do Brasil**. A
 ## 7. Retenção
 
 - Mantemos os dados enquanto sua conta existir ou enquanto forem necessários para a finalidade.  
-- Você pode solicitar exclusão conforme a seção 9; alguns registros podem ser mantidos pelo tempo exigido por lei ou para resolução de disputas.
+- Após um pedido válido de exclusão (seção 9), removemos ou anonimizamos os dados em nuvem em prazo razoável, em geral **até 30 dias úteis**, salvo obrigação legal de guarda maior.  
+- Dados armazenados **somente no dispositivo** (por exemplo, preferências locais, imagem de fundo) devem ser apagados por você nas configurações do aparelho ou ao desinstalar o App.
 
 ## 8. Segurança
 
 Adotamos medidas razoáveis (controle de acesso via conta, comunicação criptografada com os serviços em nuvem, permissões solicitadas apenas quando necessárias). **Nenhum sistema é 100% seguro.** Proteja sua conta com senha forte e não compartilhe o dispositivo sem bloqueio.
 
-## 9. Seus direitos (titular de dados)
+## 9. Exclusão de conta e dados (Mentor Financeiro)
 
-Dependendo da lei aplicável, você pode solicitar:
+Esta seção atende à transparência exigida pela **Google Play** e aos seus direitos sob a LGPD, quando aplicável.
+
+### Como solicitar
+
+1. Envie um e-mail para **george.guimares@gmail.com** a partir da caixa de entrada que você usa no App (ou informe claramente o **e-mail da conta** ou o identificador que conseguir associar à sua conta).  
+2. Use o assunto **“Exclusão de dados – Mentor Financeiro”** ou **“LGPD – Mentor Financeiro”**.  
+3. Indique o que deseja:
+   - **exclusão completa da conta e dos dados em nuvem**, ou  
+   - **exclusão de categorias específicas** (por exemplo, apenas registros de gastos/metas), **sem encerrar a conta**, quando tecnicamente possível.  
+4. Podemos pedir confirmação de identidade para evitar exclusões indevidas.
+
+### O que tende a ser **excluído ou desvinculado** após o atendimento
+
+- Documentos e campos do seu usuário no **Cloud Firestore** (perfil, gastos, metas, configurações e dados equivalentes guardados nas coleções do App).  
+- Vínculos necessários para encerrar o tratamento no âmbito do App (por exemplo, remoção do usuário na autenticação **Firebase**, quando couber e for solicitada exclusão total).  
+- **Token de notificações (FCM)** associado ao seu perfil, quando armazenado conosco.
+
+### O que pode ser **mantido** por mais tempo
+
+- Registros **anonimizados ou agregados** que não identifiquem você.  
+- Dados cuja guarda seja **obrigatória por lei** (por exemplo, obrigações fiscais/comerciais) ou necessária para **defesa em disputas**, pelo tempo legal ou razoável.  
+- Informações tratadas diretamente pela **Google Play** ou pela **Google** (login Google, histórico de compras na loja): use também as ferramentas da conta Google e da Play, quando aplicável.  
+- Dados processados pela **RevenueCat** ou outros provedores: podem permanecer conforme os termos e ferramentas desses provedores, além do que excluímos na nossa base.
+
+### Prazo
+
+Respondemos e tratamos pedidos válidos em **até 30 dias úteis**, salvo complexidade ou exigência legal.
+
+## 10. Seus direitos (titular de dados)
+
+Além da exclusão (seção 9), dependendo da lei aplicável, você pode solicitar:
 
 - Confirmação de tratamento e acesso;  
 - Correção de dados incompletos ou desatualizados;  
@@ -111,15 +142,16 @@ Dependendo da lei aplicável, você pode solicitar:
 
 Envie pedidos para **george.guimares@gmail.com** com assunto “LGPD – Mentor Financeiro”. Também poderão existir ferramentas na própria Google Play / conta Google para gerenciar dados vinculados ao login Google.
 
-## 10. Crianças e adolescentes
+## 11. Crianças e adolescentes
 
 O App **não é direcionado** a menores de 13 anos. Se você é responsável legal e acredita que uma criança nos enviou dados, contate **george.guimares@gmail.com** para que possamos avaliar a exclusão.
 
-## 11. Alterações
+## 12. Alterações
 
 Podemos atualizar esta política. A data no topo indica a versão vigente. Alterações relevantes podem ser comunicadas no App ou por outros meios razoáveis.
 
-## 12. Contato
+## 13. Contato
 
+**Aplicativo:** Mentor Financeiro (conforme ficha na Google Play).  
 **E-mail:** george.guimares@gmail.com  
 **Política publicada em:** https://terriblegeorge.github.io/Mentor_Financeiro/

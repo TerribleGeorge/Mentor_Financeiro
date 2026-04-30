@@ -108,6 +108,13 @@ Na Play Console, declare **recursos financeiros** ou **acesso a dados financeiro
 
 ---
 
+### Exclusão de dados sem obrigar exclusão de conta (pergunta opcional)
+
+Se a Console perguntar se você oferece meio de excluir **parte** dos dados **sem** exigir exclusão da conta: como você atende pedidos por **george.guimares@gmail.com** e pode apagar categorias (ex.: só gastos/metas), pode marcar **Sim**. A política no GitHub foi atualizada com os passos e o que é mantido.  
+Se você não quiser se comprometer com exclusão parcial manual, marque **Não** (mas a política já descreve o canal por e-mail para exclusão total e, quando possível, parcial).
+
+---
+
 ## Checklist final
 
 - [ ] URL da política de privacidade cadastrada e acessível sem login  
