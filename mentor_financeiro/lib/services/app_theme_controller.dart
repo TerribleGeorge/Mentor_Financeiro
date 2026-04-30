@@ -7,6 +7,12 @@ import 'package:image_picker/image_picker.dart';
 enum AppThemeMode { light, dark, medium }
 
 class AppThemeController extends ChangeNotifier {
+  static final AppThemeController instance = AppThemeController._internal();
+
+  factory AppThemeController() => instance;
+
+  AppThemeController._internal();
+
   static const String _themeKey = 'app_theme_mode';
   static const String _backgroundImageKey = 'background_image_path';
   static const String _isPremiumKey = 'is_premium';

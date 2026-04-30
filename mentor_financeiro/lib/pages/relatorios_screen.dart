@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../models/transacao_model.dart';
 import '../services/localization_service.dart';
 import '../services/mentoria_service.dart';
+import 'adicionar_transacao_page.dart';
+import '../widgets/premium_wrapper.dart';
 import '../widgets/dica_card.dart';
 import '../widgets/nota_saude_circle.dart';
 
@@ -100,6 +102,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF00D9FF),
+        foregroundColor: const Color(0xFF0F172A),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AdicionarTransacaoPage()),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('usuarios')
@@ -170,11 +183,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (_notaSaude != null) ...[
-                  NotaSaudeCard(notaSaude: _notaSaude!),
+                  PremiumWrapper(
+                    feature: 'Nota de Saúde Financeira',
+                    child: NotaSaudeCard(notaSaude: _notaSaude!),
+                  ),
                   const SizedBox(height: 20),
                 ],
                 if (_dicas.isNotEmpty) ...[
-                  DicaCarousel(dicas: _dicas),
+                  PremiumWrapper(
+                    feature: 'Mentoria (dicas personalizadas)',
+                    child: DicaCarousel(dicas: _dicas),
+                  ),
                   const SizedBox(height: 20),
                 ],
                 _buildMonthSelector(),
@@ -185,7 +204,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 24),
                 _buildPieChart(transacoes),
                 const SizedBox(height: 24),
-                _buildCandleStickChart(transacoes),
+                PremiumWrapper(
+                  feature: 'Análise avançada (últimos 7 dias)',
+                  child: _buildCandleStickChart(transacoes),
+                ),
                 const SizedBox(height: 24),
                 _buildRecentTransactions(transacoes.take(5).toList()),
               ],

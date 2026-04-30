@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import '../services/app_theme_controller.dart';
+import '../services/subscription_provider.dart';
+import 'paywall_screen.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -14,7 +17,6 @@ class _SettingsPageState extends State<SettingsPage> {
   String _idiomaSelecionado = 'pt';
   String _moedaSelecionada = 'BRL';
   int _temaSelecionado = 2;
-  bool _isPremium = false;
   final _themeController = AppThemeController();
 
   @override
@@ -33,7 +35,6 @@ class _SettingsPageState extends State<SettingsPage> {
           _idiomaSelecionado = prefs.getString('idioma') ?? 'pt';
           _moedaSelecionada = prefs.getString('moeda') ?? 'BRL';
           _temaSelecionado = _themeController.themeMode.index;
-          _isPremium = _themeController.isPremium;
         });
       }
     }
@@ -50,10 +51,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isPremium = context.watch<SubscriptionProvider>().isPremium;
     return ListenableBuilder(
       listenable: _themeController,
       builder: (context, _) {
-        _isPremium = _themeController.isPremium;
         _temaSelecionado = _themeController.themeMode.index;
 
         return Scaffold(
@@ -85,14 +86,14 @@ class _SettingsPageState extends State<SettingsPage> {
                   _buildListTile(
                     icon: Icons.wallpaper,
                     title: 'Personalizar Fundo',
-                    subtitle: _isPremium ? 'Ativo' : 'Somente Premium',
-                    trailing: _isPremium
+                    subtitle: isPremium ? 'Ativo' : 'Somente Premium',
+                    trailing: isPremium
                         ? const Icon(
                             Icons.check_circle,
                             color: Color(0xFF26DE81),
                           )
                         : const Icon(Icons.lock, color: Colors.white38),
-                    onTap: _isPremium
+                    onTap: isPremium
                         ? () => _themeController.pickBackgroundImage()
                         : _showPremiumDialog,
                   ),
@@ -393,6 +394,10 @@ class _SettingsPageState extends State<SettingsPage> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
+              Navigator.push(
+                this.context,
+                MaterialPageRoute(builder: (_) => const PaywallScreen()),
+              );
             },
             child: const Text(
               'Upgrade',

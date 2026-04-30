@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/subscription_constants.dart';
 
 class SubscriptionProvider extends ChangeNotifier {
@@ -34,7 +35,8 @@ class SubscriptionProvider extends ChangeNotifier {
   Future<void> _loadPremiumStatus() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      _isPremium = false;
+      final prefs = await SharedPreferences.getInstance();
+      _isPremium = prefs.getBool('is_premium') ?? false;
       return;
     }
 
@@ -52,9 +54,14 @@ class SubscriptionProvider extends ChangeNotifier {
           _subscriptionEndDate = (data!['premiumEndDate'] as Timestamp)
               .toDate();
         }
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        _isPremium = prefs.getBool('is_premium') ?? false;
       }
     } catch (e) {
       debugPrint('Erro ao carregar status premium: $e');
+      final prefs = await SharedPreferences.getInstance();
+      _isPremium = prefs.getBool('is_premium') ?? false;
     }
   }
 

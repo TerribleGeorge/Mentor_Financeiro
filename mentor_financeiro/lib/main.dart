@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'services/firebase_service.dart';
 import 'services/app_theme_controller.dart';
+import 'services/subscription_provider.dart';
 import 'app_pages.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -83,100 +85,107 @@ class MentorFinanceiroApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: themeController,
-      builder: (context, _) {
-        final modoTema = themeController.themeMode;
-        ThemeMode flutterThemeMode;
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => SubscriptionProvider()..initialize(),
+        ),
+      ],
+      child: ListenableBuilder(
+        listenable: themeController,
+        builder: (context, _) {
+          final modoTema = themeController.themeMode;
+          ThemeMode flutterThemeMode;
 
-        if (modoTema == AppThemeMode.light) {
-          flutterThemeMode = ThemeMode.light;
-        } else if (modoTema == AppThemeMode.medium) {
-          flutterThemeMode = ThemeMode.dark;
-        } else {
-          flutterThemeMode = ThemeMode.dark;
-        }
+          if (modoTema == AppThemeMode.light) {
+            flutterThemeMode = ThemeMode.light;
+          } else if (modoTema == AppThemeMode.medium) {
+            flutterThemeMode = ThemeMode.dark;
+          } else {
+            flutterThemeMode = ThemeMode.dark;
+          }
 
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Mentor Financeiro',
-          theme: themeController.currentTheme,
-          themeMode: flutterThemeMode,
-          initialRoute: '/',
-          onGenerateRoute: (settings) {
-            switch (settings.name) {
-              case '/':
-                return MaterialPageRoute(builder: (_) => const TelaSplash());
-              case '/login':
-                return MaterialPageRoute(builder: (_) => const TelaLogin());
-              case '/configuracao':
-                return MaterialPageRoute(
-                  builder: (_) => const TelaConfiguracao(),
-                );
-              case '/principal':
-                return MaterialPageRoute(
-                  builder: (_) => const MainNavigation(),
-                );
-              case '/perfil':
-                return MaterialPageRoute(builder: (_) => const TelaPerfil());
-              case '/metas':
-                return MaterialPageRoute(builder: (_) => const TelaMetas());
-              case '/investimentos':
-                return MaterialPageRoute(
-                  builder: (_) => const TelaInvestimentos(),
-                );
-              case '/estrategias':
-                return MaterialPageRoute(
-                  builder: (_) => const TelaEstrategias(),
-                );
-              case '/conhecimento':
-                return MaterialPageRoute(
-                  builder: (_) => const ConhecimentoHub(),
-                );
-              case '/conhecimento/investimentos':
-                return MaterialPageRoute(
-                  builder: (_) => const InvestimentosMenu(),
-                );
-              case '/conhecimento/estrategias':
-                return MaterialPageRoute(
-                  builder: (_) => const EstrategiasMenu(),
-                );
-              case '/conhecimento/dicionario':
-                return MaterialPageRoute(
-                  builder: (_) => const DicionarioPage(),
-                );
-              case '/conhecimento/primeiros-passos':
-                return MaterialPageRoute(
-                  builder: (_) => const PrimeirosPassosPage(),
-                );
-              case '/conhecimento/impostos':
-                return MaterialPageRoute(
-                  builder: (_) => const ImpostosDetalhePage(),
-                );
-              case '/conhecimento/perigos':
-                return MaterialPageRoute(builder: (_) => const PerigosPage());
-              case '/conhecimento/ferramentas':
-                return MaterialPageRoute(
-                  builder: (_) => const FerramentasPage(),
-                );
-              case '/simulado':
-                return MaterialPageRoute(builder: (_) => const SimuladoPage());
-              case '/quiz-conhecimento':
-                return MaterialPageRoute(
-                  builder: (_) => const QuizConhecimentoPage(),
-                );
-              case '/upgrade':
-                return MaterialPageRoute(builder: (_) => const TelaUpgrade());
-              case '/relatorios':
-                return MaterialPageRoute(
-                  builder: (_) => const DashboardScreen(),
-                );
-              default:
-                return MaterialPageRoute(builder: (_) => const TelaSplash());
-            }
-          },
-        );
-      },
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Mentor Financeiro',
+            theme: themeController.currentTheme,
+            themeMode: flutterThemeMode,
+            initialRoute: '/',
+            onGenerateRoute: (settings) {
+              switch (settings.name) {
+                case '/':
+                  return MaterialPageRoute(builder: (_) => const TelaSplash());
+                case '/login':
+                  return MaterialPageRoute(builder: (_) => const TelaLogin());
+                case '/configuracao':
+                  return MaterialPageRoute(
+                    builder: (_) => const TelaConfiguracao(),
+                  );
+                case '/principal':
+                  return MaterialPageRoute(
+                    builder: (_) => const MainNavigation(),
+                  );
+                case '/perfil':
+                  return MaterialPageRoute(builder: (_) => const TelaPerfil());
+                case '/metas':
+                  return MaterialPageRoute(builder: (_) => const TelaMetas());
+                case '/investimentos':
+                  return MaterialPageRoute(
+                    builder: (_) => const TelaInvestimentos(),
+                  );
+                case '/estrategias':
+                  return MaterialPageRoute(
+                    builder: (_) => const TelaEstrategias(),
+                  );
+                case '/conhecimento':
+                  return MaterialPageRoute(
+                    builder: (_) => const ConhecimentoHub(),
+                  );
+                case '/conhecimento/investimentos':
+                  return MaterialPageRoute(
+                    builder: (_) => const InvestimentosMenu(),
+                  );
+                case '/conhecimento/estrategias':
+                  return MaterialPageRoute(
+                    builder: (_) => const EstrategiasMenu(),
+                  );
+                case '/conhecimento/dicionario':
+                  return MaterialPageRoute(
+                    builder: (_) => const DicionarioPage(),
+                  );
+                case '/conhecimento/primeiros-passos':
+                  return MaterialPageRoute(
+                    builder: (_) => const PrimeirosPassosPage(),
+                  );
+                case '/conhecimento/impostos':
+                  return MaterialPageRoute(
+                    builder: (_) => const ImpostosDetalhePage(),
+                  );
+                case '/conhecimento/perigos':
+                  return MaterialPageRoute(builder: (_) => const PerigosPage());
+                case '/conhecimento/ferramentas':
+                  return MaterialPageRoute(
+                    builder: (_) => const FerramentasPage(),
+                  );
+                case '/simulado':
+                  return MaterialPageRoute(builder: (_) => const SimuladoPage());
+                case '/quiz-conhecimento':
+                  return MaterialPageRoute(
+                    builder: (_) => const QuizConhecimentoPage(),
+                  );
+                case '/upgrade':
+                  return MaterialPageRoute(builder: (_) => const TelaUpgrade());
+                case '/relatorios':
+                  return MaterialPageRoute(
+                    builder: (_) => const DashboardScreen(),
+                  );
+                default:
+                  return MaterialPageRoute(builder: (_) => const TelaSplash());
+              }
+            },
+          );
+        },
+      ),
     );
   }
 }
