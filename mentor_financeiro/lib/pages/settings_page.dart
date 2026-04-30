@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../services/app_theme_controller.dart';
+import '../services/locale_controller.dart';
 import '../services/subscription_provider.dart';
 import 'paywall_screen.dart';
 
@@ -28,16 +29,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _carregarPreferencias() async {
     final prefs = await SharedPreferences.getInstance();
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      if (mounted) {
-        setState(() {
-          _idiomaSelecionado = prefs.getString('idioma') ?? 'pt';
-          _moedaSelecionada = prefs.getString('moeda') ?? 'BRL';
-          _temaSelecionado = _themeController.themeMode.index;
-        });
-      }
-    }
+    if (!mounted) return;
+    setState(() {
+      _idiomaSelecionado = prefs.getString(LocaleController.prefsKey) ?? 'pt';
+      _moedaSelecionada = prefs.getString('moeda') ?? 'BRL';
+      _temaSelecionado = _themeController.themeMode.index;
+    });
   }
 
   Future<void> _salvarPreferencia(String chave, dynamic valor) async {
@@ -317,10 +314,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 trailing: _idiomaSelecionado == cod
                     ? const Icon(Icons.check, color: Color(0xFF00D9FF))
                     : null,
-                onTap: () {
+                onTap: () async {
                   setState(() => _idiomaSelecionado = cod);
-                  _salvarPreferencia('idioma', cod);
-                  Navigator.pop(context);
+                  await LocaleController.instance.setLanguageCode(cod);
+                  if (context.mounted) Navigator.pop(context);
                 },
               ),
             ),

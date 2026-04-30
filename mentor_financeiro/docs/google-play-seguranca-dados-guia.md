@@ -115,6 +115,18 @@ Se você não quiser se comprometer com exclusão parcial manual, marque **Não*
 
 ---
 
+## Idiomas na ficha da loja (Play Console)
+
+O app expõe escolha de idioma em **Configurações** e usa `AppLocalizations` para **português**, **inglês** e **espanhol** (`pt`, `en`, `es`). Na Play Console, em **Presença na loja** / detalhes do app, adicione pelo menos:
+
+- **Português (Brasil)** — pt-BR  
+- **Inglês (Estados Unidos)** — en-US  
+- **Espanhol** — es (ou país que você priorizar, ex. es-419)
+
+Textos ainda podem misturar strings fixas em PT em algumas telas; vá uniformizando com `.arb` conforme for revisando o app.
+
+---
+
 ## Checklist final
 
 - [ ] URL da política de privacidade cadastrada e acessível sem login  

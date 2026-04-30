@@ -6,8 +6,10 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
+import 'l10n/app_localizations.dart';
 import 'services/firebase_service.dart';
 import 'services/app_theme_controller.dart';
+import 'services/locale_controller.dart';
 import 'services/subscription_provider.dart';
 import 'app_pages.dart';
 
@@ -19,6 +21,7 @@ const String revenueCatIosApiKey = 'test_pibcZvswDiwSwzDHpGIrBKIkNLZ';
 const String mentorProEntitlementId = 'Mentor Financeiro Pro';
 
 final themeController = AppThemeController();
+final localeController = LocaleController();
 
 Future<void> initializeRevenueCat(String? uid) async {
   if (kIsWeb) {
@@ -33,7 +36,9 @@ Future<void> initializeRevenueCat(String? uid) async {
 
   final apiKey = defaultTargetPlatform == TargetPlatform.iOS
       ? (envIos?.isNotEmpty == true ? envIos! : revenueCatIosApiKey)
-      : (envAndroid?.isNotEmpty == true ? envAndroid! : revenueCatAndroidApiKey);
+      : (envAndroid?.isNotEmpty == true
+            ? envAndroid!
+            : revenueCatAndroidApiKey);
 
   final configuration = PurchasesConfiguration(apiKey);
   await Purchases.configure(configuration);
@@ -94,6 +99,7 @@ void main() async {
   await verificarStatusAssinatura();
 
   await themeController.initialize();
+  await localeController.initialize();
 
   debugPrint('=== TEMA DEBUG ===');
   debugPrint('O TEMA ATUAL É: ${themeController.themeMode}');
@@ -114,7 +120,7 @@ class MentorFinanceiroApp extends StatelessWidget {
         ),
       ],
       child: ListenableBuilder(
-        listenable: themeController,
+        listenable: Listenable.merge([themeController, localeController]),
         builder: (context, _) {
           final modoTema = themeController.themeMode;
           ThemeMode flutterThemeMode;
@@ -132,6 +138,9 @@ class MentorFinanceiroApp extends StatelessWidget {
             title: 'Mentor Financeiro',
             theme: themeController.currentTheme,
             themeMode: flutterThemeMode,
+            locale: localeController.locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
             initialRoute: '/',
             onGenerateRoute: (settings) {
               switch (settings.name) {
@@ -193,7 +202,9 @@ class MentorFinanceiroApp extends StatelessWidget {
                     builder: (_) => const FerramentasPage(),
                   );
                 case '/simulado':
-                  return MaterialPageRoute(builder: (_) => const SimuladoPage());
+                  return MaterialPageRoute(
+                    builder: (_) => const SimuladoPage(),
+                  );
                 case '/quiz-conhecimento':
                   return MaterialPageRoute(
                     builder: (_) => const QuizConhecimentoPage(),
@@ -217,7 +228,9 @@ class MentorFinanceiroApp extends StatelessWidget {
                     ),
                   );
                 case '/cambio':
-                  return MaterialPageRoute(builder: (_) => const CambioScreen());
+                  return MaterialPageRoute(
+                    builder: (_) => const CambioScreen(),
+                  );
                 default:
                   return MaterialPageRoute(builder: (_) => const TelaSplash());
               }

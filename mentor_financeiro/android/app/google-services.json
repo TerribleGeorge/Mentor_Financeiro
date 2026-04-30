@@ -41,6 +41,35 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841128243215:android:61cd5390ef01a9a82ef37a",
+        "android_client_info": {
+          "package_name": "com.georgeguimares.mentorfinanceiro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "841128243215-t5lkthv9odaect1sj7heodftkv200dni.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAb2ar5SCQEq3VlK5GGaaWdR4WvHgOlS00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "841128243215-t5lkthv9odaect1sj7heodftkv200dni.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
