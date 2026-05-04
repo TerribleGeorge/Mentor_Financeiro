@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../domain/finance/daily_limit_calculator.dart';
+import '../services/finance_config_signals.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -14,47 +17,33 @@ class _HomeScreenState extends State<HomeScreen> {
   // ignore: unused_field - Reservado para uso futuro (exibir ganhos do dia)
   double _ganhosHoje = 0;
   double _porcentagem = 0;
+  String? _alertaLimiteDiario;
   String _nomeUsuario = 'Usuário';
   final ScrollController _scrollController = ScrollController();
+
+  void _onFinanceConfigSaved() => _carregarDados();
 
   @override
   void initState() {
     super.initState();
+    FinanceConfigSignals.addListener(_onFinanceConfigSaved);
     _carregarDados();
+  }
+
+  @override
+  void dispose() {
+    FinanceConfigSignals.removeListener(_onFinanceConfigSaved);
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _carregarDados() async {
     final prefs = await SharedPreferences.getInstance();
     _nomeUsuario = prefs.getString('nome_usuario') ?? 'Usuário';
 
-    final hoje = DateTime.now();
-    final diasNoMes = DateTime(hoje.year, hoje.month + 1, 0).day;
-    final diasRestantes = diasNoMes - hoje.day + 1;
-
-    double rendaFixa =
-        double.tryParse(
-          prefs.getString('valor_Renda Fixa')?.replaceAll(',', '.') ?? '0',
-        ) ??
-        0;
-    double rendaExtra =
-        double.tryParse(
-          prefs.getString('valor_Renda Extra')?.replaceAll(',', '.') ?? '0',
-        ) ??
-        0;
-    double gastosFixos =
-        double.tryParse(
-          prefs.getString('valor_Gastos Fixos')?.replaceAll(',', '.') ?? '0',
-        ) ??
-        0;
-    double reserva =
-        double.tryParse(
-          prefs.getString('valor_Reserva')?.replaceAll(',', '.') ?? '0',
-        ) ??
-        0;
-
-    double rendaMensal = rendaFixa + rendaExtra;
-    double gastosMensal = gastosFixos + reserva;
-    _limiteDiario = ((rendaMensal - gastosMensal) / diasRestantes);
+    final limite = DailyLimitCalculator.computeFromPrefs(prefs);
+    _limiteDiario = limite.displayLimit;
+    _alertaLimiteDiario = limite.alertMessage;
 
     final dataHoje = DateTime.now().toIso8601String().split('T')[0];
     _gastosHoje = prefs.getDouble('gastos_$dataHoje') ?? 0;
@@ -157,12 +146,26 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'R\$ ${_gastosHoje.toStringAsFixed(2)} gastos de R\$ ${_limiteDiario.toStringAsFixed(2)}',
+                              _limiteDiario > 0
+                                  ? 'R\$ ${_gastosHoje.toStringAsFixed(2)} gastos de R\$ ${_limiteDiario.toStringAsFixed(2)}'
+                                  : 'R\$ ${_gastosHoje.toStringAsFixed(2)} gastos hoje (limite R\$ 0,00)',
                               style: const TextStyle(
                                 color: Colors.black54,
                                 fontSize: 12,
                               ),
                             ),
+                            if (_alertaLimiteDiario != null) ...[
+                              const SizedBox(height: 10),
+                              Text(
+                                _alertaLimiteDiario!,
+                                style: const TextStyle(
+                                  color: Color(0xFF991B1B),
+                                  fontSize: 11,
+                                  height: 1.35,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),

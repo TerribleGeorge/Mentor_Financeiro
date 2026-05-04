@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Serviço Firebase (para backup na nuvem)
 import '../services/firebase_service.dart';
+import '../services/finance_config_signals.dart';
 
 // Tela Principal
 import 'tela_home.dart';
@@ -68,6 +69,13 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
       true,
       ehRenda: true,
       cor: Colors.tealAccent,
+    ),
+    const _CampoConfig(
+      'Saldo Atual',
+      'Saldo em conta (negativo se estiver no cheque especial)',
+      false,
+      ehSaldoConta: true,
+      cor: Color(0xFF38BDF8),
     ),
     // GASTOS
     const _CampoConfig(
@@ -144,7 +152,8 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     // Inicializa controllers
     for (var campo in _campos) {
       _controllers[campo.nome] = TextEditingController();
-      _camposAtivos[campo.nome] = campo.obrigatorio;
+      _camposAtivos[campo.nome] =
+          campo.ehSaldoConta ? true : campo.obrigatorio;
     }
     // Carrega dados salvos
     _carregarDados();
@@ -162,8 +171,8 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
         _controllers[campo.nome]?.text =
             prefs.getString('valor_${campo.nome}') ?? '';
         // Busca ativo/inativo
-        _camposAtivos[campo.nome] =
-            prefs.getBool('ativo_${campo.nome}') ?? campo.obrigatorio;
+        _camposAtivos[campo.nome] = prefs.getBool('ativo_${campo.nome}') ??
+            (campo.ehSaldoConta ? true : campo.obrigatorio);
       }
     });
   }
@@ -210,11 +219,15 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     // Marca como configurado
     await prefs.setBool('configurado', true);
 
-    // Navega para tela principal
-    if (mounted) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const TelaHome()));
+    FinanceConfigSignals.notifySaved();
+
+    if (!mounted) return;
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop(true);
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const TelaHome()),
+      );
     }
   }
 
@@ -246,11 +259,18 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
             ),
             const SizedBox(height: 30),
 
+            _secao(
+              '🏦 SALDO NA CONTA',
+              const Color(0xFF38BDF8),
+              _campos.where((c) => c.ehSaldoConta).toList(),
+            ),
+            const SizedBox(height: 30),
+
             // Seção: GASTOS
             _secao(
               '📋 SEUS GASTOS FIXOS',
               Colors.redAccent,
-              _campos.where((c) => !c.ehRenda).toList(),
+              _campos.where((c) => !c.ehRenda && !c.ehSaldoConta).toList(),
             ),
             const SizedBox(height: 30),
 
@@ -433,6 +453,7 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
 
     // Soma valores ativos
     for (var campo in _campos) {
+      if (campo.ehSaldoConta) continue;
       if (_camposAtivos[campo.nome] ?? false) {
         double valor =
             double.tryParse(
@@ -545,6 +566,7 @@ class _CampoConfig {
   final String hint;
   final bool obrigatorio;
   final bool ehRenda;
+  final bool ehSaldoConta;
   final Color cor;
 
   const _CampoConfig(
@@ -552,6 +574,7 @@ class _CampoConfig {
     this.hint,
     this.obrigatorio, {
     this.ehRenda = false,
+    this.ehSaldoConta = false,
     this.cor = Colors.grey,
   });
 }

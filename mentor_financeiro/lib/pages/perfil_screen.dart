@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 import '../services/firebase_service.dart';
+import '../services/revenue_cat_bootstrap.dart';
 import 'tela_login.dart';
 import 'questionario_page.dart';
 import 'settings_page.dart';
@@ -333,7 +333,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     if (confirmar == true && mounted) {
       try {
         await FirebaseService.logout();
-        await Purchases.logOut();
+        await RevenueCatBootstrap.logOutIfConfigured();
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const TelaLogin()),

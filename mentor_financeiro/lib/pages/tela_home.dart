@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../domain/finance/daily_limit_calculator.dart';
 import '../services/firebase_service.dart';
+import '../services/finance_config_signals.dart';
 
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
@@ -14,14 +16,25 @@ class _TelaHomeState extends State<TelaHome> {
   double _gastosHoje = 0;
   double _ganhosHoje = 0;
   double _porcentagem = 0;
+  String? _alertaLimiteDiario;
   String _nomeUsuario = 'Usuário';
   final ScrollController _scrollController = ScrollController();
+
+  void _onFinanceConfigSaved() => _carregarDados();
 
   @override
   void initState() {
     super.initState();
+    FinanceConfigSignals.addListener(_onFinanceConfigSaved);
     _carregarDados();
     _solicitarPermissaoNotificacoes();
+  }
+
+  @override
+  void dispose() {
+    FinanceConfigSignals.removeListener(_onFinanceConfigSaved);
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _solicitarPermissaoNotificacoes() async {
@@ -36,34 +49,9 @@ class _TelaHomeState extends State<TelaHome> {
     final prefs = await SharedPreferences.getInstance();
     _nomeUsuario = prefs.getString('nome_usuario') ?? 'Usuário';
 
-    final hoje = DateTime.now();
-    final diasNoMes = DateTime(hoje.year, hoje.month + 1, 0).day;
-    final diasRestantes = diasNoMes - hoje.day + 1;
-
-    double rendaFixa =
-        double.tryParse(
-          prefs.getString('valor_Renda Fixa')?.replaceAll(',', '.') ?? '0',
-        ) ??
-        0;
-    double rendaExtra =
-        double.tryParse(
-          prefs.getString('valor_Renda Extra')?.replaceAll(',', '.') ?? '0',
-        ) ??
-        0;
-    double gastosFixos =
-        double.tryParse(
-          prefs.getString('valor_Gastos Fixos')?.replaceAll(',', '.') ?? '0',
-        ) ??
-        0;
-    double reserva =
-        double.tryParse(
-          prefs.getString('valor_Reserva')?.replaceAll(',', '.') ?? '0',
-        ) ??
-        0;
-
-    double rendaMensal = rendaFixa + rendaExtra;
-    double gastosMensal = gastosFixos + reserva;
-    _limiteDiario = ((rendaMensal - gastosMensal) / diasRestantes);
+    final limite = DailyLimitCalculator.computeFromPrefs(prefs);
+    _limiteDiario = limite.displayLimit;
+    _alertaLimiteDiario = limite.alertMessage;
 
     final dataHoje = DateTime.now().toIso8601String().split('T')[0];
     _gastosHoje = prefs.getDouble('gastos_$dataHoje') ?? 0;
@@ -201,9 +189,22 @@ class _TelaHomeState extends State<TelaHome> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "${(_porcentagem * 100).toStringAsFixed(0)}% usado",
+                        _limiteDiario > 0
+                            ? "${(_porcentagem * 100).toStringAsFixed(0)}% usado"
+                            : "Sem limite diário positivo",
                         style: TextStyle(color: _corLimite(), fontSize: 12),
                       ),
+                      if (_alertaLimiteDiario != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _alertaLimiteDiario!,
+                          style: TextStyle(
+                            color: Colors.amber.shade200,
+                            fontSize: 12,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

@@ -21,6 +21,7 @@ import '../pages/tela_metas.dart';
 import '../pages/tela_perfil.dart';
 import '../pages/tela_upgrade.dart';
 import '../pages/quiz_conhecimento_page.dart';
+import '../pages/questionario_page.dart';
 import '../presentation/calculator/calculadora_mentora_screen.dart';
 import '../presentation/home/mentor_home_screen.dart';
 import '../presentation/insight/insight_detail_screen.dart';
@@ -32,10 +33,15 @@ import '../presentation/splash/splash_screen.dart';
 class MentorAppRouter {
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case '/':
+      case AppRoutes.splash:
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const SplashScreen(),
+        );
+      case AppRoutes.questionario:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const QuestionarioPage(),
         );
       case AppRoutes.login:
         return MaterialPageRoute<void>(

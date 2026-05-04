@@ -394,7 +394,7 @@ class _TelaPerfilState extends State<TelaPerfil> {
               ),
               _pergunta(
                 "Como funciona o limite diário?",
-                "É calculado: (Renda - Gastos Fixos) / Dias restantes do mês.",
+                "É calculado: (Renda mensal − Gastos fixos + Saldo atual) ÷ dias restantes do mês. Se o valor for zero ou negativo, o limite exibido é R\$ 0,00 e um alerta orienta a cobrir o saldo.",
               ),
               _pergunta(
                 "Como explorar conhecimento?",

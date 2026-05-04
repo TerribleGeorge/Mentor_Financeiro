@@ -8,10 +8,9 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:provider/provider.dart';
 
-import 'core/config/app_secrets.dart';
+import 'core/constants/app_routes.dart';
 import 'data/services/firebase_data_service.dart';
 import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
@@ -19,67 +18,42 @@ import 'services/firebase_service.dart';
 import 'services/app_theme_controller.dart';
 import 'services/currency_preference_controller.dart';
 import 'services/locale_controller.dart';
+import 'services/revenue_cat_bootstrap.dart';
 import 'services/subscription_provider.dart';
 import 'services/user_persona_service.dart';
 import 'app/mentor_app_router.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
-const String mentorProEntitlementId = 'Mentor Financeiro Pro';
-
 final themeController = AppThemeController();
 final localeController = LocaleController();
 final currencyPreferenceController = CurrencyPreferenceController.instance;
 final userPersonaService = UserPersonaService.instance;
 
-Future<void> initializeRevenueCat(String? uid) async {
-  if (kIsWeb) {
-    return;
-  }
-
-  final apiKey = defaultTargetPlatform == TargetPlatform.iOS
-      ? AppSecrets.revenueCatIos
-      : AppSecrets.revenueCatAndroid;
-
-  if (apiKey == null || apiKey.isEmpty) {
-    log(
-      'RevenueCat: defina REVENUECAT_ANDROID_API_KEY / REVENUECAT_IOS_API_KEY no .env.',
-      name: 'mentor.bootstrap',
-    );
-    return;
-  }
-
-  await Purchases.setLogLevel(LogLevel.debug);
-
-  final configuration = PurchasesConfiguration(apiKey);
-  await Purchases.configure(configuration);
-
-  if (uid != null) {
-    await Purchases.logIn(uid);
-    debugPrint('=== REVENUECAT DEBUG ===');
-    debugPrint('Firebase UID: $uid');
-    debugPrint('RevenueCat ID: ${Purchases.appUserID}');
-    debugPrint('======================');
-  }
-}
-
-Future<void> verificarStatusAssinatura() async {
+/// Evita que o arranque fique preso em SDKs externos (FCM, RevenueCat, health Firebase).
+Future<void> _runWithBootTimeout(String label, Future<void> Function() work) async {
   try {
-    final customerInfo = await Purchases.getCustomerInfo();
-    final entitlements = customerInfo.entitlements.all;
-
-    bool isPremium = false;
-    if (entitlements.containsKey(mentorProEntitlementId)) {
-      isPremium = entitlements[mentorProEntitlementId]!.isActive;
+    await work().timeout(const Duration(seconds: 5));
+  } on TimeoutException catch (_, st) {
+    log(
+      '[$label] timeout 5s — continuação do boot sem bloquear.',
+      name: 'mentor.bootstrap',
+      stackTrace: st,
+    );
+    if (label == 'revenuecat') {
+      RevenueCatBootstrap.abort();
+      try {
+        await themeController.setPremiumStatus(false);
+      } catch (_) {}
     }
-
-    await themeController.setPremiumStatus(isPremium);
-
-    debugPrint('=== PREMIUM DEBUG ===');
-    debugPrint('USUÁRIO É MESTRE? $isPremium');
-    debugPrint('====================');
-  } catch (e) {
-    debugPrint('Erro ao verificar assinatura: $e');
+  } catch (e, st) {
+    log('[$label] $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
+    if (label == 'revenuecat') {
+      RevenueCatBootstrap.abort();
+      try {
+        await themeController.setPremiumStatus(false);
+      } catch (_) {}
+    }
   }
 }
 
@@ -104,28 +78,30 @@ void main() async {
   }
 
   if (firebaseReady) {
-    await FirebaseDataService.instance.setupObservability();
-    FirebaseDataService.instance.setCrashlyticsUser(
-      FirebaseAuth.instance.currentUser?.uid,
-    );
+    await _runWithBootTimeout('firebase_ops', () async {
+      await FirebaseDataService.instance.setupObservability();
+      FirebaseDataService.instance.setCrashlyticsUser(
+        FirebaseAuth.instance.currentUser?.uid,
+      );
 
-    final health = await FirebaseDataService.instance.runBootstrapHealthChecks();
-    log(
-      'Conexão Firestore (servidor): ${health.firestore ? "estabelecida" : "indisponível ou sem permissão"}.',
-      name: 'mentor.health',
-    );
-    log(
-      'APIs externas (probe HTTP): ${health.externalHttp ? "alcançáveis" : "indisponíveis"}.',
-      name: 'mentor.health',
-    );
+      final health = await FirebaseDataService.instance.runBootstrapHealthChecks();
+      log(
+        'Conexão Firestore (servidor): ${health.firestore ? "estabelecida" : "indisponível ou sem permissão"}.',
+        name: 'mentor.health',
+      );
+      log(
+        'APIs externas (probe HTTP): ${health.externalHttp ? "alcançáveis" : "indisponíveis"}.',
+        name: 'mentor.health',
+      );
 
-    await FirebaseDataService.instance.logAnalyticsEvent(
-      'mentor_bootstrap_health',
-      <String, Object>{
-        'firestore_ok': health.firestore ? 1 : 0,
-        'http_ok': health.externalHttp ? 1 : 0,
-      },
-    );
+      await FirebaseDataService.instance.logAnalyticsEvent(
+        'mentor_bootstrap_health',
+        <String, Object>{
+          'firestore_ok': health.firestore ? 1 : 0,
+          'http_ok': health.externalHttp ? 1 : 0,
+        },
+      );
+    });
   } else {
     log(
       'Firebase indisponível: health checks e Crashlytics não ativados.',
@@ -133,19 +109,25 @@ void main() async {
     );
   }
 
-  try {
-    await FirebaseService.inicializarMessaging();
-  } catch (e, st) {
-    log('Messaging: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
-  }
+  await _runWithBootTimeout('fcm', () async {
+    try {
+      await FirebaseService.inicializarMessaging();
+    } catch (e, st) {
+      log('Messaging: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
+    }
+  });
 
-  await initializeRevenueCat(FirebaseAuth.instance.currentUser?.uid);
-  await verificarStatusAssinatura();
+  await _runWithBootTimeout(
+    'revenuecat',
+    () => RevenueCatBootstrap.run(FirebaseAuth.instance.currentUser?.uid),
+  );
 
-  await themeController.initialize();
-  await currencyPreferenceController.initialize();
-  await localeController.initialize();
-  await userPersonaService.initialize();
+  await _runWithBootTimeout('local_prefs', () async {
+    await themeController.initialize();
+    await currencyPreferenceController.initialize();
+    await localeController.initialize();
+    await userPersonaService.initialize();
+  });
 
   if (kDebugMode) {
     debugPrint('=== TEMA DEBUG ===');
@@ -203,7 +185,8 @@ class MentorFinanceiroApp extends StatelessWidget {
             locale: localeController.locale,
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
-            initialRoute: '/',
+            // Rota inicial = Splash Mentor v2 (ver MentorAppRouter + presentation/splash/).
+            initialRoute: AppRoutes.splash,
             onGenerateRoute: MentorAppRouter.onGenerateRoute,
           );
         },

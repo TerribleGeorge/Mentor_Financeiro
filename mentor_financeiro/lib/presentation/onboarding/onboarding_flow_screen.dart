@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_routes.dart';
+import '../../services/firebase_service.dart';
 import '../../services/user_persona_service.dart';
 
 /// Três slides introdutórios do Mentor (fluxo v2).
@@ -44,6 +47,14 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
 
   Future<void> _finish() async {
     await UserPersonaService.instance.setMentorOnboardingComplete();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      try {
+        await FirebaseService.completarOnboarding(uid);
+      } catch (_) {}
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('onboarding_completo', true);
+    }
     if (!mounted) return;
     Navigator.of(context).pushReplacementNamed(AppRoutes.personaSetup);
   }

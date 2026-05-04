@@ -5,8 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_routes.dart';
 import '../../services/firebase_service.dart';
 import '../../services/user_persona_service.dart';
-import '../../pages/onboarding_page.dart';
-import '../../pages/questionario_page.dart';
 
 /// Splash: integridade básica + autenticação + fluxo Mentor v2.
 class SplashScreen extends StatefulWidget {
@@ -66,16 +64,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if (!perfilCompleto) {
         if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const QuestionarioPage()),
-          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.questionario);
         }
         return;
       } else if (!onboardingCompleto) {
         if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const OnboardingPage()),
-          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.onboardingMentor);
         }
         return;
       }
@@ -90,9 +84,7 @@ class _SplashScreenState extends State<SplashScreen> {
       );
 
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const OnboardingPage()),
-        );
+        Navigator.of(context).pushReplacementNamed(AppRoutes.onboardingMentor);
       }
       return;
     }
