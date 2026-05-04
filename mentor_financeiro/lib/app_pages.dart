@@ -1,3 +1,7 @@
+// LEGADO: barrel de exports para telas em `pages/`. Nenhum import ativo em `lib/`
+// (2025-05): preferir imports diretos ou `app/mentor_app_router.dart` + `presentation/`.
+// TODO(devvoid): remover após migração completa do app clássico.
+
 export 'pages/tela_splash.dart';
 export 'pages/tela_onboarding.dart';
 export 'pages/tela_meu_perfil.dart';

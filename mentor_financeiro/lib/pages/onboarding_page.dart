@@ -1,3 +1,9 @@
+// LEGADO (Firestore): onboarding de 3 páginas exibido pelo `SplashScreen` quando
+// `onboardingCompleto` ainda é falso no documento `usuarios` — grava prefs e chama
+// `FirebaseService.completarOnboarding`. Não duplica `OnboardingFlowScreen` (Mentor v2):
+// aquele fluxo é rota `/onboarding-mentor` com conteúdo e flags distintos.
+// TODO(devvoid): fundir num único fluxo quando o legado `usuarios` for descontinuado.
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/firebase_service.dart';

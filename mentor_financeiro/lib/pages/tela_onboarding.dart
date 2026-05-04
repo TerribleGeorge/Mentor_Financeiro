@@ -1,7 +1,14 @@
+// LEGADO / CÓDIGO MORTO: fluxo de onboarding antigo (3 páginas → login).
+// O app usa `presentation/onboarding/onboarding_flow_screen.dart` (Mentor v2) e
+// `OnboardingPage` para onboarding Firestore legado a partir do splash.
+// Nenhuma navegação referencia `TelaOnboarding` — mantido só por export em `app_pages.dart`.
+// TODO(devvoid): excluir arquivo e export quando confirmar ausência de uso externo.
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'tela_login.dart';
 
+@Deprecated('Substituído pelo fluxo Mentor em presentation/ + rotas nomeadas.')
 class TelaOnboarding extends StatefulWidget {
   const TelaOnboarding({super.key});
 
