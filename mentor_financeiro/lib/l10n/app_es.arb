@@ -93,5 +93,45 @@
   "notaExcelente": "Excelente! Tienes buena salud financiera.",
   "notaBom": "Bien, pero puede mejorar.",
   "notaAtencao": "Atención a los gastos.",
-  "notaRevisar": "Revisa tus finanzas."
+  "notaRevisar": "Revisa tus finanzas.",
+  "mentorInsightTitle": "Orientación del Mentor",
+  "mentorInsightLoading": "Consultando el mercado…",
+  "mentorInsightError": "No se pudieron cargar los datos ahora. Inténtalo de nuevo en un momento.",
+  "mentorInsightOffline": "Sin conexión. Conéctate para ver cotizaciones y al Mentor.",
+  "mentorAllocationDefensive": "Con la volatilidad actual, prioriza preservar capital y liquidez antes de buscar rendimiento.",
+  "mentorAllocationBalanced": "Equilibra protección y crecimiento: diversifica y revisa el plazo de tu objetivo.",
+  "mentorAllocationOffensive": "Tu perfil admite más riesgo: mantén disciplina y evita concentrar en pocos activos.",
+  "mentorInsightSymbols": "Activos observados: {symbols}",
+  "@mentorInsightSymbols": {
+    "placeholders": {
+      "symbols": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyFollowLocale": "Automático (idioma)",
+  "compoundCalculatorTitle": "Calculadora Mentora — Interés Compuesto",
+  "compoundCalculatorSubtitle": "Simula aportes, ganancia nominal y real (tras inflación) y consejos del Mentor.",
+  "compoundInitialLabel": "Aporte inicial",
+  "compoundMonthlyLabel": "Aporte mensual",
+  "compoundRateLabel": "Tasa de interés",
+  "compoundRateAnnual": "anual",
+  "compoundRateMonthly": "mensual",
+  "compoundHorizonLabel": "Plazo",
+  "compoundHorizonYears": "años",
+  "compoundHorizonMonths": "meses",
+  "compoundInflationLabel": "Inflación estimada (% anual)",
+  "compoundCalculate": "Calcular",
+  "compoundChartInvested": "Total invertido",
+  "compoundChartInterest": "Intereses ganados",
+  "compoundSummaryNominalEnd": "Saldo final (nominal)",
+  "compoundSummaryRealGain": "Ganancia real (poder adquisitivo)",
+  "compoundMentorCardTitle": "Consejo del Mentor",
+  "compoundInvalidInput": "Introduce valores válidos (plazo > 0).",
+  "userPersonaSectionTitle": "Tono del Mentor",
+  "userPersonaNovice": "Principiante",
+  "userPersonaStrategist": "Estratega",
+  "userPersonaRiskTaker": "Atrevido",
+  "userPersonaConservative": "Ahorrador",
+  "compoundOpenFullInsight": "Ver análisis completo del Mentor"
 }

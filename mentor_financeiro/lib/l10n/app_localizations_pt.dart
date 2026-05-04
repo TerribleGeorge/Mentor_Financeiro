@@ -282,4 +282,111 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get notaRevisar => 'Revise suas finanças.';
+
+  @override
+  String get mentorInsightTitle => 'Orientação do Mentor';
+
+  @override
+  String get mentorInsightLoading => 'Consultando mercado…';
+
+  @override
+  String get mentorInsightError =>
+      'Não foi possível carregar os dados agora. Tente de novo em instantes.';
+
+  @override
+  String get mentorInsightOffline =>
+      'Sem internet. Conecte-se para consultar cotações e o Mentor.';
+
+  @override
+  String get mentorAllocationDefensive =>
+      'Com a volatilidade atual, priorize preservação de capital e liquidez antes de buscar retorno.';
+
+  @override
+  String get mentorAllocationBalanced =>
+      'Equilibre proteção e crescimento: diversifique e revisite o prazo do seu objetivo.';
+
+  @override
+  String get mentorAllocationOffensive =>
+      'Seu perfil permite mais risco: mantenha disciplina e limite concentrações em poucos ativos.';
+
+  @override
+  String mentorInsightSymbols(String symbols) {
+    return 'Ativos observados: $symbols';
+  }
+
+  @override
+  String get currencyFollowLocale => 'Automático (idioma)';
+
+  @override
+  String get compoundCalculatorTitle => 'Calculadora Mentora — Juros Compostos';
+
+  @override
+  String get compoundCalculatorSubtitle =>
+      'Simule aportes, veja ganho nominal e real (após inflação) e ouça o Mentor.';
+
+  @override
+  String get compoundInitialLabel => 'Aporte inicial';
+
+  @override
+  String get compoundMonthlyLabel => 'Aporte mensal';
+
+  @override
+  String get compoundRateLabel => 'Taxa de juros';
+
+  @override
+  String get compoundRateAnnual => 'ao ano';
+
+  @override
+  String get compoundRateMonthly => 'ao mês';
+
+  @override
+  String get compoundHorizonLabel => 'Prazo';
+
+  @override
+  String get compoundHorizonYears => 'anos';
+
+  @override
+  String get compoundHorizonMonths => 'meses';
+
+  @override
+  String get compoundInflationLabel => 'Inflação estimada (% ao ano)';
+
+  @override
+  String get compoundCalculate => 'Calcular';
+
+  @override
+  String get compoundChartInvested => 'Total investido';
+
+  @override
+  String get compoundChartInterest => 'Juros ganhos';
+
+  @override
+  String get compoundSummaryNominalEnd => 'Montante final (nominal)';
+
+  @override
+  String get compoundSummaryRealGain => 'Ganho real (poder de compra)';
+
+  @override
+  String get compoundMentorCardTitle => 'Conselho do Mentor';
+
+  @override
+  String get compoundInvalidInput => 'Preencha valores válidos (prazo > 0).';
+
+  @override
+  String get userPersonaSectionTitle => 'Tom do Mentor';
+
+  @override
+  String get userPersonaNovice => 'Iniciante';
+
+  @override
+  String get userPersonaStrategist => 'Estrategista';
+
+  @override
+  String get userPersonaRiskTaker => 'Arrojado';
+
+  @override
+  String get userPersonaConservative => 'Poupador';
+
+  @override
+  String get compoundOpenFullInsight => 'Ver análise completa do Mentor';
 }

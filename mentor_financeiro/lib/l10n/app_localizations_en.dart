@@ -280,4 +280,111 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notaRevisar => 'Review your finances.';
+
+  @override
+  String get mentorInsightTitle => 'Mentor guidance';
+
+  @override
+  String get mentorInsightLoading => 'Fetching market data…';
+
+  @override
+  String get mentorInsightError =>
+      'Could not load data right now. Try again shortly.';
+
+  @override
+  String get mentorInsightOffline =>
+      'You\'re offline. Connect to fetch quotes and Mentor insights.';
+
+  @override
+  String get mentorAllocationDefensive =>
+      'Given current volatility, prioritize capital preservation and liquidity before chasing returns.';
+
+  @override
+  String get mentorAllocationBalanced =>
+      'Balance protection and growth: diversify and revisit your goal horizon.';
+
+  @override
+  String get mentorAllocationOffensive =>
+      'Your profile allows more risk: stay disciplined and avoid heavy concentration.';
+
+  @override
+  String mentorInsightSymbols(String symbols) {
+    return 'Symbols reviewed: $symbols';
+  }
+
+  @override
+  String get currencyFollowLocale => 'Automatic (language)';
+
+  @override
+  String get compoundCalculatorTitle => 'Mentor Calculator — Compound Interest';
+
+  @override
+  String get compoundCalculatorSubtitle =>
+      'Simulate contributions, nominal vs real gain (after inflation), and mentor notes.';
+
+  @override
+  String get compoundInitialLabel => 'Initial lump sum';
+
+  @override
+  String get compoundMonthlyLabel => 'Monthly contribution';
+
+  @override
+  String get compoundRateLabel => 'Interest rate';
+
+  @override
+  String get compoundRateAnnual => 'per year';
+
+  @override
+  String get compoundRateMonthly => 'per month';
+
+  @override
+  String get compoundHorizonLabel => 'Time horizon';
+
+  @override
+  String get compoundHorizonYears => 'years';
+
+  @override
+  String get compoundHorizonMonths => 'months';
+
+  @override
+  String get compoundInflationLabel => 'Estimated inflation (% per year)';
+
+  @override
+  String get compoundCalculate => 'Calculate';
+
+  @override
+  String get compoundChartInvested => 'Total invested';
+
+  @override
+  String get compoundChartInterest => 'Interest earned';
+
+  @override
+  String get compoundSummaryNominalEnd => 'Ending balance (nominal)';
+
+  @override
+  String get compoundSummaryRealGain => 'Real gain (purchasing power)';
+
+  @override
+  String get compoundMentorCardTitle => 'Mentor advice';
+
+  @override
+  String get compoundInvalidInput => 'Enter valid values (horizon > 0).';
+
+  @override
+  String get userPersonaSectionTitle => 'Mentor tone';
+
+  @override
+  String get userPersonaNovice => 'Beginner';
+
+  @override
+  String get userPersonaStrategist => 'Strategist';
+
+  @override
+  String get userPersonaRiskTaker => 'Risk-taker';
+
+  @override
+  String get userPersonaConservative => 'Saver';
+
+  @override
+  String get compoundOpenFullInsight => 'Open full mentor insight';
 }

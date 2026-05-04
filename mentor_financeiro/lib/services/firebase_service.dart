@@ -21,6 +21,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 // Utilities de debug
 import 'package:flutter/foundation.dart';
 
+import '../core/config/app_secrets.dart';
+
 // CLASSE FIREBASE SERVICE
 // Singleton: Uma única instância para todo o app
 class FirebaseService {
@@ -283,14 +285,8 @@ class FirebaseService {
   // DADOS DO USUÁRIO (FIRESTORE)
   // ==============================================================================
 
-  // Email do administrador (substitua pelo seu email)
-  static const String emailAdmin = "george.guimares@gmail.com";
-
-  // Verifica se é admin pelo email
-  static bool verificarAdmin(String? email) {
-    if (email == null) return false;
-    return email.toLowerCase() == emailAdmin.toLowerCase();
-  }
+  /// Admin definido apenas via `FIREBASE_ADMIN_EMAIL` no `.env` (lista separada por vírgulas).
+  static bool verificarAdmin(String? email) => AppSecrets.isAdminEmail(email);
 
   // Salva dados do usuário no Firestore
   // Importância: Persiste dados do perfil

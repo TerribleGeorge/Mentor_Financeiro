@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../core/widgets/mentor_insight_card.dart';
+import '../domain/entities/financial_market_region.dart';
+import '../services/localization_service.dart';
+
 class TelaInvestimentos extends StatelessWidget {
   const TelaInvestimentos({super.key});
 
@@ -21,8 +25,15 @@ class TelaInvestimentos extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: const [
-          _ExpansionTopico(
+        children: [
+          MentorInsightCard(
+            region:
+                LocalizationService.currentLocale.languageCode == 'pt'
+                    ? FinancialMarketRegion.brazil
+                    : FinancialMarketRegion.global,
+          ),
+          const SizedBox(height: 16),
+          const _ExpansionTopico(
             icone: Icons.savings_outlined,
             titulo: 'Poupança',
             descricao:
@@ -64,7 +75,7 @@ class TelaInvestimentos extends StatelessWidget {
             descricao:
                 'Letras de Crédito do Agronegócioda Imobiliário. Isentas de IR para pessoa física. Rendimento atrelado ao CDI. Boas opções para diversificar com menor risco.',
           ),
-          _ExpansionTopico(
+          const _ExpansionTopico(
             icone: Icons.diamond_outlined,
             titulo: 'Debêntures',
             descricao:

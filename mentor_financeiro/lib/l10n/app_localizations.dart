@@ -627,6 +627,204 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Revise suas finanças.'**
   String get notaRevisar;
+
+  /// Mentor insight card title
+  ///
+  /// In pt, this message translates to:
+  /// **'Orientação do Mentor'**
+  String get mentorInsightTitle;
+
+  /// Mentor insight loading
+  ///
+  /// In pt, this message translates to:
+  /// **'Consultando mercado…'**
+  String get mentorInsightLoading;
+
+  /// Mentor insight error
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar os dados agora. Tente de novo em instantes.'**
+  String get mentorInsightError;
+
+  /// Mentor insight when device is offline
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem internet. Conecte-se para consultar cotações e o Mentor.'**
+  String get mentorInsightOffline;
+
+  /// Defensive allocation hint
+  ///
+  /// In pt, this message translates to:
+  /// **'Com a volatilidade atual, priorize preservação de capital e liquidez antes de buscar retorno.'**
+  String get mentorAllocationDefensive;
+
+  /// Balanced allocation hint
+  ///
+  /// In pt, this message translates to:
+  /// **'Equilibre proteção e crescimento: diversifique e revisite o prazo do seu objetivo.'**
+  String get mentorAllocationBalanced;
+
+  /// Offensive allocation hint
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu perfil permite mais risco: mantenha disciplina e limite concentrações em poucos ativos.'**
+  String get mentorAllocationOffensive;
+
+  /// List of symbols watched by mentor
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativos observados: {symbols}'**
+  String mentorInsightSymbols(String symbols);
+
+  /// Currency follows app language
+  ///
+  /// In pt, this message translates to:
+  /// **'Automático (idioma)'**
+  String get currencyFollowLocale;
+
+  /// Compound interest calculator title
+  ///
+  /// In pt, this message translates to:
+  /// **'Calculadora Mentora — Juros Compostos'**
+  String get compoundCalculatorTitle;
+
+  /// Compound calculator subtitle
+  ///
+  /// In pt, this message translates to:
+  /// **'Simule aportes, veja ganho nominal e real (após inflação) e ouça o Mentor.'**
+  String get compoundCalculatorSubtitle;
+
+  /// No description provided for @compoundInitialLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aporte inicial'**
+  String get compoundInitialLabel;
+
+  /// No description provided for @compoundMonthlyLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aporte mensal'**
+  String get compoundMonthlyLabel;
+
+  /// No description provided for @compoundRateLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Taxa de juros'**
+  String get compoundRateLabel;
+
+  /// No description provided for @compoundRateAnnual.
+  ///
+  /// In pt, this message translates to:
+  /// **'ao ano'**
+  String get compoundRateAnnual;
+
+  /// No description provided for @compoundRateMonthly.
+  ///
+  /// In pt, this message translates to:
+  /// **'ao mês'**
+  String get compoundRateMonthly;
+
+  /// No description provided for @compoundHorizonLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prazo'**
+  String get compoundHorizonLabel;
+
+  /// No description provided for @compoundHorizonYears.
+  ///
+  /// In pt, this message translates to:
+  /// **'anos'**
+  String get compoundHorizonYears;
+
+  /// No description provided for @compoundHorizonMonths.
+  ///
+  /// In pt, this message translates to:
+  /// **'meses'**
+  String get compoundHorizonMonths;
+
+  /// No description provided for @compoundInflationLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inflação estimada (% ao ano)'**
+  String get compoundInflationLabel;
+
+  /// No description provided for @compoundCalculate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Calcular'**
+  String get compoundCalculate;
+
+  /// No description provided for @compoundChartInvested.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total investido'**
+  String get compoundChartInvested;
+
+  /// No description provided for @compoundChartInterest.
+  ///
+  /// In pt, this message translates to:
+  /// **'Juros ganhos'**
+  String get compoundChartInterest;
+
+  /// No description provided for @compoundSummaryNominalEnd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Montante final (nominal)'**
+  String get compoundSummaryNominalEnd;
+
+  /// No description provided for @compoundSummaryRealGain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ganho real (poder de compra)'**
+  String get compoundSummaryRealGain;
+
+  /// No description provided for @compoundMentorCardTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conselho do Mentor'**
+  String get compoundMentorCardTitle;
+
+  /// No description provided for @compoundInvalidInput.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencha valores válidos (prazo > 0).'**
+  String get compoundInvalidInput;
+
+  /// Persona selector title
+  ///
+  /// In pt, this message translates to:
+  /// **'Tom do Mentor'**
+  String get userPersonaSectionTitle;
+
+  /// No description provided for @userPersonaNovice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Iniciante'**
+  String get userPersonaNovice;
+
+  /// No description provided for @userPersonaStrategist.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estrategista'**
+  String get userPersonaStrategist;
+
+  /// No description provided for @userPersonaRiskTaker.
+  ///
+  /// In pt, this message translates to:
+  /// **'Arrojado'**
+  String get userPersonaRiskTaker;
+
+  /// No description provided for @userPersonaConservative.
+  ///
+  /// In pt, this message translates to:
+  /// **'Poupador'**
+  String get userPersonaConservative;
+
+  /// No description provided for @compoundOpenFullInsight.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver análise completa do Mentor'**
+  String get compoundOpenFullInsight;
 }
 
 class _AppLocalizationsDelegate

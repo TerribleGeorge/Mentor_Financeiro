@@ -1,44 +1,55 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:async';
+import 'dart:developer' show log;
+
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'core/config/app_secrets.dart';
+import 'data/services/firebase_data_service.dart';
 import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
 import 'services/firebase_service.dart';
 import 'services/app_theme_controller.dart';
+import 'services/currency_preference_controller.dart';
 import 'services/locale_controller.dart';
 import 'services/subscription_provider.dart';
-import 'app_pages.dart';
+import 'services/user_persona_service.dart';
+import 'app/mentor_app_router.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
-// Fallbacks caso .env não esteja configurado.
-const String revenueCatAndroidApiKey = 'test_pibcZvswDiwSwzDHpGIrBKIkNLZ';
-const String revenueCatIosApiKey = 'test_pibcZvswDiwSwzDHpGIrBKIkNLZ';
 const String mentorProEntitlementId = 'Mentor Financeiro Pro';
 
 final themeController = AppThemeController();
 final localeController = LocaleController();
+final currencyPreferenceController = CurrencyPreferenceController.instance;
+final userPersonaService = UserPersonaService.instance;
 
 Future<void> initializeRevenueCat(String? uid) async {
   if (kIsWeb) {
-    // RevenueCat não é suportado no Flutter Web neste app.
+    return;
+  }
+
+  final apiKey = defaultTargetPlatform == TargetPlatform.iOS
+      ? AppSecrets.revenueCatIos
+      : AppSecrets.revenueCatAndroid;
+
+  if (apiKey == null || apiKey.isEmpty) {
+    log(
+      'RevenueCat: defina REVENUECAT_ANDROID_API_KEY / REVENUECAT_IOS_API_KEY no .env.',
+      name: 'mentor.bootstrap',
+    );
     return;
   }
 
   await Purchases.setLogLevel(LogLevel.debug);
-
-  final envAndroid = dotenv.env['REVENUECAT_ANDROID_API_KEY']?.trim();
-  final envIos = dotenv.env['REVENUECAT_IOS_API_KEY']?.trim();
-
-  final apiKey = defaultTargetPlatform == TargetPlatform.iOS
-      ? (envIos?.isNotEmpty == true ? envIos! : revenueCatIosApiKey)
-      : (envAndroid?.isNotEmpty == true
-            ? envAndroid!
-            : revenueCatAndroidApiKey);
 
   final configuration = PurchasesConfiguration(apiKey);
   await Purchases.configure(configuration);
@@ -77,35 +88,79 @@ void main() async {
 
   try {
     await dotenv.load(fileName: '.env');
-  } catch (e) {
-    debugPrint('dotenv ERRO: $e');
+  } catch (e, st) {
+    log('dotenv: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
   }
 
+  var firebaseReady = false;
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-  } catch (e) {
-    debugPrint('Firebase ERRO: $e');
+    firebaseReady = true;
+    log('Firebase Core inicializado.', name: 'mentor.bootstrap');
+  } catch (e, st) {
+    log('Firebase: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
+  }
+
+  if (firebaseReady) {
+    await FirebaseDataService.instance.setupObservability();
+    FirebaseDataService.instance.setCrashlyticsUser(
+      FirebaseAuth.instance.currentUser?.uid,
+    );
+
+    final health = await FirebaseDataService.instance.runBootstrapHealthChecks();
+    log(
+      'Conexão Firestore (servidor): ${health.firestore ? "estabelecida" : "indisponível ou sem permissão"}.',
+      name: 'mentor.health',
+    );
+    log(
+      'APIs externas (probe HTTP): ${health.externalHttp ? "alcançáveis" : "indisponíveis"}.',
+      name: 'mentor.health',
+    );
+
+    await FirebaseDataService.instance.logAnalyticsEvent(
+      'mentor_bootstrap_health',
+      <String, Object>{
+        'firestore_ok': health.firestore ? 1 : 0,
+        'http_ok': health.externalHttp ? 1 : 0,
+      },
+    );
+  } else {
+    log(
+      'Firebase indisponível: health checks e Crashlytics não ativados.',
+      name: 'mentor.health',
+    );
   }
 
   try {
     await FirebaseService.inicializarMessaging();
-  } catch (e) {
-    debugPrint('Messaging ERRO: $e');
+  } catch (e, st) {
+    log('Messaging: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
   }
 
-  await initializeRevenueCat(null);
+  await initializeRevenueCat(FirebaseAuth.instance.currentUser?.uid);
   await verificarStatusAssinatura();
 
   await themeController.initialize();
+  await currencyPreferenceController.initialize();
   await localeController.initialize();
+  await userPersonaService.initialize();
 
-  debugPrint('=== TEMA DEBUG ===');
-  debugPrint('O TEMA ATUAL É: ${themeController.themeMode}');
-  debugPrint('================');
+  if (kDebugMode) {
+    debugPrint('=== TEMA DEBUG ===');
+    debugPrint('O TEMA ATUAL É: ${themeController.themeMode}');
+    debugPrint('================');
+  }
 
-  runApp(const MentorFinanceiroApp());
+  runZonedGuarded(() {
+    runApp(const MentorFinanceiroApp());
+  }, (error, stack) {
+    log('Erro não tratado: $error', name: 'mentor.errors', error: error, stackTrace: stack);
+    if (!kIsWeb && Firebase.apps.isNotEmpty) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    }
+  });
 }
 
 class MentorFinanceiroApp extends StatelessWidget {
@@ -118,9 +173,16 @@ class MentorFinanceiroApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => SubscriptionProvider()..initialize(),
         ),
+        ChangeNotifierProvider<UserPersonaService>.value(
+          value: userPersonaService,
+        ),
       ],
       child: ListenableBuilder(
-        listenable: Listenable.merge([themeController, localeController]),
+        listenable: Listenable.merge([
+          themeController,
+          localeController,
+          currencyPreferenceController,
+        ]),
         builder: (context, _) {
           final modoTema = themeController.themeMode;
           ThemeMode flutterThemeMode;
@@ -142,99 +204,7 @@ class MentorFinanceiroApp extends StatelessWidget {
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             initialRoute: '/',
-            onGenerateRoute: (settings) {
-              switch (settings.name) {
-                case '/':
-                  return MaterialPageRoute(builder: (_) => const TelaSplash());
-                case '/login':
-                  return MaterialPageRoute(builder: (_) => const TelaLogin());
-                case '/configuracao':
-                  return MaterialPageRoute(
-                    builder: (_) => const TelaConfiguracao(),
-                  );
-                case '/principal':
-                  final idx = (settings.arguments is int)
-                      ? (settings.arguments as int)
-                      : 0;
-                  return MaterialPageRoute(
-                    builder: (_) => MainNavigation(initialIndex: idx),
-                  );
-                case '/perfil':
-                  return MaterialPageRoute(builder: (_) => const TelaPerfil());
-                case '/metas':
-                  return MaterialPageRoute(builder: (_) => const TelaMetas());
-                case '/investimentos':
-                  return MaterialPageRoute(
-                    builder: (_) => const TelaInvestimentos(),
-                  );
-                case '/estrategias':
-                  return MaterialPageRoute(
-                    builder: (_) => const TelaEstrategias(),
-                  );
-                case '/conhecimento':
-                  return MaterialPageRoute(
-                    builder: (_) => const ConhecimentoHub(),
-                  );
-                case '/conhecimento/investimentos':
-                  return MaterialPageRoute(
-                    builder: (_) => const InvestimentosMenu(),
-                  );
-                case '/conhecimento/estrategias':
-                  return MaterialPageRoute(
-                    builder: (_) => const EstrategiasMenu(),
-                  );
-                case '/conhecimento/dicionario':
-                  return MaterialPageRoute(
-                    builder: (_) => const DicionarioPage(),
-                  );
-                case '/conhecimento/primeiros-passos':
-                  return MaterialPageRoute(
-                    builder: (_) => const PrimeirosPassosPage(),
-                  );
-                case '/conhecimento/impostos':
-                  return MaterialPageRoute(
-                    builder: (_) => const ImpostosDetalhePage(),
-                  );
-                case '/conhecimento/perigos':
-                  return MaterialPageRoute(builder: (_) => const PerigosPage());
-                case '/conhecimento/ferramentas':
-                  return MaterialPageRoute(
-                    builder: (_) => const FerramentasPage(),
-                  );
-                case '/simulado':
-                  return MaterialPageRoute(
-                    builder: (_) => const SimuladoPage(),
-                  );
-                case '/quiz-conhecimento':
-                  return MaterialPageRoute(
-                    builder: (_) => const QuizConhecimentoPage(),
-                  );
-                case '/upgrade':
-                  return MaterialPageRoute(builder: (_) => const TelaUpgrade());
-                case '/relatorios':
-                  return MaterialPageRoute(
-                    builder: (_) => const DashboardScreen(
-                      title: 'Relatórios',
-                      showBackButton: true,
-                      chartsOnly: false,
-                    ),
-                  );
-                case '/graficos':
-                  return MaterialPageRoute(
-                    builder: (_) => const DashboardScreen(
-                      title: 'Gráficos',
-                      showBackButton: true,
-                      chartsOnly: true,
-                    ),
-                  );
-                case '/cambio':
-                  return MaterialPageRoute(
-                    builder: (_) => const CambioScreen(),
-                  );
-                default:
-                  return MaterialPageRoute(builder: (_) => const TelaSplash());
-              }
-            },
+            onGenerateRoute: MentorAppRouter.onGenerateRoute,
           );
         },
       ),

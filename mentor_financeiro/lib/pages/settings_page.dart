@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../services/app_theme_controller.dart';
+import '../services/currency_preference_controller.dart';
 import '../services/locale_controller.dart';
 import '../services/subscription_provider.dart';
 import 'paywall_screen.dart';
@@ -32,7 +34,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (!mounted) return;
     setState(() {
       _idiomaSelecionado = prefs.getString(LocaleController.prefsKey) ?? 'pt';
-      _moedaSelecionada = prefs.getString('moeda') ?? 'BRL';
+      _moedaSelecionada = prefs.getString('moeda') ?? 'AUTO';
       _temaSelecionado = _themeController.themeMode.index;
     });
   }
@@ -133,7 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   _buildListTile(
                     icon: Icons.attach_money,
                     title: 'Unidade Monetária',
-                    subtitle: _getMoedaNome(_moedaSelecionada),
+                    subtitle: _getMoedaNome(context, _moedaSelecionada),
                     trailing: const Icon(
                       Icons.chevron_right,
                       color: Colors.white38,
@@ -274,8 +276,11 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  String _getMoedaNome(String codigo) {
+  String _getMoedaNome(BuildContext context, String codigo) {
+    final l10n = AppLocalizations.of(context);
     switch (codigo) {
+      case 'AUTO':
+        return l10n?.currencyFollowLocale ?? 'Automático (idioma)';
       case 'BRL':
         return 'Real (R\$)';
       case 'USD':
@@ -283,7 +288,7 @@ class _SettingsPageState extends State<SettingsPage> {
       case 'EUR':
         return 'Euro (€)';
       default:
-        return 'Real (R\$)';
+        return l10n?.currencyFollowLocale ?? 'Automático (idioma)';
     }
   }
 
@@ -345,19 +350,19 @@ class _SettingsPageState extends State<SettingsPage> {
               style: TextStyle(color: Colors.white, fontSize: 18),
             ),
             const SizedBox(height: 16),
-            ...['BRL', 'USD', 'EUR'].map(
+            ...['AUTO', 'BRL', 'USD', 'EUR'].map(
               (cod) => ListTile(
                 title: Text(
-                  _getMoedaNome(cod),
+                  _getMoedaNome(context, cod),
                   style: const TextStyle(color: Colors.white),
                 ),
                 trailing: _moedaSelecionada == cod
                     ? const Icon(Icons.check, color: Color(0xFF00D9FF))
                     : null,
-                onTap: () {
+                onTap: () async {
                   setState(() => _moedaSelecionada = cod);
-                  _salvarPreferencia('moeda', cod);
-                  Navigator.pop(context);
+                  await CurrencyPreferenceController.instance.setCurrencyMode(cod);
+                  if (context.mounted) Navigator.pop(context);
                 },
               ),
             ),

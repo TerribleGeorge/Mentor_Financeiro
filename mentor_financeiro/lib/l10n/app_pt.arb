@@ -361,5 +361,79 @@
   "notaRevisar": "Revise suas finanças.",
   "@notaRevisar": {
     "description": "Need to review"
-  }
+  },
+  "mentorInsightTitle": "Orientação do Mentor",
+  "@mentorInsightTitle": {
+    "description": "Mentor insight card title"
+  },
+  "mentorInsightLoading": "Consultando mercado…",
+  "@mentorInsightLoading": {
+    "description": "Mentor insight loading"
+  },
+  "mentorInsightError": "Não foi possível carregar os dados agora. Tente de novo em instantes.",
+  "@mentorInsightError": {
+    "description": "Mentor insight error"
+  },
+  "mentorInsightOffline": "Sem internet. Conecte-se para consultar cotações e o Mentor.",
+  "@mentorInsightOffline": {
+    "description": "Mentor insight when device is offline"
+  },
+  "mentorAllocationDefensive": "Com a volatilidade atual, priorize preservação de capital e liquidez antes de buscar retorno.",
+  "@mentorAllocationDefensive": {
+    "description": "Defensive allocation hint"
+  },
+  "mentorAllocationBalanced": "Equilibre proteção e crescimento: diversifique e revisite o prazo do seu objetivo.",
+  "@mentorAllocationBalanced": {
+    "description": "Balanced allocation hint"
+  },
+  "mentorAllocationOffensive": "Seu perfil permite mais risco: mantenha disciplina e limite concentrações em poucos ativos.",
+  "@mentorAllocationOffensive": {
+    "description": "Offensive allocation hint"
+  },
+  "mentorInsightSymbols": "Ativos observados: {symbols}",
+  "@mentorInsightSymbols": {
+    "description": "List of symbols watched by mentor",
+    "placeholders": {
+      "symbols": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyFollowLocale": "Automático (idioma)",
+  "@currencyFollowLocale": {
+    "description": "Currency follows app language"
+  },
+  "compoundCalculatorTitle": "Calculadora Mentora — Juros Compostos",
+  "@compoundCalculatorTitle": {
+    "description": "Compound interest calculator title"
+  },
+  "compoundCalculatorSubtitle": "Simule aportes, veja ganho nominal e real (após inflação) e ouça o Mentor.",
+  "@compoundCalculatorSubtitle": {
+    "description": "Compound calculator subtitle"
+  },
+  "compoundInitialLabel": "Aporte inicial",
+  "compoundMonthlyLabel": "Aporte mensal",
+  "compoundRateLabel": "Taxa de juros",
+  "compoundRateAnnual": "ao ano",
+  "compoundRateMonthly": "ao mês",
+  "compoundHorizonLabel": "Prazo",
+  "compoundHorizonYears": "anos",
+  "compoundHorizonMonths": "meses",
+  "compoundInflationLabel": "Inflação estimada (% ao ano)",
+  "compoundCalculate": "Calcular",
+  "compoundChartInvested": "Total investido",
+  "compoundChartInterest": "Juros ganhos",
+  "compoundSummaryNominalEnd": "Montante final (nominal)",
+  "compoundSummaryRealGain": "Ganho real (poder de compra)",
+  "compoundMentorCardTitle": "Conselho do Mentor",
+  "compoundInvalidInput": "Preencha valores válidos (prazo > 0).",
+  "userPersonaSectionTitle": "Tom do Mentor",
+  "@userPersonaSectionTitle": {
+    "description": "Persona selector title"
+  },
+  "userPersonaNovice": "Iniciante",
+  "userPersonaStrategist": "Estrategista",
+  "userPersonaRiskTaker": "Arrojado",
+  "userPersonaConservative": "Poupador",
+  "compoundOpenFullInsight": "Ver análise completa do Mentor"
 }

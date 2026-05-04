@@ -93,5 +93,45 @@
   "notaExcelente": "Excellent! You have great financial health.",
   "notaBom": "Good, but can improve.",
   "notaAtencao": "Attention to spending.",
-  "notaRevisar": "Review your finances."
+  "notaRevisar": "Review your finances.",
+  "mentorInsightTitle": "Mentor guidance",
+  "mentorInsightLoading": "Fetching market data…",
+  "mentorInsightError": "Could not load data right now. Try again shortly.",
+  "mentorInsightOffline": "You're offline. Connect to fetch quotes and Mentor insights.",
+  "mentorAllocationDefensive": "Given current volatility, prioritize capital preservation and liquidity before chasing returns.",
+  "mentorAllocationBalanced": "Balance protection and growth: diversify and revisit your goal horizon.",
+  "mentorAllocationOffensive": "Your profile allows more risk: stay disciplined and avoid heavy concentration.",
+  "mentorInsightSymbols": "Symbols reviewed: {symbols}",
+  "@mentorInsightSymbols": {
+    "placeholders": {
+      "symbols": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyFollowLocale": "Automatic (language)",
+  "compoundCalculatorTitle": "Mentor Calculator — Compound Interest",
+  "compoundCalculatorSubtitle": "Simulate contributions, nominal vs real gain (after inflation), and mentor notes.",
+  "compoundInitialLabel": "Initial lump sum",
+  "compoundMonthlyLabel": "Monthly contribution",
+  "compoundRateLabel": "Interest rate",
+  "compoundRateAnnual": "per year",
+  "compoundRateMonthly": "per month",
+  "compoundHorizonLabel": "Time horizon",
+  "compoundHorizonYears": "years",
+  "compoundHorizonMonths": "months",
+  "compoundInflationLabel": "Estimated inflation (% per year)",
+  "compoundCalculate": "Calculate",
+  "compoundChartInvested": "Total invested",
+  "compoundChartInterest": "Interest earned",
+  "compoundSummaryNominalEnd": "Ending balance (nominal)",
+  "compoundSummaryRealGain": "Real gain (purchasing power)",
+  "compoundMentorCardTitle": "Mentor advice",
+  "compoundInvalidInput": "Enter valid values (horizon > 0).",
+  "userPersonaSectionTitle": "Mentor tone",
+  "userPersonaNovice": "Beginner",
+  "userPersonaStrategist": "Strategist",
+  "userPersonaRiskTaker": "Risk-taker",
+  "userPersonaConservative": "Saver",
+  "compoundOpenFullInsight": "Open full mentor insight"
 }

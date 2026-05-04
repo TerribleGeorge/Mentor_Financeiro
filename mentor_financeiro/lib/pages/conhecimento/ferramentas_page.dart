@@ -26,6 +26,21 @@ class FerramentasPage extends StatelessWidget {
           _buildHeader(),
           const SizedBox(height: 24),
           _buildSection(
+            'Calculadoras do Mentor',
+            'Simulações inteligentes com orientação prática:',
+            Icons.calculate_outlined,
+            [
+              _buildNavToolItem(
+                context,
+                'Calculadora Mentora de Juros',
+                'Montante nominal, ganho real após inflação e conselhos sobre IR, prazo e disciplina.',
+                const Color(0xFF00D9FF),
+                '/ferramentas/calculadora-juros',
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildSection(
             'Corretoras Recomendadas',
             'As melhores opções para começar a investir no Brasil:',
             Icons.business,
@@ -246,6 +261,59 @@ class FerramentasPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNavToolItem(
+    BuildContext context,
+    String name,
+    String description,
+    Color color,
+    String route,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => Navigator.pushNamed(context, route),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        description,
+                        style: const TextStyle(color: Colors.white54, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Colors.white38),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

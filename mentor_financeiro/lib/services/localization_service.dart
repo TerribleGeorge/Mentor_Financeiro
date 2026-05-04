@@ -1,14 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalizationService {
   static Locale _currentLocale = const Locale('pt', 'BR');
-  static String _currencySymbol = 'R\$';
+  static String _currencySymbol = r'R$';
   static String _currencyCode = 'BRL';
+
+  /// `AUTO` segue o idioma/região atual; caso contrário ISO (`BRL`, `USD`, `EUR`).
+  static String _currencyMode = 'AUTO';
 
   static Locale get currentLocale => _currentLocale;
   static String get currencySymbol => _currencySymbol;
   static String get currencyCode => _currencyCode;
+  static String get currencyMode => _currencyMode;
+
+  static Future<void> initializeCurrencyMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    _currencyMode = prefs.getString('moeda') ?? 'AUTO';
+    _applyCurrencyDisplay();
+  }
+
+  static Future<void> setCurrencyMode(String mode) async {
+    _currencyMode = mode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('moeda', mode);
+    _applyCurrencyDisplay();
+  }
 
   static String formatCurrency(double value) {
     final format = NumberFormat.currency(
@@ -34,34 +52,61 @@ class LocalizationService {
 
     if (systemLocale.countryCode == 'BR' || systemLocale.languageCode == 'pt') {
       _currentLocale = const Locale('pt', 'BR');
-      _currencySymbol = 'R\$';
-      _currencyCode = 'BRL';
     } else if (systemLocale.languageCode == 'en') {
       _currentLocale = const Locale('en', 'US');
-      _currencySymbol = '\$';
-      _currencyCode = 'USD';
     } else if (systemLocale.languageCode == 'es') {
       _currentLocale = const Locale('es', 'ES');
-      _currencySymbol = '€';
-      _currencyCode = 'EUR';
     } else {
       _currentLocale = const Locale('pt', 'BR');
-      _currencySymbol = 'R\$';
-      _currencyCode = 'BRL';
     }
+    _applyCurrencyDisplay();
   }
 
   static void setLocale(Locale locale) {
     _currentLocale = locale;
+    _applyCurrencyDisplay();
+  }
+
+  static void _applyCurrencyDisplay() {
+    if (_currencyMode != 'AUTO') {
+      _applyIsoCurrency(_currencyMode);
+      return;
+    }
+    _applyLocaleDefaultCurrency(_currentLocale);
+  }
+
+  static void _applyLocaleDefaultCurrency(Locale locale) {
     if (locale.countryCode == 'BR' || locale.languageCode == 'pt') {
-      _currencySymbol = 'R\$';
+      _currencySymbol = r'R$';
       _currencyCode = 'BRL';
     } else if (locale.languageCode == 'en') {
-      _currencySymbol = '\$';
+      _currencySymbol = r'$';
       _currencyCode = 'USD';
     } else if (locale.languageCode == 'es') {
       _currencySymbol = '€';
       _currencyCode = 'EUR';
+    } else {
+      _currencySymbol = r'R$';
+      _currencyCode = 'BRL';
+    }
+  }
+
+  static void _applyIsoCurrency(String iso) {
+    switch (iso.toUpperCase()) {
+      case 'BRL':
+        _currencySymbol = r'R$';
+        _currencyCode = 'BRL';
+        break;
+      case 'USD':
+        _currencySymbol = r'$';
+        _currencyCode = 'USD';
+        break;
+      case 'EUR':
+        _currencySymbol = '€';
+        _currencyCode = 'EUR';
+        break;
+      default:
+        _applyLocaleDefaultCurrency(_currentLocale);
     }
   }
 
@@ -73,13 +118,13 @@ class LocalizationService {
 
   static String getCurrencySymbolForLocale(Locale locale) {
     if (locale.countryCode == 'BR' || locale.languageCode == 'pt') {
-      return 'R\$';
+      return r'R$';
     } else if (locale.languageCode == 'en') {
-      return '\$';
+      return r'$';
     } else if (locale.languageCode == 'es') {
       return '€';
     }
-    return 'R\$';
+    return r'R$';
   }
 
   static String getLocaleName(Locale locale) {
