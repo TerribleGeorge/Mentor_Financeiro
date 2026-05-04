@@ -18,6 +18,7 @@ class _PersonaSetupScreenState extends State<PersonaSetupScreen> {
   Future<void> _confirm() async {
     await UserPersonaService.instance.setPersona(_selected);
     await UserPersonaService.instance.setMentorPersonaSetupComplete();
+    await UserPersonaService.instance.flushMentorProfileToCloud();
     if (!mounted) return;
     Navigator.of(context).pushReplacementNamed(AppRoutes.home);
   }

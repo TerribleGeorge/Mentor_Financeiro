@@ -3,12 +3,14 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/persona_visual_theme.dart';
 import '../../domain/entities/user_persona.dart';
+import '../../domain/mentorship/mentorship_engine.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/localization_service.dart';
 import '../../services/user_persona_service.dart';
 import 'insight_detail_args.dart';
 
-/// Análise detalhada da simulação, com tom reativo ao [UserPersona].
+/// Análise detalhada da simulação: o tom do mentor vem de [MentorshipEngine] + persona atual
+/// (não dos argumentos da rota), para refletir [UserPersonaService] após mudanças na UI.
 class InsightDetailScreen extends StatelessWidget {
   const InsightDetailScreen({super.key});
 
@@ -28,6 +30,13 @@ class InsightDetailScreen extends StatelessWidget {
     final persona = context.watch<UserPersonaService>().persona;
     final visual = PersonaVisualTheme.forPersona(persona);
     final r = args.result;
+    final lang = Localizations.localeOf(context).languageCode;
+    const mentorVoice = MentorshipEngine();
+    final advice = mentorVoice.buildAdvice(
+      result: r,
+      persona: persona,
+      languageCode: lang,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -65,7 +74,7 @@ class InsightDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          ...args.advice.map(
+          ...advice.map(
             (t) => Padding(
               padding: const EdgeInsets.only(bottom: 14),
               child: Row(

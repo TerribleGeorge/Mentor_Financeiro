@@ -37,4 +37,15 @@ class CompoundInterestInputs {
       interestRatePercent >= 0 &&
       annualInflationPercent >= 0 &&
       !(initialAmount == 0 && monthlyContribution == 0);
+
+  /// Para persistência em Firestore (`saved_simulations.inputs`).
+  Map<String, dynamic> toFirestoreMap() => {
+        'initialAmount': initialAmount,
+        'monthlyContribution': monthlyContribution,
+        'interestRatePercent': interestRatePercent,
+        'ratePeriod': ratePeriod.name,
+        'horizonValue': horizonValue,
+        'horizonUnit': horizonUnit.name,
+        'annualInflationPercent': annualInflationPercent,
+      };
 }

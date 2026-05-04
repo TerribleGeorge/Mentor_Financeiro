@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../core/network/connectivity_service.dart';
+import '../../core/network/offline_exception.dart';
+import '../services/market_quotes_cache.dart';
 import '../../domain/entities/financial_market_region.dart';
 import '../../domain/entities/financial_quote.dart';
 import '../../domain/entities/market_data_snapshot.dart';
@@ -24,6 +26,21 @@ class YahooFinancialDataProvider implements IFinancialDataProvider {
 
   @override
   Future<MarketDataSnapshot> fetchQuotes(List<String> symbols) async {
+    try {
+      return await _fetchQuotesImpl(symbols);
+    } on OfflineException {
+      rethrow;
+    } catch (e, st) {
+      debugPrint('YahooFinancialDataProvider falha de rede/API: $e\n$st');
+      final cached = MarketQuotesCache.instance.peek(providerId);
+      if (cached != null && cached.quotes.isNotEmpty) {
+        return cached;
+      }
+      rethrow;
+    }
+  }
+
+  Future<MarketDataSnapshot> _fetchQuotesImpl(List<String> symbols) async {
     final quotes = <FinancialQuote>[];
     final now = DateTime.now().toUtc();
     var ensuredOnline = false;
@@ -93,10 +110,12 @@ class YahooFinancialDataProvider implements IFinancialDataProvider {
       }
     }
 
-    return MarketDataSnapshot(
+    final snapshot = MarketDataSnapshot(
       providerId: providerId,
       fetchedAt: now,
       quotes: quotes,
     );
+    MarketQuotesCache.instance.remember(providerId, snapshot);
+    return snapshot;
   }
 }

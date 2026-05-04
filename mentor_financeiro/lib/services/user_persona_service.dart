@@ -92,6 +92,9 @@ class UserPersonaService extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// Garante envio imediato do documento `users/{uid}` (ex.: após setup de persona).
+  Future<void> flushMentorProfileToCloud() => _syncMentorDocumentToCloud();
+
   /// Usuários que já concluíram onboarding legado não ficam presos no fluxo v2.
   Future<void> migrateFromLegacyIfNeeded({
     required bool legacyOnboardingComplete,

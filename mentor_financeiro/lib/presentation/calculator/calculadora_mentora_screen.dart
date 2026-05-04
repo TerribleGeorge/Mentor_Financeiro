@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +12,7 @@ import '../../core/theme/persona_visual_theme.dart';
 import '../../domain/entities/compound_interest_inputs.dart';
 import '../../domain/entities/compound_interest_result.dart';
 import '../../domain/entities/user_persona.dart';
+import '../../data/services/firebase_data_service.dart';
 import '../../domain/finance/compound_interest_calculator.dart';
 import '../../domain/mentorship/mentorship_engine.dart';
 import '../../l10n/app_localizations.dart';
@@ -65,7 +68,7 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
     return double.tryParse(t);
   }
 
-  void _compute() {
+  Future<void> _compute() async {
     final lang = Localizations.localeOf(context).languageCode;
     final l10n = AppLocalizations.of(context)!;
 
@@ -128,12 +131,57 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
         _advice = advice;
         _error = null;
       });
+      await _persistSimulationToFirestore(
+        inputs: inputs,
+        result: result,
+        persona: persona,
+      );
     } catch (_) {
       setState(() {
         _error = l10n.compoundInvalidInput;
         _result = null;
         _advice = [];
       });
+    }
+  }
+
+  Future<void> _persistSimulationToFirestore({
+    required CompoundInterestInputs inputs,
+    required CompoundInterestResult result,
+    required UserPersona persona,
+  }) async {
+    if (Firebase.apps.isEmpty) return;
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    try {
+      await FirebaseDataService.instance.saveSimulation(
+        uid: uid,
+        inputs: inputs.toFirestoreMap(),
+        summary: result.summaryFirestoreMap(personaName: persona.name),
+        label: 'compound_calculator',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Simulação salva na sua conta (nuvem).'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('saveSimulation: $e');
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Não foi possível salvar na nuvem (conexão ou permissão). O cálculo local permanece.',
+            style: const TextStyle(fontSize: 13),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -220,7 +268,7 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: _compute,
+              onPressed: () => _compute(),
               style: FilledButton.styleFrom(
                 backgroundColor: visual.accent,
                 foregroundColor: visual.onAccent,
@@ -240,10 +288,7 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
                 onPressed: () {
                   Navigator.of(context).pushNamed(
                     AppRoutes.insightDetail,
-                    arguments: InsightDetailArgs(
-                      result: _result!,
-                      advice: List<String>.from(_advice),
-                    ),
+                    arguments: InsightDetailArgs(result: _result!),
                   );
                 },
                 style: OutlinedButton.styleFrom(
