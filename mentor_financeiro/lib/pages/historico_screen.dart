@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../models/transacao_model.dart';
 import '../services/localization_service.dart';
 import '../theme/classic_mode_style.dart';
+import '../widgets/ads/adaptive_banner_ad.dart';
 
 class HistoricoScreen extends StatefulWidget {
   const HistoricoScreen({super.key});
@@ -21,6 +22,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Colors.transparent,
+      bottomNavigationBar: const AdaptiveBannerAd(),
       body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

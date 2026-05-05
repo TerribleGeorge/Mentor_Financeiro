@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/transacao_model.dart';
 
 enum TipoDica { alerta, oportunidade, goldenDay, perigo, nenhuma }
@@ -35,6 +36,185 @@ class NotaSaudeFinanceira {
 
 class MentoriaService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // ==============================================================================
+  // MÓDULOS / LIÇÕES (Mentoria v2)
+  // ==============================================================================
+  static const String _prefsMentoriaCompletedLessonsKey =
+      'mentoria_completed_lessons_v1';
+
+  static List<MentoriaModule> modules() {
+    return const [
+      MentoriaModule(
+        id: 'mindset',
+        title: 'Mentalidade e Comportamento',
+        subtitle: 'Diagnóstico de vícios de consumo e reeducação psicológica.',
+        accent: 0xFF00E5FF,
+        lessons: [
+          MentoriaLesson(
+            id: 'mindset_01_triggers',
+            title: 'Gatilhos de Consumo',
+            videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            blocks: [
+              MentoriaContentBlock.paragraph(
+                'Você não compra “coisas”. Você compra alívio, status, pertencimento ou distração.',
+              ),
+              MentoriaContentBlock.bullets([
+                'Identifique 3 gatilhos: tédio, ansiedade, recompensa.',
+                'Quando o gatilho aparecer, adie a compra por 24h.',
+                'Troque o hábito: caminhada curta, água, respiração 4-7-8.',
+              ]),
+            ],
+            checkpoint: MentoriaCheckpoint(
+              title: 'Exercício',
+              prompt:
+                  'Escreva 1 gatilho que te faz gastar e 1 alternativa saudável para ele.',
+            ),
+          ),
+        ],
+      ),
+      MentoriaModule(
+        id: 'spending_engineering',
+        title: 'Engenharia de Gastos',
+        subtitle: 'Separação por baldes: Essencial, Lazer, Investimento.',
+        accent: 0xFF6366F1,
+        lessons: [
+          MentoriaLesson(
+            id: 'engine_01_buckets',
+            title: 'Os 3 Baldes',
+            videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            blocks: [
+              MentoriaContentBlock.paragraph(
+                'Seu dinheiro precisa de “trilhos”. Sem trilho, ele vaza.',
+              ),
+              MentoriaContentBlock.bullets([
+                'Essencial: moradia, comida, contas, saúde.',
+                'Lazer: escolhas conscientes (não automático).',
+                'Investimento: pagar o seu “eu do futuro” primeiro.',
+              ]),
+            ],
+            checkpoint: MentoriaCheckpoint(
+              title: 'Checkpoint',
+              prompt:
+                  'Defina um percentual inicial para cada balde (ex.: 70/20/10).',
+            ),
+          ),
+        ],
+      ),
+      MentoriaModule(
+        id: 'wealth_protection',
+        title: 'Proteção de Patrimônio',
+        subtitle: 'Fundo de emergência e seguros (blindagem).',
+        accent: 0xFFFFD166,
+        lessons: [
+          MentoriaLesson(
+            id: 'protect_01_emergency',
+            title: 'Fundo de Emergência',
+            videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            blocks: [
+              MentoriaContentBlock.paragraph(
+                'Sem fundo de emergência, qualquer imprevisto vira dívida.',
+              ),
+              MentoriaContentBlock.bullets([
+                'Meta mínima: 1 mês de custos essenciais.',
+                'Meta ideal: 3 a 6 meses.',
+                'Automatize: aporte fixo no início do mês.',
+              ]),
+            ],
+            checkpoint: MentoriaCheckpoint(
+              title: 'Checkpoint',
+              prompt: r'Qual é sua meta de fundo de emergência (R$) para 30 dias?',
+            ),
+          ),
+        ],
+      ),
+      MentoriaModule(
+        id: 'freedom_acceleration',
+        title: 'Aceleração de Liberdade',
+        subtitle: 'Aumentar renda e usar juros compostos.',
+        accent: 0xFFFF2D2D,
+        lessons: [
+          MentoriaLesson(
+            id: 'freedom_01_income',
+            title: 'Aumentando a Renda',
+            videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            blocks: [
+              MentoriaContentBlock.paragraph(
+                'O jogo acelera quando você aumenta a entrada e reduz vazamentos.',
+              ),
+              MentoriaContentBlock.bullets([
+                'Liste 2 skills monetizáveis que você já tem.',
+                'Crie uma oferta simples (serviço/produto) e valide.',
+                'Direcione a renda extra: primeiro dívida → fundo → investir.',
+              ]),
+            ],
+            checkpoint: MentoriaCheckpoint(
+              title: 'Exercício',
+              prompt: r'Qual renda extra mensal (R$) você quer atingir em 60 dias?',
+            ),
+          ),
+        ],
+      ),
+    ];
+  }
+
+  static Future<Set<String>> completedLessonIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ids = prefs.getStringList(_prefsMentoriaCompletedLessonsKey) ?? const [];
+    return ids.toSet();
+  }
+
+  static Future<void> markLessonCompleted(String lessonId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final ids = (prefs.getStringList(_prefsMentoriaCompletedLessonsKey) ?? const [])
+        .toSet();
+    ids.add(lessonId);
+    await prefs.setStringList(_prefsMentoriaCompletedLessonsKey, ids.toList());
+  }
+
+  static int totalLessonsCount() {
+    var total = 0;
+    for (final m in modules()) {
+      total += m.lessons.length;
+    }
+    return total;
+  }
+
+  static Future<double> mentorScoreProgress01() async {
+    final done = await completedLessonIds();
+    final total = totalLessonsCount();
+    if (total <= 0) return 0;
+    return (done.length / total).clamp(0.0, 1.0);
+  }
+
+  static Future<MentorLimitAlert?> mentorLimitAlertFromPrefs({
+    required SharedPreferences prefs,
+    required double dailyLimit,
+  }) async {
+    if (dailyLimit <= 0) return null;
+    final now = DateTime.now();
+    int streak = 0;
+    for (int i = 0; i < 3; i++) {
+      final d = now.subtract(Duration(days: i));
+      final key = '${d.year.toString().padLeft(4, '0')}-'
+          '${d.month.toString().padLeft(2, '0')}-'
+          '${d.day.toString().padLeft(2, '0')}';
+      final spent = prefs.getDouble('gastos_$key') ?? 0.0;
+      if (spent > dailyLimit) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    if (streak >= 3) {
+      return const MentorLimitAlert(
+        title: 'Alerta do Mentor',
+        message:
+            'Você passou do seu limite diário por 3 dias seguidos. Hoje, use a regra do “adiar 24h” e corte 1 gasto automático.',
+      );
+    }
+    return null;
+  }
 
   static Future<Map<String, dynamic>?> buscarDadosUsuario(String uid) async {
     final doc = await _firestore.collection('usuarios').doc(uid).get();
@@ -284,4 +464,77 @@ class MentoriaService {
           : pontosNegativos,
     );
   }
+}
+
+// ==============================================================================
+// MODELOS DE CONTEÚDO (Mentoria)
+// ==============================================================================
+
+class MentoriaModule {
+  const MentoriaModule({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.accent,
+    required this.lessons,
+  });
+
+  final String id;
+  final String title;
+  final String subtitle;
+  final int accent; // 0xAARRGGBB
+  final List<MentoriaLesson> lessons;
+}
+
+class MentoriaLesson {
+  const MentoriaLesson({
+    required this.id,
+    required this.title,
+    required this.videoUrl,
+    required this.blocks,
+    required this.checkpoint,
+  });
+
+  final String id;
+  final String title;
+  final String videoUrl;
+  final List<MentoriaContentBlock> blocks;
+  final MentoriaCheckpoint checkpoint;
+}
+
+class MentoriaCheckpoint {
+  const MentoriaCheckpoint({required this.title, required this.prompt});
+  final String title;
+  final String prompt;
+}
+
+enum MentoriaBlockType { paragraph, bullets }
+
+class MentoriaContentBlock {
+  const MentoriaContentBlock._(this.type, {this.text, this.items});
+
+  final MentoriaBlockType type;
+  final String? text;
+  final List<String>? items;
+
+  const factory MentoriaContentBlock.paragraph(String text) =
+      _MentoriaParagraphBlock;
+  const factory MentoriaContentBlock.bullets(List<String> items) =
+      _MentoriaBulletsBlock;
+}
+
+class _MentoriaParagraphBlock extends MentoriaContentBlock {
+  const _MentoriaParagraphBlock(String text)
+      : super._(MentoriaBlockType.paragraph, text: text);
+}
+
+class _MentoriaBulletsBlock extends MentoriaContentBlock {
+  const _MentoriaBulletsBlock(List<String> items)
+      : super._(MentoriaBlockType.bullets, items: items);
+}
+
+class MentorLimitAlert {
+  const MentorLimitAlert({required this.title, required this.message});
+  final String title;
+  final String message;
 }

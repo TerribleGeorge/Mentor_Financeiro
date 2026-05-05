@@ -6,11 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../domain/finance/daily_limit_calculator.dart';
 import '../core/constants/app_routes.dart';
 import '../services/subscription_provider.dart';
+import '../services/mentoria_service.dart';
+import '../services/ad_manager_service.dart';
 import '../theme/classic_mode_style.dart';
 import '../services/finance_config_signals.dart';
 import 'adicionar_transacao_page.dart';
 import 'paywall_screen.dart';
 import 'tela_configuracao.dart';
+import '../widgets/ads/adaptive_banner_ad.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _alertaLimiteDiario;
   String _nomeUsuario = 'Usuário';
   String? _photoUrl;
+  MentorLimitAlert? _mentorAlert;
   final ScrollController _scrollController = ScrollController();
 
   void _onFinanceConfigSaved() => _carregarDados();
@@ -37,6 +41,14 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     FinanceConfigSignals.addListener(_onFinanceConfigSaved);
     _carregarDados();
+    // Preload interstitial for "pause moments" (free only; service handles gating).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final sub = context.read<SubscriptionProvider>();
+      if (!sub.isPremium) {
+        // fire-and-forget
+        AdManagerService.instance.preloadInterstitial(sub);
+      }
+    });
   }
 
   @override
@@ -70,6 +82,11 @@ class _HomeScreenState extends State<HomeScreen> {
     _porcentagem = _limiteDiario > 0
         ? (_gastosHoje / _limiteDiario).clamp(0.0, 1.0)
         : 0;
+
+    _mentorAlert = await MentoriaService.mentorLimitAlertFromPrefs(
+      prefs: prefs,
+      dailyLimit: _limiteDiario,
+    );
 
     if (mounted) setState(() {});
   }
@@ -140,6 +157,57 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
+                      if (_mentorAlert != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFFFF2D2D).withValues(alpha: 0.45),
+                            ),
+                            color: const Color(0xFFFF2D2D).withValues(alpha: 0.08),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.warning_amber, color: Color(0xFFFF2D2D)),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _mentorAlert!.title,
+                                      style: TextStyle(
+                                        color: scheme.onSurface,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _mentorAlert!.message,
+                                      style: TextStyle(
+                                        color: scheme.onSurface.withValues(alpha: 0.75),
+                                        height: 1.25,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                onPressed: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.mentoria,
+                                ),
+                                icon: const Icon(Icons.chevron_right),
+                                color: scheme.onSurface.withValues(alpha: 0.75),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
@@ -238,11 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Transações',
                               const Color(0xFF00D9FF),
                               () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/principal',
-                                  arguments: 2,
-                                );
+                                Navigator.pushNamed(context, AppRoutes.historico);
                               },
                             ),
                           ),
@@ -254,11 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Gráficos',
                               const Color(0xFF26DE81),
                               () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/principal',
-                                  arguments: 1,
-                                );
+                                Navigator.pushNamed(context, AppRoutes.graficos);
                               },
                             ),
                           ),
@@ -270,15 +330,18 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Histórico',
                               const Color(0xFFFECA57),
                               () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/principal',
-                                  arguments: 2,
-                                );
+                                Navigator.pushNamed(context, AppRoutes.historico);
                               },
                             ),
                           ),
                         ],
+                      ),
+                      // Banner no fim da Home (não pode cobrir barras de navegação).
+                      const SizedBox(height: 16),
+                      const AdaptiveBannerAd(),
+                      SizedBox(
+                        height: MediaQuery.paddingOf(context).bottom +
+                            kBottomNavigationBarHeight,
                       ),
                     ],
                   ),
@@ -431,14 +494,14 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'Mentoria',
           color: const Color(0xFFFF4D4D),
           premium: true,
-          onTap: () => Navigator.pushNamed(context, AppRoutes.relatorios),
+          onTap: () => Navigator.pushNamed(context, AppRoutes.mentoria),
         ),
         tile(
           icon: Icons.query_stats,
           label: 'Análise Personalizada',
           color: const Color(0xFF00D9FF),
           premium: true,
-          onTap: () => Navigator.pushNamed(context, AppRoutes.graficos),
+          onTap: () => Navigator.pushNamed(context, AppRoutes.relatorios),
         ),
         tile(
           icon: Icons.auto_graph,

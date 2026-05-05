@@ -11,7 +11,9 @@ import '../pages/conhecimento/investimentos_menu.dart';
 import '../pages/conhecimento/perigos_page.dart';
 import '../pages/conhecimento/primeiros_passos_page.dart';
 import '../pages/main_navigation.dart';
+import '../pages/historico_screen.dart';
 import '../pages/relatorios_screen.dart';
+import '../pages/graficos_screen.dart';
 import '../widgets/premium_wrapper.dart';
 import '../pages/simulado_page.dart';
 import '../pages/tela_estrategias.dart';
@@ -24,6 +26,8 @@ import '../pages/tela_upgrade.dart';
 import '../pages/quiz_conhecimento_page.dart';
 import '../pages/questionario_page.dart';
 import '../pages/home_screen.dart';
+import '../pages/mentoria/mentoria_screen.dart';
+import '../pages/mentoria/mentoria_lesson_screen.dart';
 import '../presentation/calculator/calculadora_mentora_screen.dart';
 import '../presentation/insight/insight_detail_screen.dart';
 import '../presentation/onboarding/onboarding_flow_screen.dart';
@@ -90,6 +94,11 @@ class MentorAppRouter {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const TelaPerfil(),
+        );
+      case AppRoutes.historico:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const HistoricoScreen(),
         );
       case AppRoutes.metas:
         return MaterialPageRoute<void>(
@@ -169,6 +178,25 @@ class MentorAppRouter {
           settings: settings,
           builder: (_) => const TelaUpgrade(),
         );
+      case AppRoutes.mentoria:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const PremiumWrapper(
+            feature: 'Mentoria',
+            child: MentoriaScreen(),
+          ),
+        );
+      case AppRoutes.mentoriaLesson:
+        final raw = settings.arguments;
+        final args = raw is MentoriaLessonArgs ? raw : null;
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => args == null
+              ? const Scaffold(
+                  body: Center(child: Text('Lição inválida')),
+                )
+              : MentoriaLessonScreen(args: args),
+        );
       case AppRoutes.relatorios:
         return MaterialPageRoute<void>(
           settings: settings,
@@ -184,14 +212,7 @@ class MentorAppRouter {
       case AppRoutes.graficos:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const PremiumWrapper(
-            feature: 'Análises personalizadas (dashboards)',
-            child: DashboardScreen(
-              title: 'Gráficos',
-              showBackButton: true,
-              chartsOnly: true,
-            ),
-          ),
+          builder: (_) => const GraficosScreen(),
         );
       case AppRoutes.cambio:
         return MaterialPageRoute<void>(

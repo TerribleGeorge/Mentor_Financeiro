@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/transacao_model.dart';
+import '../services/ad_manager_service.dart';
+import '../services/subscription_provider.dart';
 
 class AdicionarTransacaoPage extends StatefulWidget {
   const AdicionarTransacaoPage({super.key});
@@ -116,7 +119,15 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
           backgroundColor: Color(0xFF26DE81),
         ),
       );
-      Navigator.pop(context);
+      final sub = context.read<SubscriptionProvider>();
+      await AdManagerService.instance.showInterstitialIfAvailable(
+        sub,
+        onDismissed: () {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
+        },
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

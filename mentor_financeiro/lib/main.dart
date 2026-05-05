@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'core/config/app_secrets.dart';
 import 'core/constants/app_routes.dart';
@@ -222,6 +223,10 @@ void main() {
   runZonedGuarded(
     () {
       WidgetsFlutterBinding.ensureInitialized();
+      // AdMob: inicialização segura (falha não pode travar boot).
+      try {
+        MobileAds.instance.initialize();
+      } catch (_) {}
       // Registro global do Showcase (substitui o widget depreciado ShowCaseWidget).
       ShowcaseView.register(
         enableAutoScroll: true,

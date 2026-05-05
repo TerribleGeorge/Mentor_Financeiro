@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/ads/native_ad_card.dart';
 
 class ConhecimentoHub extends StatelessWidget {
   const ConhecimentoHub({super.key});
@@ -135,6 +136,7 @@ class ConhecimentoHub extends StatelessWidget {
               ),
             ),
           ),
+          const NativeAdCard(),
         ],
       ),
     );

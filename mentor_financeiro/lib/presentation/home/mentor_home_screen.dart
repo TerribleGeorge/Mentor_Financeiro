@@ -253,7 +253,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
               title: 'Mentoria completa',
               subtitle: 'Dicas personalizadas e recomendações avançadas',
               locked: !subscription.isPremium,
-              onTap: () => Navigator.of(context).pushNamed(AppRoutes.relatorios),
+              onTap: () => Navigator.of(context).pushNamed(AppRoutes.mentoria),
             ),
             const SizedBox(height: 12),
             vitrineCard(
@@ -262,7 +262,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
               title: 'Análises personalizadas',
               subtitle: 'Dashboards avançados com seus dados',
               locked: !subscription.isPremium,
-              onTap: () => Navigator.of(context).pushNamed(AppRoutes.graficos),
+              onTap: () => Navigator.of(context).pushNamed(AppRoutes.relatorios),
             ),
             const SizedBox(height: 12),
             vitrineCard(

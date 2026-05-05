@@ -9,6 +9,11 @@
         android:label="MentorFinanceiro"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
+
+        <!-- AdMob App ID (use test id by default). -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-7012055621802916~2721978828" />
         
         <activity
             android:name=".MainActivity"

@@ -11,6 +11,7 @@ abstract final class AppRoutes {
   static const String principal = '/principal';
   static const String configuracao = '/configuracao';
   static const String perfil = '/perfil';
+  static const String historico = '/historico';
   static const String metas = '/metas';
   static const String investimentos = '/investimentos';
   static const String adicionarInvestimento = '/investimento/adicionar';
@@ -27,6 +28,8 @@ abstract final class AppRoutes {
   static const String simulado = '/simulado';
   static const String quizConhecimento = '/quiz-conhecimento';
   static const String upgrade = '/upgrade';
+  static const String mentoria = '/mentoria';
+  static const String mentoriaLesson = '/mentoria/lesson';
   static const String relatorios = '/relatorios';
   static const String graficos = '/graficos';
   static const String cambio = '/cambio';

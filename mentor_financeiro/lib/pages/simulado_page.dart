@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/suitability_engine.dart';
 import '../l10n/app_localizations.dart';
 import '../content/content_repository.dart';
+import '../services/ad_manager_service.dart';
+import '../services/subscription_provider.dart';
 
 class SimuladoPage extends StatefulWidget {
   const SimuladoPage({super.key});
@@ -405,8 +408,15 @@ class _ResultPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, '/conhecimento'),
+                  onPressed: () async {
+                    final sub = context.read<SubscriptionProvider>();
+                    await AdManagerService.instance.showInterstitialIfAvailable(
+                      sub,
+                      onDismissed: () {
+                        Navigator.pushNamed(context, '/conhecimento');
+                      },
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF00D9FF),
                     foregroundColor: const Color(0xFF0F172A),
@@ -429,7 +439,15 @@ class _ResultPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () async {
+                    final sub = context.read<SubscriptionProvider>();
+                    await AdManagerService.instance.showInterstitialIfAvailable(
+                      sub,
+                      onDismissed: () {
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white70,
                     side: const BorderSide(color: Colors.white38),
