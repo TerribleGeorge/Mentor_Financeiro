@@ -124,7 +124,10 @@ class MentorAppRouter {
       case AppRoutes.conhecimentoEstrategias:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const EstrategiasMenu(),
+          builder: (_) => const PremiumWrapper(
+            feature: 'Estratégias avançadas',
+            child: EstrategiasMenu(),
+          ),
         );
       case AppRoutes.conhecimentoDicionario:
         return MaterialPageRoute<void>(

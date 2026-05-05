@@ -200,9 +200,7 @@ class AppThemeController extends ChangeNotifier {
     }
     _recomputeAdaptiveVisuals();
 
-    debugPrint(
-      'AppThemeController initialized - isPremium: $_isPremium, tema: $_themeMode',
-    );
+    // Evitar poluição do console em produção.
 
     _isLoading = false;
     notifyListeners();
@@ -214,7 +212,6 @@ class AppThemeController extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_isPremiumKey, isPremium);
-    debugPrint('Premium status updated: $isPremium');
   }
 
   Future<void> setThemeMode(AppThemeMode mode) async {

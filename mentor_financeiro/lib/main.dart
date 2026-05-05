@@ -222,6 +222,34 @@ void main() {
   runZonedGuarded(
     () {
       WidgetsFlutterBinding.ensureInitialized();
+      // Registro global do Showcase (substitui o widget depreciado ShowCaseWidget).
+      ShowcaseView.register(
+        enableAutoScroll: true,
+        blurValue: 4,
+        globalTooltipActions: [
+          TooltipActionButton(
+            type: TooltipDefaultActionType.skip,
+            name: 'Pular Tour',
+            textStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+            backgroundColor: const Color(0xFF1E293B),
+            border: Border.all(color: const Color(0xFF00D9FF)),
+            onTap: MentorTourCoordinator.skipTour,
+          ),
+        ],
+        globalTooltipActionConfig: const TooltipActionConfig(
+          position: TooltipActionPosition.outside,
+          alignment: MainAxisAlignment.end,
+        ),
+        onComplete: (index, key) {
+          MentorTourCoordinator.onShowcaseStepCompleted(
+            key,
+            mentorNavigatorKey,
+          );
+        },
+      );
       runApp(const AppBootstrapShell());
     },
     (error, stack) {
@@ -392,34 +420,7 @@ class MentorFinanceiroApp extends StatelessWidget {
               initialRoute: AppRoutes.splash,
               onGenerateRoute: MentorAppRouter.onGenerateRoute,
               builder: (context, child) {
-                return ShowCaseWidget(
-                  enableAutoScroll: true,
-                  blurValue: 4,
-                  globalTooltipActions: [
-                    TooltipActionButton(
-                      type: TooltipDefaultActionType.skip,
-                      name: 'Pular Tour',
-                      textStyle: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      backgroundColor: const Color(0xFF1E293B),
-                      border: Border.all(color: const Color(0xFF00D9FF)),
-                      onTap: MentorTourCoordinator.skipTour,
-                    ),
-                  ],
-                  globalTooltipActionConfig: const TooltipActionConfig(
-                    position: TooltipActionPosition.outside,
-                    alignment: MainAxisAlignment.end,
-                  ),
-                  onComplete: (index, key) {
-                    MentorTourCoordinator.onShowcaseStepCompleted(
-                      key,
-                      mentorNavigatorKey,
-                    );
-                  },
-                  builder: (showcaseContext) => MentorAppBackdrop(child: child),
-                );
+                return MentorAppBackdrop(child: child);
               },
             );
           },

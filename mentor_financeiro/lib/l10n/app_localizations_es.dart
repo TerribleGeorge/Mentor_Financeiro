@@ -87,7 +87,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get carregando => 'Cargando...';
 
   @override
-  String get semDados => 'Sem dados';
+  String get semDados => 'Sin datos';
 
   @override
   String get tentarNovamente => 'Intentar de nuevo';
@@ -117,10 +117,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get valor => 'Valor';
 
   @override
-  String get descricao => 'Descrição';
+  String get descricao => 'Descripción';
 
   @override
-  String get alimentacao => 'Alimentação';
+  String get alimentacao => 'Alimentación';
 
   @override
   String get transporte => 'Transporte';
@@ -135,17 +135,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get outros => 'Otros';
 
   @override
-  String get notificacoes => 'Notificações';
+  String get notificacoes => 'Notificaciones';
 
   @override
   String get permissaoNotificacoes => 'Permiso de Notificaciones';
 
   @override
-  String get ativarMonitoramento => 'Ativar Monitoramento de Gastos';
+  String get ativarMonitoramento => 'Activar Monitoreo de Gastos';
 
   @override
   String get descricaoMonitoramento =>
-      ' Permite que o app monitore automaticamente suas transações bancárias para organizar suas finanças.';
+      'Permite que la aplicación monitoree automáticamente sus transacciones bancarias para organizar sus finanzas.';
 
   @override
   String get idioma => 'Idioma';
@@ -158,7 +158,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get descricaoLocalizacao =>
-      'Para comparar investimentos locais (CDB/CDI) com taxas internacionais, precisamos saber sua localização.';
+      'Para comparar inversiones locales (CDB/CDI) con tasas internacionales, necesitamos su ubicación.';
 
   @override
   String get permissaoLocalizacaoNecessaria => 'Permiso de Ubicación Requerido';
@@ -170,7 +170,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rendaVariavel => 'Renta Variable';
 
   @override
-  String get tesouroDireto => 'Tesouro Direto';
+  String get tesouroDireto => 'Tesoro Directo';
 
   @override
   String get cdb => 'CDB';
@@ -191,10 +191,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get criptomoedas => 'Criptomonedas';
 
   @override
-  String get rendimento => 'Rendimento';
+  String get rendimento => 'Retorno';
 
   @override
-  String get rentabilidade => 'Rentabilidade';
+  String get rentabilidade => 'Rentabilidad';
 
   @override
   String get aplicar => 'Aplicar';
@@ -212,16 +212,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get estrategias => 'Estrategias';
 
   @override
-  String get conhecimento => 'Conhecimento';
+  String get conhecimento => 'Conocimiento';
 
   @override
   String get chat => 'Chat';
 
   @override
-  String get enviarMensagem => 'Enviar mensagem';
+  String get enviarMensagem => 'Enviar mensaje';
 
   @override
-  String get digiteMensagem => 'Digite uma mensagem...';
+  String get digiteMensagem => 'Escriba un mensaje...';
 
   @override
   String get alertaGastos => 'Alerta de Gastos';
@@ -232,11 +232,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get fechamentoFatura => 'Fechamento da Fatura';
+  String get fechamentoFatura => 'Cierre de Factura';
 
   @override
   String get fechamentoFaturaMsg =>
-      'Amanhã é o dia do fechamento. Ótimo momento para revisar seus gastos.';
+      'Mañana es el cierre. Buen momento para revisar gastos.';
 
   @override
   String get faturaVencendo => 'Factura por Vencer';

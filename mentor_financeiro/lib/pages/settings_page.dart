@@ -266,8 +266,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _onEnableBankNotifications() async {
-    final prefs = await SharedPreferences.getInstance();
-
     final proceed = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: const Color(0xFF0B0B0B),
@@ -328,9 +326,12 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
+    if (!mounted) return;
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_prefsNotifAsked, true);
     final ok = await _notificationListener.solicitarPermissaoEIniciar();
     if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
 
     if (ok) {
       await prefs.setBool(_prefsNotifEnabled, true);
@@ -339,7 +340,7 @@ class _SettingsPageState extends State<SettingsPage> {
         _notifEnabled = true;
         _notifDenied = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text('Leitura automática ativada.')),
       );
     } else {
@@ -349,7 +350,7 @@ class _SettingsPageState extends State<SettingsPage> {
         _notifEnabled = false;
         _notifDenied = true;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text(
             'Permissão negada. Você pode continuar usando entrada manual normalmente.',

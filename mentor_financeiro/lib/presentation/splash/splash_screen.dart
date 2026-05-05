@@ -54,6 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
         theme: theme.themeMode,
       );
       // Evita flash antes do primeiro frame do asset.
+      if (!mounted) return;
       await precacheImage(AssetImage(branding.asset), context);
       if (!mounted) return;
       setState(() {

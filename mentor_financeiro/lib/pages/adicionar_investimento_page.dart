@@ -198,7 +198,7 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: validTipo,
+                initialValue: validTipo,
                 decoration: const InputDecoration(
                   labelText: 'Tipo',
                   border: OutlineInputBorder(),
