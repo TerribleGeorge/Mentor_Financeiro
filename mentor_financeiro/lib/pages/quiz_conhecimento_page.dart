@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/quiz_engine.dart';
+import '../l10n/app_localizations.dart';
 
 class QuizConhecimentoPage extends StatefulWidget {
   const QuizConhecimentoPage({super.key});
@@ -53,14 +54,15 @@ class _QuizConhecimentoPageState extends State<QuizConhecimentoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Simulado de Conhecimento',
+        title: Text(
+          l10n.quizKnowledge_title,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
@@ -87,6 +89,7 @@ class _QuizConhecimentoPageState extends State<QuizConhecimentoPage> {
   }
 
   Widget _buildProgressBar() {
+    final l10n = AppLocalizations.of(context)!;
     final progress = (_currentPage + 1) / 12;
     return Container(
       padding: const EdgeInsets.all(20),
@@ -96,7 +99,7 @@ class _QuizConhecimentoPageState extends State<QuizConhecimentoPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Pergunta ${_currentPage + 1} de 12',
+                l10n.quizKnowledge_progress(_currentPage + 1, 12),
                 style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
               Text(

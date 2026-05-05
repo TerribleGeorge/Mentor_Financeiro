@@ -825,6 +825,420 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ver análise completa do Mentor'**
   String get compoundOpenFullInsight;
+
+  /// No description provided for @investFirstSteps_title.
+  ///
+  /// In pt, this message translates to:
+  /// **'Primeiros passos'**
+  String get investFirstSteps_title;
+
+  /// No description provided for @investFirstSteps_brokerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha uma corretora'**
+  String get investFirstSteps_brokerTitle;
+
+  /// No description provided for @investFirstSteps_brokerBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Busque instituições seguras e reguladas. Compare taxas, produtos e reputação antes de abrir conta.'**
+  String get investFirstSteps_brokerBody;
+
+  /// No description provided for @investFirstSteps_openAccountTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abra sua conta'**
+  String get investFirstSteps_openAccountTitle;
+
+  /// No description provided for @investFirstSteps_openAccountBodyBr.
+  ///
+  /// In pt, this message translates to:
+  /// **'Processo digital gratuito. Você precisará de documentos pessoais (CPF, RG) e, às vezes, comprovante de residência.'**
+  String get investFirstSteps_openAccountBodyBr;
+
+  /// No description provided for @investFirstSteps_openAccountBodyGlobal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Processo digital (varia por país). Em geral, você precisará de documento de identificação e verificação de endereço/identidade.'**
+  String get investFirstSteps_openAccountBodyGlobal;
+
+  /// No description provided for @investFirstSteps_transferTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Transfira recursos'**
+  String get investFirstSteps_transferTitle;
+
+  /// No description provided for @investFirstSteps_transferBodyBr.
+  ///
+  /// In pt, this message translates to:
+  /// **'Envie dinheiro via PIX ou TED do seu banco para a corretora. O saldo ficará disponível para investir.'**
+  String get investFirstSteps_transferBodyBr;
+
+  /// No description provided for @investFirstSteps_transferBodyGlobal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Transfira fundos via transferência bancária ou métodos locais (depende do país). O saldo ficará disponível para investir.'**
+  String get investFirstSteps_transferBodyGlobal;
+
+  /// No description provided for @investFirstSteps_riskProfileTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descubra seu perfil'**
+  String get investFirstSteps_riskProfileTitle;
+
+  /// No description provided for @investFirstSteps_riskProfileBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Responda ao questionário de suitability. Entenda se você é conservador, moderado ou arrojado.'**
+  String get investFirstSteps_riskProfileBody;
+
+  /// No description provided for @investFirstSteps_firstAssetTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Invista no primeiro ativo'**
+  String get investFirstSteps_firstAssetTitle;
+
+  /// No description provided for @investFirstSteps_firstAssetBodyBr.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comece pela reserva de emergência (Tesouro Selic ou CDB com liquidez diária). Depois, diversifique gradualmente.'**
+  String get investFirstSteps_firstAssetBodyBr;
+
+  /// No description provided for @investFirstSteps_firstAssetBodyGlobal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comece pela reserva de emergência (conta remunerada, money market ou Treasury bonds de curto prazo). Depois, diversifique gradualmente.'**
+  String get investFirstSteps_firstAssetBodyGlobal;
+
+  /// No description provided for @investFirstSteps_tipTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dica do Mentor:'**
+  String get investFirstSteps_tipTitle;
+
+  /// No description provided for @investFirstSteps_tipBodyBr.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comece devagar, invista consistentemente e evite tentar “timar” o mercado. O tempo é seu maior aliado.'**
+  String get investFirstSteps_tipBodyBr;
+
+  /// No description provided for @investFirstSteps_tipBodyGlobal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comece devagar, invista com consistência e evite tentar acertar o “timing” do mercado. O tempo é seu maior aliado.'**
+  String get investFirstSteps_tipBodyGlobal;
+
+  /// No description provided for @investMenu_tesouroTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tesouro Direto'**
+  String get investMenu_tesouroTitle;
+
+  /// No description provided for @investMenu_cdbTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Renda fixa bancária (CDB)'**
+  String get investMenu_cdbTitle;
+
+  /// No description provided for @investMenu_etfsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'ETFs internacionais'**
+  String get investMenu_etfsTitle;
+
+  /// No description provided for @investMenu_sp500Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'S&P 500 (índice)'**
+  String get investMenu_sp500Title;
+
+  /// No description provided for @investMenu_stocksTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ações'**
+  String get investMenu_stocksTitle;
+
+  /// No description provided for @investMenu_fundsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fundos'**
+  String get investMenu_fundsTitle;
+
+  /// No description provided for @investMenu_fiisTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'FIIs'**
+  String get investMenu_fiisTitle;
+
+  /// No description provided for @investMenu_reitsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'REITs'**
+  String get investMenu_reitsTitle;
+
+  /// No description provided for @investMenu_internationalTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Internacional'**
+  String get investMenu_internationalTitle;
+
+  /// No description provided for @investMenu_cryptoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cripto'**
+  String get investMenu_cryptoTitle;
+
+  /// No description provided for @investRegisterCta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar investimento'**
+  String get investRegisterCta;
+
+  /// No description provided for @investRegionHintBr.
+  ///
+  /// In pt, this message translates to:
+  /// **'País efetivo: {country} · catálogo Brasil (Tesouro, CDB, LCA…).'**
+  String investRegionHintBr(String country);
+
+  /// No description provided for @investRegionHintGlobal.
+  ///
+  /// In pt, this message translates to:
+  /// **'País efetivo: {country} · catálogo global (ETFs, NYSE/NASDAQ…). Prioridade: loja (RevenueCat) · fallback locale/IP.'**
+  String investRegionHintGlobal(String country);
+
+  /// No description provided for @strategy_sectionCoreTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estratégias essenciais'**
+  String get strategy_sectionCoreTitle;
+
+  /// No description provided for @strategy_sectionDeepDiveTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deep Dive (Premium)'**
+  String get strategy_sectionDeepDiveTitle;
+
+  /// No description provided for @strategy_emergencyFundTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reserva de emergência'**
+  String get strategy_emergencyFundTitle;
+
+  /// No description provided for @strategy_emergencyFundBodyBr.
+  ///
+  /// In pt, this message translates to:
+  /// **'É o seu escudo financeiro. Deve cobrir de 6 a 12 meses do seu custo de vida. Priorize liquidez diária e baixo risco (ex.: Tesouro Selic ou CDB atrelado ao CDI).'**
+  String get strategy_emergencyFundBodyBr;
+
+  /// No description provided for @strategy_emergencyFundBodyGlobal.
+  ///
+  /// In pt, this message translates to:
+  /// **'É o seu escudo financeiro. Deve cobrir de 6 a 12 meses do seu custo de vida. Priorize liquidez diária e baixo risco (ex.: money market e Treasury bonds de curto prazo).'**
+  String get strategy_emergencyFundBodyGlobal;
+
+  /// No description provided for @strategy_buyHoldTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buy & Hold'**
+  String get strategy_buyHoldTitle;
+
+  /// No description provided for @strategy_buyHoldBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estratégia de comprar bons ativos e mantê-los por longo prazo. O foco é disciplina, qualidade e reinvestimento ao longo dos anos.'**
+  String get strategy_buyHoldBody;
+
+  /// No description provided for @strategy_diversificationTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diversificação'**
+  String get strategy_diversificationTitle;
+
+  /// No description provided for @strategy_diversificationBodyBr.
+  ///
+  /// In pt, this message translates to:
+  /// **'Distribua seu capital entre renda fixa, ações, FIIs e ativos internacionais para reduzir riscos e melhorar o retorno ajustado ao risco.'**
+  String get strategy_diversificationBodyBr;
+
+  /// No description provided for @strategy_diversificationBodyGlobal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Distribua seu capital entre bonds, ações, REITs e exposição internacional para reduzir riscos e melhorar o retorno ajustado ao risco.'**
+  String get strategy_diversificationBodyGlobal;
+
+  /// No description provided for @strategy_dcaTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aportes constantes (DCA)'**
+  String get strategy_dcaTitle;
+
+  /// No description provided for @strategy_dcaBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'A constância vence a genialidade. Investir um pouco todos os meses é mais eficiente do que tentar adivinhar o melhor momento do mercado.'**
+  String get strategy_dcaBody;
+
+  /// No description provided for @strategy_smartGoalsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Metas SMART'**
+  String get strategy_smartGoalsTitle;
+
+  /// No description provided for @strategy_smartGoalsBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Suas metas devem ser: específicas, mensuráveis, atingíveis, relevantes e com prazo definido.'**
+  String get strategy_smartGoalsBody;
+
+  /// No description provided for @strategy_503020Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'Regra 50-30-20'**
+  String get strategy_503020Title;
+
+  /// No description provided for @strategy_503020Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Um método de organização: 50% para necessidades, 30% para desejos e 20% para investimentos e metas.'**
+  String get strategy_503020Body;
+
+  /// No description provided for @strategy_deepDive_allocationTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alocação de ativos (avançado)'**
+  String get strategy_deepDive_allocationTitle;
+
+  /// No description provided for @strategy_deepDive_allocationBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprenda a montar uma alocação por objetivo e horizonte, ajustando risco, correlação e rebalanceamento.'**
+  String get strategy_deepDive_allocationBody;
+
+  /// No description provided for @strategy_deepDive_globalEtfsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'ETFs globais e índices (avançado)'**
+  String get strategy_deepDive_globalEtfsTitle;
+
+  /// No description provided for @strategy_deepDive_globalEtfsBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entenda índices globais (ex.: S&P 500), ETFs e como montar exposição internacional com disciplina.'**
+  String get strategy_deepDive_globalEtfsBody;
+
+  /// No description provided for @strategy_deepDive_taxesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tributação e declaração (avançado)'**
+  String get strategy_deepDive_taxesTitle;
+
+  /// No description provided for @strategy_deepDive_taxesBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entenda os princípios de tributação e como organizar registros para declarar investimentos com segurança.'**
+  String get strategy_deepDive_taxesBody;
+
+  /// No description provided for @strategy_premiumLockedBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conteúdo Premium. Ative um tema Cyber/Grimm/Hive para desbloquear o Deep Dive de investimentos.'**
+  String get strategy_premiumLockedBody;
+
+  /// No description provided for @homeShowcaseTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vitrine'**
+  String get homeShowcaseTitle;
+
+  /// No description provided for @homeShowcaseProfileSimTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Simulado de Perfil'**
+  String get homeShowcaseProfileSimTitle;
+
+  /// No description provided for @homeShowcaseProfileSimSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descubra seu perfil de investidor em poucos minutos.'**
+  String get homeShowcaseProfileSimSubtitle;
+
+  /// No description provided for @homeShowcaseStrategiesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estratégias recomendadas'**
+  String get homeShowcaseStrategiesTitle;
+
+  /// No description provided for @homeShowcaseStrategiesSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atalhos diretos para aprender e aplicar estratégias.'**
+  String get homeShowcaseStrategiesSubtitle;
+
+  /// No description provided for @homeShowcaseMentorHubTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mentor: Simulados e Estratégias'**
+  String get homeShowcaseMentorHubTitle;
+
+  /// No description provided for @homeShowcaseMentorHubSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesso rápido ao Simulado de Perfil e às Estratégias recomendadas.'**
+  String get homeShowcaseMentorHubSubtitle;
+
+  /// No description provided for @quizProfile_title.
+  ///
+  /// In pt, this message translates to:
+  /// **'Simulado de Perfil'**
+  String get quizProfile_title;
+
+  /// No description provided for @quizProfile_progress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pergunta {current} de {total}'**
+  String quizProfile_progress(int current, int total);
+
+  /// No description provided for @quizProfile_badge.
+  ///
+  /// In pt, this message translates to:
+  /// **'QUESTIONÁRIO DE PERFIL'**
+  String get quizProfile_badge;
+
+  /// No description provided for @quizProfile_resultTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'SEU PERFIL É'**
+  String get quizProfile_resultTitle;
+
+  /// No description provided for @quizProfile_idealInvestmentsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'INVESTIMENTOS IDEAIS:'**
+  String get quizProfile_idealInvestmentsTitle;
+
+  /// No description provided for @quizProfile_exploreInvestmentsCta.
+  ///
+  /// In pt, this message translates to:
+  /// **'EXPLORAR INVESTIMENTOS'**
+  String get quizProfile_exploreInvestmentsCta;
+
+  /// No description provided for @quizProfile_exit.
+  ///
+  /// In pt, this message translates to:
+  /// **'SAIR'**
+  String get quizProfile_exit;
+
+  /// No description provided for @quizKnowledge_title.
+  ///
+  /// In pt, this message translates to:
+  /// **'Simulado de Conhecimento'**
+  String get quizKnowledge_title;
+
+  /// No description provided for @quizKnowledge_progress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pergunta {current} de {total}'**
+  String quizKnowledge_progress(int current, int total);
 }
 
 class _AppLocalizationsDelegate

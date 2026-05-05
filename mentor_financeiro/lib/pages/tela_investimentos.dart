@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
+import '../content/content_repository.dart';
 import '../core/constants/app_routes.dart';
 import '../core/widgets/mentor_insight_card.dart';
 import '../domain/entities/financial_market_region.dart';
@@ -12,7 +14,10 @@ class TelaInvestimentos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cat = context.watch<InvestmentCategoryProvider>();
+    final isBrazilLocale =
+        ContentRepository.isPtBrLocale(Localizations.localeOf(context));
     final topics = cat.educationCategories;
 
     return Scaffold(
@@ -24,13 +29,13 @@ class TelaInvestimentos extends StatelessWidget {
         backgroundColor: const Color(0xFF00D9FF),
         foregroundColor: Colors.black87,
         icon: const Icon(Icons.add_chart),
-        label: const Text('Registrar investimento'),
+        label: Text(l10n.investRegisterCta),
       ),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
         elevation: 0,
-        title: const Text(
-          'Investimentos',
+        title: Text(
+          l10n.investimentos,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
@@ -42,10 +47,9 @@ class TelaInvestimentos extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            cat.isBrazilMarket
-                ? 'País efectivo: ${cat.effectiveCountryCode} · catálogo Brasil (Tesouro, CDB, LCA…).'
-                : 'País efectivo: ${cat.effectiveCountryCode} · catálogo global (ETFs, NYSE/NASDAQ…). '
-                    'Prioridade: loja (RevenueCat) · fallback locale/IP.',
+            isBrazilLocale
+                ? l10n.investRegionHintBr(cat.effectiveCountryCode)
+                : l10n.investRegionHintGlobal(cat.effectiveCountryCode),
             style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 12),

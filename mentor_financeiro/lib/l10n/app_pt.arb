@@ -435,5 +435,107 @@
   "userPersonaStrategist": "Estrategista",
   "userPersonaRiskTaker": "Arrojado",
   "userPersonaConservative": "Poupador",
-  "compoundOpenFullInsight": "Ver análise completa do Mentor"
+  "compoundOpenFullInsight": "Ver análise completa do Mentor",
+
+  "investFirstSteps_title": "Primeiros passos",
+  "investFirstSteps_brokerTitle": "Escolha uma corretora",
+  "investFirstSteps_brokerBody": "Busque instituições seguras e reguladas. Compare taxas, produtos e reputação antes de abrir conta.",
+  "investFirstSteps_openAccountTitle": "Abra sua conta",
+  "investFirstSteps_openAccountBodyBr": "Processo digital gratuito. Você precisará de documentos pessoais (CPF, RG) e, às vezes, comprovante de residência.",
+  "investFirstSteps_openAccountBodyGlobal": "Processo digital (varia por país). Em geral, você precisará de documento de identificação e verificação de endereço/identidade.",
+  "investFirstSteps_transferTitle": "Transfira recursos",
+  "investFirstSteps_transferBodyBr": "Envie dinheiro via PIX ou TED do seu banco para a corretora. O saldo ficará disponível para investir.",
+  "investFirstSteps_transferBodyGlobal": "Transfira fundos via transferência bancária ou métodos locais (depende do país). O saldo ficará disponível para investir.",
+  "investFirstSteps_riskProfileTitle": "Descubra seu perfil",
+  "investFirstSteps_riskProfileBody": "Responda ao questionário de suitability. Entenda se você é conservador, moderado ou arrojado.",
+  "investFirstSteps_firstAssetTitle": "Invista no primeiro ativo",
+  "investFirstSteps_firstAssetBodyBr": "Comece pela reserva de emergência (Tesouro Selic ou CDB com liquidez diária). Depois, diversifique gradualmente.",
+  "investFirstSteps_firstAssetBodyGlobal": "Comece pela reserva de emergência (conta remunerada, money market ou Treasury bonds de curto prazo). Depois, diversifique gradualmente.",
+  "investFirstSteps_tipTitle": "Dica do Mentor:",
+  "investFirstSteps_tipBodyBr": "Comece devagar, invista consistentemente e evite tentar “timar” o mercado. O tempo é seu maior aliado.",
+  "investFirstSteps_tipBodyGlobal": "Comece devagar, invista com consistência e evite tentar acertar o “timing” do mercado. O tempo é seu maior aliado.",
+
+  "investMenu_tesouroTitle": "Tesouro Direto",
+  "investMenu_cdbTitle": "Renda fixa bancária (CDB)",
+  "investMenu_etfsTitle": "ETFs internacionais",
+  "investMenu_sp500Title": "S&P 500 (índice)",
+  "investMenu_stocksTitle": "Ações",
+  "investMenu_fundsTitle": "Fundos",
+  "investMenu_fiisTitle": "FIIs",
+  "investMenu_reitsTitle": "REITs",
+  "investMenu_internationalTitle": "Internacional",
+  "investMenu_cryptoTitle": "Cripto",
+
+  "investRegisterCta": "Registrar investimento",
+  "investRegionHintBr": "País efetivo: {country} · catálogo Brasil (Tesouro, CDB, LCA…).",
+  "@investRegionHintBr": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "investRegionHintGlobal": "País efetivo: {country} · catálogo global (ETFs, NYSE/NASDAQ…). Prioridade: loja (RevenueCat) · fallback locale/IP.",
+  "@investRegionHintGlobal": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+
+  "strategy_sectionCoreTitle": "Estratégias essenciais",
+  "strategy_sectionDeepDiveTitle": "Deep Dive (Premium)",
+  "strategy_emergencyFundTitle": "Reserva de emergência",
+  "strategy_emergencyFundBodyBr": "É o seu escudo financeiro. Deve cobrir de 6 a 12 meses do seu custo de vida. Priorize liquidez diária e baixo risco (ex.: Tesouro Selic ou CDB atrelado ao CDI).",
+  "strategy_emergencyFundBodyGlobal": "É o seu escudo financeiro. Deve cobrir de 6 a 12 meses do seu custo de vida. Priorize liquidez diária e baixo risco (ex.: money market e Treasury bonds de curto prazo).",
+  "strategy_buyHoldTitle": "Buy & Hold",
+  "strategy_buyHoldBody": "Estratégia de comprar bons ativos e mantê-los por longo prazo. O foco é disciplina, qualidade e reinvestimento ao longo dos anos.",
+  "strategy_diversificationTitle": "Diversificação",
+  "strategy_diversificationBodyBr": "Distribua seu capital entre renda fixa, ações, FIIs e ativos internacionais para reduzir riscos e melhorar o retorno ajustado ao risco.",
+  "strategy_diversificationBodyGlobal": "Distribua seu capital entre bonds, ações, REITs e exposição internacional para reduzir riscos e melhorar o retorno ajustado ao risco.",
+  "strategy_dcaTitle": "Aportes constantes (DCA)",
+  "strategy_dcaBody": "A constância vence a genialidade. Investir um pouco todos os meses é mais eficiente do que tentar adivinhar o melhor momento do mercado.",
+  "strategy_smartGoalsTitle": "Metas SMART",
+  "strategy_smartGoalsBody": "Suas metas devem ser: específicas, mensuráveis, atingíveis, relevantes e com prazo definido.",
+  "strategy_503020Title": "Regra 50-30-20",
+  "strategy_503020Body": "Um método de organização: 50% para necessidades, 30% para desejos e 20% para investimentos e metas.",
+  "strategy_deepDive_allocationTitle": "Alocação de ativos (avançado)",
+  "strategy_deepDive_allocationBody": "Aprenda a montar uma alocação por objetivo e horizonte, ajustando risco, correlação e rebalanceamento.",
+  "strategy_deepDive_globalEtfsTitle": "ETFs globais e índices (avançado)",
+  "strategy_deepDive_globalEtfsBody": "Entenda índices globais (ex.: S&P 500), ETFs e como montar exposição internacional com disciplina.",
+  "strategy_deepDive_taxesTitle": "Tributação e declaração (avançado)",
+  "strategy_deepDive_taxesBody": "Entenda os princípios de tributação e como organizar registros para declarar investimentos com segurança.",
+  "strategy_premiumLockedBody": "Conteúdo Premium. Ative um tema Cyber/Grimm/Hive para desbloquear o Deep Dive de investimentos.",
+
+  "homeShowcaseTitle": "Vitrine",
+  "homeShowcaseProfileSimTitle": "Simulado de Perfil",
+  "homeShowcaseProfileSimSubtitle": "Descubra seu perfil de investidor em poucos minutos.",
+  "homeShowcaseStrategiesTitle": "Estratégias recomendadas",
+  "homeShowcaseStrategiesSubtitle": "Atalhos diretos para aprender e aplicar estratégias.",
+  "homeShowcaseMentorHubTitle": "Mentor: Simulados e Estratégias",
+  "homeShowcaseMentorHubSubtitle": "Acesso rápido ao Simulado de Perfil e às Estratégias recomendadas.",
+
+  "quizProfile_title": "Simulado de Perfil",
+  "quizProfile_progress": "Pergunta {current} de {total}",
+  "@quizProfile_progress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "quizProfile_badge": "QUESTIONÁRIO DE PERFIL",
+  "quizProfile_resultTitle": "SEU PERFIL É",
+  "quizProfile_idealInvestmentsTitle": "INVESTIMENTOS IDEAIS:",
+  "quizProfile_exploreInvestmentsCta": "EXPLORAR INVESTIMENTOS",
+  "quizProfile_exit": "SAIR",
+
+  "quizKnowledge_title": "Simulado de Conhecimento",
+  "quizKnowledge_progress": "Pergunta {current} de {total}",
+  "@quizKnowledge_progress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  }
 }

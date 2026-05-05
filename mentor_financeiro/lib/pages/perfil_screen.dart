@@ -84,7 +84,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     final user = FirebaseAuth.instance.currentUser;
     final nome = _dadosUsuario?['nome'] ?? user?.displayName ?? 'Usuário';
     final email = FirebaseAuth.instance.currentUser?.email ?? 'Usuário não logado';
-    final photoUrl = _dadosUsuario?['photoURL'] as String? ?? user?.photoURL;
+    final photoUrl = FirebaseAuth.instance.currentUser?.photoURL;
 
     return Container(
       padding: const EdgeInsets.all(20),

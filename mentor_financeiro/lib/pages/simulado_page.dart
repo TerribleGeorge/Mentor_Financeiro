@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/suitability_engine.dart';
+import '../l10n/app_localizations.dart';
+import '../content/content_repository.dart';
 
 class SimuladoPage extends StatefulWidget {
   const SimuladoPage({super.key});
@@ -45,14 +47,15 @@ class _SimuladoPageState extends State<SimuladoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Teste seu Perfil',
+        title: Text(
+          l10n.quizProfile_title,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
@@ -79,6 +82,7 @@ class _SimuladoPageState extends State<SimuladoPage> {
   }
 
   Widget _buildProgressBar() {
+    final l10n = AppLocalizations.of(context)!;
     final progress = (_currentPage + 1) / 12;
     return Container(
       padding: const EdgeInsets.all(20),
@@ -88,7 +92,7 @@ class _SimuladoPageState extends State<SimuladoPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Pergunta ${_currentPage + 1} de 12',
+                l10n.quizProfile_progress(_currentPage + 1, 12),
                 style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
               Text(
@@ -119,6 +123,7 @@ class _SimuladoPageState extends State<SimuladoPage> {
   }
 
   Widget _buildQuestion(int index) {
+    final l10n = AppLocalizations.of(context)!;
     final question = SuitabilityEngine.questions[index];
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -132,8 +137,8 @@ class _SimuladoPageState extends State<SimuladoPage> {
               color: const Color(0xFF00D9FF).withAlpha(25),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text(
-              'QUESTIONÁRIO DE PERFIL',
+            child: Text(
+              l10n.quizProfile_badge,
               style: TextStyle(
                 color: Color(0xFF00D9FF),
                 fontSize: 11,
@@ -255,8 +260,9 @@ class _ResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final color = _getColor();
-    final suggestions = _getSuggestions();
+    final suggestions = _getSuggestions(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -299,8 +305,16 @@ class _ResultPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     const Text(
-                      'SEU PERFIL É',
+                      '',
                       style: TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    Text(
+                      l10n.quizProfile_resultTitle,
+                      style: const TextStyle(
                         color: Colors.white54,
                         fontSize: 12,
                         letterSpacing: 2,
@@ -340,17 +354,17 @@ class _ResultPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.lightbulb,
                           color: Color(0xFF00D9FF),
                           size: 20,
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
-                          'INVESTIMENTOS IDEAIS:',
-                          style: TextStyle(
+                          l10n.quizProfile_idealInvestmentsTitle,
+                          style: const TextStyle(
                             color: Colors.white54,
                             fontSize: 11,
                             letterSpacing: 1,
@@ -401,9 +415,9 @@ class _ResultPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text(
-                    'EXPLORAR INVESTIMENTOS',
-                    style: TextStyle(
+                child: Text(
+                  l10n.quizProfile_exploreInvestmentsCta,
+                  style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                       letterSpacing: 1,
@@ -424,9 +438,9 @@ class _ResultPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text(
-                    'SAIR',
-                    style: TextStyle(
+                child: Text(
+                  l10n.quizProfile_exit,
+                  style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                       letterSpacing: 1,
@@ -463,14 +477,19 @@ class _ResultPage extends StatelessWidget {
     }
   }
 
-  List<String> _getSuggestions() {
+  List<String> _getSuggestions(BuildContext context) {
+    final isBrazil = ContentRepository.isPtBrLocale(Localizations.localeOf(context));
     switch (profile) {
       case Profile.conservador:
-        return ['Tesouro Selic', 'CDB 100% CDI', 'Fundos DI'];
+        return isBrazil
+            ? ['Tesouro Selic', 'CDB 100% CDI', 'Fundos DI']
+            : ['Treasury bonds', 'Money market', 'High-yield cash'];
       case Profile.moderado:
-        return ['FIIs', 'LCIs', 'Multimercado'];
+        return isBrazil
+            ? ['FIIs', 'LCIs', 'Multimercado']
+            : ['S&P 500 ETF', 'Dividend growth', 'REITs'];
       case Profile.arrojado:
-        return ['Ações', 'ETFs', 'Cripto'];
+        return isBrazil ? ['Ações', 'ETFs', 'Cripto'] : ['Stocks', 'ETFs', 'Crypto'];
     }
   }
 }

@@ -10,7 +10,8 @@ class MentorAppBackdrop extends StatelessWidget {
 
   final Widget? child;
 
-  static const String _voidBgAsset = 'assets/images/devvoid_standard.png';
+  // Skin padrão (Free): não usa mais o asset removido.
+  static const String _voidBgAsset = 'assets/images/DevVoid_logo.png';
   static const String _cyberBgAsset = 'assets/images/bg_cyber.png';
   static const String _grimmBgAsset = 'assets/images/bg_grimm.png';
   static const String _hiveBgAsset = 'assets/images/hive_bg.png';

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_routes.dart';
 import '../../core/widgets/mentor_insight_card.dart';
+import '../../l10n/app_localizations.dart';
 import '../../domain/entities/financial_market_region.dart';
 import '../../domain/entities/risk_profile.dart';
 import '../../services/investment_category_provider.dart';
@@ -40,12 +41,79 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cat = context.watch<InvestmentCategoryProvider>();
     final region = cat.isBrazilMarket
         ? FinancialMarketRegion.brazil
         : FinancialMarketRegion.global;
     final v = context.mentorAdaptive;
     final tileFill = Theme.of(context).cardTheme.color ?? v.widgetColor;
+
+    Widget vitrineCard({
+      required IconData icon,
+      required Color accent,
+      required String title,
+      required String subtitle,
+      required VoidCallback onTap,
+    }) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: tileFill,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: accent.withValues(alpha: 0.35)),
+            boxShadow: [
+              BoxShadow(
+                color: accent.withValues(alpha: 0.12),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: accent),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: v.textColor,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: v.secondaryTextColor,
+                        fontSize: 12,
+                        height: 1.25,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: v.secondaryTextColor),
+            ],
+          ),
+        ),
+      );
+    }
 
     final calculadoraTile = ListTile(
       tileColor: tileFill,
@@ -78,6 +146,83 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            Text(
+              l10n.homeShowcaseTitle,
+              style: TextStyle(
+                color: v.textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            vitrineCard(
+              icon: Icons.psychology,
+              accent: const Color(0xFF00D9FF),
+              title: l10n.homeShowcaseProfileSimTitle,
+              subtitle: l10n.homeShowcaseProfileSimSubtitle,
+              onTap: () => Navigator.of(context).pushNamed(AppRoutes.simulado),
+            ),
+            const SizedBox(height: 12),
+            vitrineCard(
+              icon: Icons.auto_graph,
+              accent: const Color(0xFF6366F1),
+              title: l10n.homeShowcaseStrategiesTitle,
+              subtitle: l10n.homeShowcaseStrategiesSubtitle,
+              onTap: () =>
+                  Navigator.of(context).pushNamed(AppRoutes.conhecimentoEstrategias),
+            ),
+            const SizedBox(height: 12),
+            vitrineCard(
+              icon: Icons.hub,
+              accent: const Color(0xFFE5E7EB),
+              title: l10n.homeShowcaseMentorHubTitle,
+              subtitle: l10n.homeShowcaseMentorHubSubtitle,
+              onTap: () => showModalBottomSheet<void>(
+                context: context,
+                backgroundColor: tileFill,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+                ),
+                builder: (ctx) {
+                  return SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.psychology, color: Color(0xFF00D9FF)),
+                            title: Text(
+                              l10n.homeShowcaseProfileSimTitle,
+                              style: TextStyle(color: v.textColor),
+                            ),
+                            trailing: Icon(Icons.chevron_right, color: v.secondaryTextColor),
+                            onTap: () {
+                              Navigator.of(ctx).pop();
+                              Navigator.of(context).pushNamed(AppRoutes.simulado);
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.auto_graph, color: Color(0xFF6366F1)),
+                            title: Text(
+                              l10n.homeShowcaseStrategiesTitle,
+                              style: TextStyle(color: v.textColor),
+                            ),
+                            trailing: Icon(Icons.chevron_right, color: v.secondaryTextColor),
+                            onTap: () {
+                              Navigator.of(ctx).pop();
+                              Navigator.of(context)
+                                  .pushNamed(AppRoutes.conhecimentoEstrategias);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
             Text(
               'Resumo do mercado',
               style: TextStyle(

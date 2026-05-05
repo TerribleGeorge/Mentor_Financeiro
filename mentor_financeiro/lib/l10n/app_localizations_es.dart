@@ -388,4 +388,247 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get compoundOpenFullInsight => 'Ver análisis completo del Mentor';
+
+  @override
+  String get investFirstSteps_title => 'Primeros pasos';
+
+  @override
+  String get investFirstSteps_brokerTitle => 'Elige un bróker';
+
+  @override
+  String get investFirstSteps_brokerBody =>
+      'Busca instituciones reguladas y con buena reputación. Compara comisiones, productos y fiabilidad antes de abrir la cuenta.';
+
+  @override
+  String get investFirstSteps_openAccountTitle => 'Abre tu cuenta';
+
+  @override
+  String get investFirstSteps_openAccountBodyBr =>
+      'Proceso digital. En Brasil, normalmente necesitas CPF/RG y, a veces, comprobante de domicilio.';
+
+  @override
+  String get investFirstSteps_openAccountBodyGlobal =>
+      'El alta digital varía por país. En general necesitas un documento de identidad y verificación de identidad/dirección.';
+
+  @override
+  String get investFirstSteps_transferTitle => 'Transfiere fondos';
+
+  @override
+  String get investFirstSteps_transferBodyBr =>
+      'Envía dinero vía PIX o transferencia bancaria al bróker. El saldo quedará disponible para invertir.';
+
+  @override
+  String get investFirstSteps_transferBodyGlobal =>
+      'Transfiere fondos mediante transferencia bancaria o métodos locales (depende del país). El saldo quedará disponible para invertir.';
+
+  @override
+  String get investFirstSteps_riskProfileTitle => 'Conoce tu perfil';
+
+  @override
+  String get investFirstSteps_riskProfileBody =>
+      'Responde el cuestionario de suitability. Entiende si eres conservador, moderado o agresivo.';
+
+  @override
+  String get investFirstSteps_firstAssetTitle => 'Invierte en tu primer activo';
+
+  @override
+  String get investFirstSteps_firstAssetBodyBr =>
+      'Empieza por el fondo de emergencia (Tesouro Selic o un CDB con liquidez diaria). Luego diversifica poco a poco.';
+
+  @override
+  String get investFirstSteps_firstAssetBodyGlobal =>
+      'Empieza por el fondo de emergencia (efectivo remunerado, money market o Treasury bonds de corto plazo). Luego diversifica poco a poco.';
+
+  @override
+  String get investFirstSteps_tipTitle => 'Consejo del Mentor:';
+
+  @override
+  String get investFirstSteps_tipBodyBr =>
+      'Empieza poco a poco, invierte con constancia y evita intentar acertar el timing del mercado. El tiempo es tu mejor aliado.';
+
+  @override
+  String get investFirstSteps_tipBodyGlobal =>
+      'Empieza poco a poco, invierte con constancia y evita intentar acertar el timing del mercado. El tiempo es tu mejor aliado.';
+
+  @override
+  String get investMenu_tesouroTitle => 'Bonos del Tesoro (Brasil)';
+
+  @override
+  String get investMenu_cdbTitle => 'Renta fija bancaria (CDB)';
+
+  @override
+  String get investMenu_etfsTitle => 'ETFs internacionales';
+
+  @override
+  String get investMenu_sp500Title => 'S&P 500 (índice)';
+
+  @override
+  String get investMenu_stocksTitle => 'Acciones';
+
+  @override
+  String get investMenu_fundsTitle => 'Fondos';
+
+  @override
+  String get investMenu_fiisTitle => 'FIIs';
+
+  @override
+  String get investMenu_reitsTitle => 'REITs';
+
+  @override
+  String get investMenu_internationalTitle => 'Internacional';
+
+  @override
+  String get investMenu_cryptoTitle => 'Cripto';
+
+  @override
+  String get investRegisterCta => 'Registrar inversión';
+
+  @override
+  String investRegionHintBr(String country) {
+    return 'País efectivo: $country · catálogo Brasil (Tesouro, CDB, LCA…).';
+  }
+
+  @override
+  String investRegionHintGlobal(String country) {
+    return 'País efectivo: $country · catálogo global (ETFs, NYSE/NASDAQ…). Prioridad: tienda (RevenueCat) · fallback locale/IP.';
+  }
+
+  @override
+  String get strategy_sectionCoreTitle => 'Estrategias esenciales';
+
+  @override
+  String get strategy_sectionDeepDiveTitle => 'Deep Dive (Premium)';
+
+  @override
+  String get strategy_emergencyFundTitle => 'Fondo de emergencia';
+
+  @override
+  String get strategy_emergencyFundBodyBr =>
+      'Tu escudo financiero. Cubre 6–12 meses de gastos. Prioriza liquidez diaria y bajo riesgo (p. ej., Tesouro Selic o CDB ligado al CDI).';
+
+  @override
+  String get strategy_emergencyFundBodyGlobal =>
+      'Tu escudo financiero. Cubre 6–12 meses de gastos. Prioriza liquidez diaria y bajo riesgo (p. ej., money market y Treasury bonds de corto plazo).';
+
+  @override
+  String get strategy_buyHoldTitle => 'Buy & Hold';
+
+  @override
+  String get strategy_buyHoldBody =>
+      'Comprar activos de calidad y mantenerlos a largo plazo. Enfócate en disciplina, calidad y reinversión con el tiempo.';
+
+  @override
+  String get strategy_diversificationTitle => 'Diversificación';
+
+  @override
+  String get strategy_diversificationBodyBr =>
+      'Distribuye tu capital entre renta fija, acciones, FIIs y activos internacionales para reducir riesgo y mejorar el rendimiento ajustado al riesgo.';
+
+  @override
+  String get strategy_diversificationBodyGlobal =>
+      'Distribuye tu capital entre bonos, acciones, REITs y exposición internacional para reducir riesgo y mejorar el rendimiento ajustado al riesgo.';
+
+  @override
+  String get strategy_dcaTitle => 'Aportes constantes (DCA)';
+
+  @override
+  String get strategy_dcaBody =>
+      'La constancia vence al genio. Invertir cada mes suele ser más eficaz que intentar adivinar el mejor momento del mercado.';
+
+  @override
+  String get strategy_smartGoalsTitle => 'Metas SMART';
+
+  @override
+  String get strategy_smartGoalsBody =>
+      'Tus metas deben ser: específicas, medibles, alcanzables, relevantes y con plazo definido.';
+
+  @override
+  String get strategy_503020Title => 'Regla 50-30-20';
+
+  @override
+  String get strategy_503020Body =>
+      'Un marco simple: 50% necesidades, 30% deseos y 20% inversión y metas.';
+
+  @override
+  String get strategy_deepDive_allocationTitle =>
+      'Asignación de activos (avanzado)';
+
+  @override
+  String get strategy_deepDive_allocationBody =>
+      'Aprende a construir una asignación por objetivo y horizonte, ajustando riesgo, correlación y rebalanceo.';
+
+  @override
+  String get strategy_deepDive_globalEtfsTitle =>
+      'ETFs globales e índices (avanzado)';
+
+  @override
+  String get strategy_deepDive_globalEtfsBody =>
+      'Entiende índices globales (p. ej., S&P 500), ETFs y cómo construir exposición internacional con disciplina.';
+
+  @override
+  String get strategy_deepDive_taxesTitle =>
+      'Impuestos y declaración (avanzado)';
+
+  @override
+  String get strategy_deepDive_taxesBody =>
+      'Entiende conceptos básicos de impuestos y cómo organizar registros para declarar inversiones con seguridad.';
+
+  @override
+  String get strategy_premiumLockedBody =>
+      'Contenido Premium. Activa un tema Cyber/Grimm/Hive para desbloquear el Deep Dive de inversiones.';
+
+  @override
+  String get homeShowcaseTitle => 'Vitrina';
+
+  @override
+  String get homeShowcaseProfileSimTitle => 'Simulado de perfil';
+
+  @override
+  String get homeShowcaseProfileSimSubtitle =>
+      'Descubre tu perfil de inversor en pocos minutos.';
+
+  @override
+  String get homeShowcaseStrategiesTitle => 'Estrategias recomendadas';
+
+  @override
+  String get homeShowcaseStrategiesSubtitle =>
+      'Atajos directos para aprender y aplicar estrategias.';
+
+  @override
+  String get homeShowcaseMentorHubTitle => 'Mentor: Simulados y Estrategias';
+
+  @override
+  String get homeShowcaseMentorHubSubtitle =>
+      'Acceso rápido al simulado de perfil y a las estrategias recomendadas.';
+
+  @override
+  String get quizProfile_title => 'Simulado de perfil';
+
+  @override
+  String quizProfile_progress(int current, int total) {
+    return 'Pregunta $current de $total';
+  }
+
+  @override
+  String get quizProfile_badge => 'SIMULADO DE PERFIL';
+
+  @override
+  String get quizProfile_resultTitle => 'TU PERFIL ES';
+
+  @override
+  String get quizProfile_idealInvestmentsTitle => 'INVERSIONES IDEALES:';
+
+  @override
+  String get quizProfile_exploreInvestmentsCta => 'EXPLORAR INVERSIONES';
+
+  @override
+  String get quizProfile_exit => 'SALIR';
+
+  @override
+  String get quizKnowledge_title => 'Simulado de conocimiento';
+
+  @override
+  String quizKnowledge_progress(int current, int total) {
+    return 'Pregunta $current de $total';
+  }
 }

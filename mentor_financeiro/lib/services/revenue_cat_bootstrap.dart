@@ -1,6 +1,7 @@
 import 'dart:developer' show log;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../core/config/app_secrets.dart';
@@ -51,9 +52,19 @@ abstract final class RevenueCatBootstrap {
       return;
     }
 
+    final trimmed = apiKey.trim();
+    final looksLikePublicKey =
+        trimmed.startsWith('goog_') || trimmed.startsWith('appl_');
+    if (!looksLikePublicKey) {
+      log(
+        'RevenueCat: chave parece inválida (esperado goog_... / appl_...). Confira se é a Public SDK Key do projeto.',
+        name: 'mentor.bootstrap',
+      );
+    }
+
     try {
       await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.warn);
-      await Purchases.configure(PurchasesConfiguration(apiKey));
+      await Purchases.configure(PurchasesConfiguration(trimmed));
       _sdkReady = true;
 
       if (uid != null && uid.isNotEmpty) {
@@ -70,6 +81,15 @@ abstract final class RevenueCatBootstrap {
       }
 
       await refreshPremiumFromRevenueCat();
+    } on PlatformException catch (e, st) {
+      _sdkReady = false;
+      log(
+        'RevenueCat: PlatformException ao configurar (possível Invalid API Key). ${e.code} ${e.message}',
+        name: 'mentor.bootstrap',
+        error: e,
+        stackTrace: st,
+      );
+      await AppThemeController.instance.setPremiumStatus(false);
     } catch (e, st) {
       _sdkReady = false;
       log(

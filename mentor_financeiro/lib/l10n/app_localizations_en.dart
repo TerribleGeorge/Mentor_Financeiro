@@ -387,4 +387,245 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get compoundOpenFullInsight => 'Open full mentor insight';
+
+  @override
+  String get investFirstSteps_title => 'First steps';
+
+  @override
+  String get investFirstSteps_brokerTitle => 'Choose a broker';
+
+  @override
+  String get investFirstSteps_brokerBody =>
+      'Look for regulated, reputable institutions. Compare fees, products, and reliability before opening an account.';
+
+  @override
+  String get investFirstSteps_openAccountTitle => 'Open your account';
+
+  @override
+  String get investFirstSteps_openAccountBodyBr =>
+      'Digital onboarding. In Brazil, you typically need CPF/RG and sometimes proof of address.';
+
+  @override
+  String get investFirstSteps_openAccountBodyGlobal =>
+      'Digital onboarding varies by country. Typically you need an ID document and identity/address verification.';
+
+  @override
+  String get investFirstSteps_transferTitle => 'Transfer funds';
+
+  @override
+  String get investFirstSteps_transferBodyBr =>
+      'Send money via PIX or bank transfer to your broker. The balance becomes available to invest.';
+
+  @override
+  String get investFirstSteps_transferBodyGlobal =>
+      'Transfer funds via bank transfer or local payment methods (depends on your country). The balance becomes available to invest.';
+
+  @override
+  String get investFirstSteps_riskProfileTitle => 'Know your risk profile';
+
+  @override
+  String get investFirstSteps_riskProfileBody =>
+      'Answer a suitability questionnaire. Understand whether you are conservative, moderate, or aggressive.';
+
+  @override
+  String get investFirstSteps_firstAssetTitle => 'Buy your first asset';
+
+  @override
+  String get investFirstSteps_firstAssetBodyBr =>
+      'Start with an emergency fund (Tesouro Selic or a daily-liquidity CDB). Then diversify gradually.';
+
+  @override
+  String get investFirstSteps_firstAssetBodyGlobal =>
+      'Start with an emergency fund (high-yield cash, money market funds, or short-term Treasury bonds). Then diversify gradually.';
+
+  @override
+  String get investFirstSteps_tipTitle => 'Mentor tip:';
+
+  @override
+  String get investFirstSteps_tipBodyBr =>
+      'Start small, invest consistently, and avoid trying to time the market. Time is your best ally.';
+
+  @override
+  String get investFirstSteps_tipBodyGlobal =>
+      'Start small, invest consistently, and avoid trying to time the market. Time is your best ally.';
+
+  @override
+  String get investMenu_tesouroTitle => 'Brazilian Treasuries';
+
+  @override
+  String get investMenu_cdbTitle => 'Bank fixed income (CDB)';
+
+  @override
+  String get investMenu_etfsTitle => 'International ETFs';
+
+  @override
+  String get investMenu_sp500Title => 'S&P 500 (index)';
+
+  @override
+  String get investMenu_stocksTitle => 'Stocks';
+
+  @override
+  String get investMenu_fundsTitle => 'Funds';
+
+  @override
+  String get investMenu_fiisTitle => 'FIIs';
+
+  @override
+  String get investMenu_reitsTitle => 'REITs';
+
+  @override
+  String get investMenu_internationalTitle => 'International';
+
+  @override
+  String get investMenu_cryptoTitle => 'Crypto';
+
+  @override
+  String get investRegisterCta => 'Register investment';
+
+  @override
+  String investRegionHintBr(String country) {
+    return 'Effective country: $country · Brazil catalog (Treasuries, CDB, LCA…).';
+  }
+
+  @override
+  String investRegionHintGlobal(String country) {
+    return 'Effective country: $country · Global catalog (ETFs, NYSE/NASDAQ…). Priority: store (RevenueCat) · fallback locale/IP.';
+  }
+
+  @override
+  String get strategy_sectionCoreTitle => 'Essential strategies';
+
+  @override
+  String get strategy_sectionDeepDiveTitle => 'Deep Dive (Premium)';
+
+  @override
+  String get strategy_emergencyFundTitle => 'Emergency fund';
+
+  @override
+  String get strategy_emergencyFundBodyBr =>
+      'Your financial shield. Cover 6–12 months of expenses. Prioritize daily liquidity and low risk (e.g., Tesouro Selic or CDI-linked CDB).';
+
+  @override
+  String get strategy_emergencyFundBodyGlobal =>
+      'Your financial shield. Cover 6–12 months of expenses. Prioritize daily liquidity and low risk (e.g., money market funds and short-term Treasury bonds).';
+
+  @override
+  String get strategy_buyHoldTitle => 'Buy & Hold';
+
+  @override
+  String get strategy_buyHoldBody =>
+      'Buy quality assets and hold for the long term. Focus on discipline, quality, and reinvestment over time.';
+
+  @override
+  String get strategy_diversificationTitle => 'Diversification';
+
+  @override
+  String get strategy_diversificationBodyBr =>
+      'Spread your capital across fixed income, stocks, FIIs, and international assets to reduce risk and improve risk-adjusted returns.';
+
+  @override
+  String get strategy_diversificationBodyGlobal =>
+      'Spread your capital across bonds, stocks, REITs, and international exposure to reduce risk and improve risk-adjusted returns.';
+
+  @override
+  String get strategy_dcaTitle => 'Dollar-cost averaging (DCA)';
+
+  @override
+  String get strategy_dcaBody =>
+      'Consistency beats genius. Investing every month is often more effective than trying to pick the perfect entry point.';
+
+  @override
+  String get strategy_smartGoalsTitle => 'SMART goals';
+
+  @override
+  String get strategy_smartGoalsBody =>
+      'Your goals should be specific, measurable, achievable, relevant, and time-bound.';
+
+  @override
+  String get strategy_503020Title => '50-30-20 rule';
+
+  @override
+  String get strategy_503020Body =>
+      'A simple budgeting framework: 50% needs, 30% wants, 20% investing and goals.';
+
+  @override
+  String get strategy_deepDive_allocationTitle => 'Asset allocation (advanced)';
+
+  @override
+  String get strategy_deepDive_allocationBody =>
+      'Learn how to build an allocation by goal and horizon, adjusting risk, correlation, and rebalancing.';
+
+  @override
+  String get strategy_deepDive_globalEtfsTitle =>
+      'Global ETFs and indices (advanced)';
+
+  @override
+  String get strategy_deepDive_globalEtfsBody =>
+      'Learn about global indices (e.g., S&P 500), ETFs, and how to build international exposure with discipline.';
+
+  @override
+  String get strategy_deepDive_taxesTitle => 'Taxes and reporting (advanced)';
+
+  @override
+  String get strategy_deepDive_taxesBody =>
+      'Understand core tax concepts and how to keep records to report investments safely.';
+
+  @override
+  String get strategy_premiumLockedBody =>
+      'Premium content. Activate a Cyber/Grimm/Hive theme to unlock the investment Deep Dive.';
+
+  @override
+  String get homeShowcaseTitle => 'Showcase';
+
+  @override
+  String get homeShowcaseProfileSimTitle => 'Risk profile quiz';
+
+  @override
+  String get homeShowcaseProfileSimSubtitle =>
+      'Find your investor profile in a few minutes.';
+
+  @override
+  String get homeShowcaseStrategiesTitle => 'Recommended strategies';
+
+  @override
+  String get homeShowcaseStrategiesSubtitle =>
+      'Direct shortcuts to learn and apply strategies.';
+
+  @override
+  String get homeShowcaseMentorHubTitle => 'Mentor: Quizzes & Strategies';
+
+  @override
+  String get homeShowcaseMentorHubSubtitle =>
+      'Quick access to the risk profile quiz and recommended strategies.';
+
+  @override
+  String get quizProfile_title => 'Risk profile quiz';
+
+  @override
+  String quizProfile_progress(int current, int total) {
+    return 'Question $current of $total';
+  }
+
+  @override
+  String get quizProfile_badge => 'RISK PROFILE QUIZ';
+
+  @override
+  String get quizProfile_resultTitle => 'YOUR PROFILE IS';
+
+  @override
+  String get quizProfile_idealInvestmentsTitle => 'IDEAL INVESTMENTS:';
+
+  @override
+  String get quizProfile_exploreInvestmentsCta => 'EXPLORE INVESTMENTS';
+
+  @override
+  String get quizProfile_exit => 'EXIT';
+
+  @override
+  String get quizKnowledge_title => 'Knowledge quiz';
+
+  @override
+  String quizKnowledge_progress(int current, int total) {
+    return 'Question $current of $total';
+  }
 }

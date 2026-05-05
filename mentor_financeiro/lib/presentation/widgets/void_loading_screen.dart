@@ -17,7 +17,7 @@ class VoidLoadingScreen extends StatefulWidget {
     this.particlesColor = const Color(0xFF0B0B0B),
   });
 
-  /// `devvoid_standard.png` ou logo do tema premium ([SplashAssetResolver]).
+  /// Logo central da Splash (use `DevVoid_logo.png`).
   final String splashAsset;
 
   final Color backgroundColor;
@@ -115,7 +115,7 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: widget.backgroundColor,
+      backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -126,7 +126,7 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
                 center: Alignment.center,
                 radius: 1.05,
                 colors: [
-                  widget.backgroundColor,
+                  Colors.black,
                   Colors.transparent,
                 ],
                 stops: const [0.0, 1.0],

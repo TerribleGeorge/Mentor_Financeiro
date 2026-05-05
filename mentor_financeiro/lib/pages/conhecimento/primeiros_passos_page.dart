@@ -1,18 +1,33 @@
 import 'package:flutter/material.dart';
 
+import '../../content/content_repository.dart';
+import '../../l10n/app_localizations.dart';
+
 class PrimeirosPassosPage extends StatelessWidget {
   const PrimeirosPassosPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+    final isBrazil = ContentRepository.isPtBrLocale(locale);
+    final passos = ContentRepository.investmentFirstSteps(
+      l10n: l10n,
+      isBrazil: isBrazil,
+    );
+    final dica = ContentRepository.investmentFirstStepsTip(
+      l10n: l10n,
+      isBrazil: isBrazil,
+    );
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Primeiros Passos',
+        title: Text(
+          l10n.investFirstSteps_title,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
@@ -23,42 +38,17 @@ class PrimeirosPassosPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildPasso(
-            1,
-            'Escolha uma Corretora',
-            'Busque instituições financeiras seguras e reguladas pelo Banco Central. Compare taxas e reputação.',
-            Icons.business,
-          ),
-          const SizedBox(height: 12),
-          _buildPasso(
-            2,
-            'Abra sua Conta',
-            'Processo digital gratuito. Você precisará de documentos pessoais (CPF, RG) e comprovante de residência.',
-            Icons.person_add,
-          ),
-          const SizedBox(height: 12),
-          _buildPasso(
-            3,
-            'Transfira Recursos',
-            'Envie dinheiro via PIX ou TED da sua conta bancária para a corretora. O dinheiro fica disponível para investimento.',
-            Icons.swap_horiz,
-          ),
-          const SizedBox(height: 12),
-          _buildPasso(
-            4,
-            'Descubra seu Perfil',
-            'Responda ao questionário de suitability. Entenda se você é conservador, moderado ou arrojado.',
-            Icons.psychology,
-          ),
-          const SizedBox(height: 12),
-          _buildPasso(
-            5,
-            'Invista no Primeiro Ativo',
-            'Comece pela Reserva de Emergência (Tesouro Selic ou CDB). Depois, diversifique gradualmente.',
-            Icons.rocket_launch,
-          ),
+          ...List.generate(passos.length, (i) {
+            final p = passos[i];
+            return Column(
+              children: [
+                _buildPasso(i + 1, p.title, p.body, p.icon),
+                if (i != passos.length - 1) const SizedBox(height: 12),
+              ],
+            );
+          }),
           const SizedBox(height: 24),
-          _buildDica(),
+          _buildDica(dica.title, dica.body),
         ],
       ),
     );
@@ -133,7 +123,7 @@ class PrimeirosPassosPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDica() {
+  Widget _buildDica(String titulo, String corpo) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -145,25 +135,25 @@ class PrimeirosPassosPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.green.withAlpha(75), width: 1),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.lightbulb, color: Colors.green, size: 24),
-          SizedBox(width: 12),
+          const Icon(Icons.lightbulb, color: Colors.green, size: 24),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Dica do Mentor:',
-                  style: TextStyle(
+                  titulo,
+                  style: const TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Comece devagar, invista consistentemente e evite tentar "timbar" o mercado. O tempo é seu maior aliado.',
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                  corpo,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
             ),
