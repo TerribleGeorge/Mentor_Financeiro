@@ -10,7 +10,7 @@ class MentorAppBackdrop extends StatelessWidget {
 
   final Widget? child;
 
-  static const String _voidBgAsset = 'assets/images/devvoid_logo.png';
+  static const String _voidBgAsset = 'assets/images/devvoid_standard.png';
   static const String _cyberBgAsset = 'assets/images/bg_cyber.png';
 
   @override
