@@ -35,18 +35,23 @@ import 'presentation/widgets/void_loading_screen.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
-final GlobalKey<NavigatorState> mentorNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> mentorNavigatorKey =
+    GlobalKey<NavigatorState>();
 
 final themeController = AppThemeController();
 final localeController = LocaleController();
 final currencyPreferenceController = CurrencyPreferenceController.instance;
 final userPersonaService = UserPersonaService.instance;
 final regionalContextController = RegionalContextController();
-final investmentCategoryProvider =
-    InvestmentCategoryProvider(regionalContextController);
+final investmentCategoryProvider = InvestmentCategoryProvider(
+  regionalContextController,
+);
 
 /// Evita que o arranque fique preso em SDKs externos (FCM, RevenueCat, health Firebase).
-Future<void> _runWithBootTimeout(String label, Future<void> Function() work) async {
+Future<void> _runWithBootTimeout(
+  String label,
+  Future<void> Function() work,
+) async {
   try {
     await work().timeout(const Duration(seconds: 5));
   } on TimeoutException catch (_, st) {
@@ -74,7 +79,8 @@ Future<void> _runWithBootTimeout(String label, Future<void> Function() work) asy
 
 /// Fase 1 do boot: `.env`, Firebase Core, **RevenueCat** (`getCustomerInfo` via SDK),
 /// prefs do tema — para escolher a arte da splash antes do resto.
-Future<({String splashAsset, bool firebaseReady})> _bootstrapSplashContext() async {
+Future<({String splashAsset, bool firebaseReady})>
+_bootstrapSplashContext() async {
   try {
     await dotenv.load(fileName: '.env');
   } catch (e, st) {
@@ -82,7 +88,8 @@ Future<({String splashAsset, bool firebaseReady})> _bootstrapSplashContext() asy
   }
 
   if (kDebugMode) {
-    final keyOk = AppSecrets.revenueCatAndroid != null &&
+    final keyOk =
+        AppSecrets.revenueCatAndroid != null &&
         AppSecrets.revenueCatAndroid!.trim().isNotEmpty;
     log(
       'RevenueCat: REVENUECAT_ANDROID_API_KEY no .env ${keyOk ? "carregada" : "ausente (SDK não arranca)"}.',
@@ -108,7 +115,8 @@ Future<({String splashAsset, bool firebaseReady})> _bootstrapSplashContext() asy
 
   // Splash Standard / Cyber / Grimm / Hive: mesmo fluxo que Purchases.getCustomerInfo().
   final info = await RevenueCatSubscriptionService.getCustomerInfoSafe();
-  final isPremium = info != null &&
+  final isPremium =
+      info != null &&
       RevenueCatSubscriptionService.customerHasPremiumAccess(info);
 
   await themeController.initialize();
@@ -126,13 +134,16 @@ Future<void> _revenueCatSyncDuringSplashHold() async {
   if (!RevenueCatBootstrap.isSdkReady) return;
   final info = await RevenueCatSubscriptionService.getCustomerInfoSafe();
   if (info == null) return;
-  final premium =
-      RevenueCatSubscriptionService.isPremiumEntitlementActive(info);
+  final premium = RevenueCatSubscriptionService.isPremiumEntitlementActive(
+    info,
+  );
   await themeController.setPremiumStatus(premium);
 }
 
 /// Restante do boot depois da splash estar definida (observabilidade, messaging, prefs, lojas).
-Future<void> _bootstrapApplicationRemainder({required bool firebaseReady}) async {
+Future<void> _bootstrapApplicationRemainder({
+  required bool firebaseReady,
+}) async {
   if (firebaseReady) {
     await _runWithBootTimeout('firebase_ops', () async {
       await FirebaseDataService.instance.setupObservability();
@@ -140,7 +151,8 @@ Future<void> _bootstrapApplicationRemainder({required bool firebaseReady}) async
         FirebaseAuth.instance.currentUser?.uid,
       );
 
-      final health = await FirebaseDataService.instance.runBootstrapHealthChecks();
+      final health = await FirebaseDataService.instance
+          .runBootstrapHealthChecks();
       log(
         'Conexão Firestore (servidor): ${health.firestore ? "estabelecida" : "indisponível ou sem permissão"}.',
         name: 'mentor.health',
@@ -150,13 +162,11 @@ Future<void> _bootstrapApplicationRemainder({required bool firebaseReady}) async
         name: 'mentor.health',
       );
 
-      await FirebaseDataService.instance.logAnalyticsEvent(
-        'mentor_bootstrap_health',
-        <String, Object>{
-          'firestore_ok': health.firestore ? 1 : 0,
-          'http_ok': health.externalHttp ? 1 : 0,
-        },
-      );
+      await FirebaseDataService.instance
+          .logAnalyticsEvent('mentor_bootstrap_health', <String, Object>{
+            'firestore_ok': health.firestore ? 1 : 0,
+            'http_ok': health.externalHttp ? 1 : 0,
+          });
     });
   } else {
     log(
@@ -197,16 +207,23 @@ Future<void> _bootstrapApplicationRemainder({required bool firebaseReady}) async
 }
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  runZonedGuarded(() {
-    runApp(const AppBootstrapShell());
-  }, (error, stack) {
-    log('Erro não tratado: $error', name: 'mentor.errors', error: error, stackTrace: stack);
-    if (!kIsWeb && Firebase.apps.isNotEmpty) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    }
-  });
+  runZonedGuarded(
+    () {
+      WidgetsFlutterBinding.ensureInitialized();
+      runApp(const AppBootstrapShell());
+    },
+    (error, stack) {
+      log(
+        'Erro não tratado: $error',
+        name: 'mentor.errors',
+        error: error,
+        stackTrace: stack,
+      );
+      if (!kIsWeb && Firebase.apps.isNotEmpty) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      }
+    },
+  );
 }
 
 /// Depois de [_bootstrapSplashContext]: splash + barra 10 s + resto do boot —
@@ -370,7 +387,10 @@ class MentorFinanceiroApp extends StatelessWidget {
                     alignment: MainAxisAlignment.end,
                   ),
                   onComplete: (index, key) {
-                    MentorTourCoordinator.onShowcaseStepCompleted(key, mentorNavigatorKey);
+                    MentorTourCoordinator.onShowcaseStepCompleted(
+                      key,
+                      mentorNavigatorKey,
+                    );
                   },
                   builder: (showcaseContext) => MentorAppBackdrop(child: child),
                 );

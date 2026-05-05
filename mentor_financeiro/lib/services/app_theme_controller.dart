@@ -32,6 +32,7 @@ class AppThemeController extends ChangeNotifier {
   bool _isLoading = false;
   bool _isPremium = false;
   MentorAdaptiveVisuals _adaptiveVisuals = MentorAdaptiveVisuals.presetVoid;
+  Future<void>? _initializeFuture;
 
   AppThemeMode get themeMode => _themeMode;
   bool get isLoading => _isLoading;
@@ -126,9 +127,7 @@ class AppThemeController extends ChangeNotifier {
       cardTheme: CardThemeData(
         color: v.widgetColor,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
       ),
       extensions: <ThemeExtension<dynamic>>[v],
@@ -169,9 +168,12 @@ class AppThemeController extends ChangeNotifier {
     }
   }
 
-  Future<void> initialize() async {
+  Future<void> initialize() {
+    return _initializeFuture ??= _initialize();
+  }
+
+  Future<void> _initialize() async {
     _isLoading = true;
-    notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
     final v2 = prefs.getInt(_themeKeyV2);
@@ -198,7 +200,9 @@ class AppThemeController extends ChangeNotifier {
     }
     _recomputeAdaptiveVisuals();
 
-    debugPrint('AppThemeController initialized - isPremium: $_isPremium, tema: $_themeMode');
+    debugPrint(
+      'AppThemeController initialized - isPremium: $_isPremium, tema: $_themeMode',
+    );
 
     _isLoading = false;
     notifyListeners();
@@ -272,9 +276,7 @@ class GlassCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: v.widgetColor,
             borderRadius: radius,
-            border: Border.all(
-              color: v.textColor.withValues(alpha: 0.12),
-            ),
+            border: Border.all(color: v.textColor.withValues(alpha: 0.12)),
           ),
           child: child,
         ),
