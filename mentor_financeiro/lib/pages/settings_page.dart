@@ -8,8 +8,6 @@ import '../services/app_theme_controller.dart';
 import '../services/subscription_provider.dart';
 import '../services/currency_preference_controller.dart';
 import '../services/locale_controller.dart';
-import '../widgets/premium_cyber_paywall_dialog.dart';
-
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -133,39 +131,83 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () {},
                   ),
                 ]),
-                if (kDebugMode) ...[
-                  const SizedBox(height: 24),
-                  _buildSectionTitle('Debug'),
-                  const SizedBox(height: 12),
-                  _buildCard([
+                const SizedBox(height: 24),
+                _buildSectionTitle('Assinatura'),
+                const SizedBox(height: 12),
+                _buildCard([
+                  ListTile(
+                    leading: const Icon(
+                      Icons.workspace_premium_outlined,
+                      color: Colors.white70,
+                    ),
+                    title: const Text(
+                      'Fazer teste de assinatura',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    subtitle: const Text(
+                      'Oferta mensal (trial) via RevenueCat.',
+                      style: TextStyle(color: Colors.white54, fontSize: 12),
+                    ),
+                    onTap: subscription.isLoading
+                        ? null
+                        : () async {
+                            final messenger = ScaffoldMessenger.of(context);
+                            final sub = context.read<SubscriptionProvider>();
+                            try {
+                              final ok = await sub.purchaseMonthly();
+                              if (!mounted) return;
+                              if (ok &&
+                                  sub.hasPremiumEntitlementFromRevenueCat) {
+                                messenger.showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Assinatura activa — temas premium desbloqueados.',
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      sub.errorMessage ??
+                                          'Compra cancelada ou não concluída.',
+                                    ),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                messenger.showSnackBar(
+                                  SnackBar(content: Text('Erro: $e')),
+                                );
+                              }
+                            }
+                          },
+                  ),
+                  if (kDebugMode) ...[
+                    const Divider(color: Colors.white12),
                     ListTile(
                       leading: const Icon(Icons.science_outlined,
                           color: Colors.white70),
                       title: const Text(
-                        'Simular Compra (teste)',
+                        'Simular premium (debug)',
                         style: TextStyle(color: Colors.white),
                       ),
-                      subtitle: const Text(
-                        'Ativa premium para testar o tema Cyber.',
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
-                      ),
                       onTap: () async {
+                        final messenger = ScaffoldMessenger.of(context);
                         await context
                             .read<SubscriptionProvider>()
                             .debugSimulatePremiumPurchase();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Premium simulado — Cyber desbloqueado.',
-                              ),
-                            ),
-                          );
-                        }
+                        if (!mounted) return;
+                        messenger.showSnackBar(
+                          const SnackBar(
+                            content: Text('Premium simulado (debug).'),
+                          ),
+                        );
                       },
                     ),
-                  ]),
-                ],
+                  ],
+                ]),
                 const SizedBox(height: 40),
               ],
             ),
@@ -217,8 +259,8 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               _buildTemaChip(subscription, 'Void', AppThemeMode.voidTheme),
               _buildTemaChip(subscription, 'Cyber', AppThemeMode.cyber),
-              _buildTemaChip(subscription, 'Obsidian', AppThemeMode.obsidian),
-              _buildTemaChip(subscription, 'Glacier', AppThemeMode.glacier),
+              _buildTemaChip(subscription, 'Grimm', AppThemeMode.obsidian),
+              _buildTemaChip(subscription, 'Hive', AppThemeMode.glacier),
             ],
           ),
         ],
@@ -232,19 +274,51 @@ class _SettingsPageState extends State<SettingsPage> {
     AppThemeMode mode,
   ) {
     final isSelected = _themeController.themeMode == mode;
-    final lockedCyber =
-        mode == AppThemeMode.cyber &&
-            !subscription.hasPremiumEntitlementFromRevenueCat;
+    final locked = mode.requiresPremiumEntitlement &&
+        !subscription.hasPremiumEntitlementFromRevenueCat;
     return GestureDetector(
-      onTap: () {
-        if (lockedCyber) {
-          PremiumCyberPaywallDialog.show(context);
-          return;
-        }
-        _themeController.setThemeMode(mode);
-      },
+      onTap: subscription.isLoading
+          ? null
+          : () async {
+              final messenger = ScaffoldMessenger.of(context);
+              if (!mode.requiresPremiumEntitlement) {
+                await _themeController.setThemeMode(mode);
+                return;
+              }
+              if (subscription.hasPremiumEntitlementFromRevenueCat) {
+                await _themeController.setThemeMode(mode);
+                return;
+              }
+              try {
+                final ok = await subscription.purchaseMonthly();
+                if (!mounted) return;
+                if (ok &&
+                    subscription.hasPremiumEntitlementFromRevenueCat) {
+                  await _themeController.setThemeMode(mode);
+                  if (!mounted) return;
+                  messenger.showSnackBar(
+                    SnackBar(content: Text('$nome desbloqueado.')),
+                  );
+                } else {
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        subscription.errorMessage ??
+                            'Compra cancelada ou não concluída.',
+                      ),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  messenger.showSnackBar(
+                    SnackBar(content: Text('Erro: $e')),
+                  );
+                }
+              }
+            },
       child: Opacity(
-        opacity: lockedCyber ? 0.45 : 1,
+        opacity: locked ? 0.45 : 1,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
@@ -257,7 +331,7 @@ class _SettingsPageState extends State<SettingsPage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (lockedCyber) ...[
+              if (locked) ...[
                 const Icon(Icons.lock, size: 12, color: Colors.white60),
                 const SizedBox(width: 4),
               ],

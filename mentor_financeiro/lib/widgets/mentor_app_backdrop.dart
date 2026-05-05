@@ -12,6 +12,8 @@ class MentorAppBackdrop extends StatelessWidget {
 
   static const String _voidBgAsset = 'assets/images/devvoid_standard.png';
   static const String _cyberBgAsset = 'assets/images/bg_cyber.png';
+  static const String _grimmBgAsset = 'assets/images/bg_grimm.png';
+  static const String _hiveBgAsset = 'assets/images/hive_bg.png';
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +76,7 @@ class MentorAppBackdrop extends StatelessWidget {
                       center: Alignment.bottomCenter,
                       radius: 1.2,
                       colors: [
-                        Colors.black.withValues(alpha: 0.35),
+                        Colors.black.withValues(alpha: 0.25),
                         Colors.transparent,
                       ],
                     ),
@@ -89,8 +91,8 @@ class MentorAppBackdrop extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.white.withValues(alpha: 0.35),
-                        const Color(0xFFF0F9FF).withValues(alpha: 0.02),
+                        Colors.white.withValues(alpha: 0.2),
+                        Colors.transparent,
                       ],
                     ),
                   ),
@@ -121,10 +123,23 @@ class _ThemeBackgroundLayer extends StatelessWidget {
           gaplessPlayback: true,
           errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
         );
-      case AppThemeMode.voidTheme:
       case AppThemeMode.obsidian:
+        return Image.asset(
+          MentorAppBackdrop._grimmBgAsset,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+        );
+      case AppThemeMode.glacier:
+        return Image.asset(
+          MentorAppBackdrop._hiveBgAsset,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+        );
+      case AppThemeMode.voidTheme:
         return Opacity(
-          opacity: themeMode == AppThemeMode.obsidian ? 0.14 : 0.22,
+          opacity: 0.22,
           child: Image.asset(
             MentorAppBackdrop._voidBgAsset,
             fit: BoxFit.cover,
@@ -132,8 +147,6 @@ class _ThemeBackgroundLayer extends StatelessWidget {
             errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
           ),
         );
-      case AppThemeMode.glacier:
-        return const SizedBox.shrink();
     }
   }
 }

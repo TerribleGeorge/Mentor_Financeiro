@@ -7,7 +7,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/subscription_constants.dart';
-import 'app_theme_controller.dart' show AppThemeController, AppThemeMode;
+import 'app_theme_controller.dart';
 import 'revenue_cat_bootstrap.dart';
 import 'revenue_cat_subscription_service.dart';
 
@@ -49,7 +49,7 @@ class SubscriptionProvider extends ChangeNotifier {
       await refreshFromRevenueCat();
     } else {
       await _loadPremiumStatusFallback();
-      await _enforceCyberThemeGate();
+      await _enforcePremiumThemeGate();
       notifyListeners();
     }
 
@@ -57,9 +57,10 @@ class SubscriptionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _enforceCyberThemeGate() async {
-    if (AppThemeController.instance.themeMode != AppThemeMode.cyber) return;
+  Future<void> _enforcePremiumThemeGate() async {
     if (hasPremiumEntitlementFromRevenueCat) return;
+    final mode = AppThemeController.instance.themeMode;
+    if (!mode.requiresPremiumEntitlement) return;
     await AppThemeController.instance.setThemeMode(AppThemeMode.voidTheme);
   }
 
@@ -80,7 +81,7 @@ class SubscriptionProvider extends ChangeNotifier {
   Future<void> refreshFromRevenueCat() async {
     if (!RevenueCatBootstrap.isSdkReady) {
       await _loadPremiumStatusFallback();
-      await _enforceCyberThemeGate();
+      await _enforcePremiumThemeGate();
       notifyListeners();
       return;
     }
@@ -93,7 +94,7 @@ class SubscriptionProvider extends ChangeNotifier {
       _errorMessage = e.toString();
       await _loadPremiumStatusFallback();
     }
-    await _enforceCyberThemeGate();
+    await _enforcePremiumThemeGate();
     notifyListeners();
   }
 
@@ -118,7 +119,7 @@ class SubscriptionProvider extends ChangeNotifier {
   /// Atualização em tempo real ([Purchases.addCustomerInfoUpdateListener]) sem novo pedido HTTP.
   Future<void> applyCustomerInfo(CustomerInfo info) async {
     await _applyCustomerInfo(info);
-    await _enforceCyberThemeGate();
+    await _enforcePremiumThemeGate();
     notifyListeners();
   }
 

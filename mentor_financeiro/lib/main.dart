@@ -106,6 +106,7 @@ Future<({String splashAsset, bool firebaseReady})> _bootstrapSplashContext() asy
     () => RevenueCatBootstrap.run(FirebaseAuth.instance.currentUser?.uid),
   );
 
+  // Splash Standard / Cyber / Grimm / Hive: mesmo fluxo que Purchases.getCustomerInfo().
   final info = await RevenueCatSubscriptionService.getCustomerInfoSafe();
   final isPremium = info != null &&
       RevenueCatSubscriptionService.customerHasPremiumAccess(info);
@@ -198,8 +199,8 @@ void main() {
   });
 }
 
-/// Depois de [_bootstrapSplashContext]: splash correta + resto do boot +
-/// [VoidLoadingScreen.waitMinimumBootstrapVisualHold]; saída só com fade (sem escala).
+/// Depois de [_bootstrapSplashContext]: splash + barra 10 s + resto do boot —
+/// só navega quando [Future.wait] termina (mínimo 10 s **e** remainder do bootstrap).
 /// O hold de 10s antes da Home pós-login continua em [VoidLoadingScreen.minimumNavigationHold].
 class AppBootstrapShell extends StatefulWidget {
   const AppBootstrapShell({super.key});
@@ -221,16 +222,16 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
 
   Future<void> _startBootstrap() async {
     try {
-      final (:splashAsset, :firebaseReady) = await _bootstrapSplashContext();
+      final splashCtx = await _bootstrapSplashContext();
       if (mounted) {
         setState(() {
-          _splashAssetPath = splashAsset;
+          _splashAssetPath = splashCtx.splashAsset;
           _splashReady = true;
         });
       }
       await Future.wait<void>([
-        _bootstrapApplicationRemainder(firebaseReady: firebaseReady),
-        VoidLoadingScreen.waitMinimumBootstrapVisualHold(),
+        _bootstrapApplicationRemainder(firebaseReady: splashCtx.firebaseReady),
+        VoidLoadingScreen.waitBootstrapSynchronizationHold(),
       ]);
     } catch (e, st) {
       log(
@@ -247,7 +248,7 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
       }
       await Future.wait<void>([
         _bootstrapApplicationRemainder(firebaseReady: Firebase.apps.isNotEmpty),
-        VoidLoadingScreen.waitMinimumBootstrapVisualHold(),
+        VoidLoadingScreen.waitBootstrapSynchronizationHold(),
       ]);
     }
     if (mounted) {

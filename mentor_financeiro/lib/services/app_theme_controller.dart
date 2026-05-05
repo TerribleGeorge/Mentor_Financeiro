@@ -6,7 +6,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/mentor_adaptive_visuals.dart';
 
 /// Temas predefinidos devvoid (sem imagem de fundo personalizada).
+/// [obsidian] e [glacier] correspondem à marca **Grimm** e **Hive** na UI.
 enum AppThemeMode { voidTheme, cyber, obsidian, glacier }
+
+extension AppThemeModePremium on AppThemeMode {
+  /// Cyber, Grimm (obsidian) e Hive (glacier) exigem entitlement premium RevenueCat.
+  bool get requiresPremiumEntitlement =>
+      this == AppThemeMode.cyber ||
+      this == AppThemeMode.obsidian ||
+      this == AppThemeMode.glacier;
+}
 
 class AppThemeController extends ChangeNotifier {
   static final AppThemeController instance = AppThemeController._internal();
@@ -183,7 +192,7 @@ class AppThemeController extends ChangeNotifier {
     }
 
     _isPremium = prefs.getBool(_isPremiumKey) ?? false;
-    if (_themeMode == AppThemeMode.cyber && !_isPremium) {
+    if (!_isPremium && _themeMode.requiresPremiumEntitlement) {
       _themeMode = AppThemeMode.voidTheme;
       await prefs.setInt(_themeKeyV2, _themeMode.index);
     }
@@ -205,7 +214,7 @@ class AppThemeController extends ChangeNotifier {
   }
 
   Future<void> setThemeMode(AppThemeMode mode) async {
-    if (mode == AppThemeMode.cyber && !_isPremium) {
+    if (mode.requiresPremiumEntitlement && !_isPremium) {
       return;
     }
     if (_themeMode == mode) return;
@@ -226,9 +235,9 @@ class AppThemeController extends ChangeNotifier {
       case AppThemeMode.cyber:
         return 'Cyber';
       case AppThemeMode.obsidian:
-        return 'Obsidian';
+        return 'Grimm';
       case AppThemeMode.glacier:
-        return 'Glacier';
+        return 'Hive';
     }
   }
 }

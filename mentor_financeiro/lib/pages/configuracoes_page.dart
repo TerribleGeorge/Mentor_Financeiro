@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/app_theme_controller.dart';
 import '../services/subscription_provider.dart';
-import '../widgets/premium_cyber_paywall_dialog.dart';
 
 class ConfiguracoesPage extends StatelessWidget {
   const ConfiguracoesPage({super.key});
@@ -44,10 +43,64 @@ class ConfiguracoesPage extends StatelessWidget {
             _buildSectionTitle('Visualização', themeController),
             const SizedBox(height: 16),
             _buildPreviewCard(themeController),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Assinatura', themeController),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: subscription.isLoading
+                  ? null
+                  : () async {
+                      try {
+                        final ok = await context
+                            .read<SubscriptionProvider>()
+                            .purchaseMonthly();
+                        if (!context.mounted) return;
+                        if (ok &&
+                            context
+                                .read<SubscriptionProvider>()
+                                .hasPremiumEntitlementFromRevenueCat) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Assinatura activa — temas Cyber, Grimm e Hive desbloqueados.',
+                              ),
+                            ),
+                          );
+                        } else {
+                          final err =
+                              context.read<SubscriptionProvider>().errorMessage;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                err ??
+                                    'Compra cancelada ou não concluída.',
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Erro: $e')),
+                          );
+                        }
+                      }
+                    },
+              icon: subscription.isLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.workspace_premium_outlined, size: 20),
+              label: Text(
+                subscription.isLoading
+                    ? 'A processar…'
+                    : 'Fazer teste de assinatura (offering)',
+              ),
+            ),
             if (kDebugMode) ...[
-              const SizedBox(height: 32),
-              _buildSectionTitle('Debug', themeController),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               OutlinedButton.icon(
                 onPressed: () async {
                   await context
@@ -56,13 +109,13 @@ class ConfiguracoesPage extends StatelessWidget {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Premium simulado — Tema Cyber desbloqueado.'),
+                        content: Text('Premium simulado (debug).'),
                       ),
                     );
                   }
                 },
                 icon: const Icon(Icons.science_outlined, size: 20),
-                label: const Text('Simular Compra (teste)'),
+                label: const Text('Simular premium (só debug)'),
               ),
             ],
           ],
@@ -95,6 +148,7 @@ class ConfiguracoesPage extends StatelessWidget {
         icon: Icons.blur_on,
         color: const Color(0xFF00E5FF),
         previewColor: const Color(0xFF0A0A0A),
+        thumbnailAsset: null,
       ),
       _ThemeOption(
         mode: AppThemeMode.cyber,
@@ -102,20 +156,23 @@ class ConfiguracoesPage extends StatelessWidget {
         icon: Icons.hub_outlined,
         color: const Color(0xFFE879F9),
         previewColor: const Color(0xFF252936),
+        thumbnailAsset: 'assets/images/devvoid_cyber.png',
       ),
       _ThemeOption(
         mode: AppThemeMode.obsidian,
-        name: 'Obsidian',
+        name: 'Grimm',
         icon: Icons.diamond_outlined,
         color: const Color(0xFFC0C5CE),
         previewColor: const Color(0xFF3D444D),
+        thumbnailAsset: 'assets/images/devvoid_grimm.png',
       ),
       _ThemeOption(
         mode: AppThemeMode.glacier,
-        name: 'Glacier',
-        icon: Icons.ac_unit,
+        name: 'Hive',
+        icon: Icons.hexagon_outlined,
         color: const Color(0xFF0EA5E9),
         previewColor: const Color(0xFFEFF6FF),
+        thumbnailAsset: 'assets/images/devvoid_hive.png',
       ),
     ];
 
@@ -126,20 +183,51 @@ class ConfiguracoesPage extends StatelessWidget {
         final isSelected = controller.themeMode == theme.mode;
         final onLightPreview =
             theme.previewColor.computeLuminance() > 0.55;
-        final cyberLocked = theme.mode == AppThemeMode.cyber &&
+        final locked = theme.mode.requiresPremiumEntitlement &&
             !subscription.hasPremiumEntitlementFromRevenueCat;
         return SizedBox(
           width: (MediaQuery.sizeOf(context).width - 40 - 12) / 2,
           child: GestureDetector(
-            onTap: () {
-              if (cyberLocked) {
-                PremiumCyberPaywallDialog.show(context);
-                return;
-              }
-              controller.setThemeMode(theme.mode);
-            },
+            onTap: subscription.isLoading
+                ? null
+                : () async {
+                    if (!locked) {
+                      await controller.setThemeMode(theme.mode);
+                      return;
+                    }
+                    try {
+                      final ok =
+                          await subscription.purchaseMonthly();
+                      if (!context.mounted) return;
+                      if (ok &&
+                          subscription.hasPremiumEntitlementFromRevenueCat) {
+                        await controller.setThemeMode(theme.mode);
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${theme.name} desbloqueado.'),
+                          ),
+                        );
+                      } else {
+                        final err = subscription.errorMessage;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              err ?? 'Compra cancelada ou não concluída.',
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Erro: $e')),
+                        );
+                      }
+                    }
+                  },
             child: AnimatedOpacity(
-              opacity: cyberLocked ? 0.42 : 1,
+              opacity: locked ? 0.42 : 1,
               duration: const Duration(milliseconds: 200),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -168,7 +256,23 @@ class ConfiguracoesPage extends StatelessWidget {
                   children: [
                     Column(
                       children: [
-                        Icon(theme.icon, color: theme.color, size: 28),
+                        if (theme.thumbnailAsset != null)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(
+                              theme.thumbnailAsset!,
+                              width: 52,
+                              height: 52,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Icon(
+                                theme.icon,
+                                color: theme.color,
+                                size: 28,
+                              ),
+                            ),
+                          )
+                        else
+                          Icon(theme.icon, color: theme.color, size: 28),
                         const SizedBox(height: 8),
                         Text(
                           theme.name,
@@ -182,7 +286,7 @@ class ConfiguracoesPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    if (cyberLocked)
+                    if (locked)
                       Positioned(
                         right: -4,
                         top: -6,
@@ -263,12 +367,15 @@ class _ThemeOption {
   final IconData icon;
   final Color color;
   final Color previewColor;
+  final String? thumbnailAsset;
+
   const _ThemeOption({
     required this.mode,
     required this.name,
     required this.icon,
     required this.color,
     required this.previewColor,
+    this.thumbnailAsset,
   });
 }
 
