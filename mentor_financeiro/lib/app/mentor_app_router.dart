@@ -23,8 +23,8 @@ import '../pages/tela_perfil.dart';
 import '../pages/tela_upgrade.dart';
 import '../pages/quiz_conhecimento_page.dart';
 import '../pages/questionario_page.dart';
+import '../pages/home_screen.dart';
 import '../presentation/calculator/calculadora_mentora_screen.dart';
-import '../presentation/home/mentor_home_screen.dart';
 import '../presentation/insight/insight_detail_screen.dart';
 import '../presentation/onboarding/onboarding_flow_screen.dart';
 import '../presentation/persona/persona_setup_screen.dart';
@@ -62,7 +62,7 @@ class MentorAppRouter {
       case AppRoutes.home:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const MentorHomeScreen(),
+          builder: (_) => const HomeScreen(),
         );
       case AppRoutes.calculadoraMentora:
       case AppRoutes.ferramentasCalculadoraJuros:
