@@ -8,7 +8,7 @@ class VoidSmokePainter extends CustomPainter {
 
   final Animation<double> animation;
 
-  static const Color _lead = Color(0xFF1A1A1A);
+  static const Color _lead = Color(0xFF0A0A0A);
   static const int _particleCount = 15;
 
   double _fract(double x) => x - x.floorToDouble();
@@ -27,7 +27,7 @@ class VoidSmokePainter extends CustomPainter {
       final rX = _rand(si * 12.9898);
       final rSpeed = 0.22 + _rand(si * 78.233 + 1) * 0.78;
       final rSize = 14 + _rand(si * 45.164 + 2) * 52;
-      final baseOpacity = 0.2 + _rand(si * 93.989 + 3) * 0.3;
+      final baseOpacity = 0.28 + _rand(si * 93.989 + 3) * 0.35;
       final phaseShift = _rand(si * 67.41 + 4);
       final driftFreq = 0.4 + _rand(si * 31.7 + 5) * 1.4;
       final driftAmp = 10 + _rand(si * 22.1 + 6) * 28;
@@ -43,7 +43,7 @@ class VoidSmokePainter extends CustomPainter {
 
       final wobble = Curves.easeInOut.transform(_fract(t * 0.15 + si * 0.02));
       final opacity =
-          (baseOpacity * (0.75 + 0.25 * math.sin(wobble * math.pi))).clamp(0.2, 0.5);
+          (baseOpacity * (0.75 + 0.25 * math.sin(wobble * math.pi))).clamp(0.28, 0.62);
 
       final greyMix = _rand(si * 88.1 + 7);
 

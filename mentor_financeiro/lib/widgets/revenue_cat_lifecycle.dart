@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../services/investment_category_provider.dart';
 import '../services/revenue_cat_bootstrap.dart';
 import '../services/subscription_provider.dart';
 
@@ -46,6 +47,8 @@ class _RevenueCatLifecycleState extends State<RevenueCatLifecycle> {
       await RevenueCatBootstrap.syncFirebaseUser(user?.uid);
       if (!mounted) return;
       await context.read<SubscriptionProvider>().refreshFromRevenueCat();
+      if (!mounted) return;
+      await context.read<InvestmentCategoryProvider>().syncStorefrontFromRevenueCat();
     });
   }
 

@@ -14,6 +14,7 @@ import '../pages/main_navigation.dart';
 import '../pages/relatorios_screen.dart';
 import '../pages/simulado_page.dart';
 import '../pages/tela_estrategias.dart';
+import '../pages/adicionar_investimento_page.dart';
 import '../pages/tela_investimentos.dart';
 import '../pages/tela_login.dart';
 import '../pages/tela_metas.dart';
@@ -98,6 +99,11 @@ class MentorAppRouter {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const TelaInvestimentos(),
+        );
+      case AppRoutes.adicionarInvestimento:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const AdicionarInvestimentoPage(),
         );
       case AppRoutes.estrategias:
         return MaterialPageRoute<void>(

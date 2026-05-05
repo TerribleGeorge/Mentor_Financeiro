@@ -13,6 +13,7 @@ abstract final class AppRoutes {
   static const String perfil = '/perfil';
   static const String metas = '/metas';
   static const String investimentos = '/investimentos';
+  static const String adicionarInvestimento = '/investimento/adicionar';
   static const String estrategias = '/estrategias';
   static const String conhecimento = '/conhecimento';
   static const String conhecimentoInvestimentos = '/conhecimento/investimentos';

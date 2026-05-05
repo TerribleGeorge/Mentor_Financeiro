@@ -20,7 +20,11 @@ import 'services/firebase_service.dart';
 import 'services/app_theme_controller.dart';
 import 'services/currency_preference_controller.dart';
 import 'services/locale_controller.dart';
+import 'services/investment_category_provider.dart';
+import 'services/regional_context_controller.dart';
+import 'presentation/splash/splash_asset_resolver.dart';
 import 'services/revenue_cat_bootstrap.dart';
+import 'services/revenue_cat_subscription_service.dart';
 import 'services/subscription_provider.dart';
 import 'services/user_persona_service.dart';
 import 'app/mentor_app_router.dart';
@@ -37,6 +41,9 @@ final themeController = AppThemeController();
 final localeController = LocaleController();
 final currencyPreferenceController = CurrencyPreferenceController.instance;
 final userPersonaService = UserPersonaService.instance;
+final regionalContextController = RegionalContextController();
+final investmentCategoryProvider =
+    InvestmentCategoryProvider(regionalContextController);
 
 /// Evita que o arranque fique preso em SDKs externos (FCM, RevenueCat, health Firebase).
 Future<void> _runWithBootTimeout(String label, Future<void> Function() work) async {
@@ -65,8 +72,9 @@ Future<void> _runWithBootTimeout(String label, Future<void> Function() work) asy
   }
 }
 
-/// Inicialização pesada antes do [MentorFinanceiroApp] (Firebase, prefs, etc.).
-Future<void> _bootstrapApplication() async {
+/// Fase 1 do boot: `.env`, Firebase Core, **RevenueCat** (`getCustomerInfo` via SDK),
+/// prefs do tema — para escolher a arte da splash antes do resto.
+Future<({String splashAsset, bool firebaseReady})> _bootstrapSplashContext() async {
   try {
     await dotenv.load(fileName: '.env');
   } catch (e, st) {
@@ -93,6 +101,27 @@ Future<void> _bootstrapApplication() async {
     log('Firebase: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
   }
 
+  await _runWithBootTimeout(
+    'revenuecat',
+    () => RevenueCatBootstrap.run(FirebaseAuth.instance.currentUser?.uid),
+  );
+
+  final info = await RevenueCatSubscriptionService.getCustomerInfoSafe();
+  final isPremium = info != null &&
+      RevenueCatSubscriptionService.customerHasPremiumAccess(info);
+
+  await themeController.initialize();
+
+  final splashAsset = SplashAssetResolver.resolve(
+    isPremium: isPremium,
+    theme: themeController.themeMode,
+  );
+
+  return (splashAsset: splashAsset, firebaseReady: firebaseReady);
+}
+
+/// Restante do boot depois da splash estar definida (observabilidade, messaging, prefs, lojas).
+Future<void> _bootstrapApplicationRemainder({required bool firebaseReady}) async {
   if (firebaseReady) {
     await _runWithBootTimeout('firebase_ops', () async {
       await FirebaseDataService.instance.setupObservability();
@@ -133,20 +162,21 @@ Future<void> _bootstrapApplication() async {
     }
   });
 
-  // RevenueCat SDK: `Purchases.configure(PurchasesConfiguration(apiKey))` com
-  // apiKey = AppSecrets.revenueCatAndroid (lida do .env após dotenv.load).
-  // Implementação: lib/services/revenue_cat_bootstrap.dart → [RevenueCatBootstrap.run].
-  await _runWithBootTimeout(
-    'revenuecat',
-    () => RevenueCatBootstrap.run(FirebaseAuth.instance.currentUser?.uid),
-  );
-
   await _runWithBootTimeout('local_prefs', () async {
-    await themeController.initialize();
     await currencyPreferenceController.initialize();
     await localeController.initialize();
     await userPersonaService.initialize();
   });
+
+  await _runWithBootTimeout(
+    'regional',
+    () => regionalContextController.initialize(),
+  );
+
+  await _runWithBootTimeout(
+    'investment_categories',
+    () => investmentCategoryProvider.syncStorefrontFromRevenueCat(),
+  );
 
   if (kDebugMode) {
     debugPrint('=== TEMA DEBUG ===');
@@ -168,8 +198,9 @@ void main() {
   });
 }
 
-/// Primeiro frame: [VoidLoadingScreen] durante [_bootstrapApplication] (sem hold fixo); depois fade para o app.
-/// O hold de 10s antes da Home fica no [SplashScreen] (após login), via [VoidLoadingScreen.minimumNavigationHold].
+/// Depois de [_bootstrapSplashContext]: splash correta + resto do boot +
+/// [VoidLoadingScreen.waitMinimumBootstrapVisualHold]; saída só com fade (sem escala).
+/// O hold de 10s antes da Home pós-login continua em [VoidLoadingScreen.minimumNavigationHold].
 class AppBootstrapShell extends StatefulWidget {
   const AppBootstrapShell({super.key});
 
@@ -178,6 +209,8 @@ class AppBootstrapShell extends StatefulWidget {
 }
 
 class _AppBootstrapShellState extends State<AppBootstrapShell> {
+  bool _splashReady = false;
+  String _splashAssetPath = SplashAssetResolver.standard;
   bool _bootComplete = false;
 
   @override
@@ -187,7 +220,36 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
   }
 
   Future<void> _startBootstrap() async {
-    await _bootstrapApplication();
+    try {
+      final (:splashAsset, :firebaseReady) = await _bootstrapSplashContext();
+      if (mounted) {
+        setState(() {
+          _splashAssetPath = splashAsset;
+          _splashReady = true;
+        });
+      }
+      await Future.wait<void>([
+        _bootstrapApplicationRemainder(firebaseReady: firebaseReady),
+        VoidLoadingScreen.waitMinimumBootstrapVisualHold(),
+      ]);
+    } catch (e, st) {
+      log(
+        'bootstrapSplashContext: $e',
+        name: 'mentor.bootstrap',
+        error: e,
+        stackTrace: st,
+      );
+      if (mounted) {
+        setState(() {
+          _splashAssetPath = SplashAssetResolver.standard;
+          _splashReady = true;
+        });
+      }
+      await Future.wait<void>([
+        _bootstrapApplicationRemainder(firebaseReady: Firebase.apps.isNotEmpty),
+        VoidLoadingScreen.waitMinimumBootstrapVisualHold(),
+      ]);
+    }
     if (mounted) {
       setState(() => _bootComplete = true);
     }
@@ -195,10 +257,21 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_splashReady) {
+      return const MaterialApp(
+        key: ValueKey<String>('boot_placeholder'),
+        debugShowCheckedModeBanner: false,
+        home: ColoredBox(color: Colors.black),
+      );
+    }
+
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 720),
+      duration: const Duration(milliseconds: 1100),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
       child: _bootComplete
           ? const MentorFinanceiroApp(key: ValueKey<String>('mentor_app'))
           : MaterialApp(
@@ -209,7 +282,7 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
                 scaffoldBackgroundColor: Colors.black,
                 useMaterial3: true,
               ),
-              home: const VoidLoadingScreen(),
+              home: VoidLoadingScreen(splashAsset: _splashAssetPath),
             ),
     );
   }
@@ -228,6 +301,12 @@ class MentorFinanceiroApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<UserPersonaService>.value(
           value: userPersonaService,
+        ),
+        ChangeNotifierProvider<RegionalContextController>.value(
+          value: regionalContextController,
+        ),
+        ChangeNotifierProvider<InvestmentCategoryProvider>.value(
+          value: investmentCategoryProvider,
         ),
       ],
       child: RevenueCatLifecycle(

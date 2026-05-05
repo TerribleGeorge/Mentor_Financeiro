@@ -1,10 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_routes.dart';
 import '../../core/navigation/fade_route.dart';
+import '../../services/app_theme_controller.dart';
+import '../../services/subscription_provider.dart';
 import '../widgets/void_loading_screen.dart';
+import 'splash_asset_resolver.dart';
 import '../../services/firebase_service.dart';
 import '../../services/user_persona_service.dart';
 
@@ -124,6 +128,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const VoidLoadingScreen();
+    final theme = context.watch<AppThemeController>();
+    final subscription = context.watch<SubscriptionProvider>();
+    final asset = SplashAssetResolver.resolve(
+      isPremium: subscription.hasPremiumEntitlementFromRevenueCat,
+      theme: theme.themeMode,
+    );
+    return VoidLoadingScreen(splashAsset: asset);
   }
 }

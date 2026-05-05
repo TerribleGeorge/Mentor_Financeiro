@@ -7,12 +7,14 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/subscription_constants.dart';
-import 'app_theme_controller.dart';
+import 'app_theme_controller.dart' show AppThemeController, AppThemeMode;
 import 'revenue_cat_bootstrap.dart';
 import 'revenue_cat_subscription_service.dart';
 
 class SubscriptionProvider extends ChangeNotifier {
   bool _isPremium = false;
+  /// `true` só após [CustomerInfo] aplicado (entitlement vindo do RevenueCat), nunca por fallback Firestore sozinho.
+  bool _premiumEntitlementFromRevenueCat = false;
   bool _isLoading = false;
   String? _errorMessage;
   String _currentRegion = 'BR';
@@ -30,6 +32,13 @@ class SubscriptionProvider extends ChangeNotifier {
     return _subscriptionEndDate!.isAfter(DateTime.now());
   }
 
+  /// Tema Cyber: exige SDK pronto e entitlement `premium` confirmado em [CustomerInfo] (não Firestore/prefs em fallback).
+  bool get hasPremiumEntitlementFromRevenueCat {
+    if (!RevenueCatBootstrap.isSdkReady) return false;
+    if (!_premiumEntitlementFromRevenueCat) return false;
+    return hasActiveSubscription;
+  }
+
   bool get _firebaseReady => Firebase.apps.isNotEmpty;
 
   Future<void> initialize() async {
@@ -40,10 +49,18 @@ class SubscriptionProvider extends ChangeNotifier {
       await refreshFromRevenueCat();
     } else {
       await _loadPremiumStatusFallback();
+      await _enforceCyberThemeGate();
+      notifyListeners();
     }
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> _enforceCyberThemeGate() async {
+    if (AppThemeController.instance.themeMode != AppThemeMode.cyber) return;
+    if (hasPremiumEntitlementFromRevenueCat) return;
+    await AppThemeController.instance.setThemeMode(AppThemeMode.voidTheme);
   }
 
   /// Limpa mensagem de erro da última compra (ex.: antes de abrir o modal de paywall).
@@ -63,6 +80,7 @@ class SubscriptionProvider extends ChangeNotifier {
   Future<void> refreshFromRevenueCat() async {
     if (!RevenueCatBootstrap.isSdkReady) {
       await _loadPremiumStatusFallback();
+      await _enforceCyberThemeGate();
       notifyListeners();
       return;
     }
@@ -75,10 +93,12 @@ class SubscriptionProvider extends ChangeNotifier {
       _errorMessage = e.toString();
       await _loadPremiumStatusFallback();
     }
+    await _enforceCyberThemeGate();
     notifyListeners();
   }
 
   Future<void> _applyCustomerInfo(CustomerInfo info) async {
+    _premiumEntitlementFromRevenueCat = true;
     _isPremium = RevenueCatSubscriptionService.customerHasPremiumAccess(info);
     final ent = RevenueCatSubscriptionService.activePremiumEntitlement(info);
     if (ent?.expirationDate != null) {
@@ -98,6 +118,7 @@ class SubscriptionProvider extends ChangeNotifier {
   /// Atualização em tempo real ([Purchases.addCustomerInfoUpdateListener]) sem novo pedido HTTP.
   Future<void> applyCustomerInfo(CustomerInfo info) async {
     await _applyCustomerInfo(info);
+    await _enforceCyberThemeGate();
     notifyListeners();
   }
 
@@ -121,37 +142,41 @@ class SubscriptionProvider extends ChangeNotifier {
 
   /// Fallback: Firestore / prefs quando o SDK não está pronto.
   Future<void> _loadPremiumStatusFallback() async {
+    _premiumEntitlementFromRevenueCat = false;
     final prefs = await SharedPreferences.getInstance();
-    if (!_firebaseReady) {
-      _isPremium = prefs.getBool('is_premium') ?? false;
-      return;
-    }
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      _isPremium = prefs.getBool('is_premium') ?? false;
-      return;
-    }
-
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('usuarios')
-          .doc(user.uid)
-          .get();
-
-      if (doc.exists) {
-        final data = doc.data();
-        _isPremium = data?['isPremium'] ?? false;
-        if (data?['premiumEndDate'] != null) {
-          _subscriptionEndDate =
-              (data!['premiumEndDate'] as Timestamp).toDate();
-        }
-      } else {
+      if (!_firebaseReady) {
         _isPremium = prefs.getBool('is_premium') ?? false;
+      } else {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) {
+          _isPremium = prefs.getBool('is_premium') ?? false;
+        } else {
+          try {
+            final doc = await FirebaseFirestore.instance
+                .collection('usuarios')
+                .doc(user.uid)
+                .get();
+
+            if (doc.exists) {
+              final data = doc.data();
+              _isPremium = data?['isPremium'] ?? false;
+              if (data?['premiumEndDate'] != null) {
+                _subscriptionEndDate =
+                    (data!['premiumEndDate'] as Timestamp).toDate();
+              }
+            } else {
+              _isPremium = prefs.getBool('is_premium') ?? false;
+            }
+          } catch (e) {
+            debugPrint('Erro ao carregar status premium: $e');
+            _isPremium = prefs.getBool('is_premium') ?? false;
+          }
+        }
       }
-    } catch (e) {
-      debugPrint('Erro ao carregar status premium: $e');
-      _isPremium = prefs.getBool('is_premium') ?? false;
+    } finally {
+      await AppThemeController.instance
+          .setPremiumStatus(hasPremiumEntitlementFromRevenueCat);
     }
   }
 
@@ -280,6 +305,7 @@ class SubscriptionProvider extends ChangeNotifier {
   /// Só em **debug**: simula assinatura ativa para testar UI (tema Cyber, etc.) sem compra na loja.
   Future<void> debugSimulatePremiumPurchase() async {
     if (!kDebugMode) return;
+    _premiumEntitlementFromRevenueCat = true;
     _isPremium = true;
     _subscriptionEndDate = DateTime.now().add(const Duration(days: 365));
     _errorMessage = null;

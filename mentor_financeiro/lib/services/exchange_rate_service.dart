@@ -2,125 +2,156 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
+/// Conjunto de taxas (ex.: tabela completa a partir de uma moeda base).
 class ExchangeRatesSnapshot {
-  final String base;
-  final Map<String, double> rates;
-  final DateTime fetchedAt;
-
-  ExchangeRatesSnapshot({
+  const ExchangeRatesSnapshot({
     required this.base,
-    required this.rates,
     required this.fetchedAt,
+    required this.rates,
   });
 
+  final String base;
+  final DateTime fetchedAt;
+  final Map<String, double> rates;
+
+  /// Taxa de 1 unidade [base] para [currency] (ex.: USD→BRL).
   double? rateTo(String currency) => rates[currency.toUpperCase()];
 }
 
-class ExchangeRateService {
-  static const _cachePrefix = 'fx_cache_';
-  static const _datePrefix = 'fx_cache_date_';
+class _CachedSnapshot {
+  _CachedSnapshot(this.snapshot, this.expires);
 
-  /// Busca taxas de câmbio mais recentes (todas as moedas suportadas pela API)
-  /// e faz cache por dia (YYYY-MM-DD) para evitar bater na rede toda hora.
+  final ExchangeRatesSnapshot snapshot;
+  final DateTime expires;
+}
+
+class _CachedRate {
+  _CachedRate(this.rate, this.expires);
+
+  final double rate;
+  final DateTime expires;
+}
+
+/// Taxas via [Frankfurter](https://www.frankfurter.app/) (ECB), sem chave.
+abstract final class ExchangeRateService {
+  static final Map<String, _CachedSnapshot> _tableCache = {};
+  static final Map<String, _CachedRate> _pairCache = {};
+
+  static const _ttlTable = Duration(hours: 1);
+  static const _ttlPair = Duration(hours: 1);
+
+  /// Últimas taxas com [base] como moeda de origem (ex.: USD → todas as outras).
   static Future<ExchangeRatesSnapshot?> getLatest({
     String base = 'USD',
     bool forceRefresh = false,
   }) async {
-    final baseUpper = base.toUpperCase();
-    final prefs = await SharedPreferences.getInstance();
-    final today = _yyyyMmDd(DateTime.now());
-
+    final key = base.toUpperCase();
     if (!forceRefresh) {
-      final lastDay = prefs.getString('$_datePrefix$baseUpper');
-      final cached = prefs.getString('$_cachePrefix$baseUpper');
-      if (lastDay == today && cached != null) {
-        final decoded = jsonDecode(cached) as Map<String, dynamic>;
-        return _fromJson(baseUpper, decoded);
+      final c = _tableCache[key];
+      if (c != null && c.expires.isAfter(DateTime.now())) {
+        return c.snapshot;
       }
     }
 
     try {
-      final uri = Uri.parse('https://open.er-api.com/v6/latest/$baseUpper');
-      final res = await http.get(uri);
+      final uri = Uri.parse(
+        'https://api.frankfurter.app/latest?from=$key',
+      );
+      final res = await http.get(uri).timeout(const Duration(seconds: 15));
       if (res.statusCode != 200) {
-        return await _loadFallback(baseUpper, prefs);
+        debugPrint('ExchangeRateService getLatest HTTP ${res.statusCode}');
+        return null;
       }
 
-      final decoded = jsonDecode(res.body) as Map<String, dynamic>;
-      final snapshot = _fromApiResponse(baseUpper, decoded);
-      if (snapshot == null) {
-        return await _loadFallback(baseUpper, prefs);
+      final decoded = jsonDecode(res.body);
+      if (decoded is! Map<String, dynamic>) return null;
+
+      final ratesRaw = decoded['rates'];
+      if (ratesRaw is! Map<String, dynamic>) return null;
+
+      final rates = <String, double>{};
+      for (final e in ratesRaw.entries) {
+        final v = e.value;
+        if (v is num) {
+          rates[e.key] = v.toDouble();
+        }
       }
 
-      await prefs.setString('$_datePrefix$baseUpper', today);
-      await prefs.setString('$_cachePrefix$baseUpper', jsonEncode(decoded));
-      return snapshot;
-    } catch (e) {
-      debugPrint('Erro ao buscar câmbio: $e');
-      return await _loadFallback(baseUpper, prefs);
-    }
-  }
-
-  static Future<ExchangeRatesSnapshot?> _loadFallback(
-    String baseUpper,
-    SharedPreferences prefs,
-  ) async {
-    final cached = prefs.getString('$_cachePrefix$baseUpper');
-    if (cached == null) return null;
-    try {
-      final decoded = jsonDecode(cached) as Map<String, dynamic>;
-      return _fromJson(baseUpper, decoded);
-    } catch (_) {
+      final snap = ExchangeRatesSnapshot(
+        base: key,
+        fetchedAt: DateTime.now().toUtc(),
+        rates: rates,
+      );
+      _tableCache[key] = _CachedSnapshot(
+        snap,
+        DateTime.now().add(_ttlTable),
+      );
+      return snap;
+    } catch (e, st) {
+      debugPrint('ExchangeRateService getLatest: $e\n$st');
       return null;
     }
   }
 
-  static ExchangeRatesSnapshot? _fromJson(
-    String baseUpper,
-    Map<String, dynamic> decoded,
-  ) {
-    return _fromApiResponse(baseUpper, decoded);
+  /// Converte um valor em **BRL** para [targetCurrency] (ISO 4217).
+  static Future<double?> convertFromBrl(double amountBrl, String targetCurrency) async {
+    final rate = await rateBrlTo(targetCurrency);
+    if (rate == null) return null;
+    return amountBrl * rate;
   }
 
-  static ExchangeRatesSnapshot? _fromApiResponse(
-    String baseUpper,
-    Map<String, dynamic> decoded,
-  ) {
-    final ratesRaw = decoded['rates'];
-    if (ratesRaw is! Map) return null;
+  /// Uma unidade BRL vale quantas unidades de [targetCurrency].
+  static Future<double?> rateBrlTo(String targetCurrency) async {
+    final upper = targetCurrency.toUpperCase();
+    if (upper == 'BRL') return 1.0;
 
-    final rates = <String, double>{};
-    for (final entry in ratesRaw.entries) {
-      final code = entry.key?.toString().toUpperCase();
-      if (code == null || code.isEmpty) continue;
-      final v = entry.value;
-      if (v is num) {
-        rates[code] = v.toDouble();
-      }
+    final cached = _pairCache[upper];
+    if (cached != null && cached.expires.isAfter(DateTime.now())) {
+      return cached.rate;
     }
 
-    final timeLastUpdateUnix = decoded['time_last_update_unix'];
-    DateTime fetchedAt = DateTime.now();
-    if (timeLastUpdateUnix is num) {
-      fetchedAt = DateTime.fromMillisecondsSinceEpoch(
-        timeLastUpdateUnix.toInt() * 1000,
+    try {
+      final uri = Uri.parse(
+        'https://api.frankfurter.app/latest?from=BRL&to=$upper',
       );
-    }
+      final res = await http.get(uri).timeout(const Duration(seconds: 12));
+      if (res.statusCode != 200) {
+        debugPrint('ExchangeRateService rateBrlTo HTTP ${res.statusCode}');
+        return null;
+      }
 
-    return ExchangeRatesSnapshot(
-      base: baseUpper,
-      rates: rates,
-      fetchedAt: fetchedAt,
-    );
+      final decoded = jsonDecode(res.body);
+      if (decoded is! Map<String, dynamic>) return null;
+
+      final rates = decoded['rates'];
+      if (rates is! Map<String, dynamic>) return null;
+
+      final raw = rates[upper];
+      if (raw is! num) return null;
+
+      final rate = raw.toDouble();
+      _pairCache[upper] = _CachedRate(rate, DateTime.now().add(_ttlPair));
+      return rate;
+    } catch (e, st) {
+      debugPrint('ExchangeRateService rateBrlTo: $e\n$st');
+      return null;
+    }
   }
 
-  static String _yyyyMmDd(DateTime dt) {
-    final y = dt.year.toString().padLeft(4, '0');
-    final m = dt.month.toString().padLeft(2, '0');
-    final d = dt.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
+  /// Converte [amount] entre moedas ISO usando a tabela Frankfurter para [fromCurrency].
+  static Future<double?> convertAmount(
+    double amount,
+    String fromCurrency,
+    String toCurrency,
+  ) async {
+    final from = fromCurrency.toUpperCase();
+    final to = toCurrency.toUpperCase();
+    if (from == to) return amount;
+
+    final snap = await getLatest(base: from);
+    final rate = snap?.rateTo(to);
+    if (rate == null) return null;
+    return amount * rate;
   }
 }
-

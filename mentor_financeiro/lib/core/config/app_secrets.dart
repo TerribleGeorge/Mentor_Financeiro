@@ -8,6 +8,10 @@ abstract final class AppSecrets {
   static String? get revenueCatIos =>
       dotenv.env['REVENUECAT_IOS_API_KEY']?.trim();
 
+  /// Opcional: Alpha Vantage para cotações globais ([AlphaVantageFinancialDataProvider]).
+  static String? get alphaVantageApiKey =>
+      dotenv.env['ALPHA_VANTAGE_API_KEY']?.trim();
+
   /// Um ou mais e-mails admin separados por vírgula (ex.: `a@x.com,b@y.com`).
   static Set<String> get adminEmails {
     final raw = dotenv.env['FIREBASE_ADMIN_EMAIL']?.trim() ?? '';

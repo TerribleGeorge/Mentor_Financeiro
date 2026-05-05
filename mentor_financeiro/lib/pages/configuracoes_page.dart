@@ -127,7 +127,7 @@ class ConfiguracoesPage extends StatelessWidget {
         final onLightPreview =
             theme.previewColor.computeLuminance() > 0.55;
         final cyberLocked = theme.mode == AppThemeMode.cyber &&
-            !subscription.hasActiveSubscription;
+            !subscription.hasPremiumEntitlementFromRevenueCat;
         return SizedBox(
           width: (MediaQuery.sizeOf(context).width - 40 - 12) / 2,
           child: GestureDetector(

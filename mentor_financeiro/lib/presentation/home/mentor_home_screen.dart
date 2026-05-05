@@ -5,8 +5,9 @@ import '../../core/constants/app_routes.dart';
 import '../../core/widgets/mentor_insight_card.dart';
 import '../../domain/entities/financial_market_region.dart';
 import '../../domain/entities/risk_profile.dart';
-import '../../services/localization_service.dart';
+import '../../services/investment_category_provider.dart';
 import '../../services/user_persona_service.dart';
+import '../../widgets/patrimonio_convertido_card.dart';
 import '../../theme/mentor_adaptive_visuals.dart';
 import '../../tour/mentor_showcase_style.dart';
 import '../../tour/mentor_tour_keys.dart';
@@ -24,11 +25,6 @@ class MentorHomeScreen extends StatefulWidget {
 class _MentorHomeScreenState extends State<MentorHomeScreen> {
   bool _homeTourKickoffDone = false;
 
-  FinancialMarketRegion get _region =>
-      LocalizationService.currentLocale.languageCode == 'pt'
-          ? FinancialMarketRegion.brazil
-          : FinancialMarketRegion.global;
-
   @override
   void initState() {
     super.initState();
@@ -44,7 +40,10 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final region = _region;
+    final cat = context.watch<InvestmentCategoryProvider>();
+    final region = cat.isBrazilMarket
+        ? FinancialMarketRegion.brazil
+        : FinancialMarketRegion.global;
     final v = context.mentorAdaptive;
     final tileFill = Theme.of(context).cardTheme.color ?? v.widgetColor;
 
@@ -89,11 +88,15 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              region == FinancialMarketRegion.brazil ? 'Foco B3 (BRL)' : 'Foco global (USD)',
+              region == FinancialMarketRegion.brazil
+                  ? 'Mercado: Brasil (${cat.effectiveCountryCode}) · B3 / BRL'
+                  : 'Mercado: internacional (${cat.effectiveCountryCode}) · cotações globais',
               style: TextStyle(color: v.secondaryTextColor, fontSize: 13),
             ),
             const SizedBox(height: 12),
             MentorInsightCard(region: region, profile: RiskProfile.moderate),
+            const SizedBox(height: 16),
+            const PatrimonioConvertidoCard(),
             const SizedBox(height: 28),
             Text(
               'Ferramentas',

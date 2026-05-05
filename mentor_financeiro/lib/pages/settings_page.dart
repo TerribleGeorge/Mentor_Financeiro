@@ -233,7 +233,8 @@ class _SettingsPageState extends State<SettingsPage> {
   ) {
     final isSelected = _themeController.themeMode == mode;
     final lockedCyber =
-        mode == AppThemeMode.cyber && !subscription.hasActiveSubscription;
+        mode == AppThemeMode.cyber &&
+            !subscription.hasPremiumEntitlementFromRevenueCat;
     return GestureDetector(
       onTap: () {
         if (lockedCyber) {
