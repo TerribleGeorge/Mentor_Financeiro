@@ -1,15 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/app_theme_controller.dart';
 import '../services/subscription_provider.dart';
-import 'paywall_screen.dart';
+import '../widgets/premium_cyber_paywall_dialog.dart';
 
 class ConfiguracoesPage extends StatelessWidget {
   const ConfiguracoesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final themeController = Provider.of<AppThemeController>(context);
+    final themeController = context.watch<AppThemeController>();
+    final subscription = context.watch<SubscriptionProvider>();
 
     return Scaffold(
       backgroundColor: themeController.currentTheme.scaffoldBackgroundColor,
@@ -37,11 +39,32 @@ class ConfiguracoesPage extends StatelessWidget {
           children: [
             _buildSectionTitle('Temas devvoid', themeController),
             const SizedBox(height: 16),
-            _buildThemeSelector(context, themeController),
+            _buildThemeSelector(context, themeController, subscription),
             const SizedBox(height: 32),
             _buildSectionTitle('Visualização', themeController),
             const SizedBox(height: 16),
             _buildPreviewCard(themeController),
+            if (kDebugMode) ...[
+              const SizedBox(height: 32),
+              _buildSectionTitle('Debug', themeController),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  await context
+                      .read<SubscriptionProvider>()
+                      .debugSimulatePremiumPurchase();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Premium simulado — Tema Cyber desbloqueado.'),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.science_outlined, size: 20),
+                label: const Text('Simular Compra (teste)'),
+              ),
+            ],
           ],
         ),
       ),
@@ -63,6 +86,7 @@ class ConfiguracoesPage extends StatelessWidget {
   Widget _buildThemeSelector(
     BuildContext context,
     AppThemeController controller,
+    SubscriptionProvider subscription,
   ) {
     final themes = [
       _ThemeOption(
@@ -102,18 +126,14 @@ class ConfiguracoesPage extends StatelessWidget {
         final isSelected = controller.themeMode == theme.mode;
         final onLightPreview =
             theme.previewColor.computeLuminance() > 0.55;
-        final cyberLocked =
-            theme.mode == AppThemeMode.cyber && !controller.isPremium;
+        final cyberLocked = theme.mode == AppThemeMode.cyber &&
+            !subscription.hasActiveSubscription;
         return SizedBox(
           width: (MediaQuery.sizeOf(context).width - 40 - 12) / 2,
           child: GestureDetector(
             onTap: () {
               if (cyberLocked) {
-                Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const PaywallScreen(),
-                  ),
-                );
+                PremiumCyberPaywallDialog.show(context);
                 return;
               }
               controller.setThemeMode(theme.mode);

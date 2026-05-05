@@ -1,11 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_theme_controller.dart';
+import '../services/subscription_provider.dart';
 import '../services/currency_preference_controller.dart';
 import '../services/locale_controller.dart';
-import 'paywall_screen.dart';
+import '../widgets/premium_cyber_paywall_dialog.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -36,8 +39,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final subscription = context.watch<SubscriptionProvider>();
     return ListenableBuilder(
-      listenable: _themeController,
+      listenable: Listenable.merge([_themeController, subscription]),
       builder: (context, _) {
         return Scaffold(
           backgroundColor: Colors.transparent,
@@ -63,7 +67,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 _buildSectionTitle('Aparência'),
                 const SizedBox(height: 12),
                 _buildCard([
-                  _buildThemeSelector(),
+                  _buildThemeSelector(subscription),
                 ]),
                 const SizedBox(height: 24),
                 _buildSectionTitle('Conta'),
@@ -129,6 +133,39 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () {},
                   ),
                 ]),
+                if (kDebugMode) ...[
+                  const SizedBox(height: 24),
+                  _buildSectionTitle('Debug'),
+                  const SizedBox(height: 12),
+                  _buildCard([
+                    ListTile(
+                      leading: const Icon(Icons.science_outlined,
+                          color: Colors.white70),
+                      title: const Text(
+                        'Simular Compra (teste)',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      subtitle: const Text(
+                        'Ativa premium para testar o tema Cyber.',
+                        style: TextStyle(color: Colors.white54, fontSize: 12),
+                      ),
+                      onTap: () async {
+                        await context
+                            .read<SubscriptionProvider>()
+                            .debugSimulatePremiumPurchase();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Premium simulado — Cyber desbloqueado.',
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ]),
+                ],
                 const SizedBox(height: 40),
               ],
             ),
@@ -157,7 +194,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildThemeSelector() {
+  Widget _buildThemeSelector(SubscriptionProvider subscription) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -178,10 +215,10 @@ class _SettingsPageState extends State<SettingsPage> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _buildTemaChip('Void', AppThemeMode.voidTheme),
-              _buildTemaChip('Cyber', AppThemeMode.cyber),
-              _buildTemaChip('Obsidian', AppThemeMode.obsidian),
-              _buildTemaChip('Glacier', AppThemeMode.glacier),
+              _buildTemaChip(subscription, 'Void', AppThemeMode.voidTheme),
+              _buildTemaChip(subscription, 'Cyber', AppThemeMode.cyber),
+              _buildTemaChip(subscription, 'Obsidian', AppThemeMode.obsidian),
+              _buildTemaChip(subscription, 'Glacier', AppThemeMode.glacier),
             ],
           ),
         ],
@@ -189,15 +226,18 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildTemaChip(String nome, AppThemeMode mode) {
+  Widget _buildTemaChip(
+    SubscriptionProvider subscription,
+    String nome,
+    AppThemeMode mode,
+  ) {
     final isSelected = _themeController.themeMode == mode;
-    final lockedCyber = mode == AppThemeMode.cyber && !_themeController.isPremium;
+    final lockedCyber =
+        mode == AppThemeMode.cyber && !subscription.hasActiveSubscription;
     return GestureDetector(
       onTap: () {
         if (lockedCyber) {
-          Navigator.of(context).push<void>(
-            MaterialPageRoute<void>(builder: (_) => const PaywallScreen()),
-          );
+          PremiumCyberPaywallDialog.show(context);
           return;
         }
         _themeController.setThemeMode(mode);

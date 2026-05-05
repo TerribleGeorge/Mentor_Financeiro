@@ -6,7 +6,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../constants/revenue_cat_constants.dart';
 import '../constants/subscription_constants.dart';
 import 'app_theme_controller.dart';
 import 'revenue_cat_bootstrap.dart';
@@ -47,6 +46,19 @@ class SubscriptionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Limpa mensagem de erro da última compra (ex.: antes de abrir o modal de paywall).
+  void clearErrorMessage() {
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Consulta [Purchases.getCustomerInfo], aplica entitlements (`premium`, …) e
+  /// devolve se o utilizador tem assinatura premium activa.
+  Future<bool> syncPremiumFromCustomerInfo() async {
+    await refreshFromRevenueCat();
+    return hasActiveSubscription;
+  }
+
   /// Fonte de verdade quando o SDK RevenueCat está configurado.
   Future<void> refreshFromRevenueCat() async {
     if (!RevenueCatBootstrap.isSdkReady) {
@@ -67,9 +79,8 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   Future<void> _applyCustomerInfo(CustomerInfo info) async {
-    _isPremium = RevenueCatSubscriptionService.customerHasMentorPro(info);
-    final ent =
-        info.entitlements.all[RevenueCatConstants.mentorProEntitlementId];
+    _isPremium = RevenueCatSubscriptionService.customerHasPremiumAccess(info);
+    final ent = RevenueCatSubscriptionService.activePremiumEntitlement(info);
     if (ent?.expirationDate != null) {
       _subscriptionEndDate = DateTime.tryParse(ent!.expirationDate!);
     } else {
@@ -264,5 +275,18 @@ class SubscriptionProvider extends ChangeNotifier {
       await _loadPremiumStatusFallback();
       notifyListeners();
     }
+  }
+
+  /// Só em **debug**: simula assinatura ativa para testar UI (tema Cyber, etc.) sem compra na loja.
+  Future<void> debugSimulatePremiumPurchase() async {
+    if (!kDebugMode) return;
+    _isPremium = true;
+    _subscriptionEndDate = DateTime.now().add(const Duration(days: 365));
+    _errorMessage = null;
+    await AppThemeController.instance.setPremiumStatus(true);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_premium', true);
+    await _mirrorPremiumToFirestore();
+    notifyListeners();
   }
 }

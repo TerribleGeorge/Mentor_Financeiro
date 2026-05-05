@@ -6,11 +6,22 @@ import 'revenue_cat_bootstrap.dart';
 
 /// Operações de compra, [CustomerInfo] e resolução de pacotes — só após [Purchases.configure].
 abstract final class RevenueCatSubscriptionService {
-  /// Verifica se o entitlement **Mentor Financeiro Android Pro** está ativo.
-  static bool customerHasMentorPro(CustomerInfo info) {
-    final id = RevenueCatConstants.mentorProEntitlementId;
-    final ent = info.entitlements.all[id];
-    return ent?.isActive ?? false;
+  /// `true` se qualquer um de [RevenueCatConstants.premiumEntitlementIds] estiver ativo.
+  static bool customerHasPremiumAccess(CustomerInfo info) {
+    for (final id in RevenueCatConstants.premiumEntitlementIds) {
+      final ent = info.entitlements.all[id];
+      if (ent?.isActive ?? false) return true;
+    }
+    return false;
+  }
+
+  /// Preferência do primeiro entitlement premium ativo (expiração / debugging).
+  static EntitlementInfo? activePremiumEntitlement(CustomerInfo info) {
+    for (final id in RevenueCatConstants.premiumEntitlementIds) {
+      final ent = info.entitlements.all[id];
+      if (ent?.isActive ?? false) return ent;
+    }
+    return null;
   }
 
   static Future<CustomerInfo?> getCustomerInfoSafe() async {

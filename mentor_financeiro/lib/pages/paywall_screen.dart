@@ -38,7 +38,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   Future<void> _presentModalPaywall() async {
     if (!RevenueCatBootstrap.isSdkReady) return;
     final result = await RevenueCatUI.presentPaywallIfNeeded(
-      RevenueCatConstants.mentorProEntitlementId,
+      RevenueCatConstants.paywallTargetEntitlementId,
     );
     if (!mounted) return;
     if (result == PaywallResult.purchased || result == PaywallResult.restored) {
@@ -62,7 +62,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
             padding: const EdgeInsets.all(24),
             child: Text(
               'Compras indisponíveis: configure REVENUECAT_ANDROID_API_KEY no .env '
-              'e defina o entitlement "${RevenueCatConstants.mentorProEntitlementId}" no RevenueCat.',
+              'e crie no RevenueCat os entitlements (ex.: premium, cyber) ou ajuste '
+              'RevenueCatConstants.paywallTargetEntitlementId.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,

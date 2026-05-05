@@ -11,6 +11,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 
+import 'core/config/app_secrets.dart';
 import 'core/constants/app_routes.dart';
 import 'data/services/firebase_data_service.dart';
 import 'firebase_options.dart';
@@ -72,6 +73,15 @@ Future<void> _bootstrapApplication() async {
     log('dotenv: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
   }
 
+  if (kDebugMode) {
+    final keyOk = AppSecrets.revenueCatAndroid != null &&
+        AppSecrets.revenueCatAndroid!.trim().isNotEmpty;
+    log(
+      'RevenueCat: REVENUECAT_ANDROID_API_KEY no .env ${keyOk ? "carregada" : "ausente (SDK não arranca)"}.',
+      name: 'mentor.bootstrap',
+    );
+  }
+
   var firebaseReady = false;
   try {
     await Firebase.initializeApp(
@@ -123,6 +133,9 @@ Future<void> _bootstrapApplication() async {
     }
   });
 
+  // RevenueCat SDK: `Purchases.configure(PurchasesConfiguration(apiKey))` com
+  // apiKey = AppSecrets.revenueCatAndroid (lida do .env após dotenv.load).
+  // Implementação: lib/services/revenue_cat_bootstrap.dart → [RevenueCatBootstrap.run].
   await _runWithBootTimeout(
     'revenuecat',
     () => RevenueCatBootstrap.run(FirebaseAuth.instance.currentUser?.uid),
