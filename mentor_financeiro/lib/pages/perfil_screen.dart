@@ -83,7 +83,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   Widget _buildProfileHeader() {
     final user = FirebaseAuth.instance.currentUser;
     final nome = _dadosUsuario?['nome'] ?? user?.displayName ?? 'Usuário';
-    final email = _dadosUsuario?['email'] ?? user?.email ?? '';
+    final email = FirebaseAuth.instance.currentUser?.email ?? 'Usuário não logado';
     final photoUrl = _dadosUsuario?['photoURL'] as String? ?? user?.photoURL;
 
     return Container(

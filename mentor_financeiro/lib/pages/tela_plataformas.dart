@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../core/config/app_secrets.dart';
 
 class TelaPlataformas extends StatefulWidget {
   const TelaPlataformas({super.key});
@@ -75,11 +78,12 @@ class _TelaPlataformasState extends State<TelaPlataformas> {
 
   Future<void> _carregarStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('email_usuario') ?? '';
+    final email =
+        FirebaseAuth.instance.currentUser?.email?.trim().toLowerCase() ?? '';
     setState(() {
       _isPremium =
           (prefs.getBool('plano_pro') ?? false) ||
-          email.toLowerCase() == 'george.guimares@gmail.com';
+          (email.isNotEmpty && AppSecrets.adminEmails.contains(email));
     });
   }
 

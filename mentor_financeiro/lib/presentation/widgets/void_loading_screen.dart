@@ -1,4 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:particles_flutter/engine.dart';
+import 'package:particles_flutter/shapes.dart';
 
 import '../splash/splash_asset_resolver.dart';
 
@@ -8,10 +12,17 @@ class VoidLoadingScreen extends StatefulWidget {
   const VoidLoadingScreen({
     super.key,
     required this.splashAsset,
+    this.backgroundColor = Colors.black,
+    this.progressColor = _defaultProgressColor,
+    this.particlesColor = const Color(0xFF0B0B0B),
   });
 
   /// `devvoid_standard.png` ou logo do tema premium ([SplashAssetResolver]).
   final String splashAsset;
+
+  final Color backgroundColor;
+  final Color progressColor;
+  final Color particlesColor;
 
   static const Duration bootstrapSynchronizationHold = Duration(seconds: 10);
 
@@ -31,14 +42,14 @@ class VoidLoadingScreen extends StatefulWidget {
   State<VoidLoadingScreen> createState() => _VoidLoadingScreenState();
 }
 
-/// Cor da barra (Void / splash única; sem depender de tema).
-const Color _splashProgressAccent = Color(0xFF00E5FF);
+const Color _defaultProgressColor = Color(0xFFE5E7EB);
 
 class _VoidLoadingScreenState extends State<VoidLoadingScreen>
     with TickerProviderStateMixin {
   late final AnimationController _progressController;
   late final AnimationController _pulseController;
   late final Animation<double> _pulseScale;
+  late List<Particle> _particles;
 
   @override
   void initState() {
@@ -59,6 +70,16 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
         curve: Curves.easeInOut,
       ),
     );
+
+    _particles = _createFogParticles(widget.particlesColor);
+  }
+
+  @override
+  void didUpdateWidget(covariant VoidLoadingScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.particlesColor != widget.particlesColor) {
+      _particles = _createFogParticles(widget.particlesColor);
+    }
   }
 
   @override
@@ -68,33 +89,86 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
     super.dispose();
   }
 
+  List<Particle> _createFogParticles(Color base) {
+    final rng = Random(1337);
+
+    // Mantém leve: poucas partículas grandes, movimento lento.
+    // Visual "névoa volumétrica": círculos grandes, opacidades baixas e velocidades suaves.
+    const count = 42;
+    double sign() => rng.nextBool() ? 1 : -1;
+
+    return List<Particle>.generate(count, (_) {
+      final radius = 18 + rng.nextDouble() * 42; // 18..60
+      final opacity = 0.05 + rng.nextDouble() * 0.12; // 0.05..0.17
+      final driftX = (6 + rng.nextDouble() * 18) * sign(); // -24..24
+      // Movimento ascendente predominante.
+      final driftY = -(12 + rng.nextDouble() * 28); // -40..-12
+
+      return CircularParticle(
+        color: base.withValues(alpha: opacity),
+        radius: radius,
+        velocity: Offset(driftX, driftY),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF000000),
+      backgroundColor: widget.backgroundColor,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Center(
-            child: ScaleTransition(
-              scale: _pulseScale,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Image.asset(
-                  widget.splashAsset,
-                  fit: BoxFit.contain,
-                  alignment: Alignment.center,
-                  filterQuality: FilterQuality.high,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      SplashAssetResolver.standard,
-                      fit: BoxFit.contain,
-                      alignment: Alignment.center,
-                    );
-                  },
-                ),
+          // Profundidade extra para misturar a "fumaça" com o vazio (sem aparência de figurinha).
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.center,
+                radius: 1.05,
+                colors: [
+                  widget.backgroundColor,
+                  Colors.transparent,
+                ],
+                stops: const [0.0, 1.0],
               ),
             ),
+          ),
+          // Conteúdo principal: partículas atrás + logo DV ao centro com pulso.
+          // IMPORTANTE: partículas nunca acima da logo.
+          Stack(
+            fit: StackFit.expand,
+            children: [
+              IgnorePointer(
+                child: Particles(
+                  particles: _particles,
+                  height: MediaQuery.sizeOf(context).height,
+                  width: MediaQuery.sizeOf(context).width,
+                  boundType: BoundType.WrapAround,
+                ),
+              ),
+              Center(
+                child: ScaleTransition(
+                  scale: _pulseScale,
+                  child: FractionallySizedBox(
+                    widthFactor: 0.78,
+                    child: Image.asset(
+                      widget.splashAsset,
+                      fit: BoxFit.contain,
+                      alignment: Alignment.center,
+                      filterQuality: FilterQuality.high,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          SplashAssetResolver.devVoidLogo,
+                          fit: BoxFit.contain,
+                          alignment: Alignment.center,
+                          filterQuality: FilterQuality.high,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           SafeArea(
             child: Align(
@@ -110,8 +184,8 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
                         value: _progressController.value.clamp(0.0, 1.0),
                         minHeight: 3,
                         backgroundColor: Colors.white.withValues(alpha: 0.1),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          _splashProgressAccent,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          widget.progressColor,
                         ),
                       ),
                     );

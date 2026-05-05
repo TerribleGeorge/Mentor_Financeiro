@@ -79,7 +79,14 @@ Future<void> _runWithBootTimeout(
 
 /// Fase 1 do boot: `.env`, Firebase Core, **RevenueCat** (`getCustomerInfo` via SDK),
 /// prefs do tema — para escolher a arte da splash antes do resto.
-Future<({String splashAsset, bool firebaseReady})>
+Future<
+    ({
+      String splashAsset,
+      Color splashBackground,
+      Color splashProgress,
+      Color splashParticles,
+      bool firebaseReady
+    })>
 _bootstrapSplashContext() async {
   try {
     await dotenv.load(fileName: '.env');
@@ -119,14 +126,25 @@ _bootstrapSplashContext() async {
       info != null &&
       RevenueCatSubscriptionService.customerHasPremiumAccess(info);
 
+  // Tema salvo nas prefs deve ser usado para branding premium.
   await themeController.initialize();
+  await themeController.setPremiumStatus(isPremium);
+  if (!isPremium && themeController.themeMode.requiresPremiumEntitlement) {
+    await themeController.setThemeMode(AppThemeMode.voidTheme);
+  }
 
-  final splashAsset = SplashAssetResolver.resolve(
+  final branding = SplashAssetResolver.resolveBranding(
     isPremium: isPremium,
     theme: themeController.themeMode,
   );
 
-  return (splashAsset: splashAsset, firebaseReady: firebaseReady);
+  return (
+    splashAsset: branding.asset,
+    splashBackground: branding.background,
+    splashProgress: branding.progress,
+    splashParticles: branding.particles,
+    firebaseReady: firebaseReady
+  );
 }
 
 /// Durante os 10 s da splash: confirma [CustomerInfo] e actualiza premium no tema.
@@ -238,7 +256,10 @@ class AppBootstrapShell extends StatefulWidget {
 
 class _AppBootstrapShellState extends State<AppBootstrapShell> {
   bool _splashReady = false;
-  String _splashAssetPath = SplashAssetResolver.standard;
+  String _splashAssetPath = SplashAssetResolver.devVoidLogo;
+  Color _splashBackground = Colors.black;
+  Color _splashProgress = const Color(0xFFE5E7EB);
+  Color _splashParticles = const Color(0xFF0B0B0B);
   bool _bootComplete = false;
 
   @override
@@ -253,6 +274,9 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
       if (mounted) {
         setState(() {
           _splashAssetPath = splashCtx.splashAsset;
+          _splashBackground = splashCtx.splashBackground;
+          _splashProgress = splashCtx.splashProgress;
+          _splashParticles = splashCtx.splashParticles;
           _splashReady = true;
         });
       }
@@ -270,7 +294,10 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
       );
       if (mounted) {
         setState(() {
-          _splashAssetPath = SplashAssetResolver.standard;
+          _splashAssetPath = SplashAssetResolver.devVoidLogo;
+          _splashBackground = Colors.black;
+          _splashProgress = const Color(0xFFE5E7EB);
+          _splashParticles = const Color(0xFF0B0B0B);
           _splashReady = true;
         });
       }
@@ -312,7 +339,12 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
                 scaffoldBackgroundColor: Colors.black,
                 useMaterial3: true,
               ),
-              home: VoidLoadingScreen(splashAsset: _splashAssetPath),
+              home: VoidLoadingScreen(
+                splashAsset: _splashAssetPath,
+                backgroundColor: _splashBackground,
+                progressColor: _splashProgress,
+                particlesColor: _splashParticles,
+              ),
             ),
     );
   }

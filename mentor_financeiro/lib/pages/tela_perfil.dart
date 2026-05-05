@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/firebase_service.dart';
 import '../core/constants/app_routes.dart';
+import '../core/config/app_secrets.dart';
 import 'tela_login.dart';
 import 'tela_upgrade.dart';
 
@@ -15,15 +17,18 @@ class TelaPerfil extends StatefulWidget {
 
 class _TelaPerfilState extends State<TelaPerfil> {
   String _nomeUsuario = "";
-  String _emailUsuario = "";
   String _photoURL = "";
   bool _planoPro = false;
   String _perfilInvestidor = "";
 
-  static const String _emailAdmin = "george.guimares@gmail.com";
   static const List<String> _perfis = ["Conservador", "Moderado", "Arrojado"];
 
-  bool get _isAdmin => _emailUsuario.toLowerCase() == _emailAdmin.toLowerCase();
+  bool get _isAdmin {
+    final email =
+        FirebaseAuth.instance.currentUser?.email?.trim().toLowerCase() ?? '';
+    if (email.isEmpty) return false;
+    return AppSecrets.adminEmails.contains(email);
+  }
 
   String get _statusPlano {
     if (_isAdmin) return "Desenvolvedor Mestre";
@@ -41,7 +46,6 @@ class _TelaPerfilState extends State<TelaPerfil> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _nomeUsuario = prefs.getString('nome_usuario') ?? "Usuário";
-      _emailUsuario = prefs.getString('email_usuario') ?? "";
       _photoURL = prefs.getString('photo_url') ?? "";
       _planoPro = prefs.getBool('plano_pro') ?? false;
       _perfilInvestidor = prefs.getString('perfil_investidor') ?? "";

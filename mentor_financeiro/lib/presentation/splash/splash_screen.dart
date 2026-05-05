@@ -1,16 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_routes.dart';
 import '../../core/navigation/fade_route.dart';
-import '../../services/app_theme_controller.dart';
-import '../../services/subscription_provider.dart';
 import '../widgets/void_loading_screen.dart';
-import 'splash_asset_resolver.dart';
+import '../splash/splash_asset_resolver.dart';
 import '../../services/firebase_service.dart';
 import '../../services/user_persona_service.dart';
+import '../../services/app_theme_controller.dart';
+import '../../services/revenue_cat_subscription_service.dart';
 
 /// Splash: integridade básica + autenticação + fluxo Mentor v2.
 class SplashScreen extends StatefulWidget {
@@ -22,12 +21,48 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   late final DateTime _splashStartedAt;
+  ({String asset, Color background, Color progress, Color particles})? _branding;
 
   @override
   void initState() {
     super.initState();
     _splashStartedAt = DateTime.now();
+    // 1) Branding primeiro (CustomerInfo) para não dar "flash" de troca de logo.
+    _loadBranding();
+    // 2) Depois segue o fluxo de navegação/login.
     _iniciarApp();
+  }
+
+  Future<void> _loadBranding() async {
+    try {
+      final info = await RevenueCatSubscriptionService.getCustomerInfoSafe();
+      final isPremium =
+          info != null &&
+          RevenueCatSubscriptionService.customerHasPremiumAccess(info);
+
+      // Tema salvo nas prefs (AppThemeController já migra legacy e aplica gate).
+      final theme = AppThemeController.instance;
+      await theme.initialize();
+      await theme.setPremiumStatus(isPremium);
+      if (!isPremium && theme.themeMode.requiresPremiumEntitlement) {
+        await theme.setThemeMode(AppThemeMode.voidTheme);
+      }
+
+      final branding = SplashAssetResolver.resolveBranding(
+        isPremium: isPremium,
+        theme: theme.themeMode,
+      );
+      if (!mounted) return;
+      setState(() => _branding = branding);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _branding = SplashAssetResolver.resolveBranding(
+          isPremium: false,
+          theme: AppThemeMode.voidTheme,
+        );
+      });
+    }
   }
 
   Future<void> _ensureHoldBeforeHome() async {
@@ -128,12 +163,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<AppThemeController>();
-    final subscription = context.watch<SubscriptionProvider>();
-    final asset = SplashAssetResolver.resolve(
-      isPremium: subscription.hasPremiumEntitlementFromRevenueCat,
-      theme: theme.themeMode,
+    final branding = _branding;
+    if (branding == null) {
+      // Evita flash: mostra só o vazio até a decisão do branding.
+      return const ColoredBox(color: Colors.black);
+    }
+    return VoidLoadingScreen(
+      splashAsset: branding.asset,
+      backgroundColor: branding.background,
+      progressColor: branding.progress,
+      particlesColor: branding.particles,
     );
-    return VoidLoadingScreen(splashAsset: asset);
   }
 }

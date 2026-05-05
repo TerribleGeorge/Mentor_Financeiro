@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/firebase_service.dart';
+import '../core/config/app_secrets.dart';
 
 class TelaMeuPerfil extends StatefulWidget {
   const TelaMeuPerfil({super.key});
@@ -11,7 +13,6 @@ class TelaMeuPerfil extends StatefulWidget {
 
 class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
   String _nomeUsuario = "";
-  String _emailUsuario = "";
   String _photoURL = "";
   String _profissao = "";
   String _perfilInvestidor = "";
@@ -19,8 +20,12 @@ class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
   bool _planoPro = false;
   bool _carregando = true;
 
-  static const String _emailAdmin = "george.guimares@gmail.com";
-  bool get _isAdmin => _emailUsuario.toLowerCase() == _emailAdmin.toLowerCase();
+  bool get _isAdmin {
+    final email =
+        FirebaseAuth.instance.currentUser?.email?.trim().toLowerCase() ?? '';
+    if (email.isEmpty) return false;
+    return AppSecrets.adminEmails.contains(email);
+  }
 
   String get _statusPlano {
     if (_isAdmin) return "Desenvolvedor Mestre";
@@ -43,7 +48,6 @@ class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
       if (dados != null) {
         setState(() {
           _nomeUsuario = dados['nome'] ?? 'Usuário';
-          _emailUsuario = dados['email'] ?? '';
           _photoURL = dados['photoURL'] ?? '';
           _profissao = dados['profissao'] ?? '';
           _perfilInvestidor = dados['perfilInvestidor'] ?? '';
