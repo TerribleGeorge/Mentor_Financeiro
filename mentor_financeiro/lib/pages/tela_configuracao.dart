@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 // Armazenamento local
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../theme/classic_mode_style.dart';
+
 // Serviço Firebase (para backup na nuvem)
 import '../services/firebase_service.dart';
 import '../services/finance_config_signals.dart';
@@ -512,7 +514,7 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
               color: positivo ? Colors.greenAccent : Colors.redAccent,
               fontSize: 32,
               fontWeight: FontWeight.bold,
-            ),
+            ).withFinancialShadows(context),
           ),
           const SizedBox(height: 10),
 
@@ -541,7 +543,8 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
         ),
         Text(
           'R\$ ${valor.toStringAsFixed(2)}',
-          style: TextStyle(color: cor, fontWeight: FontWeight.bold),
+          style: TextStyle(color: cor, fontWeight: FontWeight.bold)
+              .withFinancialShadows(context),
         ),
       ],
     );

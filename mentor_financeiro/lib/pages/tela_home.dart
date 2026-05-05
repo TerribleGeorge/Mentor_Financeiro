@@ -1,6 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../domain/finance/daily_limit_calculator.dart';
+import '../theme/classic_mode_style.dart';
+import '../theme/mentor_adaptive_visuals.dart';
 import '../services/firebase_service.dart';
 import '../services/finance_config_signals.dart';
 
@@ -66,13 +70,22 @@ class _TelaHomeState extends State<TelaHome> {
   Widget _botaoNavegacao(IconData icone, String rota) {
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, rota),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(15),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: context.mentorAdaptive.widgetColor,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: context.mentorAdaptive.textColor.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Icon(icone, color: Colors.white54),
+          ),
         ),
-        child: Icon(icone, color: Colors.white54),
       ),
     );
   }
@@ -93,7 +106,7 @@ class _TelaHomeState extends State<TelaHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: SingleChildScrollView(
           controller: _scrollController,
@@ -141,25 +154,29 @@ class _TelaHomeState extends State<TelaHome> {
               const SizedBox(height: 15),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        _corLimite().withAlpha(40),
-                        _corLimite().withAlpha(15),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: _corLimite().withAlpha(75),
-                      width: 1,
-                    ),
-                  ),
-                  child: Column(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            _corLimite().withAlpha(36),
+                            _corLimite().withAlpha(12),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: _corLimite().withAlpha(70),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
@@ -173,7 +190,7 @@ class _TelaHomeState extends State<TelaHome> {
                           color: Colors.white,
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                        ),
+                        ).withFinancialShadows(context),
                       ),
                       const SizedBox(height: 8),
                       ClipRRect(
@@ -207,6 +224,8 @@ class _TelaHomeState extends State<TelaHome> {
                       ],
                     ],
                   ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 15),
@@ -215,63 +234,83 @@ class _TelaHomeState extends State<TelaHome> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "GASTOS",
-                              style: TextStyle(
-                                color: Colors.white54,
-                                fontSize: 12,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: context.mentorAdaptive.widgetColor,
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: context.mentorAdaptive.textColor
+                                    .withValues(alpha: 0.1),
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "R\$ ${_gastosHoje.toStringAsFixed(2)}",
-                              style: const TextStyle(
-                                color: Colors.redAccent,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "GASTOS",
+                                  style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "R\$ ${_gastosHoje.toStringAsFixed(2)}",
+                                  style: const TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ).withFinancialShadows(context),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "RECEBIDO",
-                              style: TextStyle(
-                                color: Colors.white54,
-                                fontSize: 12,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: context.mentorAdaptive.widgetColor,
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: context.mentorAdaptive.textColor
+                                    .withValues(alpha: 0.1),
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "R\$ ${_ganhosHoje.toStringAsFixed(2)}",
-                              style: const TextStyle(
-                                color: Colors.greenAccent,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "RECEBIDO",
+                                  style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "R\$ ${_ganhosHoje.toStringAsFixed(2)}",
+                                  style: const TextStyle(
+                                    color: Colors.greenAccent,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ).withFinancialShadows(context),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),

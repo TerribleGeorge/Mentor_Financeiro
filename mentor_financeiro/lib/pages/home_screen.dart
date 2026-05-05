@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/finance/daily_limit_calculator.dart';
+import '../theme/classic_mode_style.dart';
 import '../services/finance_config_signals.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -57,17 +58,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-          ),
-        ),
-        child: SafeArea(
+      body: SafeArea(
           child: CustomScrollView(
             controller: _scrollController,
             slivers: [
@@ -79,33 +73,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         'Olá, $_nomeUsuario',
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: scheme.onSurface.withValues(alpha: 0.72),
                           fontSize: 14,
+                          shadows: ClassicModeStyle.secondaryTextShadows(context),
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
+                      Text(
                         'Bem-vindo ao Mentor',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: scheme.onSurface,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          shadows: ClassicModeStyle.primaryTextShadows(context),
                         ),
                       ),
                       const SizedBox(height: 24),
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF00D9FF), Color(0xFF00A8CC)],
+                          gradient: LinearGradient(
+                            colors: [
+                              scheme.primary,
+                              scheme.primary.withValues(alpha: 0.82),
+                            ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(
-                                0xFF00D9FF,
-                              ).withValues(alpha: 0.3),
+                              color: scheme.primary.withValues(alpha: 0.28),
                               blurRadius: 15,
                               offset: const Offset(0, 8),
                             ),
@@ -128,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: Colors.black,
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
-                              ),
+                              ).withFinancialShadows(context),
                             ),
                             const SizedBox(height: 16),
                             ClipRRect(
@@ -152,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: const TextStyle(
                                 color: Colors.black54,
                                 fontSize: 12,
-                              ),
+                              ).withFinancialShadows(context),
                             ),
                             if (_alertaLimiteDiario != null) ...[
                               const SizedBox(height: 10),
@@ -174,6 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Expanded(
                             child: _buildQuickAction(
+                              context,
                               Icons.receipt_long,
                               'Transações',
                               const Color(0xFF00D9FF),
@@ -189,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: _buildQuickAction(
+                              context,
                               Icons.pie_chart,
                               'Gráficos',
                               const Color(0xFF26DE81),
@@ -204,6 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: _buildQuickAction(
+                              context,
                               Icons.history,
                               'Histórico',
                               const Color(0xFFFECA57),
@@ -224,12 +224,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-        ),
       ),
     );
   }
 
   Widget _buildQuickAction(
+    BuildContext context,
     IconData icon,
     String label,
     Color color,
@@ -240,9 +240,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.28)),
         ),
         child: Column(
           children: [
@@ -254,6 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: color,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
+                shadows: ClassicModeStyle.secondaryTextShadows(context),
               ),
             ),
           ],

@@ -15,7 +15,6 @@ import 'core/constants/app_routes.dart';
 import 'data/services/firebase_data_service.dart';
 import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
-import 'presentation/widgets/void_loading_screen.dart';
 import 'services/firebase_service.dart';
 import 'services/app_theme_controller.dart';
 import 'services/currency_preference_controller.dart';
@@ -26,6 +25,7 @@ import 'services/user_persona_service.dart';
 import 'app/mentor_app_router.dart';
 import 'widgets/mentor_app_backdrop.dart';
 import 'tour/mentor_tour_coordinator.dart';
+import 'presentation/widgets/void_loading_screen.dart';
 
 FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
@@ -154,7 +154,8 @@ void main() {
   });
 }
 
-/// Primeiro frame: [VoidLoadingScreen] durante [_bootstrapApplication]; depois fade para o app.
+/// Primeiro frame: [VoidLoadingScreen] durante [_bootstrapApplication] (sem hold fixo); depois fade para o app.
+/// O hold de 10s antes da Home fica no [SplashScreen] (após login), via [VoidLoadingScreen.minimumNavigationHold].
 class AppBootstrapShell extends StatefulWidget {
   const AppBootstrapShell({super.key});
 
@@ -225,13 +226,9 @@ class MentorFinanceiroApp extends StatelessWidget {
           final modoTema = themeController.themeMode;
           ThemeMode flutterThemeMode;
 
-          if (modoTema == AppThemeMode.light) {
-            flutterThemeMode = ThemeMode.light;
-          } else if (modoTema == AppThemeMode.medium) {
-            flutterThemeMode = ThemeMode.dark;
-          } else {
-            flutterThemeMode = ThemeMode.dark;
-          }
+          flutterThemeMode = modoTema == AppThemeMode.glacier
+              ? ThemeMode.light
+              : ThemeMode.dark;
 
           return MaterialApp(
             navigatorKey: mentorNavigatorKey,

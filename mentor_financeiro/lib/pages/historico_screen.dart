@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../models/transacao_model.dart';
 import '../services/localization_service.dart';
+import '../theme/classic_mode_style.dart';
 
 class HistoricoScreen extends StatefulWidget {
   const HistoricoScreen({super.key});
@@ -17,28 +18,22 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-          ),
-        ),
-        child: SafeArea(
+      body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(20),
+              Padding(
+                padding: const EdgeInsets.all(20),
                 child: Text(
                   'Histórico',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: scheme.onSurface,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    shadows: ClassicModeStyle.primaryTextShadows(context),
                   ),
                 ),
               ),
@@ -89,7 +84,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                             itemCount: transacoes.length,
                             itemBuilder: (context, index) {
                               final t = transacoes[index];
-                              return _buildTransacaoItem(t);
+                              return _buildTransacaoItem(context, t);
                             },
                           );
                         },
@@ -98,18 +93,22 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 
-  Widget _buildTransacaoItem(TransacaoModel t) {
+  Widget _buildTransacaoItem(BuildContext context, TransacaoModel t) {
     final isCredito = t.tipoPagamento == TipoPagamento.credito;
+    final surface = Theme.of(context).colorScheme.surface.withValues(alpha: 0.62);
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: surface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
+        ),
       ),
       child: Row(
         children: [
@@ -138,8 +137,8 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
               children: [
                 Text(
                   t.descricao,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: onSurface,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
@@ -148,7 +147,10 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                 const SizedBox(height: 4),
                 Text(
                   DateFormat('dd/MM/yyyy', 'pt_BR').format(t.data),
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  style: TextStyle(
+                    color: onSurface.withValues(alpha: 0.55),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -160,7 +162,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                   ? const Color(0xFF26DE81)
                   : const Color(0xFFFC5C65),
               fontWeight: FontWeight.bold,
-            ),
+            ).withFinancialShadows(context),
           ),
         ],
       ),

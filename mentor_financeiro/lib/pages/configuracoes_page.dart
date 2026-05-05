@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/app_theme_controller.dart';
 import '../services/subscription_provider.dart';
+import 'paywall_screen.dart';
 
 class ConfiguracoesPage extends StatelessWidget {
   const ConfiguracoesPage({super.key});
@@ -10,8 +10,6 @@ class ConfiguracoesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = Provider.of<AppThemeController>(context);
-    final subscriptionProvider = Provider.of<SubscriptionProvider>(context);
-    final isPremium = subscriptionProvider.isPremium;
 
     return Scaffold(
       backgroundColor: themeController.currentTheme.scaffoldBackgroundColor,
@@ -37,13 +35,9 @@ class ConfiguracoesPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('Tema do App', themeController),
+            _buildSectionTitle('Temas devvoid', themeController),
             const SizedBox(height: 16),
-            _buildThemeSelector(context, themeController, isPremium),
-            const SizedBox(height: 32),
-            _buildSectionTitle('Fundo Personalizado', themeController),
-            const SizedBox(height: 16),
-            _buildBackgroundSection(context, themeController, isPremium),
+            _buildThemeSelector(context, themeController),
             const SizedBox(height: 32),
             _buildSectionTitle('Visualização', themeController),
             const SizedBox(height: 16),
@@ -69,224 +63,122 @@ class ConfiguracoesPage extends StatelessWidget {
   Widget _buildThemeSelector(
     BuildContext context,
     AppThemeController controller,
-    bool isPremium,
   ) {
     final themes = [
       _ThemeOption(
-        mode: AppThemeMode.light,
-        name: 'Claro',
-        icon: Icons.wb_sunny,
-        color: const Color(0xFFF5F5F5),
-        previewColor: Colors.white,
+        mode: AppThemeMode.voidTheme,
+        name: 'Void',
+        icon: Icons.blur_on,
+        color: const Color(0xFF00E5FF),
+        previewColor: const Color(0xFF0A0A0A),
       ),
       _ThemeOption(
-        mode: AppThemeMode.dark,
-        name: 'Escuro',
-        icon: Icons.dark_mode,
-        color: const Color(0xFF0F172A),
-        previewColor: const Color(0xFF1E293B),
+        mode: AppThemeMode.cyber,
+        name: 'Cyber',
+        icon: Icons.hub_outlined,
+        color: const Color(0xFFE879F9),
+        previewColor: const Color(0xFF252936),
       ),
       _ThemeOption(
-        mode: AppThemeMode.medium,
-        name: 'Médio',
-        icon: Icons.settings_brightness,
-        color: const Color(0xFF263238),
-        previewColor: const Color(0xFF37474F),
+        mode: AppThemeMode.obsidian,
+        name: 'Obsidian',
+        icon: Icons.diamond_outlined,
+        color: const Color(0xFFC0C5CE),
+        previewColor: const Color(0xFF3D444D),
+      ),
+      _ThemeOption(
+        mode: AppThemeMode.glacier,
+        name: 'Glacier',
+        icon: Icons.ac_unit,
+        color: const Color(0xFF0EA5E9),
+        previewColor: const Color(0xFFEFF6FF),
       ),
     ];
 
-    return Row(
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
       children: themes.map((theme) {
         final isSelected = controller.themeMode == theme.mode;
-        final isLocked =
-            !isPremium &&
-            (theme.mode == AppThemeMode.medium ||
-                theme.mode == AppThemeMode.dark);
-        return Expanded(
+        final onLightPreview =
+            theme.previewColor.computeLuminance() > 0.55;
+        final cyberLocked =
+            theme.mode == AppThemeMode.cyber && !controller.isPremium;
+        return SizedBox(
+          width: (MediaQuery.sizeOf(context).width - 40 - 12) / 2,
           child: GestureDetector(
-            onTap: () => isLocked
-                ? _showPremiumBottomSheet(context)
-                : controller.setThemeMode(theme.mode),
-            child: AnimatedContainer(
+            onTap: () {
+              if (cyberLocked) {
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const PaywallScreen(),
+                  ),
+                );
+                return;
+              }
+              controller.setThemeMode(theme.mode);
+            },
+            child: AnimatedOpacity(
+              opacity: cyberLocked ? 0.42 : 1,
               duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.symmetric(horizontal: 6),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.previewColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFF00D9FF)
-                      : Colors.grey.withValues(alpha: 0.2),
-                  width: isSelected ? 2 : 1,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: theme.previewColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF00D9FF)
+                        : Colors.grey.withValues(alpha: 0.25),
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFF00D9FF).withValues(alpha: 0.28),
+                            blurRadius: 12,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : null,
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: const Color(0xFF00D9FF).withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          spreadRadius: 2,
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Column(
-                children: [
-                  Stack(
-                    children: [
-                      Icon(
-                        theme.icon,
-                        color: theme.color == const Color(0xFFF5F5F5)
-                            ? Colors.black54
-                            : Colors.white70,
-                        size: 32,
-                      ),
-                      if (isLocked)
-                        Positioned(
-                          right: -8,
-                          top: -8,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Color(0xFF00D9FF),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.lock,
-                              size: 12,
-                              color: Colors.white,
-                            ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Column(
+                      children: [
+                        Icon(theme.icon, color: theme.color, size: 28),
+                        const SizedBox(height: 8),
+                        Text(
+                          theme.name,
+                          style: TextStyle(
+                            color: onLightPreview ? Colors.black87 : Colors.white,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                            fontSize: 13,
                           ),
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    theme.name,
-                    style: TextStyle(
-                      color: theme.color == const Color(0xFFF5F5F5)
-                          ? Colors.black87
-                          : Colors.white,
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      fontSize: 13,
+                      ],
                     ),
-                  ),
-                ],
+                    if (cyberLocked)
+                      Positioned(
+                        right: -4,
+                        top: -6,
+                        child: Icon(
+                          Icons.lock_rounded,
+                          size: 18,
+                          color: theme.color.withValues(alpha: 0.95),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
         );
       }).toList(),
-    );
-  }
-
-  Widget _buildBackgroundSection(
-    BuildContext context,
-    AppThemeController controller,
-    bool isPremium,
-  ) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () => isPremium
-              ? controller.pickBackgroundImage()
-              : _showPremiumBottomSheet(context),
-          child: GlassCard(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF00D9FF).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.image,
-                    color: Color(0xFF00D9FF),
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Escolher foto da galeria',
-                            style: TextStyle(
-                              color:
-                                  controller.currentTheme.brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black87,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                            ),
-                          ),
-                          if (!isPremium) ...[
-                            const SizedBox(width: 8),
-                            const Icon(
-                              Icons.lock,
-                              size: 14,
-                              color: Color(0xFF00D9FF),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        isPremium
-                            ? 'Toque para selecionar uma imagem'
-                            : 'Disponível no plano Premium',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right, color: Colors.white38),
-              ],
-            ),
-          ),
-        ),
-        if (controller.hasBackgroundImage) ...[
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  File(controller.backgroundImagePath!),
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Fundo ativo',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
-                onPressed: () => controller.removeBackgroundImage(),
-              ),
-            ],
-          ),
-        ],
-      ],
     );
   }
 
@@ -340,139 +232,6 @@ class ConfiguracoesPage extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showPremiumBottomSheet(BuildContext context) {
-    final subscriptionProvider = Provider.of<SubscriptionProvider>(
-      context,
-      listen: false,
-    );
-    final benefits = subscriptionProvider.getLocalizedBenefits();
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) => Container(
-        height: MediaQuery.of(ctx).size.height * 0.75,
-        decoration: BoxDecoration(
-          color: Color(0xFF1E293B),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF00D9FF), Color(0xFF0066FF)],
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.diamond,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Desbloqueie o Premium',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Acesse todos os recursos exclusivos',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                itemCount: benefits.length,
-                itemBuilder: (_, i) => Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.check_circle,
-                        color: Color(0xFF00D9FF),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          benefits[i],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const PaywallPage()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00D9FF),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    'Ver Planos e Preços',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

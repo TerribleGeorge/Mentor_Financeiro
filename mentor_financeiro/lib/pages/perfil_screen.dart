@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../theme/classic_mode_style.dart';
+import '../theme/mentor_adaptive_visuals.dart';
 import '../services/firebase_service.dart';
 import '../services/revenue_cat_bootstrap.dart';
 import 'tela_login.dart';
@@ -44,32 +46,26 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-          ),
-        ),
-        child: SafeArea(
+      body: SafeArea(
           child: _carregando
-              ? const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF00D9FF)),
+              ? Center(
+                  child: CircularProgressIndicator(color: scheme.primary),
                 )
               : SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Perfil',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: scheme.onSurface,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          shadows: ClassicModeStyle.primaryTextShadows(context),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -80,7 +76,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   ),
                 ),
         ),
-      ),
     );
   }
 
@@ -93,8 +88,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: context.mentorAdaptive.widgetColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: context.mentorAdaptive.textColor.withValues(alpha: 0.1),
+        ),
       ),
       child: Row(
         children: [

@@ -36,6 +36,38 @@ class MentorAdaptiveVisuals extends ThemeExtension<MentorAdaptiveVisuals> {
     readableBlurSigma: 5,
   );
 
+  /// Preto puro, ciano, vidro com traço ciano (preset Void).
+  static const MentorAdaptiveVisuals presetVoid = MentorAdaptiveVisuals(
+    textColor: Color(0xFFE8FDFF),
+    secondaryTextColor: Color(0xB300E5FF),
+    widgetColor: Color(0x2800E5FF),
+    readableBlurSigma: 6,
+  );
+
+  /// Cyber: vidro escuro, roxo neon.
+  static const MentorAdaptiveVisuals presetCyber = MentorAdaptiveVisuals(
+    textColor: Color(0xFFF5E8FF),
+    secondaryTextColor: Color(0xB3E879F9),
+    widgetColor: Color(0x2AE879F9),
+    readableBlurSigma: 6,
+  );
+
+  /// Obsidian: cinza chumbo, prata.
+  static const MentorAdaptiveVisuals presetObsidian = MentorAdaptiveVisuals(
+    textColor: Color(0xFFF1F3F5),
+    secondaryTextColor: Color(0xB3C0C5CE),
+    widgetColor: Color(0x33C0C5CE),
+    readableBlurSigma: 5,
+  );
+
+  /// Glacier: claro, azul gelo, alto contraste.
+  static const MentorAdaptiveVisuals presetGlacier = MentorAdaptiveVisuals(
+    textColor: Color(0xFF0A1628),
+    secondaryTextColor: Color(0xB31E3A5F),
+    widgetColor: Color(0x330EA5E9),
+    readableBlurSigma: 5,
+  );
+
   @override
   MentorAdaptiveVisuals copyWith({
     Color? textColor,

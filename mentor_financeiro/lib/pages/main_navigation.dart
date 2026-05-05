@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/notification_listener_service.dart';
+
 import 'home_screen.dart';
 import 'graficos_screen.dart';
 import 'historico_screen.dart';
 import 'perfil_screen.dart';
+import '../services/notification_listener_service.dart';
 
 class MainNavigation extends StatefulWidget {
   final int initialIndex;
@@ -30,8 +31,6 @@ class _MainNavigationState extends State<MainNavigation> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex.clamp(0, _screens.length - 1);
-    // Tenta iniciar captura automática via notificações (Android).
-    // Se não tiver permissão, o sistema abre a tela de configuração.
     _notificationListener.iniciar();
   }
 
@@ -52,14 +51,64 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bright = theme.brightness == Brightness.light;
+    final edge = bright
+        ? Colors.white.withValues(alpha: 0.7)
+        : Colors.black.withValues(alpha: 0.5);
+    final bar = theme.colorScheme.surface.withValues(alpha: 0.88);
+    final accent = theme.colorScheme.primary;
+    final labelIdle = theme.colorScheme.onSurface.withValues(alpha: 0.5);
+
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      backgroundColor: Colors.transparent,
+      extendBody: true,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 100,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [edge, Colors.transparent],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 120,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [edge, Colors.transparent],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          IndexedStack(index: _currentIndex, children: _screens),
+        ],
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
+          color: bar,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black.withValues(alpha: bright ? 0.06 : 0.32),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -71,20 +120,24 @@ class _MainNavigationState extends State<MainNavigation> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(0, Icons.home_outlined, Icons.home, 'Início'),
+                _buildNavItem(0, Icons.home_outlined, Icons.home, 'Início', accent, labelIdle),
                 _buildNavItem(
                   1,
                   Icons.pie_chart_outline,
                   Icons.pie_chart,
                   'Gráficos',
+                  accent,
+                  labelIdle,
                 ),
                 _buildNavItem(
                   2,
                   Icons.history_outlined,
                   Icons.history,
                   'Histórico',
+                  accent,
+                  labelIdle,
                 ),
-                _buildNavItem(3, Icons.person_outline, Icons.person, 'Perfil'),
+                _buildNavItem(3, Icons.person_outline, Icons.person, 'Perfil', accent, labelIdle),
               ],
             ),
           ),
@@ -98,10 +151,11 @@ class _MainNavigationState extends State<MainNavigation> {
     IconData icon,
     IconData activeIcon,
     String label,
+    Color accent,
+    Color labelIdle,
   ) {
     final isSelected = _currentIndex == index;
-    final color = isSelected ? const Color(0xFF00D9FF) : Colors.white54;
-
+    final color = isSelected ? accent : labelIdle;
     return GestureDetector(
       onTap: () => _onTabTapped(index),
       behavior: HitTestBehavior.opaque,
@@ -109,9 +163,7 @@ class _MainNavigationState extends State<MainNavigation> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFF00D9FF).withValues(alpha: 0.1)
-              : Colors.transparent,
+          color: isSelected ? accent.withValues(alpha: 0.12) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

@@ -8,6 +8,7 @@ import '../services/localization_service.dart';
 import '../services/mentoria_service.dart';
 import '../services/exchange_rate_service.dart';
 import 'adicionar_transacao_page.dart';
+import '../theme/classic_mode_style.dart';
 import '../widgets/premium_wrapper.dart';
 import '../widgets/dica_card.dart';
 import '../widgets/nota_saude_circle.dart';
@@ -94,24 +95,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
       59,
     );
 
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
         title: Text(
           widget.title,
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: scheme.onSurface,
+            fontWeight: FontWeight.bold,
+            shadows: ClassicModeStyle.primaryTextShadows(context),
+          ),
         ),
         centerTitle: true,
         leading: widget.showBackButton
             ? IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: Icon(Icons.arrow_back, color: scheme.onSurface),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white70),
+            icon: Icon(Icons.settings, color: scheme.onSurface.withValues(alpha: 0.72)),
             onPressed: () {},
           ),
         ],
@@ -409,7 +414,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
-            ),
+            ).withFinancialShadows(context),
           ),
           const SizedBox(height: 14),
           SizedBox(
@@ -442,7 +447,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.55),
                             fontSize: 10,
-                          ),
+                          ).withFinancialShadows(context),
                           textAlign: TextAlign.right,
                         ),
                       ),
@@ -685,7 +690,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               fontSize: 36,
               fontWeight: FontWeight.bold,
               letterSpacing: -1,
-            ),
+            ).withFinancialShadows(context),
           ),
           const SizedBox(height: 16),
           Row(
@@ -717,7 +722,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(width: 6),
           Text(
             text,
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
+            style: const TextStyle(color: Colors.white70, fontSize: 12)
+                .withFinancialShadows(context),
           ),
         ],
       ),
@@ -816,7 +822,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(width: 4),
                 Text(
                   _formatarMoeda(entry.value),
-                  style: const TextStyle(color: Colors.white54, fontSize: 11),
+                  style: const TextStyle(color: Colors.white54, fontSize: 11)
+                      .withFinancialShadows(context),
                 ),
               ],
             );
@@ -912,7 +919,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.55),
                               fontSize: 10,
-                            ),
+                            ).withFinancialShadows(context),
                             textAlign: TextAlign.right,
                           ),
                         );
@@ -1050,6 +1057,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             : const Color(0xFF2ED573),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
+                        shadows: ClassicModeStyle.financialValueShadows(context),
                       ),
                     );
                   },
@@ -1246,7 +1254,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: Color(0xFFFF6B6B),
               fontWeight: FontWeight.bold,
               fontSize: 15,
-            ),
+            ).withFinancialShadows(context),
           ),
         ],
       ),

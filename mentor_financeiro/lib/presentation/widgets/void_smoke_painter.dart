@@ -9,7 +9,7 @@ class VoidSmokePainter extends CustomPainter {
   final Animation<double> animation;
 
   static const Color _lead = Color(0xFF1A1A1A);
-  static const int _particleCount = 56;
+  static const int _particleCount = 15;
 
   double _fract(double x) => x - x.floorToDouble();
 

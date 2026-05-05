@@ -1,14 +1,12 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme/mentor_adaptive_visuals.dart';
 
-enum AppThemeMode { light, dark, medium }
+/// Temas predefinidos devvoid (sem imagem de fundo personalizada).
+enum AppThemeMode { voidTheme, cyber, obsidian, glacier }
 
 class AppThemeController extends ChangeNotifier {
   static final AppThemeController instance = AppThemeController._internal();
@@ -17,89 +15,100 @@ class AppThemeController extends ChangeNotifier {
 
   AppThemeController._internal();
 
-  static const String _themeKey = 'app_theme_mode';
-  static const String _backgroundImageKey = 'background_image_path';
+  static const String _themeKeyV2 = 'app_theme_preset_v2';
+  static const String _themeKeyLegacy = 'app_theme_mode';
   static const String _isPremiumKey = 'is_premium';
 
-  AppThemeMode _themeMode = AppThemeMode.dark;
-  String? _backgroundImagePath;
+  AppThemeMode _themeMode = AppThemeMode.voidTheme;
   bool _isLoading = false;
   bool _isPremium = false;
-  Color? _dominantBackgroundColor;
-  MentorAdaptiveVisuals _adaptiveVisuals = MentorAdaptiveVisuals.darkNeutral;
+  MentorAdaptiveVisuals _adaptiveVisuals = MentorAdaptiveVisuals.presetVoid;
 
   AppThemeMode get themeMode => _themeMode;
-  String? get backgroundImagePath => _backgroundImagePath;
   bool get isLoading => _isLoading;
   bool get isPremium => _isPremium;
-  Color? get dominantBackgroundColor => _dominantBackgroundColor;
 
-  /// Contraste reativo (derivado da luminância da paleta).
   Color get textColor => _adaptiveVisuals.textColor;
 
-  /// Vidro semântico para Cards/Containers (ARGB com alpha).
   Color get widgetColor => _adaptiveVisuals.widgetColor;
-
-  bool get hasBackgroundImage =>
-      _backgroundImagePath != null && File(_backgroundImagePath!).existsSync();
 
   Color get backdropBaseColor {
     switch (_themeMode) {
-      case AppThemeMode.light:
-        return const Color(0xFFF5F5F5);
-      case AppThemeMode.dark:
-        return const Color(0xFF0F172A);
-      case AppThemeMode.medium:
-        return const Color(0xFF263238);
+      case AppThemeMode.voidTheme:
+        return const Color(0xFF000000);
+      case AppThemeMode.cyber:
+        return const Color(0xFF1A1D26);
+      case AppThemeMode.obsidian:
+        return const Color(0xFF2D3238);
+      case AppThemeMode.glacier:
+        return const Color(0xFFF0F9FF);
     }
   }
 
   ThemeData get currentTheme {
     final ThemeData base = switch (_themeMode) {
-      AppThemeMode.light => _lightTheme,
-      AppThemeMode.dark => _darkTheme,
-      AppThemeMode.medium => _mediumTheme,
+      AppThemeMode.voidTheme => _voidTheme,
+      AppThemeMode.cyber => _cyberTheme,
+      AppThemeMode.obsidian => _obsidianTheme,
+      AppThemeMode.glacier => _glacierTheme,
     };
     return _mergeAdaptive(base, _adaptiveVisuals);
   }
 
-  static final ThemeData _lightTheme = ThemeData(
-    brightness: Brightness.light,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF00D9FF),
-      brightness: Brightness.light,
-      surface: Colors.white,
-    ),
-    scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-    useMaterial3: true,
-    cardTheme: const CardThemeData(color: Colors.white, elevation: 2),
-  );
-
-  static final ThemeData _darkTheme = ThemeData(
+  static final ThemeData _voidTheme = ThemeData(
     brightness: Brightness.dark,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF00D9FF),
+      seedColor: const Color(0xFF00E5FF),
       brightness: Brightness.dark,
-      surface: Color(0xFF0F172A),
+      surface: Color(0xFF000000),
+      primary: Color(0xFF00E5FF),
     ),
-    scaffoldBackgroundColor: const Color(0xFF0F172A),
+    scaffoldBackgroundColor: const Color(0xFF000000),
     useMaterial3: true,
-    cardTheme: const CardThemeData(color: Color(0xFF1E293B), elevation: 0),
+    cardTheme: const CardThemeData(color: Color(0xFF0A0A0A), elevation: 0),
   );
 
-  static final ThemeData _mediumTheme = ThemeData(
+  static final ThemeData _cyberTheme = ThemeData(
     brightness: Brightness.dark,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF00D9FF),
+      seedColor: const Color(0xFFD946EF),
       brightness: Brightness.dark,
-      surface: const Color(0xFF263238),
+      surface: Color(0xFF1A1D26),
+      primary: Color(0xFFE879F9),
     ),
-    scaffoldBackgroundColor: const Color(0xFF263238),
+    scaffoldBackgroundColor: const Color(0xFF1A1D26),
     useMaterial3: true,
     cardTheme: CardThemeData(
-      color: const Color(0xFF37474F).withValues(alpha: 0.7),
+      color: const Color(0xFF252936).withValues(alpha: 0.55),
       elevation: 0,
     ),
+  );
+
+  static final ThemeData _obsidianTheme = ThemeData(
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: const Color(0xFFC0C5CE),
+      brightness: Brightness.dark,
+      surface: Color(0xFF2D3238),
+      primary: Color(0xFFC0C5CE),
+    ),
+    scaffoldBackgroundColor: const Color(0xFF2D3238),
+    useMaterial3: true,
+    cardTheme: const CardThemeData(color: Color(0xFF3D444D), elevation: 0),
+  );
+
+  static final ThemeData _glacierTheme = ThemeData(
+    brightness: Brightness.light,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: const Color(0xFF0EA5E9),
+      brightness: Brightness.light,
+      surface: Color(0xFFF8FAFC),
+      primary: Color(0xFF0284C7),
+      onSurface: Color(0xFF0A1628),
+    ),
+    scaffoldBackgroundColor: const Color(0xFFF0F9FF),
+    useMaterial3: true,
+    cardTheme: const CardThemeData(color: Color(0xFFEFF6FF), elevation: 0),
   );
 
   ThemeData _mergeAdaptive(ThemeData base, MentorAdaptiveVisuals v) {
@@ -139,63 +148,16 @@ class AppThemeController extends ChangeNotifier {
   }
 
   void _recomputeAdaptiveVisuals() {
-    if (hasBackgroundImage && _dominantBackgroundColor != null) {
-      final lum = _dominantBackgroundColor!.computeLuminance();
-      if (lum > 0.5) {
-        _adaptiveVisuals = MentorAdaptiveVisuals(
-          textColor: const Color(0xEE000000),
-          secondaryTextColor: const Color(0x99000000),
-          widgetColor: const Color(0x33000000),
-          readableBlurSigma: 5,
-        );
-      } else {
-        _adaptiveVisuals = MentorAdaptiveVisuals(
-          textColor: Colors.white,
-          secondaryTextColor: const Color(0xB3FFFFFF),
-          widgetColor: const Color(0x33FFFFFF),
-          readableBlurSigma: 5,
-        );
-      }
-      return;
+    switch (_themeMode) {
+      case AppThemeMode.voidTheme:
+        _adaptiveVisuals = MentorAdaptiveVisuals.presetVoid;
+      case AppThemeMode.cyber:
+        _adaptiveVisuals = MentorAdaptiveVisuals.presetCyber;
+      case AppThemeMode.obsidian:
+        _adaptiveVisuals = MentorAdaptiveVisuals.presetObsidian;
+      case AppThemeMode.glacier:
+        _adaptiveVisuals = MentorAdaptiveVisuals.presetGlacier;
     }
-    _adaptiveVisuals = _themeMode == AppThemeMode.light
-        ? MentorAdaptiveVisuals.lightNeutral
-        : MentorAdaptiveVisuals.darkNeutral;
-  }
-
-  Future<void> refreshPaletteFromBackgroundPath(String? path) async {
-    if (path == null || path.isEmpty) {
-      _dominantBackgroundColor = null;
-      _recomputeAdaptiveVisuals();
-      notifyListeners();
-      return;
-    }
-    final file = File(path);
-    if (!file.existsSync()) {
-      _dominantBackgroundColor = null;
-      _recomputeAdaptiveVisuals();
-      notifyListeners();
-      return;
-    }
-    try {
-      final palette = await PaletteGenerator.fromImageProvider(
-        FileImage(file),
-        maximumColorCount: 16,
-      );
-      final d = palette.dominantColor?.color;
-      if (d != null) {
-        _dominantBackgroundColor = d;
-      } else if (palette.colors.isNotEmpty) {
-        _dominantBackgroundColor = palette.colors.first;
-      } else {
-        _dominantBackgroundColor = null;
-      }
-    } catch (e, st) {
-      debugPrint('PaletteGenerator: $e\n$st');
-      _dominantBackgroundColor = null;
-    }
-    _recomputeAdaptiveVisuals();
-    notifyListeners();
   }
 
   Future<void> initialize() async {
@@ -203,19 +165,34 @@ class AppThemeController extends ChangeNotifier {
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
-    final themeIndex = prefs.getInt(_themeKey) ?? 2;
-    _themeMode = AppThemeMode.values[themeIndex];
-    _backgroundImagePath = prefs.getString(_backgroundImageKey);
-    _isPremium = prefs.getBool(_isPremiumKey) ?? false;
+    final v2 = prefs.getInt(_themeKeyV2);
+    if (v2 != null && v2 >= 0 && v2 < AppThemeMode.values.length) {
+      _themeMode = AppThemeMode.values[v2];
+    } else {
+      final legacy = prefs.getInt(_themeKeyLegacy);
+      if (legacy != null && legacy >= 0 && legacy <= 2) {
+        _themeMode = switch (legacy) {
+          0 => AppThemeMode.glacier,
+          1 => AppThemeMode.voidTheme,
+          _ => AppThemeMode.obsidian,
+        };
+      } else {
+        _themeMode = AppThemeMode.voidTheme;
+      }
+      await prefs.setInt(_themeKeyV2, _themeMode.index);
+    }
 
+    _isPremium = prefs.getBool(_isPremiumKey) ?? false;
+    if (_themeMode == AppThemeMode.cyber && !_isPremium) {
+      _themeMode = AppThemeMode.voidTheme;
+      await prefs.setInt(_themeKeyV2, _themeMode.index);
+    }
     _recomputeAdaptiveVisuals();
 
-    debugPrint('AppThemeController initialized - isPremium: $_isPremium');
+    debugPrint('AppThemeController initialized - isPremium: $_isPremium, tema: $_themeMode');
 
     _isLoading = false;
     notifyListeners();
-
-    await refreshPaletteFromBackgroundPath(_backgroundImagePath);
   }
 
   Future<void> setPremiumStatus(bool isPremium) async {
@@ -228,63 +205,30 @@ class AppThemeController extends ChangeNotifier {
   }
 
   Future<void> setThemeMode(AppThemeMode mode) async {
+    if (mode == AppThemeMode.cyber && !_isPremium) {
+      return;
+    }
     if (_themeMode == mode) return;
     _themeMode = mode;
     _recomputeAdaptiveVisuals();
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_themeKey, mode.index);
+    await prefs.setInt(_themeKeyV2, mode.index);
   }
 
-  Future<void> pickBackgroundImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1920,
-      maxHeight: 1080,
-      imageQuality: 85,
-    );
-
-    if (pickedFile != null) {
-      _backgroundImagePath = pickedFile.path;
-      notifyListeners();
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_backgroundImageKey, pickedFile.path);
-      await refreshPaletteFromBackgroundPath(_backgroundImagePath);
-    }
-  }
-
-  Future<void> removeBackgroundImage() async {
-    _backgroundImagePath = null;
-    _dominantBackgroundColor = null;
-    _recomputeAdaptiveVisuals();
-    notifyListeners();
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_backgroundImageKey);
-  }
-
-  Color get backgroundColor {
-    switch (_themeMode) {
-      case AppThemeMode.light:
-        return const Color(0xFFF5F5F5);
-      case AppThemeMode.dark:
-        return const Color(0xFF0F172A);
-      case AppThemeMode.medium:
-        return const Color(0xFF263238);
-    }
-  }
+  Color get backgroundColor => backdropBaseColor;
 
   String get themeName {
     switch (_themeMode) {
-      case AppThemeMode.light:
-        return 'Claro';
-      case AppThemeMode.dark:
-        return 'Escuro';
-      case AppThemeMode.medium:
-        return 'Médio';
+      case AppThemeMode.voidTheme:
+        return 'Void';
+      case AppThemeMode.cyber:
+        return 'Cyber';
+      case AppThemeMode.obsidian:
+        return 'Obsidian';
+      case AppThemeMode.glacier:
+        return 'Glacier';
     }
   }
 }

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_theme_controller.dart';
 import '../services/currency_preference_controller.dart';
 import '../services/locale_controller.dart';
-import '../services/subscription_provider.dart';
 import 'paywall_screen.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -19,14 +17,12 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   String _idiomaSelecionado = 'pt';
   String _moedaSelecionada = 'BRL';
-  int _temaSelecionado = 2;
   final _themeController = AppThemeController();
 
   @override
   void initState() {
     super.initState();
     _carregarPreferencias();
-    _themeController.initialize();
   }
 
   Future<void> _carregarPreferencias() async {
@@ -35,31 +31,18 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       _idiomaSelecionado = prefs.getString(LocaleController.prefsKey) ?? 'pt';
       _moedaSelecionada = prefs.getString('moeda') ?? 'AUTO';
-      _temaSelecionado = _themeController.themeMode.index;
     });
-  }
-
-  Future<void> _salvarPreferencia(String chave, dynamic valor) async {
-    final prefs = await SharedPreferences.getInstance();
-    if (valor is int) {
-      await prefs.setInt(chave, valor);
-    } else {
-      await prefs.setString(chave, valor.toString());
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isPremium = context.watch<SubscriptionProvider>().isPremium;
     return ListenableBuilder(
       listenable: _themeController,
       builder: (context, _) {
-        _temaSelecionado = _themeController.themeMode.index;
-
         return Scaffold(
-          backgroundColor: const Color(0xFF0F172A),
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
-            backgroundColor: const Color(0xFF0F172A),
+            backgroundColor: Colors.transparent,
             title: const Text(
               'Configurações',
               style: TextStyle(
@@ -81,21 +64,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 12),
                 _buildCard([
                   _buildThemeSelector(),
-                  const Divider(color: Colors.white12),
-                  _buildListTile(
-                    icon: Icons.wallpaper,
-                    title: 'Personalizar Fundo',
-                    subtitle: isPremium ? 'Ativo' : 'Somente Premium',
-                    trailing: isPremium
-                        ? const Icon(
-                            Icons.check_circle,
-                            color: Color(0xFF26DE81),
-                          )
-                        : const Icon(Icons.lock, color: Colors.white38),
-                    onTap: isPremium
-                        ? () => _themeController.pickBackgroundImage()
-                        : _showPremiumDialog,
-                  ),
                 ]),
                 const SizedBox(height: 24),
                 _buildSectionTitle('Conta'),
@@ -182,11 +150,9 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildCard(List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return GlassCard(
+      padding: EdgeInsets.zero,
+      borderRadius: BorderRadius.circular(16),
       child: Column(children: children),
     );
   }
@@ -194,48 +160,74 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildThemeSelector() {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.palette, color: Colors.white70, size: 22),
-          const SizedBox(width: 16),
-          const Expanded(
-            child: Text(
-              'Tema',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
+          const Row(
+            children: [
+              Icon(Icons.palette, color: Colors.white70, size: 22),
+              SizedBox(width: 16),
+              Text(
+                'Tema devvoid',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ],
           ),
-          _buildTemaChip('Claro', 0),
-          const SizedBox(width: 8),
-          _buildTemaChip('Médio', 1),
-          const SizedBox(width: 8),
-          _buildTemaChip('Escuro', 2),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildTemaChip('Void', AppThemeMode.voidTheme),
+              _buildTemaChip('Cyber', AppThemeMode.cyber),
+              _buildTemaChip('Obsidian', AppThemeMode.obsidian),
+              _buildTemaChip('Glacier', AppThemeMode.glacier),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTemaChip(String nome, int tema) {
-    final isSelected = _temaSelecionado == tema;
+  Widget _buildTemaChip(String nome, AppThemeMode mode) {
+    final isSelected = _themeController.themeMode == mode;
+    final lockedCyber = mode == AppThemeMode.cyber && !_themeController.isPremium;
     return GestureDetector(
       onTap: () {
-        setState(() => _temaSelecionado = tema);
-        _salvarPreferencia('tema', tema);
-        _themeController.setThemeMode(AppThemeMode.values[tema]);
+        if (lockedCyber) {
+          Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(builder: (_) => const PaywallScreen()),
+          );
+          return;
+        }
+        _themeController.setThemeMode(mode);
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF00D9FF) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF00D9FF) : Colors.white30,
+      child: Opacity(
+        opacity: lockedCyber ? 0.45 : 1,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF00D9FF) : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? const Color(0xFF00D9FF) : Colors.white30,
+            ),
           ),
-        ),
-        child: Text(
-          nome,
-          style: TextStyle(
-            color: isSelected ? Colors.black : Colors.white70,
-            fontSize: 12,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (lockedCyber) ...[
+                const Icon(Icons.lock, size: 12, color: Colors.white60),
+                const SizedBox(width: 4),
+              ],
+              Text(
+                nome,
+                style: TextStyle(
+                  color: isSelected ? Colors.black : Colors.white70,
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -368,45 +360,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showPremiumDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
-        title: const Text(
-          'Funcionalidade Premium',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Faça upgrade para Premium!',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Agora Não',
-              style: TextStyle(color: Colors.white54),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                this.context,
-                MaterialPageRoute(builder: (_) => const PaywallScreen()),
-              );
-            },
-            child: const Text(
-              'Upgrade',
-              style: TextStyle(color: Color(0xFF00D9FF)),
-            ),
-          ),
-        ],
       ),
     );
   }

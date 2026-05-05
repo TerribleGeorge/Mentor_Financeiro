@@ -17,10 +17,21 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  late final DateTime _splashStartedAt;
+
   @override
   void initState() {
     super.initState();
+    _splashStartedAt = DateTime.now();
     _iniciarApp();
+  }
+
+  Future<void> _ensureHoldBeforeHome() async {
+    final elapsed = DateTime.now().difference(_splashStartedAt);
+    final min = VoidLoadingScreen.minimumNavigationHold;
+    if (elapsed < min) {
+      await Future<void>.delayed(min - elapsed);
+    }
   }
 
   Future<void> _iniciarApp() async {
@@ -105,6 +116,8 @@ class _SplashScreenState extends State<SplashScreen> {
       await pushReplacementNamedFade(context, AppRoutes.personaSetup);
       return;
     }
+    if (!mounted) return;
+    await _ensureHoldBeforeHome();
     if (!mounted) return;
     await pushReplacementNamedFade(context, AppRoutes.home);
   }

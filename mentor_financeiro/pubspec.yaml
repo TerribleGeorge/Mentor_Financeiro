@@ -96,12 +96,10 @@ dependencies:
     sdk: flutter
   geolocator: ^13.0.2
   permission_handler: ^11.4.0
-  image_picker: ^1.1.2
   provider: ^6.1.2
   purchases_flutter: ^10.0.1
   firebase_crashlytics: ^5.2.0
   connectivity_plus: ^7.1.1
-  palette_generator: ^0.3.3+7
   showcaseview: ^5.0.2
   # firebase_ai: ^3.10.0  # Temporariamente desativado
 

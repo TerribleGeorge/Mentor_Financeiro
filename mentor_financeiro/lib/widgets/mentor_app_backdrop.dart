@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../services/app_theme_controller.dart';
 
-/// Coloca a imagem de fundo abaixo de toda a árvore de rotas; o [Container] sólido
-/// cobre o ecrã quando não há foto (Scaffold fica `transparent` no tema).
+/// Fundo global por tema predefinido (sem imagem do utilizador).
+/// Preset Void: bruma ciano muito subtil sobre preto.
 class MentorAppBackdrop extends StatelessWidget {
   const MentorAppBackdrop({super.key, required this.child});
 
@@ -17,24 +15,40 @@ class MentorAppBackdrop extends StatelessWidget {
       listenable: AppThemeController.instance,
       builder: (context, _) {
         final c = AppThemeController.instance;
-        final bgPath = c.backgroundImagePath;
 
         return Stack(
           fit: StackFit.expand,
           children: [
-            Positioned.fill(
-              child: ColoredBox(color: c.backdropBaseColor),
-            ),
-            if (bgPath != null && File(bgPath).existsSync())
+            Positioned.fill(child: ColoredBox(color: c.backdropBaseColor)),
+            if (c.themeMode == AppThemeMode.voidTheme)
               Positioned.fill(
-                child: Image.file(
-                  File(bgPath),
-                  fit: BoxFit.cover,
-                  gaplessPlayback: true,
-                  errorBuilder: (context, err, st) {
-                    debugPrint('MentorAppBackdrop Image.file: $err');
-                    return const SizedBox.shrink();
-                  },
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: const Alignment(0, 0.72),
+                      radius: 1.15,
+                      colors: [
+                        const Color(0xFF00E5FF).withValues(alpha: 0.07),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            if (c.themeMode == AppThemeMode.cyber)
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFFD946EF).withValues(alpha: 0.06),
+                        Colors.transparent,
+                        const Color(0xFF7C3AED).withValues(alpha: 0.05),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             Positioned.fill(
