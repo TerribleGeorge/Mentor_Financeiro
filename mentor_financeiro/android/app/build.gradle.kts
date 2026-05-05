@@ -23,7 +23,8 @@ android {
 
     defaultConfig {
         applicationId = "com.georgeguimares.mentorfinanceiro"
-        minSdk = flutter.minSdkVersion
+        // RevenueCat Paywalls / UI requerem API 24+ (docs.revenuecat.com).
+        minSdk = maxOf(24, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

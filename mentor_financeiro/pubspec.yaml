@@ -101,6 +101,7 @@ dependencies:
   firebase_crashlytics: ^5.2.0
   connectivity_plus: ^7.1.1
   showcaseview: ^5.0.2
+  purchases_ui_flutter: ^10.0.1
   # firebase_ai: ^3.10.0  # Temporariamente desativado
 
 # ==============================================================================

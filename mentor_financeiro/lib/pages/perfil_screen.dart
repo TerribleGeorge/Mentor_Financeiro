@@ -7,6 +7,7 @@ import '../services/revenue_cat_bootstrap.dart';
 import 'tela_login.dart';
 import 'questionario_page.dart';
 import 'settings_page.dart';
+import 'customer_center_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -154,6 +155,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
         'label': 'Notificações',
         'rota': '/notif',
       },
+      {
+        'icon': Icons.workspace_premium_outlined,
+        'label': 'Assinatura',
+        'rota': '/assinatura',
+      },
       {'icon': Icons.help_outline, 'label': 'Ajuda', 'rota': '/ajuda'},
       {'icon': Icons.logout, 'label': 'Sair', 'rota': '/sair'},
     ];
@@ -207,6 +213,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
         break;
       case 'Notificações':
         _showNotificationSettings();
+        break;
+      case 'Assinatura':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CustomerCenterScreen()),
+        );
         break;
       case 'Sair':
         await _fazerLogout();

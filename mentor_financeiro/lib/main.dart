@@ -23,6 +23,7 @@ import 'services/revenue_cat_bootstrap.dart';
 import 'services/subscription_provider.dart';
 import 'services/user_persona_service.dart';
 import 'app/mentor_app_router.dart';
+import 'widgets/revenue_cat_lifecycle.dart';
 import 'widgets/mentor_app_backdrop.dart';
 import 'tour/mentor_tour_coordinator.dart';
 import 'presentation/widgets/void_loading_screen.dart';
@@ -216,60 +217,62 @@ class MentorFinanceiroApp extends StatelessWidget {
           value: userPersonaService,
         ),
       ],
-      child: ListenableBuilder(
-        listenable: Listenable.merge([
-          themeController,
-          localeController,
-          currencyPreferenceController,
-        ]),
-        builder: (context, _) {
-          final modoTema = themeController.themeMode;
-          ThemeMode flutterThemeMode;
+      child: RevenueCatLifecycle(
+        child: ListenableBuilder(
+          listenable: Listenable.merge([
+            themeController,
+            localeController,
+            currencyPreferenceController,
+          ]),
+          builder: (context, _) {
+            final modoTema = themeController.themeMode;
+            ThemeMode flutterThemeMode;
 
-          flutterThemeMode = modoTema == AppThemeMode.glacier
-              ? ThemeMode.light
-              : ThemeMode.dark;
+            flutterThemeMode = modoTema == AppThemeMode.glacier
+                ? ThemeMode.light
+                : ThemeMode.dark;
 
-          return MaterialApp(
-            navigatorKey: mentorNavigatorKey,
-            debugShowCheckedModeBanner: false,
-            title: 'Mentor Financeiro',
-            theme: themeController.currentTheme,
-            themeMode: flutterThemeMode,
-            locale: localeController.locale,
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            initialRoute: AppRoutes.splash,
-            onGenerateRoute: MentorAppRouter.onGenerateRoute,
-            builder: (context, child) {
-              return ShowCaseWidget(
-                enableAutoScroll: true,
-                blurValue: 4,
-                globalTooltipActions: [
-                  TooltipActionButton(
-                    type: TooltipDefaultActionType.skip,
-                    name: 'Pular Tour',
-                    textStyle: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+            return MaterialApp(
+              navigatorKey: mentorNavigatorKey,
+              debugShowCheckedModeBanner: false,
+              title: 'Mentor Financeiro',
+              theme: themeController.currentTheme,
+              themeMode: flutterThemeMode,
+              locale: localeController.locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              initialRoute: AppRoutes.splash,
+              onGenerateRoute: MentorAppRouter.onGenerateRoute,
+              builder: (context, child) {
+                return ShowCaseWidget(
+                  enableAutoScroll: true,
+                  blurValue: 4,
+                  globalTooltipActions: [
+                    TooltipActionButton(
+                      type: TooltipDefaultActionType.skip,
+                      name: 'Pular Tour',
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      backgroundColor: const Color(0xFF1E293B),
+                      border: Border.all(color: const Color(0xFF00D9FF)),
+                      onTap: MentorTourCoordinator.skipTour,
                     ),
-                    backgroundColor: const Color(0xFF1E293B),
-                    border: Border.all(color: const Color(0xFF00D9FF)),
-                    onTap: MentorTourCoordinator.skipTour,
+                  ],
+                  globalTooltipActionConfig: const TooltipActionConfig(
+                    position: TooltipActionPosition.outside,
+                    alignment: MainAxisAlignment.end,
                   ),
-                ],
-                globalTooltipActionConfig: const TooltipActionConfig(
-                  position: TooltipActionPosition.outside,
-                  alignment: MainAxisAlignment.end,
-                ),
-                onComplete: (index, key) {
-                  MentorTourCoordinator.onShowcaseStepCompleted(key, mentorNavigatorKey);
-                },
-                builder: (showcaseContext) => MentorAppBackdrop(child: child),
-              );
-            },
-          );
-        },
+                  onComplete: (index, key) {
+                    MentorTourCoordinator.onShowcaseStepCompleted(key, mentorNavigatorKey);
+                  },
+                  builder: (showcaseContext) => MentorAppBackdrop(child: child),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

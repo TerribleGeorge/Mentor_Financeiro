@@ -3,11 +3,9 @@ import 'dart:developer' show log;
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import '../constants/revenue_cat_constants.dart';
 import '../core/config/app_secrets.dart';
 import 'app_theme_controller.dart' show AppThemeController;
-
-/// Entitlement configurado no dashboard RevenueCat.
-const String mentorProEntitlementId = 'Mentor Financeiro Pro';
 
 /// Inicialização segura do RevenueCat: só configura com chave válida do `.env`;
 /// expõe [isSdkReady] para evitar chamadas ao SDK antes de [Purchases.configure].
@@ -94,8 +92,9 @@ abstract final class RevenueCatBootstrap {
       final customerInfo = await Purchases.getCustomerInfo();
       final entitlements = customerInfo.entitlements.all;
       var isPremium = false;
-      if (entitlements.containsKey(mentorProEntitlementId)) {
-        isPremium = entitlements[mentorProEntitlementId]!.isActive;
+      final proId = RevenueCatConstants.mentorProEntitlementId;
+      if (entitlements.containsKey(proId)) {
+        isPremium = entitlements[proId]!.isActive;
       }
       await AppThemeController.instance.setPremiumStatus(isPremium);
     } catch (e, st) {
@@ -115,6 +114,30 @@ abstract final class RevenueCatBootstrap {
       await Purchases.logOut();
     } catch (e, st) {
       log('RevenueCat logOut: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
+    }
+  }
+
+  /// Alinha o utilizador RevenueCat com o Firebase (`Purchases.logIn` / `logOut`).
+  /// Não atualiza UI — o chamador deve seguir com [SubscriptionProvider.refreshFromRevenueCat]
+  /// ou o listener de [CustomerInfo].
+  static Future<void> syncFirebaseUser(String? uid) async {
+    if (!_sdkReady || kIsWeb) return;
+    try {
+      if (uid != null && uid.isNotEmpty) {
+        final current = await Purchases.appUserID;
+        if (current != uid) {
+          await Purchases.logIn(uid);
+        }
+      } else {
+        await logOutIfConfigured();
+      }
+    } catch (e, st) {
+      log(
+        'RevenueCat syncFirebaseUser: $e',
+        name: 'mentor.bootstrap',
+        error: e,
+        stackTrace: st,
+      );
     }
   }
 }
