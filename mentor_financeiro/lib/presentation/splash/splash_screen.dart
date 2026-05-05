@@ -36,20 +36,19 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _loadBranding() async {
     try {
       final info = await RevenueCatSubscriptionService.getCustomerInfoSafe();
-      final isPremium =
-          info != null &&
+      final isPremium = info != null &&
           RevenueCatSubscriptionService.customerHasPremiumAccess(info);
 
       // Tema salvo nas prefs (AppThemeController já migra legacy e aplica gate).
       final theme = AppThemeController.instance;
       await theme.initialize();
-      await theme.setPremiumStatus(isPremium);
+      await theme.setPremiumStatus(isPremium == true);
       if (!isPremium && theme.themeMode.requiresPremiumEntitlement) {
         await theme.setThemeMode(AppThemeMode.voidTheme);
       }
 
       final branding = SplashAssetResolver.resolveBranding(
-        isPremium: isPremium,
+        isPremium: isPremium == true,
         theme: theme.themeMode,
       );
       if (!mounted) return;

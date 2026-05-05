@@ -97,7 +97,7 @@ _bootstrapSplashContext() async {
   if (kDebugMode) {
     final keyOk =
         AppSecrets.revenueCatAndroid != null &&
-        AppSecrets.revenueCatAndroid!.trim().isNotEmpty;
+        (AppSecrets.revenueCatAndroid ?? '').trim().isNotEmpty;
     log(
       'RevenueCat: REVENUECAT_ANDROID_API_KEY no .env ${keyOk ? "carregada" : "ausente (SDK não arranca)"}.',
       name: 'mentor.bootstrap',

@@ -2,9 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:particles_flutter/engine.dart';
-import 'package:particles_flutter/shapes.dart';
 
-import '../splash/splash_asset_resolver.dart';
 
 /// Splash de boot: fundo preto absoluto, **uma** logo centrada ([splashAsset]),
 /// [ScaleTransition] 1.0→1.08 em loop, barra fina no rodapé durante **10 s** (sincronizada com o timer global).
@@ -149,17 +147,17 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
               Center(
                 child: ScaleTransition(
                   scale: _pulseScale,
-                  child: FractionallySizedBox(
-                    widthFactor: 0.78,
+                  child: SizedBox.expand(
                     child: Image.asset(
-                      widget.splashAsset,
-                      fit: BoxFit.contain,
+                      // Regra: usar apenas DevVoid_logo como standard/free.
+                      'assets/images/DevVoid_logo.png',
+                      fit: BoxFit.cover,
                       alignment: Alignment.center,
                       filterQuality: FilterQuality.high,
                       errorBuilder: (context, error, stackTrace) {
                         return Image.asset(
-                          SplashAssetResolver.devVoidLogo,
-                          fit: BoxFit.contain,
+                          'assets/images/DevVoid_logo.png',
+                          fit: BoxFit.cover,
                           alignment: Alignment.center,
                           filterQuality: FilterQuality.high,
                         );
