@@ -31,7 +31,7 @@ class _MainNavigationState extends State<MainNavigation> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex.clamp(0, _screens.length - 1);
-    _notificationListener.iniciar();
+    // Permissão de leitura automática via notificações bancárias deve ser manual (Configurações).
   }
 
   @override

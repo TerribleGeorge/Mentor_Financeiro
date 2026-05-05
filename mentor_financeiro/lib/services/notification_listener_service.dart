@@ -596,6 +596,8 @@ class NotificationListenerService {
     }
   }
 
+  /// Inicia o stream **sem** disparar pedido de permissão automaticamente.
+  /// Retorna `false` se a permissão ainda não foi concedida.
   Future<bool> iniciar() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -605,11 +607,8 @@ class NotificationListenerService {
 
     final hasPermission = await verificarPermissao();
     if (!hasPermission) {
-      final requested = await solicitarPermissao();
-      if (!requested) {
-        debugPrint('Permissão de notificações negada.');
-        return false;
-      }
+      debugPrint('Permissão de notificações não concedida. Não iniciar automaticamente.');
+      return false;
     }
 
     _subscription = _eventChannel.receiveBroadcastStream().listen(
@@ -621,6 +620,16 @@ class NotificationListenerService {
       'NotificationListenerService iniciado para usuário: ${user.uid}',
     );
     return true;
+  }
+
+  /// Fluxo manual (UX): solicita permissão e inicia se concedido.
+  Future<bool> solicitarPermissaoEIniciar() async {
+    final requested = await solicitarPermissao();
+    if (!requested) {
+      debugPrint('Permissão de notificações negada.');
+      return false;
+    }
+    return iniciar();
   }
 
   void _onNotificationReceived(dynamic event) {

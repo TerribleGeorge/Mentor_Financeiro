@@ -16,7 +16,6 @@ import 'core/constants/app_routes.dart';
 import 'data/services/firebase_data_service.dart';
 import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
-import 'services/firebase_service.dart';
 import 'services/app_theme_controller.dart';
 import 'services/currency_preference_controller.dart';
 import 'services/locale_controller.dart';
@@ -121,7 +120,8 @@ _bootstrapSplashContext() async {
   );
 
   // Splash Standard / Cyber / Grimm / Hive: mesmo fluxo que Purchases.getCustomerInfo().
-  final info = await RevenueCatSubscriptionService.getCustomerInfoSafe();
+  final info = await RevenueCatSubscriptionService.getCustomerInfoSafe()
+      .timeout(const Duration(seconds: 2), onTimeout: () => null);
   final isPremium =
       info != null &&
       RevenueCatSubscriptionService.customerHasPremiumAccess(info);
@@ -193,13 +193,7 @@ Future<void> _bootstrapApplicationRemainder({
     );
   }
 
-  await _runWithBootTimeout('fcm', () async {
-    try {
-      await FirebaseService.inicializarMessaging();
-    } catch (e, st) {
-      log('Messaging: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
-    }
-  });
+  // Notificações devem ser opt-in: não pedir permissão no boot.
 
   await _runWithBootTimeout('local_prefs', () async {
     await currencyPreferenceController.initialize();

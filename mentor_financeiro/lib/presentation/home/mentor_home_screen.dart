@@ -8,6 +8,8 @@ import '../../domain/entities/financial_market_region.dart';
 import '../../domain/entities/risk_profile.dart';
 import '../../services/investment_category_provider.dart';
 import '../../services/user_persona_service.dart';
+import '../../services/subscription_provider.dart';
+import '../../pages/paywall_screen.dart';
 import '../../widgets/patrimonio_convertido_card.dart';
 import '../../theme/mentor_adaptive_visuals.dart';
 import '../../tour/mentor_showcase_style.dart';
@@ -43,6 +45,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cat = context.watch<InvestmentCategoryProvider>();
+    final subscription = context.watch<SubscriptionProvider>();
     final region = cat.isBrazilMarket
         ? FinancialMarketRegion.brazil
         : FinancialMarketRegion.global;
@@ -55,9 +58,18 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
       required String title,
       required String subtitle,
       required VoidCallback onTap,
+      bool locked = false,
     }) {
       return InkWell(
-        onTap: onTap,
+        onTap: locked
+            ? () {
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const PaywallScreen(),
+                  ),
+                );
+              }
+            : onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -108,7 +120,10 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: v.secondaryTextColor),
+              Icon(
+                locked ? Icons.lock : Icons.chevron_right,
+                color: v.secondaryTextColor,
+              ),
             ],
           ),
         ),
@@ -221,6 +236,42 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
                   );
                 },
               ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Premium',
+              style: TextStyle(
+                color: v.textColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            vitrineCard(
+              icon: Icons.psychology_alt,
+              accent: const Color(0xFFFF4D4D),
+              title: 'Mentoria completa',
+              subtitle: 'Dicas personalizadas e recomendações avançadas',
+              locked: !subscription.isPremium,
+              onTap: () => Navigator.of(context).pushNamed(AppRoutes.relatorios),
+            ),
+            const SizedBox(height: 12),
+            vitrineCard(
+              icon: Icons.query_stats,
+              accent: const Color(0xFF00D9FF),
+              title: 'Análises personalizadas',
+              subtitle: 'Dashboards avançados com seus dados',
+              locked: !subscription.isPremium,
+              onTap: () => Navigator.of(context).pushNamed(AppRoutes.graficos),
+            ),
+            const SizedBox(height: 12),
+            vitrineCard(
+              icon: Icons.picture_as_pdf,
+              accent: const Color(0xFFE5B100),
+              title: 'Relatórios mensais',
+              subtitle: 'Visão detalhada do mês e exportação',
+              locked: !subscription.isPremium,
+              onTap: () => Navigator.of(context).pushNamed(AppRoutes.relatorios),
             ),
             const SizedBox(height: 24),
             Text(

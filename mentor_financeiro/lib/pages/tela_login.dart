@@ -19,7 +19,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 // Serviço Firebase
 import '../services/firebase_service.dart';
 
-import '../core/constants/app_routes.dart';
+import 'home_screen.dart';
 
 // WIDGET STATEFUL
 class TelaLogin extends StatefulWidget {
@@ -767,9 +767,12 @@ class _TelaLoginState extends State<TelaLogin> {
       }
     }
 
-    // Próxima etapa: Calculadora Mentora (rota `/configuracao` → MentorAppRouter).
+    // Próxima etapa: Dashboard/Home (limpa a pilha para o "voltar" não quebrar).
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed(AppRoutes.configuracao);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
     }
   }
 

@@ -81,14 +81,9 @@ abstract final class RevenueCatBootstrap {
       }
 
       await refreshPremiumFromRevenueCat();
-    } on PlatformException catch (e, st) {
+    } on PlatformException catch (_) {
       _sdkReady = false;
-      log(
-        'RevenueCat: PlatformException ao configurar (possível Invalid API Key). ${e.code} ${e.message}',
-        name: 'mentor.bootstrap',
-        error: e,
-        stackTrace: st,
-      );
+      // Emergência UX: não travar o boot nem poluir console se a chave estiver inválida (401).
       await AppThemeController.instance.setPremiumStatus(false);
     } catch (e, st) {
       _sdkReady = false;

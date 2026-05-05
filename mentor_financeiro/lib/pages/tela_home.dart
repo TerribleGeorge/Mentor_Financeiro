@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../domain/finance/daily_limit_calculator.dart';
 import '../theme/classic_mode_style.dart';
 import '../theme/mentor_adaptive_visuals.dart';
-import '../services/firebase_service.dart';
 import '../services/finance_config_signals.dart';
 
 class TelaHome extends StatefulWidget {
@@ -31,7 +30,6 @@ class _TelaHomeState extends State<TelaHome> {
     super.initState();
     FinanceConfigSignals.addListener(_onFinanceConfigSaved);
     _carregarDados();
-    _solicitarPermissaoNotificacoes();
   }
 
   @override
@@ -39,10 +37,6 @@ class _TelaHomeState extends State<TelaHome> {
     FinanceConfigSignals.removeListener(_onFinanceConfigSaved);
     _scrollController.dispose();
     super.dispose();
-  }
-
-  Future<void> _solicitarPermissaoNotificacoes() async {
-    await FirebaseService.inicializarMessaging();
   }
 
   void _abrirSimulado() {

@@ -149,17 +149,22 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
                   scale: _pulseScale,
                   child: SizedBox.expand(
                     child: Image.asset(
-                      // Regra: usar apenas DevVoid_logo como standard/free.
-                      'assets/images/DevVoid_logo.png',
+                      widget.splashAsset,
                       fit: BoxFit.cover,
                       alignment: Alignment.center,
                       filterQuality: FilterQuality.high,
+                      gaplessPlayback: true,
+                      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                        if (wasSynchronouslyLoaded || frame != null) return child;
+                        return const ColoredBox(color: Colors.black);
+                      },
                       errorBuilder: (context, error, stackTrace) {
                         return Image.asset(
                           'assets/images/DevVoid_logo.png',
                           fit: BoxFit.cover,
                           alignment: Alignment.center,
                           filterQuality: FilterQuality.high,
+                          gaplessPlayback: true,
                         );
                       },
                     ),

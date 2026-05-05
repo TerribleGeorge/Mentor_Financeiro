@@ -9,6 +9,7 @@ import '../services/subscription_provider.dart';
 import 'paywall_screen.dart';
 import '../services/currency_preference_controller.dart';
 import '../services/locale_controller.dart';
+import '../services/notification_listener_service.dart';
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -20,6 +21,13 @@ class _SettingsPageState extends State<SettingsPage> {
   String _idiomaSelecionado = 'pt';
   String _moedaSelecionada = 'BRL';
   final _themeController = AppThemeController();
+  final _notificationListener = NotificationListenerService();
+
+  static const _prefsNotifAsked = 'notif_bank_access_asked';
+  static const _prefsNotifDenied = 'notif_bank_access_denied';
+  static const _prefsNotifEnabled = 'notif_bank_access_enabled';
+  bool _notifEnabled = false;
+  bool _notifDenied = false;
 
   @override
   void initState() {
@@ -33,6 +41,8 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       _idiomaSelecionado = prefs.getString(LocaleController.prefsKey) ?? 'pt';
       _moedaSelecionada = prefs.getString('moeda') ?? 'AUTO';
+      _notifEnabled = prefs.getBool(_prefsNotifEnabled) ?? false;
+      _notifDenied = prefs.getBool(_prefsNotifDenied) ?? false;
     });
   }
 
@@ -92,6 +102,41 @@ class _SettingsPageState extends State<SettingsPage> {
                 _buildSectionTitle('Preferências'),
                 const SizedBox(height: 12),
                 _buildCard([
+                  _buildListTile(
+                    icon: Icons.auto_awesome,
+                    title: 'Leitura automática de bancos',
+                    subtitle: _notifEnabled
+                        ? 'Ativada'
+                        : (_notifDenied ? 'Desativada (negada)' : 'Desativada'),
+                    trailing: subscription.isPremium
+                        ? Switch(
+                            value: _notifEnabled,
+                            onChanged: (value) async {
+                              if (value) {
+                                await _onEnableBankNotifications();
+                              } else {
+                                await _onDisableBankNotifications();
+                              }
+                            },
+                          )
+                        : const Icon(Icons.lock, color: Colors.white54),
+                    onTap: () async {
+                      if (!subscription.isPremium) {
+                        await Navigator.of(context).push<void>(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const PaywallScreen(),
+                          ),
+                        );
+                        return;
+                      }
+                      if (_notifEnabled) {
+                        await _onDisableBankNotifications();
+                      } else {
+                        await _onEnableBankNotifications();
+                      }
+                    },
+                  ),
+                  const Divider(color: Colors.white12),
                   _buildListTile(
                     icon: Icons.language,
                     title: 'Idioma',
@@ -217,6 +262,113 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         );
       },
+    );
+  }
+
+  Future<void> _onEnableBankNotifications() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final proceed = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: const Color(0xFF0B0B0B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Ativar leitura automática',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Para automatizar o registro de gastos via notificações bancárias, precisamos dessa permissão. Seus dados são processados localmente e nunca saem do dispositivo.',
+                  style: TextStyle(color: Colors.white70, height: 1.3),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white70,
+                          side: const BorderSide(color: Colors.white24),
+                        ),
+                        child: const Text('Agora não'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Continuar'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (proceed != true) {
+      return;
+    }
+
+    await prefs.setBool(_prefsNotifAsked, true);
+    final ok = await _notificationListener.solicitarPermissaoEIniciar();
+    if (!mounted) return;
+
+    if (ok) {
+      await prefs.setBool(_prefsNotifEnabled, true);
+      await prefs.setBool(_prefsNotifDenied, false);
+      setState(() {
+        _notifEnabled = true;
+        _notifDenied = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Leitura automática ativada.')),
+      );
+    } else {
+      await prefs.setBool(_prefsNotifEnabled, false);
+      await prefs.setBool(_prefsNotifDenied, true);
+      setState(() {
+        _notifEnabled = false;
+        _notifDenied = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Permissão negada. Você pode continuar usando entrada manual normalmente.',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onDisableBankNotifications() async {
+    final prefs = await SharedPreferences.getInstance();
+    _notificationListener.parar();
+    await prefs.setBool(_prefsNotifEnabled, false);
+    if (!mounted) return;
+    setState(() {
+      _notifEnabled = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Leitura automática desativada.')),
     );
   }
 

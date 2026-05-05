@@ -12,6 +12,7 @@ import '../pages/conhecimento/perigos_page.dart';
 import '../pages/conhecimento/primeiros_passos_page.dart';
 import '../pages/main_navigation.dart';
 import '../pages/relatorios_screen.dart';
+import '../widgets/premium_wrapper.dart';
 import '../pages/simulado_page.dart';
 import '../pages/tela_estrategias.dart';
 import '../pages/adicionar_investimento_page.dart';
@@ -168,19 +169,25 @@ class MentorAppRouter {
       case AppRoutes.relatorios:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const DashboardScreen(
-            title: 'Relatórios',
-            showBackButton: true,
-            chartsOnly: false,
+          builder: (_) => const PremiumWrapper(
+            feature: 'Relatórios mensais',
+            child: DashboardScreen(
+              title: 'Relatórios',
+              showBackButton: true,
+              chartsOnly: false,
+            ),
           ),
         );
       case AppRoutes.graficos:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const DashboardScreen(
-            title: 'Gráficos',
-            showBackButton: true,
-            chartsOnly: true,
+          builder: (_) => const PremiumWrapper(
+            feature: 'Análises personalizadas (dashboards)',
+            child: DashboardScreen(
+              title: 'Gráficos',
+              showBackButton: true,
+              chartsOnly: true,
+            ),
           ),
         );
       case AppRoutes.cambio:

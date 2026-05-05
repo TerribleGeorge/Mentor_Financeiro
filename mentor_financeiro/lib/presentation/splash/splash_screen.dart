@@ -22,6 +22,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   late final DateTime _splashStartedAt;
   ({String asset, Color background, Color progress, Color particles})? _branding;
+  bool _loading = true;
 
   @override
   void initState() {
@@ -35,7 +36,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _loadBranding() async {
     try {
-      final info = await RevenueCatSubscriptionService.getCustomerInfoSafe();
+      final info = await RevenueCatSubscriptionService.getCustomerInfoSafe()
+          .timeout(const Duration(seconds: 2), onTimeout: () => null);
       final isPremium = info != null &&
           RevenueCatSubscriptionService.customerHasPremiumAccess(info);
 
@@ -51,8 +53,13 @@ class _SplashScreenState extends State<SplashScreen> {
         isPremium: isPremium == true,
         theme: theme.themeMode,
       );
+      // Evita flash antes do primeiro frame do asset.
+      await precacheImage(AssetImage(branding.asset), context);
       if (!mounted) return;
-      setState(() => _branding = branding);
+      setState(() {
+        _branding = branding;
+        _loading = false;
+      });
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -60,6 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
           isPremium: false,
           theme: AppThemeMode.voidTheme,
         );
+        _loading = false;
       });
     }
   }
@@ -162,6 +170,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) return Container(color: Colors.black);
     final branding = _branding;
     if (branding == null) {
       // Evita flash: mostra só o vazio até a decisão do branding.
