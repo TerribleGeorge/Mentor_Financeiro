@@ -7,6 +7,8 @@ import '../../domain/mentorship/mentorship_engine.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/localization_service.dart';
 import '../../services/user_persona_service.dart';
+import '../../theme/mentor_adaptive_visuals.dart';
+import '../../widgets/mentor_readable_layer.dart';
 import 'insight_detail_args.dart';
 
 /// Análise detalhada da simulação: o tom do mentor vem de [MentorshipEngine] + persona atual
@@ -22,6 +24,7 @@ class InsightDetailScreen extends StatelessWidget {
 
     if (args == null) {
       return Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(title: Text(l10n.compoundMentorCardTitle)),
         body: Center(child: Text(l10n.compoundInvalidInput)),
       );
@@ -38,61 +41,65 @@ class InsightDetailScreen extends StatelessWidget {
       languageCode: lang,
     );
 
+    final va = context.mentorAdaptive;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
         title: Text(
           l10n.compoundMentorCardTitle,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          _chipPersona(context, l10n, persona, visual),
-          const SizedBox(height: 16),
-          _metricCard(
-            visual,
-            l10n.compoundSummaryNominalEnd,
-            LocalizationService.formatCurrency(r.nominalFutureValue),
-          ),
-          const SizedBox(height: 10),
-          _metricCard(
-            visual,
-            l10n.compoundSummaryRealGain,
-            LocalizationService.formatCurrency(r.realGain),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.compoundMentorCardTitle,
-            style: TextStyle(
-              color: visual.accent,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
+      body: MentorReadableLayer(
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            _chipPersona(context, l10n, persona, visual),
+            const SizedBox(height: 16),
+            _metricCard(
+              context,
+              visual,
+              l10n.compoundSummaryNominalEnd,
+              LocalizationService.formatCurrency(r.nominalFutureValue),
             ),
-          ),
-          const SizedBox(height: 12),
-          ...advice.map(
-            (t) => Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.auto_awesome, size: 20, color: visual.insightIconColor),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      t,
-                      style: const TextStyle(color: Colors.white70, height: 1.45),
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 10),
+            _metricCard(
+              context,
+              visual,
+              l10n.compoundSummaryRealGain,
+              LocalizationService.formatCurrency(r.realGain),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              l10n.compoundMentorCardTitle,
+              style: TextStyle(
+                color: visual.accent,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            ...advice.map(
+              (t) => Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.auto_awesome, size: 20, color: visual.insightIconColor),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        t,
+                        style: TextStyle(color: va.secondaryTextColor, height: 1.45),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -121,24 +128,34 @@ class InsightDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _metricCard(PersonaVisualTheme visual, String title, String value) {
+  Widget _metricCard(
+    BuildContext context,
+    PersonaVisualTheme visual,
+    String title,
+    String value,
+  ) {
+    final v = context.mentorAdaptive;
+    final fill = Theme.of(context).cardTheme.color ?? v.widgetColor;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: fill,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: visual.mentorBorder.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+          Text(
+            title,
+            style: TextStyle(color: v.secondaryTextColor, fontSize: 12),
+          ),
           const SizedBox(height: 6),
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: v.textColor,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),

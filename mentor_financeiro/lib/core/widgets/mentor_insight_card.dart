@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/network/offline_exception.dart';
+import '../../theme/mentor_adaptive_visuals.dart';
 import '../../data/providers/financial_provider_factory.dart';
 import '../../domain/entities/financial_market_region.dart';
 import '../../domain/entities/mentor_allocation_hint.dart';
@@ -33,11 +34,12 @@ class MentorInsightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final v = context.mentorAdaptive;
     final provider = FinancialProviderFactory.forRegion(region);
     const engine = MentorEngine();
 
     return Card(
-      color: const Color(0xFF1E293B),
+      color: Theme.of(context).cardTheme.color,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -56,7 +58,7 @@ class MentorInsightCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       l10n.mentorInsightLoading,
-                      style: const TextStyle(color: Colors.white70),
+                      style: TextStyle(color: v.secondaryTextColor),
                     ),
                   ),
                 ],
@@ -68,7 +70,7 @@ class MentorInsightCard extends StatelessWidget {
                   : l10n.mentorInsightError;
               return Text(
                 message,
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(color: v.secondaryTextColor),
               );
             }
 
@@ -86,8 +88,8 @@ class MentorInsightCard extends StatelessWidget {
               children: [
                 Text(
                   l10n.mentorInsightTitle,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: v.textColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -95,12 +97,15 @@ class MentorInsightCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   hintText,
-                  style: const TextStyle(color: Colors.white70, height: 1.35),
+                  style: TextStyle(color: v.secondaryTextColor, height: 1.35),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.mentorInsightSymbols(data.quotes.map((q) => q.symbol).join(', ')),
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  style: TextStyle(
+                    color: v.secondaryTextColor.withValues(alpha: 0.85),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             );

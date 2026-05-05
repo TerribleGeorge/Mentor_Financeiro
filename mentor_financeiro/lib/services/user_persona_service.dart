@@ -21,12 +21,16 @@ class UserPersonaService extends ChangeNotifier {
   UserPersona _persona = UserPersona.novice;
   bool _mentorOnboardingDone = false;
   bool _mentorPersonaSetupDone = false;
+  bool _mentorTourCompleted = false;
 
   UserPersona get persona => _persona;
 
   bool get mentorOnboardingDone => _mentorOnboardingDone;
 
   bool get mentorPersonaSetupDone => _mentorPersonaSetupDone;
+
+  /// `true` quando o utilizador ainda não concluiu o tour guiado (prefs + nuvem).
+  bool get shouldShowTour => !_mentorTourCompleted;
 
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
@@ -35,6 +39,7 @@ class UserPersonaService extends ChangeNotifier {
     _mentorOnboardingDone = prefs.getBool(AppPrefs.mentorOnboardingDone) ?? false;
     _mentorPersonaSetupDone =
         prefs.getBool(AppPrefs.mentorPersonaSetupDone) ?? false;
+    _mentorTourCompleted = prefs.getBool(AppPrefs.mentorTourCompleted) ?? false;
     if (Firebase.apps.isNotEmpty) {
       await _pullCloudMentorStateIfPossible(prefs);
     }
@@ -52,6 +57,7 @@ class UserPersonaService extends ChangeNotifier {
       final personaRaw = data['persona']?.toString();
       final cloudOnboarding = data['mentorOnboardingDone'] == true;
       final cloudPersonaSetup = data['mentorPersonaSetupDone'] == true;
+      final cloudTourDone = data['mentorTourCompleted'] == true;
 
       var changed = false;
       if (personaRaw != null && personaRaw.isNotEmpty) {
@@ -72,6 +78,11 @@ class UserPersonaService extends ChangeNotifier {
         await prefs.setBool(AppPrefs.mentorPersonaSetupDone, true);
         changed = true;
       }
+      if (cloudTourDone && !_mentorTourCompleted) {
+        _mentorTourCompleted = true;
+        await prefs.setBool(AppPrefs.mentorTourCompleted, true);
+        changed = true;
+      }
       if (changed) notifyListeners();
     } catch (_) {}
   }
@@ -87,6 +98,7 @@ class UserPersonaService extends ChangeNotifier {
         personaName: _persona.name,
         mentorOnboardingDone: _mentorOnboardingDone,
         mentorPersonaSetupDone: _mentorPersonaSetupDone,
+        mentorTourCompleted: _mentorTourCompleted,
         email: user.email,
       );
     } catch (_) {}
@@ -141,6 +153,16 @@ class UserPersonaService extends ChangeNotifier {
     _persona = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(prefsKey, value.name);
+    notifyListeners();
+    await _syncMentorDocumentToCloud();
+  }
+
+  /// Marca o tour guiado como concluído (SharedPreferences + Firestore via [_syncMentorDocumentToCloud]).
+  Future<void> completeGuidedTour() async {
+    if (_mentorTourCompleted) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(AppPrefs.mentorTourCompleted, true);
+    _mentorTourCompleted = true;
     notifyListeners();
     await _syncMentorDocumentToCloud();
   }

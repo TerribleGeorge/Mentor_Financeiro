@@ -101,6 +101,8 @@ dependencies:
   purchases_flutter: ^10.0.1
   firebase_crashlytics: ^5.2.0
   connectivity_plus: ^7.1.1
+  palette_generator: ^0.3.3+7
+  showcaseview: ^5.0.2
   # firebase_ai: ^3.10.0  # Temporariamente desativado
 
 # ==============================================================================
@@ -169,3 +171,4 @@ flutter:
     - .env
     - assets/.env
     - assets/icons/void_icon.png
+    - assets/images/void_logo.png

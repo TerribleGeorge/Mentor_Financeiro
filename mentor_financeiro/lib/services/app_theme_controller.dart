@@ -1,8 +1,12 @@
 import 'dart:io';
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:palette_generator/palette_generator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../theme/mentor_adaptive_visuals.dart';
 
 enum AppThemeMode { light, dark, medium }
 
@@ -21,23 +25,42 @@ class AppThemeController extends ChangeNotifier {
   String? _backgroundImagePath;
   bool _isLoading = false;
   bool _isPremium = false;
+  Color? _dominantBackgroundColor;
+  MentorAdaptiveVisuals _adaptiveVisuals = MentorAdaptiveVisuals.darkNeutral;
 
   AppThemeMode get themeMode => _themeMode;
   String? get backgroundImagePath => _backgroundImagePath;
   bool get isLoading => _isLoading;
   bool get isPremium => _isPremium;
+  Color? get dominantBackgroundColor => _dominantBackgroundColor;
+
+  /// Contraste reativo (derivado da luminância da paleta).
+  Color get textColor => _adaptiveVisuals.textColor;
+
+  /// Vidro semântico para Cards/Containers (ARGB com alpha).
+  Color get widgetColor => _adaptiveVisuals.widgetColor;
+
   bool get hasBackgroundImage =>
       _backgroundImagePath != null && File(_backgroundImagePath!).existsSync();
 
-  ThemeData get currentTheme {
+  Color get backdropBaseColor {
     switch (_themeMode) {
       case AppThemeMode.light:
-        return _lightTheme;
+        return const Color(0xFFF5F5F5);
       case AppThemeMode.dark:
-        return _darkTheme;
+        return const Color(0xFF0F172A);
       case AppThemeMode.medium:
-        return _mediumTheme;
+        return const Color(0xFF263238);
     }
+  }
+
+  ThemeData get currentTheme {
+    final ThemeData base = switch (_themeMode) {
+      AppThemeMode.light => _lightTheme,
+      AppThemeMode.dark => _darkTheme,
+      AppThemeMode.medium => _mediumTheme,
+    };
+    return _mergeAdaptive(base, _adaptiveVisuals);
   }
 
   static final ThemeData _lightTheme = ThemeData(
@@ -79,6 +102,102 @@ class AppThemeController extends ChangeNotifier {
     ),
   );
 
+  ThemeData _mergeAdaptive(ThemeData base, MentorAdaptiveVisuals v) {
+    return base.copyWith(
+      scaffoldBackgroundColor: Colors.transparent,
+      cardTheme: CardThemeData(
+        color: v.widgetColor,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        clipBehavior: Clip.antiAlias,
+      ),
+      extensions: <ThemeExtension<dynamic>>[v],
+      colorScheme: base.colorScheme.copyWith(
+        onSurface: v.textColor,
+        onSurfaceVariant: v.secondaryTextColor,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        foregroundColor: v.textColor,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(color: v.textColor),
+        titleTextStyle: TextStyle(
+          color: v.textColor,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        textColor: v.textColor,
+        iconColor: v.secondaryTextColor,
+      ),
+    );
+  }
+
+  void _recomputeAdaptiveVisuals() {
+    if (hasBackgroundImage && _dominantBackgroundColor != null) {
+      final lum = _dominantBackgroundColor!.computeLuminance();
+      if (lum > 0.5) {
+        _adaptiveVisuals = MentorAdaptiveVisuals(
+          textColor: const Color(0xEE000000),
+          secondaryTextColor: const Color(0x99000000),
+          widgetColor: const Color(0x33000000),
+          readableBlurSigma: 5,
+        );
+      } else {
+        _adaptiveVisuals = MentorAdaptiveVisuals(
+          textColor: Colors.white,
+          secondaryTextColor: const Color(0xB3FFFFFF),
+          widgetColor: const Color(0x33FFFFFF),
+          readableBlurSigma: 5,
+        );
+      }
+      return;
+    }
+    _adaptiveVisuals = _themeMode == AppThemeMode.light
+        ? MentorAdaptiveVisuals.lightNeutral
+        : MentorAdaptiveVisuals.darkNeutral;
+  }
+
+  Future<void> refreshPaletteFromBackgroundPath(String? path) async {
+    if (path == null || path.isEmpty) {
+      _dominantBackgroundColor = null;
+      _recomputeAdaptiveVisuals();
+      notifyListeners();
+      return;
+    }
+    final file = File(path);
+    if (!file.existsSync()) {
+      _dominantBackgroundColor = null;
+      _recomputeAdaptiveVisuals();
+      notifyListeners();
+      return;
+    }
+    try {
+      final palette = await PaletteGenerator.fromImageProvider(
+        FileImage(file),
+        maximumColorCount: 16,
+      );
+      final d = palette.dominantColor?.color;
+      if (d != null) {
+        _dominantBackgroundColor = d;
+      } else if (palette.colors.isNotEmpty) {
+        _dominantBackgroundColor = palette.colors.first;
+      } else {
+        _dominantBackgroundColor = null;
+      }
+    } catch (e, st) {
+      debugPrint('PaletteGenerator: $e\n$st');
+      _dominantBackgroundColor = null;
+    }
+    _recomputeAdaptiveVisuals();
+    notifyListeners();
+  }
+
   Future<void> initialize() async {
     _isLoading = true;
     notifyListeners();
@@ -89,10 +208,14 @@ class AppThemeController extends ChangeNotifier {
     _backgroundImagePath = prefs.getString(_backgroundImageKey);
     _isPremium = prefs.getBool(_isPremiumKey) ?? false;
 
+    _recomputeAdaptiveVisuals();
+
     debugPrint('AppThemeController initialized - isPremium: $_isPremium');
 
     _isLoading = false;
     notifyListeners();
+
+    await refreshPaletteFromBackgroundPath(_backgroundImagePath);
   }
 
   Future<void> setPremiumStatus(bool isPremium) async {
@@ -107,6 +230,7 @@ class AppThemeController extends ChangeNotifier {
   Future<void> setThemeMode(AppThemeMode mode) async {
     if (_themeMode == mode) return;
     _themeMode = mode;
+    _recomputeAdaptiveVisuals();
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
@@ -128,11 +252,14 @@ class AppThemeController extends ChangeNotifier {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_backgroundImageKey, pickedFile.path);
+      await refreshPaletteFromBackgroundPath(_backgroundImagePath);
     }
   }
 
   Future<void> removeBackgroundImage() async {
     _backgroundImagePath = null;
+    _dominantBackgroundColor = null;
+    _recomputeAdaptiveVisuals();
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
@@ -162,41 +289,6 @@ class AppThemeController extends ChangeNotifier {
   }
 }
 
-class BackgroundWrapper extends StatelessWidget {
-  final Widget child;
-  final String? backgroundImagePath;
-
-  const BackgroundWrapper({
-    super.key,
-    required this.child,
-    this.backgroundImagePath,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (backgroundImagePath == null ||
-        !File(backgroundImagePath!).existsSync()) {
-      return child;
-    }
-
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.file(
-          File(backgroundImagePath!),
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-        ),
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(color: Colors.black.withValues(alpha: 0.4)),
-        ),
-        child,
-      ],
-    );
-  }
-}
-
 class GlassCard extends StatelessWidget {
   final Widget child;
   final double blur;
@@ -215,7 +307,7 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final v = context.mentorAdaptive;
     final radius = borderRadius ?? BorderRadius.circular(16);
 
     return ClipRRect(
@@ -225,11 +317,11 @@ class GlassCard extends StatelessWidget {
         child: Container(
           padding: padding ?? const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: opacity)
-                : Colors.black.withValues(alpha: opacity * 0.5),
+            color: v.widgetColor,
             borderRadius: radius,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            border: Border.all(
+              color: v.textColor.withValues(alpha: 0.12),
+            ),
           ),
           child: child,
         ),

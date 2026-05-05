@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_routes.dart';
+import '../../core/navigation/fade_route.dart';
+import '../widgets/void_loading_screen.dart';
 import '../../services/firebase_service.dart';
 import '../../services/user_persona_service.dart';
 
@@ -22,14 +24,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _iniciarApp() async {
-    await Future.delayed(const Duration(seconds: 2));
-
     final prefs = await SharedPreferences.getInstance();
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+        await pushReplacementNamedFade(context, AppRoutes.login);
       }
       return;
     }
@@ -64,12 +64,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if (!perfilCompleto) {
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed(AppRoutes.questionario);
+          await pushReplacementNamedFade(context, AppRoutes.questionario);
         }
         return;
       } else if (!onboardingCompleto) {
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed(AppRoutes.onboardingMentor);
+          await pushReplacementNamedFade(context, AppRoutes.onboardingMentor);
         }
         return;
       }
@@ -84,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen> {
       );
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.onboardingMentor);
+        await pushReplacementNamedFade(context, AppRoutes.onboardingMentor);
       }
       return;
     }
@@ -98,59 +98,19 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (!UserPersonaService.instance.mentorOnboardingDone) {
-      Navigator.of(context).pushReplacementNamed(AppRoutes.onboardingMentor);
+      await pushReplacementNamedFade(context, AppRoutes.onboardingMentor);
       return;
     }
     if (!UserPersonaService.instance.mentorPersonaSetupDone) {
-      Navigator.of(context).pushReplacementNamed(AppRoutes.personaSetup);
+      await pushReplacementNamedFade(context, AppRoutes.personaSetup);
       return;
     }
     if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+    await pushReplacementNamedFade(context, AppRoutes.home);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFF00D9FF),
-              ),
-              child: const Icon(
-                Icons.account_balance_wallet,
-                size: 60,
-                color: Color(0xFF0F172A),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'MENTOR FINANCEIRO',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const SizedBox(
-              width: 80,
-              height: 3,
-              child: LinearProgressIndicator(
-                backgroundColor: Color(0xFF1E293B),
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00D9FF)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return const VoidLoadingScreen();
   }
 }

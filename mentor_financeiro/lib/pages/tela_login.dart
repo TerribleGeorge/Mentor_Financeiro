@@ -19,8 +19,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 // Serviço Firebase
 import '../services/firebase_service.dart';
 
-// Tela de configuração (próxima etapa)
-import 'tela_configuracao.dart';
+import '../core/constants/app_routes.dart';
 
 // WIDGET STATEFUL
 class TelaLogin extends StatefulWidget {
@@ -768,11 +767,9 @@ class _TelaLoginState extends State<TelaLogin> {
       }
     }
 
-    // Navega para tela de configuração
+    // Próxima etapa: Calculadora Mentora (rota `/configuracao` → MentorAppRouter).
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const TelaConfiguracao()),
-      );
+      Navigator.of(context).pushReplacementNamed(AppRoutes.configuracao);
     }
   }
 

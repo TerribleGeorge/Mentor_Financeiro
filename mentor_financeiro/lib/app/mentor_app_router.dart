@@ -13,7 +13,6 @@ import '../pages/conhecimento/primeiros_passos_page.dart';
 import '../pages/main_navigation.dart';
 import '../pages/relatorios_screen.dart';
 import '../pages/simulado_page.dart';
-import '../pages/tela_configuracao.dart';
 import '../pages/tela_estrategias.dart';
 import '../pages/tela_investimentos.dart';
 import '../pages/tela_login.dart';
@@ -77,7 +76,7 @@ class MentorAppRouter {
       case AppRoutes.configuracao:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const TelaConfiguracao(),
+          builder: (_) => const CalculadoraMentoraScreen(),
         );
       case AppRoutes.principal:
         final idx = (settings.arguments is int) ? (settings.arguments as int) : 0;

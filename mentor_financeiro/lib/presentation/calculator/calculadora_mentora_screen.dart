@@ -18,6 +18,10 @@ import '../../domain/mentorship/mentorship_engine.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/localization_service.dart';
 import '../../services/user_persona_service.dart';
+import '../../theme/mentor_adaptive_visuals.dart';
+import '../../tour/mentor_showcase_style.dart';
+import '../../tour/mentor_tour_keys.dart';
+import '../../widgets/mentor_readable_layer.dart';
 import '../insight/insight_detail_args.dart';
 
 class CalculadoraMentoraScreen extends StatefulWidget {
@@ -194,119 +198,151 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
     final l10n = AppLocalizations.of(context)!;
     final persona = context.watch<UserPersonaService>().persona;
     final visual = PersonaVisualTheme.forPersona(persona);
+    final va = context.mentorAdaptive;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
         elevation: 0,
         title: Text(
           l10n.compoundCalculatorTitle,
           style: const TextStyle(
-            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            l10n.compoundCalculatorSubtitle,
-            style: const TextStyle(color: Colors.white70, height: 1.35),
-          ),
-          const SizedBox(height: 16),
-          _personaBar(context, l10n, visual, persona),
-          const SizedBox(height: 20),
-          _field(
-            visual: visual,
-            label: l10n.compoundInitialLabel,
-            controller: _initialCtrl,
-            icon: Icons.savings_outlined,
-          ),
-          _field(
-            visual: visual,
-            label: l10n.compoundMonthlyLabel,
-            controller: _monthlyCtrl,
-            icon: Icons.calendar_month_outlined,
-          ),
-          _rateSegmentRow(l10n, visual),
-          _field(
-            visual: visual,
-            label: l10n.compoundRateLabel,
-            controller: _rateCtrl,
-            icon: Icons.percent,
-            hint: _ratePeriod == InterestRatePeriod.annual ? '12' : '0.9',
-          ),
-          const SizedBox(height: 8),
-          _horizonSegmentRow(l10n, visual),
-          _field(
-            visual: visual,
-            label: l10n.compoundHorizonLabel,
-            controller: _horizonCtrl,
-            icon: Icons.schedule,
-            keyboardType: TextInputType.number,
-            hint: _horizonUnit == HorizonUnit.years ? '10' : '120',
-          ),
-          _field(
-            visual: visual,
-            label: l10n.compoundInflationLabel,
-            controller: _inflationCtrl,
-            icon: Icons.trending_flat,
-            hint: '4.5',
-          ),
-          if (_error != null) ...[
+      body: MentorReadableLayer(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(
+              l10n.compoundCalculatorSubtitle,
+              style: TextStyle(color: va.secondaryTextColor, height: 1.35),
+            ),
+            const SizedBox(height: 16),
+            MentorShowcaseStyle.wrap(
+              showcaseKey: MentorTourKeys.personaSelector,
+              description: 'Mude o tom de voz do seu Mentor aqui',
+              child: _personaBar(context, l10n, visual, persona),
+            ),
+            const SizedBox(height: 20),
+            _field(
+              context: context,
+              visual: visual,
+              label: l10n.compoundInitialLabel,
+              controller: _initialCtrl,
+              icon: Icons.savings_outlined,
+            ),
+            _field(
+              context: context,
+              visual: visual,
+              label: l10n.compoundMonthlyLabel,
+              controller: _monthlyCtrl,
+              icon: Icons.calendar_month_outlined,
+            ),
+            _rateSegmentRow(context, l10n, visual),
+            _field(
+              context: context,
+              visual: visual,
+              label: l10n.compoundRateLabel,
+              controller: _rateCtrl,
+              icon: Icons.percent,
+              hint: _ratePeriod == InterestRatePeriod.annual ? '12' : '0.9',
+            ),
             const SizedBox(height: 8),
-            Text(_error!, style: const TextStyle(color: Color(0xFFF87171))),
-          ],
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => _compute(),
-              style: FilledButton.styleFrom(
-                backgroundColor: visual.accent,
-                foregroundColor: visual.onAccent,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-              child: Text(
-                l10n.compoundCalculate,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+            _horizonSegmentRow(context, l10n, visual),
+            _field(
+              context: context,
+              visual: visual,
+              label: l10n.compoundHorizonLabel,
+              controller: _horizonCtrl,
+              icon: Icons.schedule,
+              keyboardType: TextInputType.number,
+              hint: _horizonUnit == HorizonUnit.years ? '10' : '120',
             ),
-          ),
-          if (_result != null) ...[
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed(
-                    AppRoutes.insightDetail,
-                    arguments: InsightDetailArgs(result: _result!),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: visual.accent,
-                  side: BorderSide(color: visual.accent),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+            _field(
+              context: context,
+              visual: visual,
+              label: l10n.compoundInflationLabel,
+              controller: _inflationCtrl,
+              icon: Icons.trending_flat,
+              hint: '4.5',
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 8),
+              Text(_error!, style: const TextStyle(color: Color(0xFFF87171))),
+            ],
+            const SizedBox(height: 16),
+            MentorShowcaseStyle.wrap(
+              showcaseKey: MentorTourKeys.calculateSave,
+              description: 'Não perca seus cálculos, salve aqui!',
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => _compute(),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: visual.accent,
+                    foregroundColor: visual.onAccent,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Text(
+                    l10n.compoundCalculate,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-                child: Text(l10n.compoundOpenFullInsight),
               ),
             ),
-            const SizedBox(height: 28),
-            _summaryRow(l10n, visual),
             const SizedBox(height: 20),
-            SizedBox(height: 220, child: _buildChart(l10n, visual)),
-            const SizedBox(height: 24),
-            _mentorCard(l10n, visual),
+            MentorShowcaseStyle.wrap(
+              showcaseKey: MentorTourKeys.wealthChart,
+              description: 'Aqui você vê sua riqueza crescendo',
+              child: SizedBox(
+                height: 220,
+                child: _result != null
+                    ? _buildChart(context, l10n, visual)
+                    : Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            'Após calcular, o gráfico compara o que você investiu com os juros acumulados.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: va.secondaryTextColor, height: 1.35),
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+            if (_result != null) ...[
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(
+                      AppRoutes.insightDetail,
+                      arguments: InsightDetailArgs(result: _result!),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: visual.accent,
+                    side: BorderSide(color: visual.accent),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text(l10n.compoundOpenFullInsight),
+                ),
+              ),
+              const SizedBox(height: 28),
+              _summaryRow(context, l10n, visual),
+              const SizedBox(height: 24),
+              _mentorCard(context, l10n, visual),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -330,13 +366,15 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
     PersonaVisualTheme visual,
     UserPersona selected,
   ) {
+    final va = context.mentorAdaptive;
+    final chipBg = Theme.of(context).cardTheme.color ?? va.widgetColor;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.userPersonaSectionTitle,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: va.textColor,
             fontWeight: FontWeight.w600,
             fontSize: 14,
           ),
@@ -357,13 +395,13 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
               },
               selectedColor: visual.accent,
               labelStyle: TextStyle(
-                color: isSel ? visual.onAccent : Colors.white70,
+                color: isSel ? visual.onAccent : va.secondaryTextColor,
                 fontWeight: isSel ? FontWeight.bold : FontWeight.w500,
                 fontSize: 12,
               ),
-              backgroundColor: const Color(0xFF1E293B),
+              backgroundColor: chipBg,
               side: BorderSide(
-                color: isSel ? visual.accent : Colors.white24,
+                color: isSel ? visual.accent : va.textColor.withValues(alpha: 0.24),
               ),
             );
           }).toList(),
@@ -373,6 +411,7 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
   }
 
   Widget _field({
+    required BuildContext context,
     required PersonaVisualTheme visual,
     required String label,
     required TextEditingController controller,
@@ -382,24 +421,26 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
       decimal: true,
     ),
   }) {
+    final va = context.mentorAdaptive;
+    final fill = Theme.of(context).cardTheme.color ?? va.widgetColor;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: va.textColor),
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
-          labelStyle: const TextStyle(color: Colors.white70),
-          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.35)),
+          labelStyle: TextStyle(color: va.secondaryTextColor),
+          hintStyle: TextStyle(color: va.secondaryTextColor.withValues(alpha: 0.45)),
           prefixIcon: Icon(icon, color: visual.accent),
           filled: true,
-          fillColor: const Color(0xFF1E293B),
+          fillColor: fill,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+            borderSide: BorderSide(color: va.textColor.withValues(alpha: 0.12)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -410,7 +451,11 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
     );
   }
 
-  Widget _rateSegmentRow(AppLocalizations l10n, PersonaVisualTheme visual) {
+  Widget _rateSegmentRow(
+    BuildContext context,
+    AppLocalizations l10n,
+    PersonaVisualTheme visual,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: SegmentedButton<InterestRatePeriod>(
@@ -434,20 +479,24 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
             if (states.contains(WidgetState.selected)) {
               return visual.onAccent;
             }
-            return Colors.white70;
+            return context.mentorAdaptive.secondaryTextColor;
           }),
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
               return visual.accent;
             }
-            return const Color(0xFF1E293B);
+            return Theme.of(context).cardTheme.color ?? context.mentorAdaptive.widgetColor;
           }),
         ),
       ),
     );
   }
 
-  Widget _horizonSegmentRow(AppLocalizations l10n, PersonaVisualTheme visual) {
+  Widget _horizonSegmentRow(
+    BuildContext context,
+    AppLocalizations l10n,
+    PersonaVisualTheme visual,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: SegmentedButton<HorizonUnit>(
@@ -471,25 +520,30 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
             if (states.contains(WidgetState.selected)) {
               return visual.onAccent;
             }
-            return Colors.white70;
+            return context.mentorAdaptive.secondaryTextColor;
           }),
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
               return visual.accent;
             }
-            return const Color(0xFF1E293B);
+            return Theme.of(context).cardTheme.color ?? context.mentorAdaptive.widgetColor;
           }),
         ),
       ),
     );
   }
 
-  Widget _summaryRow(AppLocalizations l10n, PersonaVisualTheme visual) {
+  Widget _summaryRow(
+    BuildContext context,
+    AppLocalizations l10n,
+    PersonaVisualTheme visual,
+  ) {
     final r = _result!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _statTile(
+          context,
           visual,
           l10n.compoundSummaryNominalEnd,
           LocalizationService.formatCurrency(r.nominalFutureValue),
@@ -497,6 +551,7 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
         ),
         const SizedBox(height: 10),
         _statTile(
+          context,
           visual,
           l10n.compoundSummaryRealGain,
           LocalizationService.formatCurrency(r.realGain),
@@ -508,16 +563,19 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
   }
 
   Widget _statTile(
+    BuildContext context,
     PersonaVisualTheme visual,
     String title,
     String value,
     IconData icon, {
     Color? valueColor,
   }) {
+    final va = context.mentorAdaptive;
+    final fill = Theme.of(context).cardTheme.color ?? va.widgetColor;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: fill,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -530,12 +588,12 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  style: TextStyle(color: va.secondaryTextColor, fontSize: 12),
                 ),
                 Text(
                   value,
                   style: TextStyle(
-                    color: valueColor ?? Colors.white,
+                    color: valueColor ?? va.textColor,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -548,7 +606,12 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
     );
   }
 
-  Widget _buildChart(AppLocalizations l10n, PersonaVisualTheme visual) {
+  Widget _buildChart(
+    BuildContext context,
+    AppLocalizations l10n,
+    PersonaVisualTheme visual,
+  ) {
+    final va = context.mentorAdaptive;
     final r = _result!;
     final invested = math.max(0.0, r.totalInvested);
     final interest = math.max(0.0, r.nominalInterestGain);
@@ -564,7 +627,7 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
           drawVerticalLine: false,
           horizontalInterval: cap <= 1 ? 0.25 : cap / 4,
           getDrawingHorizontalLine: (value) => FlLine(
-            color: Colors.white.withValues(alpha: 0.06),
+            color: va.textColor.withValues(alpha: 0.08),
             strokeWidth: 1,
           ),
         ),
@@ -583,7 +646,7 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
                   child: Text(
                     value == 0 ? '0' : LocalizationService.formatCurrency(value),
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.45),
+                      color: va.secondaryTextColor.withValues(alpha: 0.65),
                       fontSize: 9,
                     ),
                     textAlign: TextAlign.right,
@@ -603,8 +666,8 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     label,
-                    style: const TextStyle(
-                      color: Colors.white70,
+                    style: TextStyle(
+                      color: va.secondaryTextColor,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -651,7 +714,12 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
     );
   }
 
-  Widget _mentorCard(AppLocalizations l10n, PersonaVisualTheme visual) {
+  Widget _mentorCard(
+    BuildContext context,
+    AppLocalizations l10n,
+    PersonaVisualTheme visual,
+  ) {
+    final va = context.mentorAdaptive;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -688,8 +756,8 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
               Expanded(
                 child: Text(
                   l10n.compoundMentorCardTitle,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: va.textColor,
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
                   ),
@@ -716,8 +784,8 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
                   Expanded(
                     child: Text(
                       e.value,
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: va.secondaryTextColor,
                         height: 1.45,
                         fontSize: 14,
                       ),

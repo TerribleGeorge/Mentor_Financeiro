@@ -129,6 +129,7 @@ class FirebaseDataService {
     required String personaName,
     required bool mentorOnboardingDone,
     required bool mentorPersonaSetupDone,
+    required bool mentorTourCompleted,
     String? email,
   }) async {
     if (Firebase.apps.isEmpty) return;
@@ -140,6 +141,7 @@ class FirebaseDataService {
         'persona': personaName,
         'mentorOnboardingDone': mentorOnboardingDone,
         'mentorPersonaSetupDone': mentorPersonaSetupDone,
+        'mentorTourCompleted': mentorTourCompleted,
         'updatedAt': FieldValue.serverTimestamp(),
       },
       SetOptions(merge: true),
