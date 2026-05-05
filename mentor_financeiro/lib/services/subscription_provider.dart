@@ -15,6 +15,8 @@ class SubscriptionProvider extends ChangeNotifier {
   bool _isPremium = false;
   /// `true` só após [CustomerInfo] aplicado (entitlement vindo do RevenueCat), nunca por fallback Firestore sozinho.
   bool _premiumEntitlementFromRevenueCat = false;
+  /// `customerInfo.entitlements.all['premium']?.isActive` na última sincronização RC.
+  bool _premiumEntitlementActive = false;
   bool _isLoading = false;
   String? _errorMessage;
   String _currentRegion = 'BR';
@@ -32,11 +34,11 @@ class SubscriptionProvider extends ChangeNotifier {
     return _subscriptionEndDate!.isAfter(DateTime.now());
   }
 
-  /// Tema Cyber: exige SDK pronto e entitlement `premium` confirmado em [CustomerInfo] (não Firestore/prefs em fallback).
+  /// Temas Cyber / Grimm / Hive: SDK pronto e `entitlements.all['premium']?.isActive == true`.
   bool get hasPremiumEntitlementFromRevenueCat {
     if (!RevenueCatBootstrap.isSdkReady) return false;
     if (!_premiumEntitlementFromRevenueCat) return false;
-    return hasActiveSubscription;
+    return _premiumEntitlementActive;
   }
 
   bool get _firebaseReady => Firebase.apps.isNotEmpty;
@@ -100,7 +102,9 @@ class SubscriptionProvider extends ChangeNotifier {
 
   Future<void> _applyCustomerInfo(CustomerInfo info) async {
     _premiumEntitlementFromRevenueCat = true;
-    _isPremium = RevenueCatSubscriptionService.customerHasPremiumAccess(info);
+    _premiumEntitlementActive =
+        RevenueCatSubscriptionService.isPremiumEntitlementActive(info);
+    _isPremium = _premiumEntitlementActive;
     final ent = RevenueCatSubscriptionService.activePremiumEntitlement(info);
     if (ent?.expirationDate != null) {
       _subscriptionEndDate = DateTime.tryParse(ent!.expirationDate!);
@@ -144,6 +148,7 @@ class SubscriptionProvider extends ChangeNotifier {
   /// Fallback: Firestore / prefs quando o SDK não está pronto.
   Future<void> _loadPremiumStatusFallback() async {
     _premiumEntitlementFromRevenueCat = false;
+    _premiumEntitlementActive = false;
     final prefs = await SharedPreferences.getInstance();
     try {
       if (!_firebaseReady) {
@@ -307,6 +312,7 @@ class SubscriptionProvider extends ChangeNotifier {
   Future<void> debugSimulatePremiumPurchase() async {
     if (!kDebugMode) return;
     _premiumEntitlementFromRevenueCat = true;
+    _premiumEntitlementActive = true;
     _isPremium = true;
     _subscriptionEndDate = DateTime.now().add(const Duration(days: 365));
     _errorMessage = null;

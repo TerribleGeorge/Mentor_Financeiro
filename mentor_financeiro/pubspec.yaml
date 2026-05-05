@@ -170,7 +170,6 @@ flutter:
     - .env
     - assets/.env
     - assets/icons/app_icon.png
-    - assets/images/DevVoid_logo.png
     - assets/images/devvoid_standard.png
     - assets/images/devvoid_cyber.png
     - assets/images/devvoid_grimm.png

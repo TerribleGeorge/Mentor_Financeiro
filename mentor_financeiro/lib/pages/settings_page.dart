@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_theme_controller.dart';
 import '../services/subscription_provider.dart';
+import 'paywall_screen.dart';
 import '../services/currency_preference_controller.dart';
 import '../services/locale_controller.dart';
 class SettingsPage extends StatefulWidget {
@@ -154,10 +155,16 @@ class _SettingsPageState extends State<SettingsPage> {
                             final messenger = ScaffoldMessenger.of(context);
                             final sub = context.read<SubscriptionProvider>();
                             try {
-                              final ok = await sub.purchaseMonthly();
+                              sub.clearErrorMessage();
+                              await Navigator.of(context).push<void>(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const PaywallScreen(),
+                                ),
+                              );
                               if (!mounted) return;
-                              if (ok &&
-                                  sub.hasPremiumEntitlementFromRevenueCat) {
+                              await sub.refreshFromRevenueCat();
+                              if (!mounted) return;
+                              if (sub.hasPremiumEntitlementFromRevenueCat) {
                                 messenger.showSnackBar(
                                   const SnackBar(
                                     content: Text(
@@ -165,14 +172,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                     ),
                                   ),
                                 );
-                              } else {
+                              } else if (sub.errorMessage != null &&
+                                  sub.errorMessage!.isNotEmpty) {
                                 messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      sub.errorMessage ??
-                                          'Compra cancelada ou não concluída.',
-                                    ),
-                                  ),
+                                  SnackBar(content: Text(sub.errorMessage!)),
                                 );
                               }
                             } catch (e) {
@@ -290,23 +293,25 @@ class _SettingsPageState extends State<SettingsPage> {
                 return;
               }
               try {
-                final ok = await subscription.purchaseMonthly();
+                subscription.clearErrorMessage();
+                await Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const PaywallScreen(),
+                  ),
+                );
                 if (!mounted) return;
-                if (ok &&
-                    subscription.hasPremiumEntitlementFromRevenueCat) {
+                await subscription.refreshFromRevenueCat();
+                if (!mounted) return;
+                if (subscription.hasPremiumEntitlementFromRevenueCat) {
                   await _themeController.setThemeMode(mode);
                   if (!mounted) return;
                   messenger.showSnackBar(
                     SnackBar(content: Text('$nome desbloqueado.')),
                   );
-                } else {
+                } else if (subscription.errorMessage != null &&
+                    subscription.errorMessage!.isNotEmpty) {
                   messenger.showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        subscription.errorMessage ??
-                            'Compra cancelada ou não concluída.',
-                      ),
-                    ),
+                    SnackBar(content: Text(subscription.errorMessage!)),
                   );
                 }
               } catch (e) {

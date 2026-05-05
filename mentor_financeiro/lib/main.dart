@@ -121,6 +121,16 @@ Future<({String splashAsset, bool firebaseReady})> _bootstrapSplashContext() asy
   return (splashAsset: splashAsset, firebaseReady: firebaseReady);
 }
 
+/// Durante os 10 s da splash: confirma [CustomerInfo] e actualiza premium no tema.
+Future<void> _revenueCatSyncDuringSplashHold() async {
+  if (!RevenueCatBootstrap.isSdkReady) return;
+  final info = await RevenueCatSubscriptionService.getCustomerInfoSafe();
+  if (info == null) return;
+  final premium =
+      RevenueCatSubscriptionService.isPremiumEntitlementActive(info);
+  await themeController.setPremiumStatus(premium);
+}
+
 /// Restante do boot depois da splash estar definida (observabilidade, messaging, prefs, lojas).
 Future<void> _bootstrapApplicationRemainder({required bool firebaseReady}) async {
   if (firebaseReady) {
@@ -232,6 +242,7 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
       await Future.wait<void>([
         _bootstrapApplicationRemainder(firebaseReady: splashCtx.firebaseReady),
         VoidLoadingScreen.waitBootstrapSynchronizationHold(),
+        _revenueCatSyncDuringSplashHold(),
       ]);
     } catch (e, st) {
       log(
@@ -249,6 +260,7 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
       await Future.wait<void>([
         _bootstrapApplicationRemainder(firebaseReady: Firebase.apps.isNotEmpty),
         VoidLoadingScreen.waitBootstrapSynchronizationHold(),
+        _revenueCatSyncDuringSplashHold(),
       ]);
     }
     if (mounted) {

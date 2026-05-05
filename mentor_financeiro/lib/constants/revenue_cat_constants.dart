@@ -1,30 +1,36 @@
 /// Identificadores alinhados ao dashboard RevenueCat (Products, Entitlements, Offerings).
 ///
-/// **Dashboard — checklist**
-/// 1. Criar produtos na Play Console (ex.: `monthly`, `yearly`, `lifetime`) e ligá-los aos produtos RevenueCat.
-/// 2. Criar entitlements **`premium`** e/ou **`cyber`** (ou manter **Mentor Financeiro Android Pro**) e associar produtos.
-/// 3. Criar uma *Offering* (ex.: `default`) com pacotes que usem os tipos/preços monthly, annual, lifetime
-///    (ou identificadores personalizados `monthly` / `yearly` / `lifetime`).
+/// **Entitlement**
+/// O entitlement que desbloqueia assinatura e temas Cyber / Grimm / Hive deve chamar-se
+/// exactamente **[premiumEntitlementId]** no RevenueCat (`premium`), em sincronia com o código.
+///
+/// **Pacotes → mesmo entitlement**
+/// Todos os produtos (mensal, anual, vitalício) devem estar ligados ao entitlement `premium`.
+/// Identificadores típicos de pacote na offering (alinhar com Play Console + RC):
+/// | Identificador pacote (custom ou RC) | Função |
+/// |-------------------------------------|--------|
+/// | `monthly`, `$rc_monthly`            | Mensal → `premium` |
+/// | `yearly`, `annual`, `$rc_annual`    | Anual → `premium` |
+/// | `lifetime`, `$rc_lifetime`         | Vitalício → `premium` |
+///
+/// Os **temas** (Cyber, Grimm, Hive) são apenas UI após `premium` activo; não há pacote por tema.
 abstract final class RevenueCatConstants {
-  /// Identificador legado (dashboard); continua aceite em [premiumEntitlementIds].
-  static const String mentorProEntitlementId = 'Mentor Financeiro Android Pro';
+  /// **Nome exacto** do entitlement no RevenueCat Dashboard (não alterar sem actualizar o dashboard).
+  static const String premiumEntitlementId = 'premium';
 
-  /// Qualquer um destes entitlements ativos → utilizador tratado como premium (ex.: tema Cyber).
-  static const List<String> premiumEntitlementIds = <String>[
-    'premium',
-    'cyber',
-    mentorProEntitlementId,
-  ];
+  /// Paywalls que exigem um único id devem usar o mesmo [premiumEntitlementId].
+  static const String paywallTargetEntitlementId = premiumEntitlementId;
 
-  /// Usado em paywalls que exigem um único id (ex. [RevenueCatUI.presentPaywallIfNeeded]).
-  /// Alinhe com um entitlement que exista no RevenueCat ou altere para `'cyber'` / o legado.
-  static const String paywallTargetEntitlementId = 'premium';
-
-  /// Offering por defeito (RevenueCat usa frequentemente `current` em [Offerings.current]).
-  /// Se usar outro ID no dashboard, os pacotes continuam a ser resolvidos por tipo/nome abaixo.
   static const String defaultOfferingIdentifier = 'default';
 
-  /// Identificadores de pacote aceites (custom identifiers no RC ou `$rc_*`).
+  /// Ordem ao resolver a offering com pacotes: `current`, depois estes [Offering.identifier].
+  /// Inclui `premium_offering` (nome frequente no dashboard / versões antigas do projecto).
+  static const List<String> offeringLookupIdentifiers = <String>[
+    defaultOfferingIdentifier,
+    'premium_offering',
+  ];
+
+  /// Identificadores de pacote aceites na resolução automática (custom ou `$rc_*`).
   static const Set<String> monthlyPackageIds = {'monthly', r'$rc_monthly'};
   static const Set<String> yearlyPackageIds = {'yearly', 'annual', r'$rc_annual'};
   static const Set<String> lifetimePackageIds = {'lifetime', r'$rc_lifetime'};

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/app_theme_controller.dart';
 import '../services/subscription_provider.dart';
+import 'paywall_screen.dart';
 
 class ConfiguracoesPage extends StatelessWidget {
   const ConfiguracoesPage({super.key});
@@ -51,14 +52,20 @@ class ConfiguracoesPage extends StatelessWidget {
                   ? null
                   : () async {
                       try {
-                        final ok = await context
-                            .read<SubscriptionProvider>()
-                            .purchaseMonthly();
+                        context.read<SubscriptionProvider>().clearErrorMessage();
+                        await Navigator.of(context).push<void>(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const PaywallScreen(),
+                          ),
+                        );
                         if (!context.mounted) return;
-                        if (ok &&
-                            context
-                                .read<SubscriptionProvider>()
-                                .hasPremiumEntitlementFromRevenueCat) {
+                        await context
+                            .read<SubscriptionProvider>()
+                            .refreshFromRevenueCat();
+                        if (!context.mounted) return;
+                        if (context
+                            .read<SubscriptionProvider>()
+                            .hasPremiumEntitlementFromRevenueCat) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
@@ -69,14 +76,11 @@ class ConfiguracoesPage extends StatelessWidget {
                         } else {
                           final err =
                               context.read<SubscriptionProvider>().errorMessage;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                err ??
-                                    'Compra cancelada ou não concluída.',
-                              ),
-                            ),
-                          );
+                          if (err != null && err.isNotEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(err)),
+                            );
+                          }
                         }
                       } catch (e) {
                         if (context.mounted) {
@@ -96,7 +100,7 @@ class ConfiguracoesPage extends StatelessWidget {
               label: Text(
                 subscription.isLoading
                     ? 'A processar…'
-                    : 'Fazer teste de assinatura (offering)',
+                    : 'Teste de assinatura (paywall)',
               ),
             ),
             if (kDebugMode) ...[
@@ -183,6 +187,8 @@ class ConfiguracoesPage extends StatelessWidget {
         final isSelected = controller.themeMode == theme.mode;
         final onLightPreview =
             theme.previewColor.computeLuminance() > 0.55;
+        // Cyber / Grimm / Hive: desbloqueados quando RC reporta
+        // customerInfo.entitlements.all['premium']?.isActive (via [SubscriptionProvider]).
         final locked = theme.mode.requiresPremiumEntitlement &&
             !subscription.hasPremiumEntitlementFromRevenueCat;
         return SizedBox(
@@ -196,11 +202,16 @@ class ConfiguracoesPage extends StatelessWidget {
                       return;
                     }
                     try {
-                      final ok =
-                          await subscription.purchaseMonthly();
+                      subscription.clearErrorMessage();
+                      await Navigator.of(context).push<void>(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const PaywallScreen(),
+                        ),
+                      );
                       if (!context.mounted) return;
-                      if (ok &&
-                          subscription.hasPremiumEntitlementFromRevenueCat) {
+                      await subscription.refreshFromRevenueCat();
+                      if (!context.mounted) return;
+                      if (subscription.hasPremiumEntitlementFromRevenueCat) {
                         await controller.setThemeMode(theme.mode);
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -210,13 +221,11 @@ class ConfiguracoesPage extends StatelessWidget {
                         );
                       } else {
                         final err = subscription.errorMessage;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              err ?? 'Compra cancelada ou não concluída.',
-                            ),
-                          ),
-                        );
+                        if (err != null && err.isNotEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(err)),
+                          );
+                        }
                       }
                     } catch (e) {
                       if (context.mounted) {
@@ -241,15 +250,6 @@ class ConfiguracoesPage extends StatelessWidget {
                         : Colors.grey.withValues(alpha: 0.25),
                     width: isSelected ? 2 : 1,
                   ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: const Color(0xFF00D9FF).withValues(alpha: 0.28),
-                            blurRadius: 12,
-                            spreadRadius: 1,
-                          ),
-                        ]
-                      : null,
                 ),
                 child: Stack(
                   clipBehavior: Clip.none,
@@ -257,17 +257,21 @@ class ConfiguracoesPage extends StatelessWidget {
                     Column(
                       children: [
                         if (theme.thumbnailAsset != null)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.asset(
-                              theme.thumbnailAsset!,
-                              width: 52,
-                              height: 52,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Icon(
-                                theme.icon,
-                                color: theme.color,
-                                size: 28,
+                          SizedBox(
+                            width: 56,
+                            height: 56,
+                            child: Center(
+                              child: Image.asset(
+                                theme.thumbnailAsset!,
+                                fit: BoxFit.contain,
+                                alignment: Alignment.center,
+                                filterQuality: FilterQuality.medium,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Icon(
+                                  theme.icon,
+                                  color: theme.color,
+                                  size: 28,
+                                ),
                               ),
                             ),
                           )

@@ -6,21 +6,22 @@ import 'revenue_cat_bootstrap.dart';
 
 /// Operações de compra, [CustomerInfo] e resolução de pacotes — só após [Purchases.configure].
 abstract final class RevenueCatSubscriptionService {
-  /// `true` se qualquer um de [RevenueCatConstants.premiumEntitlementIds] estiver ativo.
-  static bool customerHasPremiumAccess(CustomerInfo info) {
-    for (final id in RevenueCatConstants.premiumEntitlementIds) {
-      final ent = info.entitlements.all[id];
-      if (ent?.isActive ?? false) return true;
-    }
-    return false;
+  /// Mesmo critério que `customerInfo.entitlements.all['premium']?.isActive == true`
+  /// com [RevenueCatConstants.premiumEntitlementId].
+  static bool isPremiumEntitlementActive(CustomerInfo info) {
+    final id = RevenueCatConstants.premiumEntitlementId;
+    return info.entitlements.all[id]?.isActive ?? false;
   }
 
-  /// Preferência do primeiro entitlement premium ativo (expiração / debugging).
+  /// Alias para compatibilidade (desbloqueio de temas / espelho Firestore).
+  static bool customerHasPremiumAccess(CustomerInfo info) =>
+      isPremiumEntitlementActive(info);
+
+  /// Entitlement activo para expiração / debug (só [premiumEntitlementId]).
   static EntitlementInfo? activePremiumEntitlement(CustomerInfo info) {
-    for (final id in RevenueCatConstants.premiumEntitlementIds) {
-      final ent = info.entitlements.all[id];
-      if (ent?.isActive ?? false) return ent;
-    }
+    final id = RevenueCatConstants.premiumEntitlementId;
+    final ent = info.entitlements.all[id];
+    if (ent?.isActive ?? false) return ent;
     return null;
   }
 
@@ -44,11 +45,26 @@ abstract final class RevenueCatSubscriptionService {
     }
   }
 
-  /// Mesma prioridade que o paywall: `current`, offering `default`, ou primeira em [Offerings.all].
+  /// Prioridade: `current` com pacotes → offering por [RevenueCatConstants.offeringLookupIdentifiers]
+  /// → qualquer offering com [Offering.availablePackages] não vazio → primeira da lista.
   static Offering? resolvePrimaryOffering(Offerings? offerings) {
     if (offerings == null) return null;
-    return offerings.current ??
-        offerings.getOffering(RevenueCatConstants.defaultOfferingIdentifier) ??
+
+    bool hasPackages(Offering o) => o.availablePackages.isNotEmpty;
+
+    final current = offerings.current;
+    if (current != null && hasPackages(current)) return current;
+
+    for (final id in RevenueCatConstants.offeringLookupIdentifiers) {
+      final o = offerings.getOffering(id);
+      if (o != null && hasPackages(o)) return o;
+    }
+
+    for (final o in offerings.all.values) {
+      if (hasPackages(o)) return o;
+    }
+
+    return current ??
         (offerings.all.isNotEmpty ? offerings.all.values.first : null);
   }
 
@@ -56,21 +72,32 @@ abstract final class RevenueCatSubscriptionService {
   static Package? resolveMonthly(Offering? offering) {
     if (offering == null) return null;
     return _findByIds(offering, RevenueCatConstants.monthlyPackageIds) ??
-        _findByType(offering, PackageType.monthly);
+        _findByType(offering, PackageType.monthly) ??
+        _singlePackageFallback(offering);
   }
 
   /// Resolve pacote anual: `yearly`/`annual` ou [PackageType.annual].
   static Package? resolveYearly(Offering? offering) {
     if (offering == null) return null;
     return _findByIds(offering, RevenueCatConstants.yearlyPackageIds) ??
-        _findByType(offering, PackageType.annual);
+        _findByType(offering, PackageType.annual) ??
+        _singlePackageFallback(offering);
   }
 
   /// Resolve lifetime: identificadores ou [PackageType.lifetime].
   static Package? resolveLifetime(Offering? offering) {
     if (offering == null) return null;
     return _findByIds(offering, RevenueCatConstants.lifetimePackageIds) ??
-        _findByType(offering, PackageType.lifetime);
+        _findByType(offering, PackageType.lifetime) ??
+        _singlePackageFallback(offering);
+  }
+
+  /// Quando a offering tem um único pacote com identifier custom, usa-o para compra.
+  static Package? _singlePackageFallback(Offering offering) {
+    if (offering.availablePackages.length == 1) {
+      return offering.availablePackages.first;
+    }
+    return null;
   }
 
   static Package? _findByIds(Offering offering, Set<String> ids) {
