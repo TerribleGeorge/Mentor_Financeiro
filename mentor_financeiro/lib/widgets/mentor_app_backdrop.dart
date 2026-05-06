@@ -12,7 +12,7 @@ class MentorAppBackdrop extends StatefulWidget {
 
   final Widget? child;
 
-  static const String _legacyPreferredBg = 'assets/images/devvoid_standard.png';
+  static const String _legacyPreferredBg = 'assets/images/DevVoid_standard.png';
   static const String _legacyFallbackBg = 'assets/images/bg_cyber.png';
 
   static Future<String> _resolveLegacyBgAsset(BuildContext context) async {
@@ -76,7 +76,7 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
                     BlendMode.darken,
                   ),
                   child: Image.asset(
-                    'assets/images/devvoid_standard.png',
+                    'assets/images/DevVoid_standard.png',
                     fit: BoxFit.cover,
                     gaplessPlayback: true,
                     filterQuality: FilterQuality.high,

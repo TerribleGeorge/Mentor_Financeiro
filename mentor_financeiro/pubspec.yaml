@@ -139,20 +139,20 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icons/app_icon.png"
+  image_path: "assets/icons/app_icon2.png"
   adaptive_icon_background: "#000000"
-  adaptive_icon_foreground: "assets/icons/app_icon.png"
+  adaptive_icon_foreground: "assets/icons/app_icon2.png"
   remove_alpha_ios: true
   min_sdk_android: 21
 
 # Splash nativo (devvoid): fundo preto + logo centralizado.
 flutter_native_splash:
   color: "#000000"
-  image: assets/icons/app_icon.png
+  image: assets/icons/app_icon2.png
   fullscreen: true
   android_12:
     color: "#000000"
-    image: assets/icons/app_icon.png
+    image: assets/icons/app_icon2.png
 
 # ==============================================================================
 # CONFIGURAÇÕES DO FLUTTER
@@ -172,9 +172,9 @@ flutter:
   assets:
     - .env
     - assets/.env
-    - assets/icons/app_icon.png
+    - assets/icons/app_icon2.png
     - assets/images/DevVoid_logo.png
-    - assets/images/devvoid_standard.png
+    - assets/images/DevVoid_standard.png
     - assets/images/devvoid_cyber.png
     - assets/images/devvoid_grimm.png
     - assets/images/devvoid_hive.png

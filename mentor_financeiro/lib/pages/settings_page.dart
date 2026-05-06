@@ -657,7 +657,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   : () async {
                       // ignore: avoid_print
                       print('Simulando Premium para o George...');
-                      await context.read<SubscriptionProvider>().simulatePremium();
+                      await Provider.of<SubscriptionProvider>(
+                        context,
+                        listen: false,
+                      ).simulatePremium();
                     },
             ),
           ],

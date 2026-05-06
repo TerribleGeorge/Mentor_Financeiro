@@ -17,7 +17,7 @@ abstract final class SplashAssetResolver {
     required AppThemeMode theme,
   }) {
     try {
-      // Splash: nunca usar devvoid_standard (asset com barra/proporção errada).
+      // Fallback se app_icon2 falhar; centro da VoidLoadingScreen usa app_icon2.
       // Para a Splash, usamos sempre a logo DevVoid transparente e partículas por código.
       return devVoidLogo;
     } catch (_) {
