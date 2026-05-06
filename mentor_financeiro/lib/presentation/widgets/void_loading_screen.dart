@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// Splash de boot: preto absoluto, ícone oficial centrado, partículas negras discretas.
+/// Splash Flutter Void: [DevVoid_standard] centrado, véu preto 0.5, partículas visíveis.
 class VoidLoadingScreen extends StatefulWidget {
   const VoidLoadingScreen({
     super.key,
@@ -12,14 +12,13 @@ class VoidLoadingScreen extends StatefulWidget {
     this.particleColor,
   });
 
-  /// Mantido por compatibilidade com chamadores; o centro usa sempre [_centerSplashAsset].
+  /// Fallback se [kVoidSplashCenter] falhar.
   final String splashAsset;
   final Color backgroundColor;
   final Color progressColor;
   final Color? particleColor;
 
-  /// Ícone oficial na splash (identidade nova).
-  static const String centerSplashAsset = 'assets/icons/app_icon2.png';
+  static const String kVoidSplashCenter = 'assets/images/DevVoid_standard.png';
 
   static const Duration bootstrapSynchronizationHold = Duration(seconds: 10);
 
@@ -41,7 +40,7 @@ class VoidLoadingScreen extends StatefulWidget {
 
 const Color _defaultProgressColor = Color(0xFFE5E7EB);
 
-/// Reforço subtil: pouca névoa + poucas motas escuras por detrás da logo.
+/// Fundo preto absoluto + fumo charcoal + partículas pretas (camada atrás da arte).
 class VoidParticlesPainter extends CustomPainter {
   VoidParticlesPainter({
     required this.animationValue,
@@ -55,41 +54,46 @@ class VoidParticlesPainter extends CustomPainter {
 
   static const Color _fogCharcoal = Color(0xFF080808);
 
-  static const int _fogBlobCount = 10;
-  static const int _particleCount = 48;
-  static const double _particleRadius = 0.85;
+  static const int _fogBlobCount = 28;
+  static const int _particleCount = 120;
+  static const double _particleRadius = 1.35;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
 
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = Colors.black,
+    );
+
     final rndFog = math.Random(seed);
     final fogPaint = Paint()
-      ..color = _fogCharcoal.withValues(alpha: 0.1)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 44);
+      ..color = _fogCharcoal.withValues(alpha: 0.72)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 72);
 
     for (var i = 0; i < _fogBlobCount; i++) {
       final cx = rndFog.nextDouble() * size.width;
       final cy = rndFog.nextDouble() * size.height;
-      final r = size.shortestSide * (0.12 + rndFog.nextDouble() * 0.28);
+      final r = size.shortestSide * (0.14 + rndFog.nextDouble() * 0.42);
       canvas.drawCircle(Offset(cx, cy), r, fogPaint);
     }
 
     final rndDots = math.Random(seed + 404);
     final speckPaint = Paint()
-      ..color = particleColor.withValues(alpha: 0.22)
-      ..isAntiAlias = true;
+      ..color = particleColor.withValues(alpha: 0.92)
+      ..isAntiAlias = false;
 
-    final span = size.height + 120;
-    const speed = 2.8;
+    final span = size.height + 140;
+    const speed = 4.2;
     for (var i = 0; i < _particleCount; i++) {
       final baseX = rndDots.nextDouble() * size.width;
       final phase = rndDots.nextDouble();
       final t = ((animationValue * speed) + phase) % 1.0;
       final travel = t * span;
-      final py = size.height + 40 - travel;
+      final py = size.height + 48 - travel;
       final zig =
-          math.sin((t * math.pi * 2 * 3.0) + (phase * math.pi * 2)) * 6.0;
+          math.sin((t * math.pi * 2 * 4.5) + (phase * math.pi * 2)) * 8.0;
       final px = (baseX + zig).clamp(0.0, size.width);
       canvas.drawCircle(Offset(px, py), _particleRadius, speckPaint);
     }
@@ -114,7 +118,7 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
     _voidController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 28),
-    )..repeat();
+    )..repeat(); // fumo + partículas no CustomPainter
 
     _progressController = AnimationController(
       vsync: this,
@@ -141,81 +145,94 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final particleTint =
-        widget.particleColor ?? _particleBlack;
+    final particleTint = widget.particleColor ?? _particleBlack;
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const Positioned.fill(child: ColoredBox(color: Colors.black)),
-          SizedBox.expand(
-            child: AnimatedBuilder(
-              animation: _voidController,
-              builder: (context, child) {
-                return CustomPaint(
-                  painter: VoidParticlesPainter(
-                    animationValue: _voidController.value,
-                    particleColor: particleTint,
-                  ),
-                );
-              },
-            ),
-          ),
-          ScaleTransition(
-            scale: _pulseScale,
-            alignment: Alignment.center,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Image.asset(
-                  VoidLoadingScreen.centerSplashAsset,
-                  fit: BoxFit.contain,
-                  alignment: Alignment.center,
-                  filterQuality: FilterQuality.high,
-                  gaplessPlayback: true,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      widget.splashAsset,
-                      fit: BoxFit.contain,
-                      filterQuality: FilterQuality.high,
-                      errorBuilder: (context, err, st) => Icon(
-                        Icons.layers_rounded,
-                        size: 72,
-                        color: widget.progressColor.withValues(alpha: 0.85),
-                      ),
-                    );
-                  },
-                ),
+      body: ColoredBox(
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            SizedBox.expand(
+              child: AnimatedBuilder(
+                animation: _voidController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: VoidParticlesPainter(
+                      animationValue: _voidController.value,
+                      particleColor: particleTint,
+                    ),
+                  );
+                },
               ),
             ),
-          ),
-          SafeArea(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: AnimatedBuilder(
-                  animation: _progressController,
-                  builder: (context, child) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(2),
-                      child: LinearProgressIndicator(
-                        value: _progressController.value.clamp(0.0, 1.0),
-                        minHeight: 3,
-                        backgroundColor: Colors.white.withValues(alpha: 0.1),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          widget.progressColor,
+            ScaleTransition(
+              scale: _pulseScale,
+              alignment: Alignment.center,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Image.asset(
+                        VoidLoadingScreen.kVoidSplashCenter,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                        gaplessPlayback: true,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            widget.splashAsset,
+                            fit: BoxFit.contain,
+                            gaplessPlayback: true,
+                            errorBuilder: (context, err, st) => Icon(
+                              Icons.layers_rounded,
+                              size: 72,
+                              color: widget.progressColor.withValues(alpha: 0.85),
+                            ),
+                          );
+                        },
+                      ),
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: Container(
+                            color: Colors.black.withValues(alpha: 0.5),
+                          ),
                         ),
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+            SafeArea(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: AnimatedBuilder(
+                    animation: _progressController,
+                    builder: (context, child) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(2),
+                        child: LinearProgressIndicator(
+                          value: _progressController.value.clamp(0.0, 1.0),
+                          minHeight: 3,
+                          backgroundColor:
+                              Colors.white.withValues(alpha: 0.1),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            widget.progressColor,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

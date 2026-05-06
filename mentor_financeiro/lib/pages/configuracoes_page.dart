@@ -190,8 +190,10 @@ class ConfiguracoesPage extends StatelessWidget {
             theme.previewColor.computeLuminance() > 0.55;
         // Cyber / Grimm / Hive: desbloqueados quando RC reporta
         // customerInfo.entitlements.all['premium']?.isActive (via [SubscriptionProvider]).
-        final locked = theme.mode.requiresPremiumEntitlement &&
-            !subscription.hasPremiumEntitlementFromRevenueCat;
+        final premiumOk = subscription.isPremium ||
+            subscription.hasPremiumEntitlementFromRevenueCat;
+        final locked =
+            theme.mode.requiresPremiumEntitlement && !premiumOk;
         return SizedBox(
           width: (MediaQuery.sizeOf(context).width - 40 - 12) / 2,
           child: GestureDetector(
@@ -212,7 +214,8 @@ class ConfiguracoesPage extends StatelessWidget {
                       if (!context.mounted) return;
                       await subscription.refreshFromRevenueCat();
                       if (!context.mounted) return;
-                      if (subscription.hasPremiumEntitlementFromRevenueCat) {
+                      if (subscription.isPremium ||
+                          subscription.hasPremiumEntitlementFromRevenueCat) {
                         await controller.setThemeMode(theme.mode);
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(

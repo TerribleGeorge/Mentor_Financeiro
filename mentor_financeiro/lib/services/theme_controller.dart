@@ -34,5 +34,6 @@ class ThemeController extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_prefsKey, mode.index);
+    notifyListeners();
   }
 }

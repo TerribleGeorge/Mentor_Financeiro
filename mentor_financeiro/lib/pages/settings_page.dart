@@ -278,7 +278,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _definirTema(AppThemeMode mode, AppThemeController theme) async {
     final sub = context.read<SubscriptionProvider>();
-    if (mode.requiresPremiumEntitlement && !sub.isPremium) {
+    final premiumOk =
+        sub.isPremium || sub.hasPremiumEntitlementFromRevenueCat;
+    if (mode.requiresPremiumEntitlement && !premiumOk) {
       await _abrirPaywall();
       return;
     }
@@ -307,7 +309,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final theme = context.watch<AppThemeController>();
     final brightnessTheme = context.watch<ThemeController>();
     final user = FirebaseAuth.instance.currentUser;
-    final email = user?.email ?? 'Sem sessão iniciada';
+    final userEmail = user?.email;
+    final email = userEmail ?? 'Sem sessão iniciada';
 
     return Scaffold(
       backgroundColor: SettingsPage.voidBlack,
@@ -448,7 +451,10 @@ class _SettingsPageState extends State<SettingsPage> {
           _secTitle('Aparência (Void)'),
           const SizedBox(height: 4),
           ...AppThemeMode.values.map((mode) {
-            final locked = mode.requiresPremiumEntitlement && !subscription.isPremium;
+            final premiumOk = subscription.isPremium ||
+                subscription.hasPremiumEntitlementFromRevenueCat;
+            final locked =
+                mode.requiresPremiumEntitlement && !premiumOk;
             final selected = theme.themeMode == mode;
             return ListTile(
               leading: Icon(
@@ -638,7 +644,7 @@ class _SettingsPageState extends State<SettingsPage> {
             onTap: _logout,
           ),
           const SizedBox(height: 24),
-          if (FirebaseAuth.instance.currentUser?.email?.trim().toLowerCase() ==
+          if (userEmail?.trim().toLowerCase() ==
               'george.guimares@gmail.com') ...[
             const Divider(height: 1, color: Color(0x14FFFFFF)),
             ListTile(
@@ -701,11 +707,11 @@ class _SettingsPageState extends State<SettingsPage> {
       case AppThemeMode.voidTheme:
         return 'Preto absoluto · Hollow Knight';
       case AppThemeMode.cyber:
-        return 'Néon roxo · premium';
+        return 'Amarelo neon · cinza escuro · premium';
       case AppThemeMode.obsidian:
-        return 'Cinzento profundo · premium';
+        return 'Vermelho e preto · premium';
       case AppThemeMode.glacier:
-        return 'Claro gelo · premium';
+        return 'Laranja e preto · vespa · premium';
     }
   }
 

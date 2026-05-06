@@ -46,69 +46,51 @@ class AppThemeController extends ChangeNotifier {
     return const Color(0xFF000000);
   }
 
-  /// Tema escuro (Void): texto em branco ou ciano para Home / Definições.
+  /// Tema escuro: Void / Cyber / Grimm / Hive com [MentorAdaptiveVisuals] + accent por preset.
   ThemeData get themeDark {
-    final merged = _mergeAdaptive(_voidTheme, _adaptiveVisuals);
-    final applied = merged.textTheme.apply(
-      bodyColor: Colors.white,
-      displayColor: Colors.cyanAccent,
-    );
-    const neonTitle = Colors.cyanAccent;
-    final tt = applied.copyWith(
-      headlineLarge: applied.headlineLarge?.copyWith(color: neonTitle),
-      headlineMedium: applied.headlineMedium?.copyWith(color: neonTitle),
-      headlineSmall: applied.headlineSmall?.copyWith(color: neonTitle),
-      titleLarge: applied.titleLarge?.copyWith(color: neonTitle),
-      titleMedium: applied.titleMedium?.copyWith(color: neonTitle),
-      titleSmall: applied.titleSmall?.copyWith(color: neonTitle),
-      labelLarge: applied.labelLarge?.copyWith(color: Colors.white),
-      labelMedium: applied.labelMedium?.copyWith(color: Colors.white),
-      labelSmall: applied.labelSmall?.copyWith(color: Colors.white),
-    );
-    final papplied = merged.primaryTextTheme.apply(
-      bodyColor: Colors.white,
-      displayColor: Colors.cyanAccent,
-    );
-    final pt = papplied.copyWith(
-      titleLarge: papplied.titleLarge?.copyWith(color: neonTitle),
-      titleMedium: papplied.titleMedium?.copyWith(color: neonTitle),
-      titleSmall: papplied.titleSmall?.copyWith(color: neonTitle),
-    );
-    final bar = merged.appBarTheme;
-    return merged.copyWith(
-      textTheme: tt,
-      primaryTextTheme: pt,
-      colorScheme: merged.colorScheme.copyWith(
-        onSurface: Colors.white,
-        onSurfaceVariant: Colors.white.withValues(alpha: 0.76),
-      ),
-      listTileTheme: ListTileThemeData(
-        textColor: Colors.white,
-        iconColor: Colors.cyanAccent,
-        titleTextStyle: const TextStyle(
-          color: Colors.cyanAccent,
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-        ),
-        subtitleTextStyle: TextStyle(
-          color: Colors.white.withValues(alpha: 0.72),
-          fontSize: 13,
-        ),
-      ),
-      appBarTheme: bar.copyWith(
-        foregroundColor: Colors.cyanAccent,
-        iconTheme: const IconThemeData(color: Colors.cyanAccent),
-        titleTextStyle: bar.titleTextStyle?.copyWith(color: Colors.cyanAccent),
+    final v = _adaptiveVisuals;
+    final accent = v.accentNeon;
+    final base = _voidTheme.copyWith(
+      colorScheme: _voidTheme.colorScheme.copyWith(
+        primary: accent,
+        secondary: _secondaryForDarkPreset(_themeMode),
+        onSurface: v.textColor,
+        onSurfaceVariant: v.secondaryTextColor,
       ),
     );
+    return _mergeAdaptive(base, v);
   }
 
-  /// Tema claro (Hive quando preset glacier; caso contrário neutro legível).
+  /// Tema claro (Material light): um preset claro por [AppThemeMode].
   ThemeData get themeLight {
-    final v = _themeMode == AppThemeMode.glacier
-        ? MentorAdaptiveVisuals.presetGlacier
-        : MentorAdaptiveVisuals.lightNeutral;
-    return _mergeAdaptiveLight(_lightBaseTheme, v);
+    final v = switch (_themeMode) {
+      AppThemeMode.voidTheme => MentorAdaptiveVisuals.presetVoidLight,
+      AppThemeMode.cyber => MentorAdaptiveVisuals.presetCyberLight,
+      AppThemeMode.obsidian => MentorAdaptiveVisuals.presetGrimmLight,
+      AppThemeMode.glacier => MentorAdaptiveVisuals.presetHiveLight,
+    };
+    final base = _lightBaseTheme.copyWith(
+      colorScheme: _lightBaseTheme.colorScheme.copyWith(
+        primary: v.accentNeon,
+        secondary: v.secondaryTextColor,
+        onSurface: v.textColor,
+        onSurfaceVariant: v.secondaryTextColor,
+      ),
+    );
+    return _mergeAdaptiveLight(base, v);
+  }
+
+  static Color _secondaryForDarkPreset(AppThemeMode mode) {
+    switch (mode) {
+      case AppThemeMode.voidTheme:
+        return _neonLime;
+      case AppThemeMode.cyber:
+        return const Color(0xFFFFC107);
+      case AppThemeMode.obsidian:
+        return const Color(0xFFFF5252);
+      case AppThemeMode.glacier:
+        return const Color(0xFFFF9100);
+    }
   }
 
   /// Compatível com telas que ainda não usam [Theme.of]; equivale ao tema escuro.
@@ -125,68 +107,72 @@ class AppThemeController extends ChangeNotifier {
         ),
       ];
 
-  static TextTheme _applyUniversalLegibleTextTheme(TextTheme base) {
-    // Tudo claro, sem texto escuro em nenhuma tela.
+  static TextTheme _applyLegibleDarkTextTheme(
+    TextTheme base,
+    MentorAdaptiveVisuals v,
+  ) {
+    final accent = v.accentNeon;
+    final tc = v.textColor;
     return base.copyWith(
       displayLarge: base.displayLarge?.copyWith(
-        color: Colors.white,
-        shadows: _softGlow(_neonCyan),
+        color: accent,
+        shadows: _softGlow(accent),
       ),
       displayMedium: base.displayMedium?.copyWith(
-        color: Colors.white,
-        shadows: _softGlow(_neonCyan),
+        color: accent,
+        shadows: _softGlow(accent),
       ),
       displaySmall: base.displaySmall?.copyWith(
-        color: Colors.white,
-        shadows: _softGlow(_neonCyan),
+        color: accent,
+        shadows: _softGlow(accent),
       ),
       headlineLarge: base.headlineLarge?.copyWith(
-        color: Colors.white,
-        shadows: _softGlow(_neonCyan),
+        color: accent,
+        shadows: _softGlow(accent),
       ),
       headlineMedium: base.headlineMedium?.copyWith(
-        color: Colors.white,
-        shadows: _softGlow(_neonCyan),
+        color: accent,
+        shadows: _softGlow(accent),
       ),
       headlineSmall: base.headlineSmall?.copyWith(
-        color: Colors.white,
-        shadows: _softGlow(_neonCyan),
+        color: accent,
+        shadows: _softGlow(accent),
       ),
       titleLarge: base.titleLarge?.copyWith(
-        color: Colors.white,
-        shadows: _softGlow(_neonCyan),
+        color: accent,
+        shadows: _softGlow(accent),
       ),
       titleMedium: base.titleMedium?.copyWith(
-        color: Colors.white,
-        shadows: _softGlow(_neonCyan),
+        color: accent,
+        shadows: _softGlow(accent),
       ),
       titleSmall: base.titleSmall?.copyWith(
-        color: Colors.white,
-        shadows: _softGlow(_neonCyan),
+        color: accent,
+        shadows: _softGlow(accent),
       ),
       bodyLarge: base.bodyLarge?.copyWith(
-        color: Colors.white.withValues(alpha: 0.92),
-        shadows: _softGlow(_neonCyan),
+        color: tc.withValues(alpha: 0.94),
+        shadows: _softGlow(accent.withValues(alpha: 0.45)),
       ),
       bodyMedium: base.bodyMedium?.copyWith(
-        color: Colors.white.withValues(alpha: 0.9),
-        shadows: _softGlow(_neonCyan),
+        color: tc.withValues(alpha: 0.9),
+        shadows: _softGlow(accent.withValues(alpha: 0.35)),
       ),
       bodySmall: base.bodySmall?.copyWith(
-        color: Colors.white.withValues(alpha: 0.78),
-        shadows: _softGlow(_neonCyan),
+        color: v.secondaryTextColor,
+        shadows: _softGlow(accent.withValues(alpha: 0.28)),
       ),
       labelLarge: base.labelLarge?.copyWith(
-        color: Colors.white,
-        shadows: _softGlow(_neonCyan),
+        color: tc,
+        shadows: _softGlow(accent.withValues(alpha: 0.4)),
       ),
       labelMedium: base.labelMedium?.copyWith(
-        color: Colors.white.withValues(alpha: 0.9),
-        shadows: _softGlow(_neonCyan),
+        color: tc.withValues(alpha: 0.9),
+        shadows: _softGlow(accent.withValues(alpha: 0.35)),
       ),
       labelSmall: base.labelSmall?.copyWith(
-        color: Colors.white.withValues(alpha: 0.78),
-        shadows: _softGlow(_neonCyan),
+        color: v.secondaryTextColor,
+        shadows: _softGlow(accent.withValues(alpha: 0.25)),
       ),
     );
   }
@@ -277,7 +263,8 @@ class AppThemeController extends ChangeNotifier {
   }
 
   ThemeData _mergeAdaptive(ThemeData base, MentorAdaptiveVisuals v) {
-    final textTheme = _applyUniversalLegibleTextTheme(base.textTheme);
+    final accent = v.accentNeon;
+    final textTheme = _applyLegibleDarkTextTheme(base.textTheme, v);
     return base.copyWith(
       scaffoldBackgroundColor: Colors.transparent,
       cardTheme: CardThemeData(
@@ -292,33 +279,43 @@ class AppThemeController extends ChangeNotifier {
         onSurfaceVariant: v.secondaryTextColor,
       ),
       textTheme: textTheme,
+      primaryTextTheme: textTheme,
       inputDecorationTheme: InputDecorationTheme(
         labelStyle: TextStyle(
-          color: Colors.white.withValues(alpha: 0.8),
-          shadows: _softGlow(_neonCyan),
+          color: v.secondaryTextColor,
+          shadows: _softGlow(accent.withValues(alpha: 0.65)),
         ),
         hintStyle: TextStyle(
-          color: Colors.white.withValues(alpha: 0.55),
-          shadows: _softGlow(_neonCyan),
+          color: v.secondaryTextColor.withValues(alpha: 0.85),
+          shadows: _softGlow(accent.withValues(alpha: 0.4)),
         ),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
-        foregroundColor: v.textColor,
+        foregroundColor: accent,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
-        iconTheme: IconThemeData(color: v.textColor),
+        iconTheme: IconThemeData(color: accent),
         titleTextStyle: TextStyle(
-          color: v.textColor,
+          color: accent,
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          shadows: _softGlow(_neonCyan),
+          shadows: _softGlow(accent),
         ),
       ),
       listTileTheme: ListTileThemeData(
         textColor: v.textColor,
-        iconColor: v.secondaryTextColor,
+        iconColor: accent,
+        titleTextStyle: TextStyle(
+          color: accent,
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+        ),
+        subtitleTextStyle: TextStyle(
+          color: v.secondaryTextColor,
+          fontSize: 13,
+        ),
       ),
     );
   }
@@ -378,6 +375,7 @@ class AppThemeController extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_themeKeyV2, _themeMode.index);
+    notifyListeners();
   }
 
   Color get backgroundColor => backdropBaseColor;

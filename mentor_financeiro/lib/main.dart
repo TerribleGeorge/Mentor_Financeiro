@@ -444,6 +444,10 @@ class MentorFinanceiroApp extends StatelessWidget {
           ]),
           builder: (context, _) {
             return MaterialApp(
+              key: ValueKey<String>(
+                '${themeController.themeMode.index}_'
+                '${appThemeController.themeMode.index}',
+              ),
               navigatorKey: mentorNavigatorKey,
               debugShowCheckedModeBanner: false,
               title: 'Mentor Financeiro',

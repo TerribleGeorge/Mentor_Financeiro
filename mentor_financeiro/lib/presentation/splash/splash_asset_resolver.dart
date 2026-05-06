@@ -17,7 +17,7 @@ abstract final class SplashAssetResolver {
     required AppThemeMode theme,
   }) {
     try {
-      // Fallback se app_icon2 falhar; centro da VoidLoadingScreen usa app_icon2.
+      // Fallback da arte DevVoid transparente.
       // Para a Splash, usamos sempre a logo DevVoid transparente e partículas por código.
       return devVoidLogo;
     } catch (_) {
@@ -37,9 +37,9 @@ abstract final class SplashAssetResolver {
     // Splash: sempre a logo DevVoid central (BoxFit.contain) em fundo preto.
     // A diferenciação visual fica nas partículas (cor) e, se quiser, na barra.
     final particles = switch (theme) {
-      AppThemeMode.cyber => const Color(0xFF00E5FF),
-      AppThemeMode.obsidian => const Color(0xFFFF2D2D),
-      AppThemeMode.glacier => const Color(0xFFFFD166),
+      AppThemeMode.cyber => const Color(0xFFFFEA00),
+      AppThemeMode.obsidian => const Color(0xFFFF1744),
+      AppThemeMode.glacier => const Color(0xFFFF6D00),
       AppThemeMode.voidTheme => const Color(0xFF0B0B0B),
     };
 
