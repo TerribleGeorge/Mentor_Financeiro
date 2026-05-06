@@ -139,7 +139,16 @@ class _HomeScreenState extends State<HomeScreen> {
     FinanceConfigSignals.notifySaved();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Renda e gastos fixos guardados.')),
+      SnackBar(
+        backgroundColor: const Color(0xFF0D1118),
+        content: Text(
+          'Renda e gastos fixos guardados.',
+          style: TextStyle(
+            color: Colors.white,
+            shadows: ClassicModeStyle.secondaryTextShadows(context),
+          ),
+        ),
+      ),
     );
   }
 
@@ -152,11 +161,14 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: scheme.primary.withValues(alpha: 0.35)),
         ),
-        child: const Center(
+        child: Center(
           child: SizedBox(
             height: 18,
             width: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: scheme.primary,
+            ),
           ),
         ),
       );
@@ -173,11 +185,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
     InputDecoration deco(String label) => InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.6)),
+          labelStyle: TextStyle(
+            color: Colors.white.withValues(alpha: 0.92),
+            shadows: ClassicModeStyle.secondaryTextShadows(context),
+          ),
           filled: true,
           fillColor: const Color(0xFF0D1118),
           prefixText: 'R\$ ',
-          prefixStyle: TextStyle(color: scheme.primary.withValues(alpha: 0.85)),
+          prefixStyle: TextStyle(
+            color: scheme.primary.withValues(alpha: 0.95),
+            shadows: ClassicModeStyle.secondaryTextShadows(context),
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: scheme.primary.withValues(alpha: 0.22)),
@@ -222,9 +240,9 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Renda e Gastos Fixos',
+                  'Orçamento mensal',
                   style: TextStyle(
-                    color: scheme.onSurface,
+                    color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     shadows: ClassicModeStyle.primaryTextShadows(context),
@@ -233,26 +251,41 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               TextButton(
                 onPressed: _saveInlineBudget,
-                child: const Text('Guardar'),
+                style: TextButton.styleFrom(foregroundColor: Colors.white),
+                child: const Text(
+                  'Guardar',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
-            'Renda: R\$ ${renda.toStringAsFixed(2)} · Gastos: R\$ ${gastos.toStringAsFixed(2)}',
+            'Total renda: R\$ ${renda.toStringAsFixed(2)} · Total gastos fixos: R\$ ${gastos.toStringAsFixed(2)}',
             style: TextStyle(
-              color: scheme.onSurface.withValues(alpha: 0.62),
+              color: Colors.white.withValues(alpha: 0.82),
               fontSize: 12,
+              shadows: ClassicModeStyle.secondaryTextShadows(context),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 18),
+          Text(
+            'Renda Mensal',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              shadows: ClassicModeStyle.primaryTextShadows(context),
+            ),
+          ),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _budgetControllers['Renda Fixa'],
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(color: scheme.onSurface),
+                  style: const TextStyle(color: Colors.white),
                   decoration: deco('Renda Fixa'),
                 ),
               ),
@@ -261,13 +294,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: TextField(
                   controller: _budgetControllers['Renda Extra'],
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(color: scheme.onSurface),
+                  style: const TextStyle(color: Colors.white),
                   decoration: deco('Renda Extra'),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 18),
+          Text(
+            'Gastos Fixos',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              shadows: ClassicModeStyle.primaryTextShadows(context),
+            ),
+          ),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -295,7 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: TextField(
         controller: _budgetControllers[key],
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        style: TextStyle(color: scheme.onSurface),
+        style: const TextStyle(color: Colors.white),
         decoration: deco(key),
       ),
     );
@@ -350,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ? NetworkImage(_photoUrl!)
                                 : null,
                             child: _photoUrl == null
-                                ? Icon(Icons.person, color: scheme.onSurface.withValues(alpha: 0.72))
+                                ? Icon(Icons.person, color: Colors.white.withValues(alpha: 0.85))
                                 : null,
                           ),
                           const SizedBox(width: 12),
@@ -361,7 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Text(
                                   'Olá, $_nomeUsuario',
                                   style: TextStyle(
-                                    color: scheme.onSurface.withValues(alpha: 0.72),
+                                    color: Colors.white.withValues(alpha: 0.88),
                                     fontSize: 14,
                                     shadows: ClassicModeStyle.secondaryTextShadows(context),
                                   ),
@@ -370,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Text(
                                   'Dashboard',
                                   style: TextStyle(
-                                    color: scheme.onSurface,
+                                    color: Colors.white,
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
                                     shadows: ClassicModeStyle.primaryTextShadows(context),
@@ -381,12 +424,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           if (!subscription.isPremium)
                             TextButton(
+                              style: TextButton.styleFrom(foregroundColor: Colors.white),
                               onPressed: () => Navigator.of(context).push(
                                 MaterialPageRoute<void>(
                                   builder: (_) => const PaywallScreen(),
                                 ),
                               ),
-                              child: const Text('Premium'),
+                              child: const Text(
+                                'Premium',
+                                style: TextStyle(fontWeight: FontWeight.w700),
+                              ),
                             ),
                         ],
                       ),
@@ -413,16 +460,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Text(
                                       _mentorAlert!.title,
                                       style: TextStyle(
-                                        color: scheme.onSurface,
+                                        color: Colors.white,
                                         fontWeight: FontWeight.w800,
+                                        shadows: ClassicModeStyle.primaryTextShadows(context),
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       _mentorAlert!.message,
                                       style: TextStyle(
-                                        color: scheme.onSurface.withValues(alpha: 0.75),
+                                        color: Colors.white.withValues(alpha: 0.88),
                                         height: 1.25,
+                                        shadows: ClassicModeStyle.secondaryTextShadows(context),
                                       ),
                                     ),
                                   ],
@@ -433,7 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onPressed: () =>
                                     mentorPushNamed(context, AppRoutes.mentoria),
                                 icon: const Icon(Icons.chevron_right),
-                                color: scheme.onSurface.withValues(alpha: 0.75),
+                                color: Colors.white.withValues(alpha: 0.85),
                               ),
                             ],
                           ),
@@ -465,11 +514,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Limite Hoje',
                               style: TextStyle(
-                                color: Color(0xFF94A3B8),
+                                color: Colors.white.withValues(alpha: 0.88),
                                 fontSize: 12,
+                                shadows: ClassicModeStyle.secondaryTextShadows(context),
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -500,8 +550,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               _limiteDiario > 0
                                   ? 'R\$ ${_gastosHoje.toStringAsFixed(2)} gastos de R\$ ${_limiteDiario.toStringAsFixed(2)}'
                                   : 'R\$ ${_gastosHoje.toStringAsFixed(2)} gastos hoje (limite R\$ 0,00)',
-                              style: const TextStyle(
-                                color: Color(0xFF94A3B8),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.84),
                                 fontSize: 12,
                               ).withFinancialShadows(context),
                             ),
@@ -509,11 +559,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(height: 10),
                               Text(
                                 _alertaLimiteDiario!,
-                                style: const TextStyle(
-                                  color: Color(0xFF991B1B),
+                                style: TextStyle(
+                                  color: const Color(0xFFFF6B6B),
                                   fontSize: 11,
                                   height: 1.35,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
+                                  shadows: ClassicModeStyle.secondaryTextShadows(context),
                                 ),
                               ),
                             ],
@@ -526,7 +577,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         'Recursos',
                         style: TextStyle(
-                          color: scheme.onSurface,
+                          color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           shadows: ClassicModeStyle.primaryTextShadows(context),

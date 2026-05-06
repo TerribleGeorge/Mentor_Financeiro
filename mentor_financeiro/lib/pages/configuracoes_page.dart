@@ -12,22 +12,23 @@ class ConfiguracoesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeController = context.watch<AppThemeController>();
     final subscription = context.watch<SubscriptionProvider>();
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: themeController.currentTheme.scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Personalização',
           style: TextStyle(
-            color: themeController.currentTheme.colorScheme.onSurface,
+            color: scheme.onSurface,
           ),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: themeController.currentTheme.colorScheme.onSurface,
+            color: scheme.onSurface,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -37,15 +38,15 @@ class ConfiguracoesPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('Temas devvoid', themeController),
+            _buildSectionTitle(context, 'Temas devvoid'),
             const SizedBox(height: 16),
             _buildThemeSelector(context, themeController, subscription),
             const SizedBox(height: 32),
-            _buildSectionTitle('Visualização', themeController),
+            _buildSectionTitle(context, 'Visualização'),
             const SizedBox(height: 16),
             _buildPreviewCard(themeController),
             const SizedBox(height: 24),
-            _buildSectionTitle('Assinatura', themeController),
+            _buildSectionTitle(context, 'Assinatura'),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: subscription.isLoading
@@ -128,8 +129,8 @@ class ConfiguracoesPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title, AppThemeController controller) {
-    final isDark = controller.currentTheme.brightness == Brightness.dark;
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
       title,
       style: TextStyle(

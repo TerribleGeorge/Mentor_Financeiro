@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/app_theme_controller.dart';
+import '../services/theme_controller.dart';
 import '../services/currency_preference_controller.dart';
 import '../services/firebase_service.dart';
 import '../services/locale_controller.dart';
@@ -26,8 +27,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  static const String _ownerEmail = 'seu-email-aqui@gmail.com';
-
   String _nomeExibicao = 'Usuário';
   String? _photoUrl;
 
@@ -306,6 +305,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final subscription = context.watch<SubscriptionProvider>();
     final theme = context.watch<AppThemeController>();
+    final brightnessTheme = context.watch<ThemeController>();
     final user = FirebaseAuth.instance.currentUser;
     final email = user?.email ?? 'Sem sessão iniciada';
 
@@ -389,6 +389,60 @@ class _SettingsPageState extends State<SettingsPage> {
                 MaterialPageRoute<void>(builder: (_) => const FinanceConfigurationPage()),
               );
             },
+          ),
+          const Divider(height: 24, color: Color(0x14FFFFFF)),
+          _secTitle('Brilho (Material)'),
+          const SizedBox(height: 4),
+          ListTile(
+            leading: Icon(
+              Icons.brightness_auto_rounded,
+              color: brightnessTheme.themeMode == ThemeMode.system
+                  ? SettingsPage.voidCyan
+                  : Colors.white38,
+            ),
+            title: const Text(
+              'Seguir sistema',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              'Usar claro ou escuro conforme o SO',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 12),
+            ),
+            onTap: () => brightnessTheme.setThemeMode(ThemeMode.system),
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.light_mode_outlined,
+              color: brightnessTheme.themeMode == ThemeMode.light
+                  ? SettingsPage.voidCyan
+                  : Colors.white38,
+            ),
+            title: const Text(
+              'Claro',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              'Interface sempre clara',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 12),
+            ),
+            onTap: () => brightnessTheme.setThemeMode(ThemeMode.light),
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.dark_mode_outlined,
+              color: brightnessTheme.themeMode == ThemeMode.dark
+                  ? SettingsPage.voidCyan
+                  : Colors.white38,
+            ),
+            title: const Text(
+              'Escuro',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              'Interface sempre escura',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 12),
+            ),
+            onTap: () => brightnessTheme.setThemeMode(ThemeMode.dark),
           ),
           const Divider(height: 24, color: Color(0x14FFFFFF)),
           _secTitle('Aparência (Void)'),
@@ -583,32 +637,28 @@ class _SettingsPageState extends State<SettingsPage> {
             trailing: _chevron,
             onTap: _logout,
           ),
-          // 1) Restaurar Simular Premium (owner-only) no final.
-          if (FirebaseAuth.instance.currentUser?.email == _ownerEmail) ...[
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: subscription.isLoading
-                    ? null
-                    : () => subscription.debugSimulatePremiumPurchase(),
-                icon: const Icon(Icons.bolt_rounded),
-                label: const Text('Simular Premium'),
-                style: TextButton.styleFrom(
-                  foregroundColor: SettingsPage.voidNeonGreen,
-                  backgroundColor:
-                      SettingsPage.voidNeonGreen.withValues(alpha: 0.08),
-                  side: BorderSide(
-                    color: SettingsPage.voidNeonGreen.withValues(alpha: 0.75),
-                    width: 1.2,
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
+          const SizedBox(height: 24),
+          if (FirebaseAuth.instance.currentUser?.email?.trim().toLowerCase() ==
+              'george.guimares@gmail.com') ...[
+            const Divider(height: 1, color: Color(0x14FFFFFF)),
+            ListTile(
+              leading: Icon(Icons.bolt_rounded, color: SettingsPage.voidNeonGreen),
+              title: const Text(
+                'Simular Premium (Admin)',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
               ),
+              subtitle: Text(
+                'Bypass · apenas administrador',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
+              ),
+              trailing: const Icon(Icons.chevron_right, color: Color(0x66FFFFFF)),
+              onTap: subscription.isLoading
+                  ? null
+                  : () async {
+                      // ignore: avoid_print
+                      print('Simulando Premium para o George...');
+                      await context.read<SubscriptionProvider>().simulatePremium();
+                    },
             ),
           ],
           const SizedBox(height: 24),

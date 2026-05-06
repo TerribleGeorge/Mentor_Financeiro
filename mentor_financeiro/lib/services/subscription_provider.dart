@@ -13,7 +13,7 @@ import 'revenue_cat_subscription_service.dart';
 import 'revenue_cat_unauthorized_prefs.dart';
 
 class SubscriptionProvider extends ChangeNotifier {
-  static const String _ownerEmail = 'seu-email-aqui@gmail.com';
+  static const String _ownerEmail = 'george.guimares@gmail.com';
 
   bool get isOwner {
     final email = FirebaseAuth.instance.currentUser?.email?.trim().toLowerCase();
@@ -21,6 +21,8 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   bool _isPremium = false;
+  /// Quando true, ignora actualizações vindas do RevenueCat para não sobrescrever [simulatePremium].
+  bool _simulatePremiumActive = false;
   /// `true` só após [CustomerInfo] aplicado (entitlement vindo do RevenueCat), nunca por fallback Firestore sozinho.
   bool _premiumEntitlementFromRevenueCat = false;
   /// `customerInfo.entitlements.all['premium']?.isActive` na última sincronização RC.
@@ -44,6 +46,8 @@ class SubscriptionProvider extends ChangeNotifier {
 
   /// Temas Cyber / Grimm / Hive: SDK pronto e `entitlements.all['premium']?.isActive == true`.
   bool get hasPremiumEntitlementFromRevenueCat {
+    // Estado já aplicado (RC real ou [simulatePremium]) não deve ficar bloqueado só porque o SDK não está pronto.
+    if (_premiumEntitlementFromRevenueCat && _premiumEntitlementActive) return true;
     if (!RevenueCatBootstrap.isSdkReady) return false;
     if (!_premiumEntitlementFromRevenueCat) return false;
     return _premiumEntitlementActive;
@@ -89,6 +93,10 @@ class SubscriptionProvider extends ChangeNotifier {
 
   /// Fonte de verdade quando o SDK RevenueCat está configurado.
   Future<void> refreshFromRevenueCat() async {
+    if (_simulatePremiumActive) {
+      notifyListeners();
+      return;
+    }
     if (!RevenueCatBootstrap.isSdkReady) {
       await _loadPremiumStatusFallback();
       await _enforcePremiumThemeGate();
@@ -134,6 +142,7 @@ class SubscriptionProvider extends ChangeNotifier {
 
   /// Atualização em tempo real ([Purchases.addCustomerInfoUpdateListener]) sem novo pedido HTTP.
   Future<void> applyCustomerInfo(CustomerInfo info) async {
+    if (_simulatePremiumActive) return;
     await _applyCustomerInfo(info);
     await _enforcePremiumThemeGate();
     notifyListeners();
@@ -159,6 +168,8 @@ class SubscriptionProvider extends ChangeNotifier {
 
   /// Fallback: Firestore / prefs quando o SDK não está pronto.
   Future<void> _loadPremiumStatusFallback() async {
+    if (_simulatePremiumActive) return;
+
     _premiumEntitlementFromRevenueCat = false;
     _premiumEntitlementActive = false;
 
@@ -330,18 +341,26 @@ class SubscriptionProvider extends ChangeNotifier {
     }
   }
 
-  /// Só em **debug**: simula assinatura ativa para testar UI (tema Cyber, etc.) sem compra na loja.
-  Future<void> debugSimulatePremiumPurchase() async {
-    if (!kDebugMode) return;
+  /// Simula premium activo (ex.: botão admin em Definições). Mantém [debugSimulatePremiumPurchase].
+  Future<void> simulatePremium() async {
+    _simulatePremiumActive = true;
     _premiumEntitlementFromRevenueCat = true;
     _premiumEntitlementActive = true;
     _isPremium = true;
     _subscriptionEndDate = DateTime.now().add(const Duration(days: 365));
     _errorMessage = null;
+    notifyListeners();
+
     await AppThemeController.instance.setPremiumStatus(true);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('is_premium', true);
     await _mirrorPremiumToFirestore();
     notifyListeners();
+  }
+
+  /// Só em **debug**: delega para [simulatePremium] para não duplicar lógica.
+  Future<void> debugSimulatePremiumPurchase() async {
+    if (!kDebugMode) return;
+    await simulatePremium();
   }
 }

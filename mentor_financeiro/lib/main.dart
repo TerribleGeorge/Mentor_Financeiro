@@ -19,6 +19,7 @@ import 'data/services/firebase_data_service.dart';
 import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
 import 'services/app_theme_controller.dart';
+import 'services/theme_controller.dart';
 import 'services/currency_preference_controller.dart';
 import 'services/locale_controller.dart';
 import 'services/investment_category_provider.dart';
@@ -40,7 +41,8 @@ FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 final GlobalKey<NavigatorState> mentorNavigatorKey =
     GlobalKey<NavigatorState>();
 
-final themeController = AppThemeController();
+final appThemeController = AppThemeController();
+final themeController = ThemeController();
 final localeController = LocaleController();
 final currencyPreferenceController = CurrencyPreferenceController.instance;
 final userPersonaService = UserPersonaService.instance;
@@ -70,13 +72,14 @@ Future<void> _runWithBootTimeout(
 /// Fase 1 do boot: `.env`, Firebase Core, **RevenueCat** (`getCustomerInfo` via SDK),
 /// prefs do tema — para escolher a arte da splash antes do resto.
 Future<
-    ({
-      String splashAsset,
-      Color splashBackground,
-      Color splashProgress,
-      Color splashParticles,
-      bool firebaseReady
-    })>
+  ({
+    String splashAsset,
+    Color splashBackground,
+    Color splashProgress,
+    Color splashParticles,
+    bool firebaseReady,
+  })
+>
 _bootstrapSplashContext() async {
   try {
     await dotenv.load(fileName: '.env');
@@ -106,8 +109,9 @@ _bootstrapSplashContext() async {
   }
 
   try {
-    await RevenueCatBootstrap.run(FirebaseAuth.instance.currentUser?.uid)
-        .timeout(const Duration(seconds: 5));
+    await RevenueCatBootstrap.run(
+      FirebaseAuth.instance.currentUser?.uid,
+    ).timeout(const Duration(seconds: 5));
   } on TimeoutException catch (_, st) {
     log(
       '[revenuecat] timeout 5s — continuação do boot sem bloquear.',
@@ -116,7 +120,7 @@ _bootstrapSplashContext() async {
     );
     RevenueCatBootstrap.abort();
     try {
-      await themeController.setPremiumStatus(false);
+      await appThemeController.setPremiumStatus(false);
     } catch (_) {}
   } catch (e, st) {
     log('[revenuecat] $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
@@ -125,7 +129,7 @@ _bootstrapSplashContext() async {
       await RevenueCatUnauthorizedPrefs.mark();
     }
     try {
-      await themeController.setPremiumStatus(false);
+      await appThemeController.setPremiumStatus(false);
     } catch (_) {}
   }
 
@@ -139,12 +143,13 @@ _bootstrapSplashContext() async {
   AppThemeMode themeForBranding = AppThemeMode.voidTheme;
   try {
     await themeController.initialize();
-    await themeController.setPremiumStatus(isPremium);
-    final mode = themeController.themeMode;
+    await appThemeController.initialize();
+    await appThemeController.setPremiumStatus(isPremium);
+    final mode = appThemeController.themeMode;
     if (!isPremium && mode.requiresPremiumEntitlement) {
-      await themeController.setThemeMode(AppThemeMode.voidTheme);
+      await appThemeController.setThemeMode(AppThemeMode.voidTheme);
     }
-    themeForBranding = themeController.themeMode;
+    themeForBranding = appThemeController.themeMode;
   } catch (e, st) {
     log(
       'theme bootstrap: $e',
@@ -164,7 +169,7 @@ _bootstrapSplashContext() async {
     splashBackground: branding.background,
     splashProgress: branding.progress,
     splashParticles: branding.particles,
-    firebaseReady: firebaseReady
+    firebaseReady: firebaseReady,
   );
 }
 
@@ -176,7 +181,7 @@ Future<void> _revenueCatSyncDuringSplashHold() async {
   final premium = RevenueCatSubscriptionService.isPremiumEntitlementActive(
     info,
   );
-  await themeController.setPremiumStatus(premium);
+  await appThemeController.setPremiumStatus(premium);
 }
 
 /// Restante do boot depois da splash estar definida (observabilidade, messaging, prefs, lojas).
@@ -234,7 +239,9 @@ Future<void> _bootstrapApplicationRemainder({
 
   if (kDebugMode) {
     debugPrint('=== TEMA DEBUG ===');
-    debugPrint('O TEMA ATUAL É: ${themeController.themeMode}');
+    debugPrint(
+      'Preset visual: ${appThemeController.themeMode}; ThemeMode: ${themeController.themeMode}',
+    );
     debugPrint('================');
   }
 }
@@ -412,6 +419,7 @@ class MentorFinanceiroApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider.value(value: appThemeController),
         ChangeNotifierProvider.value(value: themeController),
         ChangeNotifierProvider(
           create: (_) => SubscriptionProvider()..initialize(),
@@ -429,24 +437,19 @@ class MentorFinanceiroApp extends StatelessWidget {
       child: RevenueCatLifecycle(
         child: ListenableBuilder(
           listenable: Listenable.merge([
+            appThemeController,
             themeController,
             localeController,
             currencyPreferenceController,
           ]),
           builder: (context, _) {
-            final modoTema = themeController.themeMode;
-            ThemeMode flutterThemeMode;
-
-            flutterThemeMode = modoTema == AppThemeMode.glacier
-                ? ThemeMode.light
-                : ThemeMode.dark;
-
             return MaterialApp(
               navigatorKey: mentorNavigatorKey,
               debugShowCheckedModeBanner: false,
               title: 'Mentor Financeiro',
-              theme: themeController.currentTheme,
-              themeMode: flutterThemeMode,
+              theme: appThemeController.themeLight,
+              darkTheme: appThemeController.themeDark,
+              themeMode: themeController.themeMode,
               locale: localeController.locale,
               supportedLocales: AppLocalizations.supportedLocales,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -464,7 +467,9 @@ class MentorFinanceiroApp extends StatelessWidget {
                     }
                     SystemNavigator.pop();
                   },
-                  child: MentorAppBackdrop(child: child ?? const SizedBox.shrink()),
+                  child: MentorAppBackdrop(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 );
               },
             );

@@ -46,10 +46,73 @@ class AppThemeController extends ChangeNotifier {
     return const Color(0xFF000000);
   }
 
-  ThemeData get currentTheme {
-    // Estética universal (Void): tema único para Free/Premium.
-    return _mergeAdaptive(_voidTheme, _adaptiveVisuals);
+  /// Tema escuro (Void): texto em branco ou ciano para Home / Definições.
+  ThemeData get themeDark {
+    final merged = _mergeAdaptive(_voidTheme, _adaptiveVisuals);
+    final applied = merged.textTheme.apply(
+      bodyColor: Colors.white,
+      displayColor: Colors.cyanAccent,
+    );
+    const neonTitle = Colors.cyanAccent;
+    final tt = applied.copyWith(
+      headlineLarge: applied.headlineLarge?.copyWith(color: neonTitle),
+      headlineMedium: applied.headlineMedium?.copyWith(color: neonTitle),
+      headlineSmall: applied.headlineSmall?.copyWith(color: neonTitle),
+      titleLarge: applied.titleLarge?.copyWith(color: neonTitle),
+      titleMedium: applied.titleMedium?.copyWith(color: neonTitle),
+      titleSmall: applied.titleSmall?.copyWith(color: neonTitle),
+      labelLarge: applied.labelLarge?.copyWith(color: Colors.white),
+      labelMedium: applied.labelMedium?.copyWith(color: Colors.white),
+      labelSmall: applied.labelSmall?.copyWith(color: Colors.white),
+    );
+    final papplied = merged.primaryTextTheme.apply(
+      bodyColor: Colors.white,
+      displayColor: Colors.cyanAccent,
+    );
+    final pt = papplied.copyWith(
+      titleLarge: papplied.titleLarge?.copyWith(color: neonTitle),
+      titleMedium: papplied.titleMedium?.copyWith(color: neonTitle),
+      titleSmall: papplied.titleSmall?.copyWith(color: neonTitle),
+    );
+    final bar = merged.appBarTheme;
+    return merged.copyWith(
+      textTheme: tt,
+      primaryTextTheme: pt,
+      colorScheme: merged.colorScheme.copyWith(
+        onSurface: Colors.white,
+        onSurfaceVariant: Colors.white.withValues(alpha: 0.76),
+      ),
+      listTileTheme: ListTileThemeData(
+        textColor: Colors.white,
+        iconColor: Colors.cyanAccent,
+        titleTextStyle: const TextStyle(
+          color: Colors.cyanAccent,
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+        ),
+        subtitleTextStyle: TextStyle(
+          color: Colors.white.withValues(alpha: 0.72),
+          fontSize: 13,
+        ),
+      ),
+      appBarTheme: bar.copyWith(
+        foregroundColor: Colors.cyanAccent,
+        iconTheme: const IconThemeData(color: Colors.cyanAccent),
+        titleTextStyle: bar.titleTextStyle?.copyWith(color: Colors.cyanAccent),
+      ),
+    );
   }
+
+  /// Tema claro (Hive quando preset glacier; caso contrário neutro legível).
+  ThemeData get themeLight {
+    final v = _themeMode == AppThemeMode.glacier
+        ? MentorAdaptiveVisuals.presetGlacier
+        : MentorAdaptiveVisuals.lightNeutral;
+    return _mergeAdaptiveLight(_lightBaseTheme, v);
+  }
+
+  /// Compatível com telas que ainda não usam [Theme.of]; equivale ao tema escuro.
+  ThemeData get currentTheme => themeDark;
 
   static const _neonCyan = Color(0xFF00E5FF);
   static const _neonLime = Color(0xFF26DE81);
@@ -147,7 +210,71 @@ class AppThemeController extends ChangeNotifier {
     cardTheme: const CardThemeData(color: Color(0xFF0D1118), elevation: 0),
   );
 
-  // Temas antigos (Cyber/Grimm/Hive) removidos: estética universal agora é Void.
+  static final ThemeData _lightBaseTheme = ThemeData(
+    brightness: Brightness.light,
+    colorScheme: ColorScheme.light(
+      brightness: Brightness.light,
+      primary: _neonCyan,
+      onPrimary: Colors.black,
+      secondary: _neonLime,
+      onSecondary: Colors.black,
+      surface: const Color(0xFFF8FAFC),
+      onSurface: const Color(0xFF0A1628),
+      surfaceContainerHighest: const Color(0xFFE2E8F0),
+      outline: const Color(0xFFCBD5E1),
+      outlineVariant: const Color(0xFFE2E8F0),
+    ),
+    scaffoldBackgroundColor: Colors.white,
+    useMaterial3: true,
+    cardTheme: const CardThemeData(
+      color: Color(0xFFF1F5F9),
+      elevation: 0,
+    ),
+  );
+
+  ThemeData _mergeAdaptiveLight(ThemeData base, MentorAdaptiveVisuals v) {
+    final textTheme = base.textTheme.apply(
+      bodyColor: v.textColor,
+      displayColor: v.textColor,
+      decorationColor: v.secondaryTextColor,
+    );
+    return base.copyWith(
+      scaffoldBackgroundColor: Colors.transparent,
+      cardTheme: CardThemeData(
+        color: v.widgetColor.withValues(alpha: 0.85),
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+      ),
+      extensions: <ThemeExtension<dynamic>>[v],
+      colorScheme: base.colorScheme.copyWith(
+        onSurface: v.textColor,
+        onSurfaceVariant: v.secondaryTextColor,
+      ),
+      textTheme: textTheme,
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: TextStyle(color: v.textColor.withValues(alpha: 0.85)),
+        hintStyle: TextStyle(color: v.secondaryTextColor),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        foregroundColor: v.textColor,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(color: v.textColor),
+        titleTextStyle: TextStyle(
+          color: v.textColor,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        textColor: v.textColor,
+        iconColor: v.secondaryTextColor,
+      ),
+    );
+  }
 
   ThemeData _mergeAdaptive(ThemeData base, MentorAdaptiveVisuals v) {
     final textTheme = _applyUniversalLegibleTextTheme(base.textTheme);
@@ -217,9 +344,14 @@ class AppThemeController extends ChangeNotifier {
     _isLoading = true;
 
     final prefs = await SharedPreferences.getInstance();
-    // Estética universal: sempre Void, independentemente de prefs antigas.
-    _themeMode = AppThemeMode.voidTheme;
-    await prefs.setInt(_themeKeyV2, _themeMode.index);
+    final stored = prefs.getInt(_themeKeyV2);
+    if (stored != null &&
+        stored >= 0 &&
+        stored < AppThemeMode.values.length) {
+      _themeMode = AppThemeMode.values[stored];
+    } else {
+      _themeMode = AppThemeMode.voidTheme;
+    }
 
     _isPremium = prefs.getBool(_isPremiumKey) ?? false;
     _recomputeAdaptiveVisuals();
@@ -239,15 +371,13 @@ class AppThemeController extends ChangeNotifier {
   }
 
   Future<void> setThemeMode(AppThemeMode mode) async {
-    // Universal Void: ignorar trocas para outros temas.
-    if (mode != AppThemeMode.voidTheme) return;
-    if (_themeMode == AppThemeMode.voidTheme) return;
-    _themeMode = AppThemeMode.voidTheme;
+    if (_themeMode == mode) return;
+    _themeMode = mode;
     _recomputeAdaptiveVisuals();
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_themeKeyV2, AppThemeMode.voidTheme.index);
+    await prefs.setInt(_themeKeyV2, _themeMode.index);
   }
 
   Color get backgroundColor => backdropBaseColor;
