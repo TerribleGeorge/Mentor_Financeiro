@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/finance/daily_limit_calculator.dart';
 import '../core/constants/app_routes.dart';
+import '../core/navigation/mentor_navigation.dart';
 import '../services/subscription_provider.dart';
 import '../services/mentoria_service.dart';
 import '../services/ad_manager_service.dart';
@@ -196,10 +197,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(width: 8),
                               IconButton(
-                                onPressed: () => Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.mentoria,
-                                ),
+                                onPressed: () =>
+                                    mentorPushNamed(context, AppRoutes.mentoria),
                                 icon: const Icon(Icons.chevron_right),
                                 color: scheme.onSurface.withValues(alpha: 0.75),
                               ),
@@ -306,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Transações',
                               const Color(0xFF00D9FF),
                               () {
-                                Navigator.pushNamed(context, AppRoutes.historico);
+                                mentorPushNamed(context, AppRoutes.historico);
                               },
                             ),
                           ),
@@ -318,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Gráficos',
                               const Color(0xFF26DE81),
                               () {
-                                Navigator.pushNamed(context, AppRoutes.graficos);
+                                mentorPushNamed(context, AppRoutes.graficos);
                               },
                             ),
                           ),
@@ -330,15 +329,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Histórico',
                               const Color(0xFFFECA57),
                               () {
-                                Navigator.pushNamed(context, AppRoutes.historico);
+                                mentorPushNamed(context, AppRoutes.historico);
                               },
                             ),
                           ),
                         ],
                       ),
-                      // Banner no fim da Home (não pode cobrir barras de navegação).
+                      // Banner no fim da Home (fora da árvore se Premium).
                       const SizedBox(height: 16),
-                      const AdaptiveBannerAd(),
+                      if (!subscription.isPremium) const AdaptiveBannerAd(),
                       SizedBox(
                         height: MediaQuery.paddingOf(context).bottom +
                             kBottomNavigationBarHeight,
@@ -479,13 +478,13 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icons.flag,
           label: 'Simulador de Metas',
           color: const Color(0xFFFECA57),
-          onTap: () => Navigator.pushNamed(context, AppRoutes.metas),
+          onTap: () => mentorPushNamed(context, AppRoutes.metas),
         ),
         tile(
           icon: Icons.menu_book,
           label: 'Conteúdo Educacional',
           color: const Color(0xFF6366F1),
-          onTap: () => Navigator.pushNamed(context, AppRoutes.conhecimento),
+          onTap: () => mentorPushNamed(context, AppRoutes.conhecimento),
         ),
 
         // PREMIUM (interceptor → paywall)
@@ -494,28 +493,29 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'Mentoria',
           color: const Color(0xFFFF4D4D),
           premium: true,
-          onTap: () => Navigator.pushNamed(context, AppRoutes.mentoria),
+          onTap: () => mentorPushNamed(context, AppRoutes.mentoria),
         ),
         tile(
           icon: Icons.query_stats,
           label: 'Análise Personalizada',
           color: const Color(0xFF00D9FF),
           premium: true,
-          onTap: () => Navigator.pushNamed(context, AppRoutes.relatorios),
+          onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
         ),
         tile(
           icon: Icons.auto_graph,
           label: 'Estratégias Avançadas',
           color: const Color(0xFF6366F1),
           premium: true,
-          onTap: () => Navigator.pushNamed(context, AppRoutes.conhecimentoEstrategias),
+          onTap: () =>
+              mentorPushNamed(context, AppRoutes.conhecimentoEstrategias),
         ),
         tile(
           icon: Icons.picture_as_pdf,
           label: 'Relatórios',
           color: const Color(0xFFE5B100),
           premium: true,
-          onTap: () => Navigator.pushNamed(context, AppRoutes.relatorios),
+          onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
         ),
       ],
     );

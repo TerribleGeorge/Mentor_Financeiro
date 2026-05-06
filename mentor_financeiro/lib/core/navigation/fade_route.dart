@@ -9,11 +9,8 @@ Future<void> pushReplacementNamedFade(
   Object? arguments,
 }) {
   final settings = RouteSettings(name: name, arguments: arguments);
-  final generated = MentorAppRouter.onGenerateRoute(settings);
-  if (generated == null) {
-    return Future.value();
-  }
-  final route = generated as MaterialPageRoute<void>;
+  final route =
+      MentorAppRouter.onGenerateRoute(settings) as MaterialPageRoute<void>;
   final page = route.builder(context);
   return Navigator.of(context).pushReplacement<void, void>(
     PageRouteBuilder<void>(

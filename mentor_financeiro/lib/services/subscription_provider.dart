@@ -10,6 +10,7 @@ import '../constants/subscription_constants.dart';
 import 'app_theme_controller.dart';
 import 'revenue_cat_bootstrap.dart';
 import 'revenue_cat_subscription_service.dart';
+import 'revenue_cat_unauthorized_prefs.dart';
 
 class SubscriptionProvider extends ChangeNotifier {
   bool _isPremium = false;
@@ -89,11 +90,15 @@ class SubscriptionProvider extends ChangeNotifier {
     }
     try {
       final info = await Purchases.getCustomerInfo();
+      await RevenueCatUnauthorizedPrefs.clear();
       await _applyCustomerInfo(info);
       _errorMessage = null;
     } catch (e, st) {
       debugPrint('refreshFromRevenueCat: $e\n$st');
       _errorMessage = e.toString();
+      if (RevenueCatUnauthorizedPrefs.exceptionIndicatesUnauthorized(e)) {
+        await RevenueCatUnauthorizedPrefs.mark();
+      }
       await _loadPremiumStatusFallback();
     }
     await _enforcePremiumThemeGate();
@@ -149,6 +154,16 @@ class SubscriptionProvider extends ChangeNotifier {
   Future<void> _loadPremiumStatusFallback() async {
     _premiumEntitlementFromRevenueCat = false;
     _premiumEntitlementActive = false;
+
+    if (await RevenueCatUnauthorizedPrefs.isMarked()) {
+      final markedPrefs = await SharedPreferences.getInstance();
+      _isPremium = false;
+      _subscriptionEndDate = null;
+      await markedPrefs.setBool('is_premium', false);
+      await AppThemeController.instance.setPremiumStatus(false);
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
     try {
       if (!_firebaseReady) {

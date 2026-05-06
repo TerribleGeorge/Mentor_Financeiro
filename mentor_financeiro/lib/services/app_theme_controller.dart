@@ -67,15 +67,21 @@ class AppThemeController extends ChangeNotifier {
 
   static final ThemeData _voidTheme = ThemeData(
     brightness: Brightness.dark,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF00E5FF),
+    colorScheme: ColorScheme.dark(
       brightness: Brightness.dark,
-      surface: Color(0xFF000000),
-      primary: Color(0xFF00E5FF),
+      primary: const Color(0xFF00E5FF),
+      onPrimary: const Color(0xFF001018),
+      secondary: const Color(0xFF64748B),
+      onSecondary: const Color(0xFFF1F5F9),
+      surface: const Color(0xFF0C0E12),
+      onSurface: const Color(0xFFE2E8F0),
+      surfaceContainerHighest: const Color(0xFF161B22),
+      outline: const Color(0xFF334155),
+      outlineVariant: const Color(0xFF1E293B),
     ),
     scaffoldBackgroundColor: const Color(0xFF000000),
     useMaterial3: true,
-    cardTheme: const CardThemeData(color: Color(0xFF0A0A0A), elevation: 0),
+    cardTheme: const CardThemeData(color: Color(0xFF0D1118), elevation: 0),
   );
 
   static final ThemeData _cyberTheme = ThemeData(

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/firebase_service.dart';
 import '../core/constants/app_routes.dart';
+import '../core/navigation/mentor_navigation.dart';
 import '../core/config/app_secrets.dart';
 import 'tela_login.dart';
 import 'tela_upgrade.dart';
@@ -78,8 +79,7 @@ class _TelaPerfilState extends State<TelaPerfil> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white54),
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.configuracao),
+            onPressed: () => mentorPushNamed(context, AppRoutes.configuracao),
           ),
         ],
       ),

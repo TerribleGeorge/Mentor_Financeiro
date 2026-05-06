@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/mentor_app_router.dart';
 import '../../core/constants/app_routes.dart';
 import '../../presentation/widgets/void_loading_screen.dart';
 import '../../services/mentoria_service.dart';
@@ -48,9 +49,14 @@ class _MentoriaScreenState extends State<MentoriaScreen> {
         builder: (_) => _MentoriaFogTransition(
           title: lesson.title,
           onReady: () async {
-            await Navigator.of(context).pushNamed(
-              AppRoutes.mentoriaLesson,
-              arguments: MentoriaLessonArgs(module: module, lesson: lesson),
+            await Navigator.of(context).push(
+              MentorAppRouter.onGenerateRoute(
+                RouteSettings(
+                  name: AppRoutes.mentoriaLesson,
+                  arguments:
+                      MentoriaLessonArgs(module: module, lesson: lesson),
+                ),
+              ),
             );
           },
         ),

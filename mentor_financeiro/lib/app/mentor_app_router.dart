@@ -20,6 +20,7 @@ import '../pages/tela_estrategias.dart';
 import '../pages/adicionar_investimento_page.dart';
 import '../pages/tela_investimentos.dart';
 import '../pages/tela_login.dart';
+import '../pages/tela_configuracao.dart';
 import '../pages/tela_metas.dart';
 import '../pages/tela_perfil.dart';
 import '../pages/tela_upgrade.dart';
@@ -36,7 +37,7 @@ import '../presentation/splash/splash_screen.dart';
 
 /// Rotas nomeadas do app (navegação nativa centralizada).
 class MentorAppRouter {
-  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.splash:
         return MaterialPageRoute<void>(
@@ -82,7 +83,7 @@ class MentorAppRouter {
       case AppRoutes.configuracao:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const CalculadoraMentoraScreen(),
+          builder: (_) => const TelaConfiguracao(),
         );
       case AppRoutes.principal:
         final idx = (settings.arguments is int) ? (settings.arguments as int) : 0;
@@ -181,10 +182,7 @@ class MentorAppRouter {
       case AppRoutes.mentoria:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const PremiumWrapper(
-            feature: 'Mentoria',
-            child: MentoriaScreen(),
-          ),
+          builder: (_) => const MentoriaScreen(),
         );
       case AppRoutes.mentoriaLesson:
         final raw = settings.arguments;
@@ -222,7 +220,7 @@ class MentorAppRouter {
       default:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const SplashScreen(),
+          builder: (_) => const HomeScreen(),
         );
     }
   }

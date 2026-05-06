@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../services/subscription_provider.dart';
 import '../../widgets/ads/native_ad_card.dart';
 
 class ConhecimentoHub extends StatelessWidget {
@@ -136,7 +139,8 @@ class ConhecimentoHub extends StatelessWidget {
               ),
             ),
           ),
-          const NativeAdCard(),
+          if (!context.watch<SubscriptionProvider>().isPremium)
+            const NativeAdCard(),
         ],
       ),
     );

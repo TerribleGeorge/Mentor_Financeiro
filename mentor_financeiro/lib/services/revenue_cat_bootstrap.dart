@@ -7,6 +7,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import '../core/config/app_secrets.dart';
 import 'app_theme_controller.dart' show AppThemeController;
 import 'revenue_cat_subscription_service.dart';
+import 'revenue_cat_unauthorized_prefs.dart';
 
 /// Inicialização segura do RevenueCat: só configura com chave válida do `.env`;
 /// expõe [isSdkReady] para evitar chamadas ao SDK antes de [Purchases.configure].
@@ -81,9 +82,17 @@ abstract final class RevenueCatBootstrap {
       }
 
       await refreshPremiumFromRevenueCat();
-    } on PlatformException catch (_) {
+    } on PlatformException catch (e, st) {
       _sdkReady = false;
-      // Emergência UX: não travar o boot nem poluir console se a chave estiver inválida (401).
+      log(
+        'RevenueCat PlatformException: $e',
+        name: 'mentor.bootstrap',
+        error: e,
+        stackTrace: st,
+      );
+      if (RevenueCatUnauthorizedPrefs.exceptionIndicatesUnauthorized(e)) {
+        await RevenueCatUnauthorizedPrefs.mark();
+      }
       await AppThemeController.instance.setPremiumStatus(false);
     } catch (e, st) {
       _sdkReady = false;
@@ -94,6 +103,9 @@ abstract final class RevenueCatBootstrap {
         stackTrace: st,
       );
       await AppThemeController.instance.setPremiumStatus(false);
+      if (RevenueCatUnauthorizedPrefs.exceptionIndicatesUnauthorized(e)) {
+        await RevenueCatUnauthorizedPrefs.mark();
+      }
     }
   }
 
@@ -108,6 +120,7 @@ abstract final class RevenueCatBootstrap {
       final isPremium =
           RevenueCatSubscriptionService.customerHasPremiumAccess(customerInfo);
       await AppThemeController.instance.setPremiumStatus(isPremium);
+      await RevenueCatUnauthorizedPrefs.clear();
     } catch (e, st) {
       log(
         'RevenueCat getCustomerInfo: $e',
@@ -115,6 +128,9 @@ abstract final class RevenueCatBootstrap {
         error: e,
         stackTrace: st,
       );
+      if (RevenueCatUnauthorizedPrefs.exceptionIndicatesUnauthorized(e)) {
+        await RevenueCatUnauthorizedPrefs.mark();
+      }
       await AppThemeController.instance.setPremiumStatus(false);
     }
   }

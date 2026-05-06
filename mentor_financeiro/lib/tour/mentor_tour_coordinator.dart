@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 import '../core/constants/app_routes.dart';
+import '../core/navigation/mentor_navigation.dart';
 import '../services/user_persona_service.dart';
 import 'mentor_tour_keys.dart';
 
@@ -13,7 +14,7 @@ class MentorTourCoordinator {
     if (key == MentorTourKeys.homeCalculadora) {
       final ctx = navigatorKey.currentContext;
       if (ctx == null) return;
-      Navigator.of(ctx).pushNamed(AppRoutes.calculadoraMentora);
+      mentorPushNamed(ctx, AppRoutes.calculadoraMentora);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ShowcaseView.get().startShowCase(<GlobalKey>[

@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
 import '../models/transacao_model.dart';
 import '../services/localization_service.dart';
+import '../services/subscription_provider.dart';
 import '../theme/classic_mode_style.dart';
 import '../widgets/ads/adaptive_banner_ad.dart';
 
@@ -20,9 +23,11 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final premium = context.watch<SubscriptionProvider>().isPremium;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      bottomNavigationBar: const AdaptiveBannerAd(),
+      bottomNavigationBar:
+          premium ? null : const AdaptiveBannerAd(),
       body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

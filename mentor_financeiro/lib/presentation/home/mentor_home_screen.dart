@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_routes.dart';
+import '../../core/navigation/mentor_navigation.dart';
 import '../../core/widgets/mentor_insight_card.dart';
 import '../../l10n/app_localizations.dart';
 import '../../domain/entities/financial_market_region.dart';
@@ -140,7 +141,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
         style: TextStyle(color: v.secondaryTextColor, fontSize: 12),
       ),
       trailing: Icon(Icons.chevron_right, color: v.secondaryTextColor),
-      onTap: () => Navigator.of(context).pushNamed(AppRoutes.calculadoraMentora),
+      onTap: () => mentorPushNamed(context, AppRoutes.calculadoraMentora),
     );
 
     return Scaffold(
@@ -152,7 +153,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pushNamed(AppRoutes.principal),
+            onPressed: () => mentorPushNamed(context, AppRoutes.principal),
             child: const Text('Modo clássico', style: TextStyle(color: Color(0xFF00D9FF))),
           ),
         ],
@@ -175,7 +176,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
               accent: const Color(0xFF00D9FF),
               title: l10n.homeShowcaseProfileSimTitle,
               subtitle: l10n.homeShowcaseProfileSimSubtitle,
-              onTap: () => Navigator.of(context).pushNamed(AppRoutes.simulado),
+              onTap: () => mentorPushNamed(context, AppRoutes.simulado),
             ),
             const SizedBox(height: 12),
             vitrineCard(
@@ -184,7 +185,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
               title: l10n.homeShowcaseStrategiesTitle,
               subtitle: l10n.homeShowcaseStrategiesSubtitle,
               onTap: () =>
-                  Navigator.of(context).pushNamed(AppRoutes.conhecimentoEstrategias),
+                  mentorPushNamed(context, AppRoutes.conhecimentoEstrategias),
             ),
             const SizedBox(height: 12),
             vitrineCard(
@@ -214,7 +215,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
                             trailing: Icon(Icons.chevron_right, color: v.secondaryTextColor),
                             onTap: () {
                               Navigator.of(ctx).pop();
-                              Navigator.of(context).pushNamed(AppRoutes.simulado);
+                              mentorPushNamed(context, AppRoutes.simulado);
                             },
                           ),
                           ListTile(
@@ -226,8 +227,8 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
                             trailing: Icon(Icons.chevron_right, color: v.secondaryTextColor),
                             onTap: () {
                               Navigator.of(ctx).pop();
-                              Navigator.of(context)
-                                  .pushNamed(AppRoutes.conhecimentoEstrategias);
+                              mentorPushNamed(
+                                  context, AppRoutes.conhecimentoEstrategias);
                             },
                           ),
                         ],
@@ -253,7 +254,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
               title: 'Mentoria completa',
               subtitle: 'Dicas personalizadas e recomendações avançadas',
               locked: !subscription.isPremium,
-              onTap: () => Navigator.of(context).pushNamed(AppRoutes.mentoria),
+              onTap: () => mentorPushNamed(context, AppRoutes.mentoria),
             ),
             const SizedBox(height: 12),
             vitrineCard(
@@ -262,7 +263,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
               title: 'Análises personalizadas',
               subtitle: 'Dashboards avançados com seus dados',
               locked: !subscription.isPremium,
-              onTap: () => Navigator.of(context).pushNamed(AppRoutes.relatorios),
+              onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
             ),
             const SizedBox(height: 12),
             vitrineCard(
@@ -271,7 +272,7 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
               title: 'Relatórios mensais',
               subtitle: 'Visão detalhada do mês e exportação',
               locked: !subscription.isPremium,
-              onTap: () => Navigator.of(context).pushNamed(AppRoutes.relatorios),
+              onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
             ),
             const SizedBox(height: 24),
             Text(

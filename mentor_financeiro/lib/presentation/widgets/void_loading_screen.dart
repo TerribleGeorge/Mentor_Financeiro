@@ -147,26 +147,38 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
               Center(
                 child: ScaleTransition(
                   scale: _pulseScale,
-                  child: SizedBox.expand(
-                    child: Image.asset(
-                      widget.splashAsset,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.center,
-                      filterQuality: FilterQuality.high,
-                      gaplessPlayback: true,
-                      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                        if (wasSynchronouslyLoaded || frame != null) return child;
-                        return const ColoredBox(color: Colors.black);
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          'assets/images/DevVoid_logo.png',
-                          fit: BoxFit.cover,
-                          alignment: Alignment.center,
-                          filterQuality: FilterQuality.high,
-                          gaplessPlayback: true,
-                        );
-                      },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 36),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 320, maxHeight: 220),
+                      child: Image.asset(
+                        widget.splashAsset,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                        filterQuality: FilterQuality.high,
+                        gaplessPlayback: true,
+                        frameBuilder:
+                            (context, child, frame, wasSynchronouslyLoaded) {
+                          if (wasSynchronouslyLoaded || frame != null) {
+                            return child;
+                          }
+                          return const ColoredBox(color: Colors.black);
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            'assets/images/DevVoid_logo.png',
+                            fit: BoxFit.contain,
+                            alignment: Alignment.center,
+                            filterQuality: FilterQuality.high,
+                            gaplessPlayback: true,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.layers_rounded,
+                              size: 72,
+                              color: widget.progressColor.withValues(alpha: 0.85),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

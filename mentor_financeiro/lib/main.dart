@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -25,6 +26,7 @@ import 'services/regional_context_controller.dart';
 import 'presentation/splash/splash_asset_resolver.dart';
 import 'services/revenue_cat_bootstrap.dart';
 import 'services/revenue_cat_subscription_service.dart';
+import 'services/revenue_cat_unauthorized_prefs.dart';
 import 'services/subscription_provider.dart';
 import 'services/user_persona_service.dart';
 import 'app/mentor_app_router.dart';
@@ -60,20 +62,8 @@ Future<void> _runWithBootTimeout(
       name: 'mentor.bootstrap',
       stackTrace: st,
     );
-    if (label == 'revenuecat') {
-      RevenueCatBootstrap.abort();
-      try {
-        await themeController.setPremiumStatus(false);
-      } catch (_) {}
-    }
   } catch (e, st) {
     log('[$label] $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
-    if (label == 'revenuecat') {
-      RevenueCatBootstrap.abort();
-      try {
-        await themeController.setPremiumStatus(false);
-      } catch (_) {}
-    }
   }
 }
 
@@ -115,10 +105,29 @@ _bootstrapSplashContext() async {
     log('Firebase: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
   }
 
-  await _runWithBootTimeout(
-    'revenuecat',
-    () => RevenueCatBootstrap.run(FirebaseAuth.instance.currentUser?.uid),
-  );
+  try {
+    await RevenueCatBootstrap.run(FirebaseAuth.instance.currentUser?.uid)
+        .timeout(const Duration(seconds: 5));
+  } on TimeoutException catch (_, st) {
+    log(
+      '[revenuecat] timeout 5s — continuação do boot sem bloquear.',
+      name: 'mentor.bootstrap',
+      stackTrace: st,
+    );
+    RevenueCatBootstrap.abort();
+    try {
+      await themeController.setPremiumStatus(false);
+    } catch (_) {}
+  } catch (e, st) {
+    log('[revenuecat] $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
+    RevenueCatBootstrap.abort();
+    if (RevenueCatUnauthorizedPrefs.exceptionIndicatesUnauthorized(e)) {
+      await RevenueCatUnauthorizedPrefs.mark();
+    }
+    try {
+      await themeController.setPremiumStatus(false);
+    } catch (_) {}
+  }
 
   // Splash Standard / Cyber / Grimm / Hive: mesmo fluxo que Purchases.getCustomerInfo().
   final info = await RevenueCatSubscriptionService.getCustomerInfoSafe()
@@ -219,14 +228,22 @@ Future<void> _bootstrapApplicationRemainder({
   }
 }
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await MobileAds.instance.initialize();
+  } catch (e, st) {
+    log(
+      'MobileAds init: $e',
+      name: 'mentor.bootstrap',
+      error: e,
+      stackTrace: st,
+    );
+  }
+
   runZonedGuarded(
     () {
-      WidgetsFlutterBinding.ensureInitialized();
-      // AdMob: inicialização segura (falha não pode travar boot).
-      try {
-        MobileAds.instance.initialize();
-      } catch (_) {}
       // Registro global do Showcase (substitui o widget depreciado ShowCaseWidget).
       ShowcaseView.register(
         enableAutoScroll: true,
@@ -425,7 +442,19 @@ class MentorFinanceiroApp extends StatelessWidget {
               initialRoute: AppRoutes.splash,
               onGenerateRoute: MentorAppRouter.onGenerateRoute,
               builder: (context, child) {
-                return MentorAppBackdrop(child: child);
+                return PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (didPop, result) {
+                    if (didPop) return;
+                    final nav = mentorNavigatorKey.currentState;
+                    if (nav != null && nav.canPop()) {
+                      nav.pop();
+                      return;
+                    }
+                    SystemNavigator.pop();
+                  },
+                  child: MentorAppBackdrop(child: child ?? const SizedBox.shrink()),
+                );
               },
             );
           },
