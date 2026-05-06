@@ -1,4 +1,4 @@
-/// Disparado após salvar a configuração financeira em [TelaConfiguracao].
+/// Disparado após salvar a configuração financeira em [FinanceConfigurationPage].
 /// Telas que exibem limite diário devem escutar e chamar [recarregar].
 class FinanceConfigSignals {
   FinanceConfigSignals._();

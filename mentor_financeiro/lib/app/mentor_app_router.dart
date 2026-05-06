@@ -20,9 +20,9 @@ import '../pages/tela_estrategias.dart';
 import '../pages/adicionar_investimento_page.dart';
 import '../pages/tela_investimentos.dart';
 import '../pages/tela_login.dart';
-import '../pages/tela_configuracao.dart';
+import '../pages/finance_configuration_page.dart';
+import '../pages/settings_page.dart';
 import '../pages/tela_metas.dart';
-import '../pages/tela_perfil.dart';
 import '../pages/tela_upgrade.dart';
 import '../pages/quiz_conhecimento_page.dart';
 import '../pages/questionario_page.dart';
@@ -83,7 +83,12 @@ class MentorAppRouter {
       case AppRoutes.configuracao:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const TelaConfiguracao(),
+          builder: (_) => const FinanceConfigurationPage(),
+        );
+      case AppRoutes.settings:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const SettingsPage(),
         );
       case AppRoutes.principal:
         final idx = (settings.arguments is int) ? (settings.arguments as int) : 0;
@@ -94,7 +99,7 @@ class MentorAppRouter {
       case AppRoutes.perfil:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const TelaPerfil(),
+          builder: (_) => const SettingsPage(),
         );
       case AppRoutes.historico:
         return MaterialPageRoute<void>(

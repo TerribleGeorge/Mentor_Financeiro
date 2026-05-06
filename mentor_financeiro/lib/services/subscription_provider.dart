@@ -13,6 +13,13 @@ import 'revenue_cat_subscription_service.dart';
 import 'revenue_cat_unauthorized_prefs.dart';
 
 class SubscriptionProvider extends ChangeNotifier {
+  static const String _ownerEmail = 'seu-email-aqui@gmail.com';
+
+  bool get isOwner {
+    final email = FirebaseAuth.instance.currentUser?.email?.trim().toLowerCase();
+    return email != null && email == _ownerEmail.toLowerCase();
+  }
+
   bool _isPremium = false;
   /// `true` só após [CustomerInfo] aplicado (entitlement vindo do RevenueCat), nunca por fallback Firestore sozinho.
   bool _premiumEntitlementFromRevenueCat = false;

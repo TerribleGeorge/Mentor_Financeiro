@@ -8,6 +8,8 @@
 //
 
 // Flutter Material
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 
 // Armazenamento local
@@ -18,6 +20,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 // Serviço Firebase
 import '../services/firebase_service.dart';
+import '../services/flutter_notification_interceptor.dart';
 
 import 'home_screen.dart';
 
@@ -765,6 +768,10 @@ class _TelaLoginState extends State<TelaLogin> {
       if (photoUrl != null && photoUrl.isNotEmpty) {
         await prefs.setString('photo_url', photoUrl);
       }
+    }
+
+    if (Platform.isAndroid) {
+      await FlutterNotificationInterceptor.promptAfterLogin();
     }
 
     // Próxima etapa: Dashboard/Home (limpa a pilha para o "voltar" não quebrar).

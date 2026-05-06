@@ -1,26 +1,23 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:particles_flutter/engine.dart';
 
-
-/// Splash de boot: fundo preto absoluto, **uma** logo centrada ([splashAsset]),
-/// [ScaleTransition] 1.0→1.08 em loop, barra fina no rodapé durante **10 s** (sincronizada com o timer global).
+/// Splash de boot estilo Hollow Knight / Void: preto absoluto, névoa charcoal,
+/// partículas escuras a subir lentamente, logo em [BoxFit.cover] e barra de 10 s.
 class VoidLoadingScreen extends StatefulWidget {
   const VoidLoadingScreen({
     super.key,
     required this.splashAsset,
-    this.backgroundColor = Colors.black,
+    this.backgroundColor = const Color(0xFF000000),
     this.progressColor = _defaultProgressColor,
-    this.particlesColor = const Color(0xFF0B0B0B),
+    /// Cor subtil das partículas (opcional); por defeito preto sobre névoa charcoal.
+    this.particleColor,
   });
 
-  /// Logo central da Splash (use `DevVoid_logo.png`).
   final String splashAsset;
-
   final Color backgroundColor;
   final Color progressColor;
-  final Color particlesColor;
+  final Color? particleColor;
 
   static const Duration bootstrapSynchronizationHold = Duration(seconds: 10);
 
@@ -42,16 +39,84 @@ class VoidLoadingScreen extends StatefulWidget {
 
 const Color _defaultProgressColor = Color(0xFFE5E7EB);
 
+/// Névoa charcoal + partículas do Void (subida lenta via [animationValue] 0–1).
+class VoidParticlesPainter extends CustomPainter {
+  VoidParticlesPainter({
+    required this.animationValue,
+    required this.particleColor,
+    this.seed = 1337,
+  });
+
+  final double animationValue;
+  final Color particleColor;
+  final int seed;
+
+  static const int _fogBlobCount = 24;
+  static const int _particleCount = 96;
+  static const double _particleRadius = 3.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = Colors.black,
+    );
+
+    final rndFog = math.Random(seed);
+    final fogPaint = Paint()
+      ..color = const Color(0xFF0A0A12).withValues(alpha: 0.78)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60);
+
+    for (var i = 0; i < _fogBlobCount; i++) {
+      final cx = rndFog.nextDouble() * size.width;
+      final cy = rndFog.nextDouble() * size.height;
+      final r = size.shortestSide * (0.14 + rndFog.nextDouble() * 0.4);
+      canvas.drawCircle(Offset(cx, cy), r, fogPaint);
+    }
+
+    final rndDots = math.Random(seed + 404);
+    final speckPaint = Paint()
+      ..color = const Color(0xFF000000)
+      ..isAntiAlias = true;
+
+    final span = size.height + 140;
+    for (var i = 0; i < _particleCount; i++) {
+      final baseX = rndDots.nextDouble() * size.width;
+      final phase = rndDots.nextDouble();
+      // Mais rápido: usa 2.1x da animação e adiciona ziguezague no X.
+      final t = ((animationValue * 2.1) + phase) % 1.0;
+      final travel = t * span;
+      final py = size.height + 48 - travel;
+      final zig =
+          math.sin((t * math.pi * 2 * 3.0) + (phase * math.pi * 2)) * 10.0;
+      final px = (baseX + zig).clamp(0.0, size.width);
+      canvas.drawCircle(Offset(px, py), _particleRadius, speckPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant VoidParticlesPainter oldDelegate) => true;
+}
+
 class _VoidLoadingScreenState extends State<VoidLoadingScreen>
     with TickerProviderStateMixin {
+  late final AnimationController _voidController;
   late final AnimationController _progressController;
   late final AnimationController _pulseController;
   late final Animation<double> _pulseScale;
-  late List<Particle> _particles;
+
+  Color get _particleColor => const Color(0xFF000000);
 
   @override
   void initState() {
     super.initState();
+    _voidController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 28),
+    )..repeat();
+
     _progressController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
@@ -59,55 +124,20 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
 
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(milliseconds: 2600),
     )..repeat(reverse: true);
 
-    _pulseScale = Tween<double>(begin: 1.0, end: 1.08).animate(
-      CurvedAnimation(
-        parent: _pulseController,
-        curve: Curves.easeInOut,
-      ),
+    _pulseScale = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-
-    _particles = _createFogParticles(widget.particlesColor);
-  }
-
-  @override
-  void didUpdateWidget(covariant VoidLoadingScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.particlesColor != widget.particlesColor) {
-      _particles = _createFogParticles(widget.particlesColor);
-    }
   }
 
   @override
   void dispose() {
+    _voidController.dispose();
     _progressController.dispose();
     _pulseController.dispose();
     super.dispose();
-  }
-
-  List<Particle> _createFogParticles(Color base) {
-    final rng = Random(1337);
-
-    // Mantém leve: poucas partículas grandes, movimento lento.
-    // Visual "névoa volumétrica": círculos grandes, opacidades baixas e velocidades suaves.
-    const count = 42;
-    double sign() => rng.nextBool() ? 1 : -1;
-
-    return List<Particle>.generate(count, (_) {
-      final radius = 18 + rng.nextDouble() * 42; // 18..60
-      final opacity = 0.05 + rng.nextDouble() * 0.12; // 0.05..0.17
-      final driftX = (6 + rng.nextDouble() * 18) * sign(); // -24..24
-      // Movimento ascendente predominante.
-      final driftY = -(12 + rng.nextDouble() * 28); // -40..-12
-
-      return CircularParticle(
-        color: base.withValues(alpha: opacity),
-        radius: radius,
-        velocity: Offset(driftX, driftY),
-      );
-    });
   }
 
   @override
@@ -117,73 +147,65 @@ class _VoidLoadingScreenState extends State<VoidLoadingScreen>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Profundidade extra para misturar a "fumaça" com o vazio (sem aparência de figurinha).
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment.center,
-                radius: 1.05,
-                colors: [
-                  Colors.black,
-                  Colors.transparent,
-                ],
-                stops: const [0.0, 1.0],
+          // Background (DevVoid_standard) + dimm.
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/devvoid_standard.png'),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
-          // Conteúdo principal: partículas atrás + logo DV ao centro com pulso.
-          // IMPORTANTE: partículas nunca acima da logo.
-          Stack(
-            fit: StackFit.expand,
-            children: [
-              IgnorePointer(
-                child: Particles(
-                  particles: _particles,
-                  height: MediaQuery.sizeOf(context).height,
-                  width: MediaQuery.sizeOf(context).width,
-                  boundType: BoundType.WrapAround,
-                ),
-              ),
-              Center(
-                child: ScaleTransition(
-                  scale: _pulseScale,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 36),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 320, maxHeight: 220),
-                      child: Image.asset(
-                        widget.splashAsset,
-                        fit: BoxFit.contain,
-                        alignment: Alignment.center,
-                        filterQuality: FilterQuality.high,
-                        gaplessPlayback: true,
-                        frameBuilder:
-                            (context, child, frame, wasSynchronouslyLoaded) {
-                          if (wasSynchronouslyLoaded || frame != null) {
-                            return child;
-                          }
-                          return const ColoredBox(color: Colors.black);
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.asset(
-                            'assets/images/DevVoid_logo.png',
-                            fit: BoxFit.contain,
-                            alignment: Alignment.center,
-                            filterQuality: FilterQuality.high,
-                            gaplessPlayback: true,
-                            errorBuilder: (context, error, stackTrace) => Icon(
-                              Icons.layers_rounded,
-                              size: 72,
-                              color: widget.progressColor.withValues(alpha: 0.85),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.3),
+            ),
+          ),
+          SizedBox.expand(
+            child: AnimatedBuilder(
+              animation: _voidController,
+              builder: (context, child) {
+                return CustomPaint(
+                  painter: VoidParticlesPainter(
+                    animationValue: _voidController.value,
+                    particleColor: _particleColor,
                   ),
-                ),
-              ),
-            ],
+                );
+              },
+            ),
+          ),
+          ScaleTransition(
+            scale: _pulseScale,
+            alignment: Alignment.center,
+            child: Image.asset(
+              widget.splashAsset,
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+              filterQuality: FilterQuality.high,
+              gaplessPlayback: true,
+              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                if (wasSynchronouslyLoaded || frame != null) {
+                  return child;
+                }
+                return const SizedBox.shrink();
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  'assets/images/DevVoid_logo.png',
+                  fit: BoxFit.cover,
+                  alignment: Alignment.center,
+                  filterQuality: FilterQuality.high,
+                  gaplessPlayback: true,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.layers_rounded,
+                    size: 72,
+                    color: widget.progressColor.withValues(alpha: 0.85),
+                  ),
+                );
+              },
+            ),
           ),
           SafeArea(
             child: Align(

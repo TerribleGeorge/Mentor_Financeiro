@@ -53,13 +53,20 @@ class _SplashScreenState extends State<SplashScreen> {
         isPremium: isPremium == true,
         theme: theme.themeMode,
       );
-      // Evita flash antes do primeiro frame do asset.
       if (!mounted) return;
-      await precacheImage(AssetImage(branding.asset), context);
-      if (!mounted) return;
-      setState(() {
-        _branding = branding;
-        _loading = false;
+      // Precache fora do build e sem forçar dependências que possam falhar com `!`.
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          if (!context.mounted) return;
+          await precacheImage(AssetImage(branding.asset), context);
+        } catch (_) {
+          /* asset opcional; VoidLoadingScreen tem fallback */
+        }
+        if (!context.mounted) return;
+        setState(() {
+          _branding = branding;
+          _loading = false;
+        });
       });
     } catch (_) {
       if (!mounted) return;
@@ -181,7 +188,7 @@ class _SplashScreenState extends State<SplashScreen> {
       splashAsset: branding.asset,
       backgroundColor: branding.background,
       progressColor: branding.progress,
-      particlesColor: branding.particles,
+      particleColor: branding.particles,
     );
   }
 }

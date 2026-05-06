@@ -1,537 +1,663 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../l10n/app_localizations.dart';
+
 import '../services/app_theme_controller.dart';
-import '../services/subscription_provider.dart';
-import 'paywall_screen.dart';
 import '../services/currency_preference_controller.dart';
+import '../services/firebase_service.dart';
 import '../services/locale_controller.dart';
-import '../services/notification_listener_service.dart';
+import '../services/revenue_cat_bootstrap.dart';
+import '../services/subscription_provider.dart';
+import 'finance_configuration_page.dart';
+import 'paywall_screen.dart';
+import 'tela_login.dart';
+
+/// Definições unificadas: perfil, senha, tema Void, moeda, localidade, assinatura, logout.
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  static const Color voidBlack = Color(0xFF000000);
+  static const Color voidCyan = Color(0xFF00E5FF);
+  static const Color voidNeonGreen = Color(0xFF26DE81);
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  String _idiomaSelecionado = 'pt';
-  String _moedaSelecionada = 'BRL';
-  final _themeController = AppThemeController();
-  final _notificationListener = NotificationListenerService();
+  static const String _ownerEmail = 'seu-email-aqui@gmail.com';
 
-  static const _prefsNotifAsked = 'notif_bank_access_asked';
-  static const _prefsNotifDenied = 'notif_bank_access_denied';
-  static const _prefsNotifEnabled = 'notif_bank_access_enabled';
-  bool _notifEnabled = false;
-  bool _notifDenied = false;
+  String _nomeExibicao = 'Usuário';
+  String? _photoUrl;
+
+  static const _chevron = Icon(Icons.chevron_right, color: Color(0x66FFFFFF));
 
   @override
   void initState() {
     super.initState();
-    _carregarPreferencias();
+    _carregarPerfil();
   }
 
-  Future<void> _carregarPreferencias() async {
+  Future<void> _carregarPerfil() async {
+    final user = FirebaseAuth.instance.currentUser;
     final prefs = await SharedPreferences.getInstance();
+    final nomeSalvo = prefs.getString('nome_usuario');
+    final photoSalva = prefs.getString('photo_url');
+
+    final nome = (user?.displayName?.trim().isNotEmpty == true)
+        ? user!.displayName!.trim()
+        : (nomeSalvo ?? 'Usuário');
+    final photo = (user?.photoURL?.trim().isNotEmpty == true)
+        ? user!.photoURL!.trim()
+        : (photoSalva?.trim().isNotEmpty == true ? photoSalva : null);
+
     if (!mounted) return;
     setState(() {
-      _idiomaSelecionado = prefs.getString(LocaleController.prefsKey) ?? 'pt';
-      _moedaSelecionada = prefs.getString('moeda') ?? 'AUTO';
-      _notifEnabled = prefs.getBool(_prefsNotifEnabled) ?? false;
-      _notifDenied = prefs.getBool(_prefsNotifDenied) ?? false;
+      _nomeExibicao = nome;
+      _photoUrl = photo;
     });
+  }
+
+  bool get _podeAlterarSenha {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+    return user.providerData.any((p) => p.providerId == EmailAuthProvider.PROVIDER_ID);
+  }
+
+  Future<void> _abrirPaywall() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(builder: (_) => const PaywallScreen()),
+    );
+    if (mounted) await context.read<SubscriptionProvider>().refreshStatus();
+  }
+
+  Future<void> _mostrarAlterarSenha() async {
+    if (!_podeAlterarSenha) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Alteração de senha só está disponível para contas com e-mail e palavra-passe.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    final email = user?.email;
+    if (user == null || email == null || email.isEmpty) return;
+
+    final atualCtrl = TextEditingController();
+    final novaCtrl = TextEditingController();
+    final confirmaCtrl = TextEditingController();
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0D1118),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: SettingsPage.voidCyan.withValues(alpha: 0.35)),
+        ),
+        title: const Text(
+          'Alterar palavra-passe',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: atualCtrl,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Palavra-passe actual',
+                  labelStyle: TextStyle(color: Colors.white54),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: novaCtrl,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Nova palavra-passe',
+                  labelStyle: TextStyle(color: Colors.white54),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: confirmaCtrl,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Confirmar nova',
+                  labelStyle: TextStyle(color: Colors.white54),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Guardar',
+              style: TextStyle(
+                color: SettingsPage.voidCyan,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true || !mounted) {
+      atualCtrl.dispose();
+      novaCtrl.dispose();
+      confirmaCtrl.dispose();
+      return;
+    }
+
+    final atual = atualCtrl.text;
+    final nova = novaCtrl.text;
+    final conf = confirmaCtrl.text;
+    atualCtrl.dispose();
+    novaCtrl.dispose();
+    confirmaCtrl.dispose();
+
+    if (nova.length < 6) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('A nova palavra-passe deve ter pelo menos 6 caracteres.')),
+        );
+      }
+      return;
+    }
+    if (nova != conf) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('A confirmação não coincide.')),
+        );
+      }
+      return;
+    }
+
+    try {
+      final cred = EmailAuthProvider.credential(email: email, password: atual);
+      await user.reauthenticateWithCredential(cred);
+      await user.updatePassword(nova);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Palavra-passe actualizada.')),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Falha ao alterar a palavra-passe.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _logout() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0D1118),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: SettingsPage.voidCyan.withValues(alpha: 0.35)),
+        ),
+        title: const Text(
+          'Terminar sessão',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Tem a certeza que pretende sair?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Sair',
+              style: TextStyle(
+                color: Color(0xFFFF6B6B),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true || !mounted) return;
+
+    try {
+      await FirebaseAuth.instance.signOut();
+      await FirebaseService.logout();
+      await RevenueCatBootstrap.logOutIfConfigured();
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(builder: (_) => const TelaLogin()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao sair: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _definirTema(AppThemeMode mode, AppThemeController theme) async {
+    final sub = context.read<SubscriptionProvider>();
+    if (mode.requiresPremiumEntitlement && !sub.isPremium) {
+      await _abrirPaywall();
+      return;
+    }
+    await theme.setThemeMode(mode);
+    if (mounted) setState(() {});
+  }
+
+  String _rotuloMoeda(String mode) {
+    switch (mode.toUpperCase()) {
+      case 'AUTO':
+        return 'Automática (idioma)';
+      case 'BRL':
+        return 'Real (BRL)';
+      case 'USD':
+        return 'Dólar (USD)';
+      case 'EUR':
+        return 'Euro (EUR)';
+      default:
+        return mode;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final subscription = context.watch<SubscriptionProvider>();
-    return ListenableBuilder(
-      listenable: Listenable.merge([_themeController, subscription]),
-      builder: (context, _) {
-        return Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            title: const Text(
-              'Configurações',
-              style: TextStyle(
+    final theme = context.watch<AppThemeController>();
+    final user = FirebaseAuth.instance.currentUser;
+    final email = user?.email ?? 'Sem sessão iniciada';
+
+    return Scaffold(
+      backgroundColor: SettingsPage.voidBlack,
+      appBar: AppBar(
+        backgroundColor: SettingsPage.voidBlack,
+        elevation: 0,
+        foregroundColor: Colors.white,
+        title: const Text(
+          'Definições',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        iconTheme: const IconThemeData(color: SettingsPage.voidCyan),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        children: [
+          _secTitle('Perfil'),
+          const SizedBox(height: 8),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: CircleAvatar(
+              radius: 28,
+              backgroundColor: SettingsPage.voidCyan.withValues(alpha: 0.2),
+              foregroundImage:
+                  _photoUrl != null && _photoUrl!.isNotEmpty ? NetworkImage(_photoUrl!) : null,
+              child: (_photoUrl == null || _photoUrl!.isEmpty)
+                  ? const Icon(Icons.person, color: SettingsPage.voidCyan, size: 28)
+                  : null,
+            ),
+            title: Text(
+              _nomeExibicao,
+              style: const TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
+                fontSize: 17,
               ),
             ),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                email,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.55),
+                  fontSize: 13,
+                ),
+              ),
             ),
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionTitle('Aparência'),
-                const SizedBox(height: 12),
-                _buildCard([
-                  _buildThemeSelector(subscription),
-                ]),
-                const SizedBox(height: 24),
-                _buildSectionTitle('Conta'),
-                const SizedBox(height: 12),
-                _buildCard([
-                  _buildListTile(
-                    icon: Icons.email_outlined,
-                    title: 'E-mail',
-                    subtitle:
-                        FirebaseAuth.instance.currentUser?.email ??
-                        'Não conectado',
-                    onTap: () {},
-                  ),
-                  const Divider(color: Colors.white12),
-                  _buildListTile(
-                    icon: Icons.lock_outline,
-                    title: 'Alterar Senha',
-                    subtitle: 'Redefinir sua senha',
-                    onTap: _showTrocarSenha,
-                  ),
-                ]),
-                const SizedBox(height: 24),
-                _buildSectionTitle('Preferências'),
-                const SizedBox(height: 12),
-                _buildCard([
-                  _buildListTile(
-                    icon: Icons.auto_awesome,
-                    title: 'Leitura automática de bancos',
-                    subtitle: _notifEnabled
-                        ? 'Ativada'
-                        : (_notifDenied ? 'Desativada (negada)' : 'Desativada'),
-                    trailing: subscription.isPremium
-                        ? Switch(
-                            value: _notifEnabled,
-                            onChanged: (value) async {
-                              if (value) {
-                                await _onEnableBankNotifications();
-                              } else {
-                                await _onDisableBankNotifications();
-                              }
-                            },
-                          )
-                        : const Icon(Icons.lock, color: Colors.white54),
-                    onTap: () async {
-                      if (!subscription.isPremium) {
-                        await Navigator.of(context).push<void>(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const PaywallScreen(),
-                          ),
-                        );
-                        return;
-                      }
-                      if (_notifEnabled) {
-                        await _onDisableBankNotifications();
-                      } else {
-                        await _onEnableBankNotifications();
-                      }
-                    },
-                  ),
-                  const Divider(color: Colors.white12),
-                  _buildListTile(
-                    icon: Icons.language,
-                    title: 'Idioma',
-                    subtitle: _getIdiomaNome(_idiomaSelecionado),
-                    trailing: const Icon(
-                      Icons.chevron_right,
-                      color: Colors.white38,
-                    ),
-                    onTap: _showSelectorIdioma,
-                  ),
-                  const Divider(color: Colors.white12),
-                  _buildListTile(
-                    icon: Icons.attach_money,
-                    title: 'Unidade Monetária',
-                    subtitle: _getMoedaNome(context, _moedaSelecionada),
-                    trailing: const Icon(
-                      Icons.chevron_right,
-                      color: Colors.white38,
-                    ),
-                    onTap: _showSelectorMoeda,
-                  ),
-                ]),
-                const SizedBox(height: 24),
-                _buildSectionTitle('Jurídico'),
-                const SizedBox(height: 12),
-                _buildCard([
-                  _buildListTile(
-                    icon: Icons.privacy_tip_outlined,
-                    title: 'Privacidade',
-                    subtitle: 'Nossa política de privacidade',
-                    onTap: () {},
-                  ),
-                  const Divider(color: Colors.white12),
-                  _buildListTile(
-                    icon: Icons.description_outlined,
-                    title: 'Termos de Uso',
-                    subtitle: 'Termos e condições',
-                    onTap: () {},
-                  ),
-                ]),
-                const SizedBox(height: 24),
-                _buildSectionTitle('Assinatura'),
-                const SizedBox(height: 12),
-                _buildCard([
+          const Divider(height: 24, color: Color(0x14FFFFFF)),
+          ListTile(
+            leading: const Icon(Icons.lock_outline_rounded, color: SettingsPage.voidCyan),
+            title: const Text(
+              'Alterar palavra-passe',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              _podeAlterarSenha
+                  ? 'Actualizar credenciais Firebase'
+                  : 'Indisponível para login só com Google',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 12),
+            ),
+            trailing: _chevron,
+            onTap: _mostrarAlterarSenha,
+          ),
+          const Divider(height: 1, color: Color(0x14FFFFFF)),
+          ListTile(
+            leading: const Icon(Icons.savings_outlined, color: SettingsPage.voidNeonGreen),
+            title: const Text(
+              'Renda e gastos fixos',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              'Configurar orçamento mensal',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 13),
+            ),
+            trailing: _chevron,
+            onTap: () {
+              Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(builder: (_) => const FinanceConfigurationPage()),
+              );
+            },
+          ),
+          const Divider(height: 24, color: Color(0x14FFFFFF)),
+          _secTitle('Aparência (Void)'),
+          const SizedBox(height: 4),
+          ...AppThemeMode.values.map((mode) {
+            final locked = mode.requiresPremiumEntitlement && !subscription.isPremium;
+            final selected = theme.themeMode == mode;
+            return ListTile(
+              leading: Icon(
+                selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                color: selected ? SettingsPage.voidCyan : Colors.white38,
+              ),
+              title: Text(
+                themeLabel(mode),
+                style: TextStyle(
+                  color: selected ? SettingsPage.voidCyan : Colors.white,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+              subtitle: Text(
+                locked ? 'Premium · toque para ver planos' : themeSubtitle(mode),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.45),
+                  fontSize: 12,
+                ),
+              ),
+              onTap: () => _definirTema(mode, theme),
+            );
+          }),
+          const Divider(height: 24, color: Color(0x14FFFFFF)),
+          _secTitle('Idioma e moeda'),
+          ListenableBuilder(
+            listenable: Listenable.merge([
+              LocaleController.instance,
+              CurrencyPreferenceController.instance,
+            ]),
+            builder: (context, _) {
+              final lc = LocaleController.instance;
+              final cc = CurrencyPreferenceController.instance;
+              return Column(
+                children: [
                   ListTile(
-                    leading: const Icon(
-                      Icons.workspace_premium_outlined,
-                      color: Colors.white70,
-                    ),
+                    leading: const Icon(Icons.language, color: SettingsPage.voidCyan),
                     title: const Text(
-                      'Fazer teste de assinatura',
-                      style: TextStyle(color: Colors.white),
+                      'Idioma da app',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                     ),
-                    subtitle: const Text(
-                      'Oferta mensal (trial) via RevenueCat.',
-                      style: TextStyle(color: Colors.white54, fontSize: 12),
+                    subtitle: Text(
+                      _languageLabel(lc.locale.languageCode),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                     ),
-                    onTap: subscription.isLoading
-                        ? null
-                        : () async {
-                            final messenger = ScaffoldMessenger.of(context);
-                            final sub = context.read<SubscriptionProvider>();
-                            try {
-                              sub.clearErrorMessage();
-                              await Navigator.of(context).push<void>(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => const PaywallScreen(),
-                                ),
-                              );
-                              if (!mounted) return;
-                              await sub.refreshFromRevenueCat();
-                              if (!mounted) return;
-                              if (sub.hasPremiumEntitlementFromRevenueCat) {
-                                messenger.showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Assinatura activa — temas premium desbloqueados.',
-                                    ),
-                                  ),
-                                );
-                              } else if (sub.errorMessage != null &&
-                                  sub.errorMessage!.isNotEmpty) {
-                                messenger.showSnackBar(
-                                  SnackBar(content: Text(sub.errorMessage!)),
-                                );
-                              }
-                            } catch (e) {
-                              if (mounted) {
-                                messenger.showSnackBar(
-                                  SnackBar(content: Text('Erro: $e')),
-                                );
-                              }
-                            }
-                          },
-                  ),
-                  if (kDebugMode) ...[
-                    const Divider(color: Colors.white12),
-                    ListTile(
-                      leading: const Icon(Icons.science_outlined,
-                          color: Colors.white70),
-                      title: const Text(
-                        'Simular premium (debug)',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      onTap: () async {
-                        final messenger = ScaffoldMessenger.of(context);
-                        await context
-                            .read<SubscriptionProvider>()
-                            .debugSimulatePremiumPurchase();
-                        if (!mounted) return;
-                        messenger.showSnackBar(
-                          const SnackBar(
-                            content: Text('Premium simulado (debug).'),
-                          ),
-                        );
+                    trailing: DropdownButton<String>(
+                      value: lc.locale.languageCode,
+                      dropdownColor: const Color(0xFF0D1118),
+                      underline: const SizedBox.shrink(),
+                      style: const TextStyle(color: Colors.white),
+                      items: LocaleController.supportedLanguageCodes
+                          .map(
+                            (code) => DropdownMenuItem(
+                              value: code,
+                              child: Text(_languageLabel(code)),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (code) {
+                        if (code != null) lc.setLanguageCode(code);
                       },
                     ),
-                  ],
-                ]),
-                const SizedBox(height: 40),
-              ],
-            ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.payments_outlined, color: SettingsPage.voidNeonGreen),
+                    title: const Text(
+                      'Moeda de exibição',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      _rotuloMoeda(cc.mode),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                    ),
+                    trailing: DropdownButton<String>(
+                      value: cc.mode,
+                      dropdownColor: const Color(0xFF0D1118),
+                      underline: const SizedBox.shrink(),
+                      style: const TextStyle(color: Colors.white),
+                      items: const [
+                        DropdownMenuItem(value: 'AUTO', child: Text('Automática')),
+                        DropdownMenuItem(value: 'BRL', child: Text('BRL')),
+                        DropdownMenuItem(value: 'USD', child: Text('USD')),
+                        DropdownMenuItem(value: 'EUR', child: Text('EUR')),
+                      ],
+                      onChanged: (m) {
+                        if (m != null) cc.setCurrencyMode(m);
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
-        );
-      },
-    );
-  }
-
-  Future<void> _onEnableBankNotifications() async {
-    final proceed = await showModalBottomSheet<bool>(
-      context: context,
-      backgroundColor: const Color(0xFF0B0B0B),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Ativar leitura automática',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+          const Divider(height: 24, color: Color(0x14FFFFFF)),
+          _secTitle('Assinatura'),
+          ListTile(
+            leading: Icon(
+              subscription.isPremium
+                  ? Icons.verified_outlined
+                  : Icons.workspace_premium_outlined,
+              color: subscription.isPremium
+                  ? SettingsPage.voidNeonGreen
+                  : SettingsPage.voidCyan,
+            ),
+            title: const Text(
+              'Estado RevenueCat',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: subscription.isPremium
+                  ? Row(
+                      children: [
+                        Icon(
+                          Icons.circle,
+                          size: 8,
+                          color: SettingsPage.voidNeonGreen.withValues(alpha: 0.95),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Assinante activo',
+                          style: TextStyle(
+                            color: SettingsPage.voidNeonGreen.withValues(alpha: 0.92),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Plano Free · anúncios activos',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            onPressed: subscription.isLoading ? null : _abrirPaywall,
+                            style: TextButton.styleFrom(
+                              foregroundColor: SettingsPage.voidCyan,
+                              backgroundColor: SettingsPage.voidCyan.withValues(alpha: 0.08),
+                              side: BorderSide(
+                                color: SettingsPage.voidCyan.withValues(alpha: 0.85),
+                                width: 1.2,
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Upgrade para Pro',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+            trailing: subscription.isPremium ? _chevron : null,
+            onTap: subscription.isPremium ? null : _abrirPaywall,
+          ),
+          const SizedBox(height: 24),
+          ListTile(
+            leading: const Icon(Icons.logout_rounded, color: Color(0xFFFF6B6B)),
+            title: const Text(
+              'Terminar sessão',
+              style: TextStyle(
+                color: Color(0xFFFF6B6B),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            subtitle: Text(
+              'Sair deste dispositivo',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 13),
+            ),
+            trailing: _chevron,
+            onTap: _logout,
+          ),
+          // 1) Restaurar Simular Premium (owner-only) no final.
+          if (FirebaseAuth.instance.currentUser?.email == _ownerEmail) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: subscription.isLoading
+                    ? null
+                    : () => subscription.debugSimulatePremiumPurchase(),
+                icon: const Icon(Icons.bolt_rounded),
+                label: const Text('Simular Premium'),
+                style: TextButton.styleFrom(
+                  foregroundColor: SettingsPage.voidNeonGreen,
+                  backgroundColor:
+                      SettingsPage.voidNeonGreen.withValues(alpha: 0.08),
+                  side: BorderSide(
+                    color: SettingsPage.voidNeonGreen.withValues(alpha: 0.75),
+                    width: 1.2,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Para automatizar o registro de gastos via notificações bancárias, precisamos dessa permissão. Seus dados são processados localmente e nunca saem do dispositivo.',
-                  style: TextStyle(color: Colors.white70, height: 1.3),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white70,
-                          side: const BorderSide(color: Colors.white24),
-                        ),
-                        child: const Text('Agora não'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Continuar'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (proceed != true) {
-      return;
-    }
-
-    if (!mounted) return;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_prefsNotifAsked, true);
-    final ok = await _notificationListener.solicitarPermissaoEIniciar();
-    if (!mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
-
-    if (ok) {
-      await prefs.setBool(_prefsNotifEnabled, true);
-      await prefs.setBool(_prefsNotifDenied, false);
-      setState(() {
-        _notifEnabled = true;
-        _notifDenied = false;
-      });
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Leitura automática ativada.')),
-      );
-    } else {
-      await prefs.setBool(_prefsNotifEnabled, false);
-      await prefs.setBool(_prefsNotifDenied, true);
-      setState(() {
-        _notifEnabled = false;
-        _notifDenied = true;
-      });
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Permissão negada. Você pode continuar usando entrada manual normalmente.',
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _onDisableBankNotifications() async {
-    final prefs = await SharedPreferences.getInstance();
-    _notificationListener.parar();
-    await prefs.setBool(_prefsNotifEnabled, false);
-    if (!mounted) return;
-    setState(() {
-      _notifEnabled = false;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Leitura automática desativada.')),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: Color(0xFF00D9FF),
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-
-  Widget _buildCard(List<Widget> children) {
-    return GlassCard(
-      padding: EdgeInsets.zero,
-      borderRadius: BorderRadius.circular(16),
-      child: Column(children: children),
-    );
-  }
-
-  Widget _buildThemeSelector(SubscriptionProvider subscription) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.palette, color: Colors.white70, size: 22),
-              SizedBox(width: 16),
-              Text(
-                'Tema devvoid',
-                style: TextStyle(color: Colors.white, fontSize: 16),
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildTemaChip(subscription, 'Void', AppThemeMode.voidTheme),
-              _buildTemaChip(subscription, 'Cyber', AppThemeMode.cyber),
-              _buildTemaChip(subscription, 'Grimm', AppThemeMode.obsidian),
-              _buildTemaChip(subscription, 'Hive', AppThemeMode.glacier),
-            ],
-          ),
+            ),
+          ],
+          const SizedBox(height: 24),
         ],
       ),
     );
   }
 
-  Widget _buildTemaChip(
-    SubscriptionProvider subscription,
-    String nome,
-    AppThemeMode mode,
-  ) {
-    final isSelected = _themeController.themeMode == mode;
-    final locked = mode.requiresPremiumEntitlement &&
-        !subscription.hasPremiumEntitlementFromRevenueCat;
-    return GestureDetector(
-      onTap: subscription.isLoading
-          ? null
-          : () async {
-              final messenger = ScaffoldMessenger.of(context);
-              if (!mode.requiresPremiumEntitlement) {
-                await _themeController.setThemeMode(mode);
-                return;
-              }
-              if (subscription.hasPremiumEntitlementFromRevenueCat) {
-                await _themeController.setThemeMode(mode);
-                return;
-              }
-              try {
-                subscription.clearErrorMessage();
-                await Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const PaywallScreen(),
-                  ),
-                );
-                if (!mounted) return;
-                await subscription.refreshFromRevenueCat();
-                if (!mounted) return;
-                if (subscription.hasPremiumEntitlementFromRevenueCat) {
-                  await _themeController.setThemeMode(mode);
-                  if (!mounted) return;
-                  messenger.showSnackBar(
-                    SnackBar(content: Text('$nome desbloqueado.')),
-                  );
-                } else if (subscription.errorMessage != null &&
-                    subscription.errorMessage!.isNotEmpty) {
-                  messenger.showSnackBar(
-                    SnackBar(content: Text(subscription.errorMessage!)),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  messenger.showSnackBar(
-                    SnackBar(content: Text('Erro: $e')),
-                  );
-                }
-              }
-            },
-      child: Opacity(
-        opacity: locked ? 0.45 : 1,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF00D9FF) : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? const Color(0xFF00D9FF) : Colors.white30,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (locked) ...[
-                const Icon(Icons.lock, size: 12, color: Colors.white60),
-                const SizedBox(width: 4),
-              ],
-              Text(
-                nome,
-                style: TextStyle(
-                  color: isSelected ? Colors.black : Colors.white70,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+  Widget _secTitle(String t) => Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          t,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.42),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
           ),
         ),
-      ),
-    );
+      );
+
+  static String themeLabel(AppThemeMode mode) {
+    switch (mode) {
+      case AppThemeMode.voidTheme:
+        return 'Void';
+      case AppThemeMode.cyber:
+        return 'Cyber';
+      case AppThemeMode.obsidian:
+        return 'Grimm';
+      case AppThemeMode.glacier:
+        return 'Hive';
+    }
   }
 
-  Widget _buildListTile({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    Widget? trailing,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.white70, size: 22),
-      title: Text(title, style: const TextStyle(color: Colors.white)),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              style: const TextStyle(color: Colors.white54, fontSize: 12),
-            )
-          : null,
-      trailing: trailing,
-      onTap: onTap,
-    );
+  static String themeSubtitle(AppThemeMode mode) {
+    switch (mode) {
+      case AppThemeMode.voidTheme:
+        return 'Preto absoluto · Hollow Knight';
+      case AppThemeMode.cyber:
+        return 'Néon roxo · premium';
+      case AppThemeMode.obsidian:
+        return 'Cinzento profundo · premium';
+      case AppThemeMode.glacier:
+        return 'Claro gelo · premium';
+    }
   }
 
-  String _getIdiomaNome(String codigo) {
-    switch (codigo) {
-      case 'pt':
-        return 'Português';
+  static String _languageLabel(String code) {
+    switch (code) {
       case 'en':
         return 'English';
       case 'es':
@@ -539,147 +665,5 @@ class _SettingsPageState extends State<SettingsPage> {
       default:
         return 'Português';
     }
-  }
-
-  String _getMoedaNome(BuildContext context, String codigo) {
-    final l10n = AppLocalizations.of(context);
-    switch (codigo) {
-      case 'AUTO':
-        return l10n?.currencyFollowLocale ?? 'Automático (idioma)';
-      case 'BRL':
-        return 'Real (R\$)';
-      case 'USD':
-        return 'Dólar (\$)';
-      case 'EUR':
-        return 'Euro (€)';
-      default:
-        return l10n?.currencyFollowLocale ?? 'Automático (idioma)';
-    }
-  }
-
-  void _showSelectorIdioma() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1E293B),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Selecione o Idioma',
-              style: TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            const SizedBox(height: 16),
-            ...['pt', 'en', 'es'].map(
-              (cod) => ListTile(
-                title: Text(
-                  _getIdiomaNome(cod),
-                  style: const TextStyle(color: Colors.white),
-                ),
-                trailing: _idiomaSelecionado == cod
-                    ? const Icon(Icons.check, color: Color(0xFF00D9FF))
-                    : null,
-                onTap: () async {
-                  setState(() => _idiomaSelecionado = cod);
-                  await LocaleController.instance.setLanguageCode(cod);
-                  if (context.mounted) Navigator.pop(context);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showSelectorMoeda() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1E293B),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Selecione a Moeda',
-              style: TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            const SizedBox(height: 16),
-            ...['AUTO', 'BRL', 'USD', 'EUR'].map(
-              (cod) => ListTile(
-                title: Text(
-                  _getMoedaNome(context, cod),
-                  style: const TextStyle(color: Colors.white),
-                ),
-                trailing: _moedaSelecionada == cod
-                    ? const Icon(Icons.check, color: Color(0xFF00D9FF))
-                    : null,
-                onTap: () async {
-                  setState(() => _moedaSelecionada = cod);
-                  await CurrencyPreferenceController.instance.setCurrencyMode(cod);
-                  if (context.mounted) Navigator.pop(context);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showTrocarSenha() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
-        title: const Text(
-          'Alterar Senha',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Enviaremos um link para seu e-mail.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancelar',
-              style: TextStyle(color: Colors.white54),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final email = FirebaseAuth.instance.currentUser?.email;
-              if (email != null) {
-                await FirebaseAuth.instance.sendPasswordResetEmail(
-                  email: email,
-                );
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Link enviado para $email')),
-                  );
-                }
-              }
-            },
-            child: const Text(
-              'Enviar',
-              style: TextStyle(color: Color(0xFF00D9FF)),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

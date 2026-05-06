@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Nomes dos campos de despesa em [TelaConfiguracao] (`valor_*` / `ativo_*`).
+/// Nomes dos campos de despesa em [FinanceConfigurationPage] (`valor_*` / `ativo_*`).
 /// Manter alinhado à lista de campos da tela de configuração.
 const List<String> kFinanceExpensePrefFieldNames = [
   'Aluguel',

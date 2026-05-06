@@ -289,7 +289,6 @@ class _MentoriaFogTransitionState extends State<_MentoriaFogTransition> {
       splashAsset: 'assets/images/DevVoid_logo.png',
       backgroundColor: Colors.black,
       progressColor: const Color(0xFF00E5FF),
-      particlesColor: const Color(0xFF00E5FF),
     );
   }
 }

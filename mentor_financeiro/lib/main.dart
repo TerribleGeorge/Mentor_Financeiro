@@ -136,16 +136,27 @@ _bootstrapSplashContext() async {
       info != null &&
       RevenueCatSubscriptionService.customerHasPremiumAccess(info);
 
-  // Tema salvo nas prefs deve ser usado para branding premium.
-  await themeController.initialize();
-  await themeController.setPremiumStatus(isPremium);
-  if (!isPremium && themeController.themeMode.requiresPremiumEntitlement) {
-    await themeController.setThemeMode(AppThemeMode.voidTheme);
+  AppThemeMode themeForBranding = AppThemeMode.voidTheme;
+  try {
+    await themeController.initialize();
+    await themeController.setPremiumStatus(isPremium);
+    final mode = themeController.themeMode;
+    if (!isPremium && mode.requiresPremiumEntitlement) {
+      await themeController.setThemeMode(AppThemeMode.voidTheme);
+    }
+    themeForBranding = themeController.themeMode;
+  } catch (e, st) {
+    log(
+      'theme bootstrap: $e',
+      name: 'mentor.bootstrap',
+      error: e,
+      stackTrace: st,
+    );
   }
 
   final branding = SplashAssetResolver.resolveBranding(
     isPremium: isPremium,
-    theme: themeController.themeMode,
+    theme: themeForBranding,
   );
 
   return (
@@ -303,7 +314,7 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
   String _splashAssetPath = SplashAssetResolver.devVoidLogo;
   Color _splashBackground = Colors.black;
   Color _splashProgress = const Color(0xFFE5E7EB);
-  Color _splashParticles = const Color(0xFF0B0B0B);
+  Color _splashParticles = const Color(0xFF020202);
   bool _bootComplete = false;
 
   @override
@@ -341,7 +352,7 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
           _splashAssetPath = SplashAssetResolver.devVoidLogo;
           _splashBackground = Colors.black;
           _splashProgress = const Color(0xFFE5E7EB);
-          _splashParticles = const Color(0xFF0B0B0B);
+          _splashParticles = const Color(0xFF020202);
           _splashReady = true;
         });
       }
@@ -387,7 +398,7 @@ class _AppBootstrapShellState extends State<AppBootstrapShell> {
                 splashAsset: _splashAssetPath,
                 backgroundColor: _splashBackground,
                 progressColor: _splashProgress,
-                particlesColor: _splashParticles,
+                particleColor: _splashParticles,
               ),
             ),
     );

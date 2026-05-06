@@ -12,25 +12,23 @@ import 'package:flutter/material.dart';
 // Armazenamento local
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/constants/app_routes.dart';
 import '../theme/classic_mode_style.dart';
 
 // Serviço Firebase (para backup na nuvem)
 import '../services/firebase_service.dart';
 import '../services/finance_config_signals.dart';
 
-// Tela Principal
-import 'tela_home.dart';
-
-// WIDGET STATEFUL
-class TelaConfiguracao extends StatefulWidget {
-  const TelaConfiguracao({super.key});
+/// Configuração de renda, saldo e gastos fixos (persistência local + Firestore).
+class FinanceConfigurationPage extends StatefulWidget {
+  const FinanceConfigurationPage({super.key});
 
   @override
-  State<TelaConfiguracao> createState() => _TelaConfiguracaoState();
+  State<FinanceConfigurationPage> createState() =>
+      _FinanceConfigurationPageState();
 }
 
-// ESTADO DA TELA CONFIGURAÇÃO
-class _TelaConfiguracaoState extends State<TelaConfiguracao> {
+class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
   // ==============================================================================
   // FORM KEY
   // ==============================================================================
@@ -227,9 +225,7 @@ class _TelaConfiguracaoState extends State<TelaConfiguracao> {
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop(true);
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const TelaHome()),
-      );
+      Navigator.of(context).pushReplacementNamed(AppRoutes.home);
     }
   }
 

@@ -10,6 +10,7 @@ abstract final class AppRoutes {
   static const String insightDetail = '/insight-detail';
   static const String principal = '/principal';
   static const String configuracao = '/configuracao';
+  static const String settings = '/settings';
   static const String perfil = '/perfil';
   static const String historico = '/historico';
   static const String metas = '/metas';

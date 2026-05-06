@@ -25,7 +25,6 @@ class AppThemeController extends ChangeNotifier {
   AppThemeController._internal();
 
   static const String _themeKeyV2 = 'app_theme_preset_v2';
-  static const String _themeKeyLegacy = 'app_theme_mode';
   static const String _isPremiumKey = 'is_premium';
 
   AppThemeMode _themeMode = AppThemeMode.voidTheme;
@@ -43,91 +42,115 @@ class AppThemeController extends ChangeNotifier {
   Color get widgetColor => _adaptiveVisuals.widgetColor;
 
   Color get backdropBaseColor {
-    switch (_themeMode) {
-      case AppThemeMode.voidTheme:
-        return const Color(0xFF000000);
-      case AppThemeMode.cyber:
-        return const Color(0xFF1A1D26);
-      case AppThemeMode.obsidian:
-        return const Color(0xFF2D3238);
-      case AppThemeMode.glacier:
-        return const Color(0xFFF0F9FF);
-    }
+    // Estética universal (Void): sempre preto absoluto.
+    return const Color(0xFF000000);
   }
 
   ThemeData get currentTheme {
-    final ThemeData base = switch (_themeMode) {
-      AppThemeMode.voidTheme => _voidTheme,
-      AppThemeMode.cyber => _cyberTheme,
-      AppThemeMode.obsidian => _obsidianTheme,
-      AppThemeMode.glacier => _glacierTheme,
-    };
-    return _mergeAdaptive(base, _adaptiveVisuals);
+    // Estética universal (Void): tema único para Free/Premium.
+    return _mergeAdaptive(_voidTheme, _adaptiveVisuals);
+  }
+
+  static const _neonCyan = Color(0xFF00E5FF);
+  static const _neonLime = Color(0xFF26DE81);
+
+  static List<Shadow> _softGlow(Color c) => [
+        Shadow(
+          color: c.withValues(alpha: 0.35),
+          blurRadius: 10,
+          offset: const Offset(0, 1.5),
+        ),
+      ];
+
+  static TextTheme _applyUniversalLegibleTextTheme(TextTheme base) {
+    // Tudo claro, sem texto escuro em nenhuma tela.
+    return base.copyWith(
+      displayLarge: base.displayLarge?.copyWith(
+        color: Colors.white,
+        shadows: _softGlow(_neonCyan),
+      ),
+      displayMedium: base.displayMedium?.copyWith(
+        color: Colors.white,
+        shadows: _softGlow(_neonCyan),
+      ),
+      displaySmall: base.displaySmall?.copyWith(
+        color: Colors.white,
+        shadows: _softGlow(_neonCyan),
+      ),
+      headlineLarge: base.headlineLarge?.copyWith(
+        color: Colors.white,
+        shadows: _softGlow(_neonCyan),
+      ),
+      headlineMedium: base.headlineMedium?.copyWith(
+        color: Colors.white,
+        shadows: _softGlow(_neonCyan),
+      ),
+      headlineSmall: base.headlineSmall?.copyWith(
+        color: Colors.white,
+        shadows: _softGlow(_neonCyan),
+      ),
+      titleLarge: base.titleLarge?.copyWith(
+        color: Colors.white,
+        shadows: _softGlow(_neonCyan),
+      ),
+      titleMedium: base.titleMedium?.copyWith(
+        color: Colors.white,
+        shadows: _softGlow(_neonCyan),
+      ),
+      titleSmall: base.titleSmall?.copyWith(
+        color: Colors.white,
+        shadows: _softGlow(_neonCyan),
+      ),
+      bodyLarge: base.bodyLarge?.copyWith(
+        color: Colors.white.withValues(alpha: 0.92),
+        shadows: _softGlow(_neonCyan),
+      ),
+      bodyMedium: base.bodyMedium?.copyWith(
+        color: Colors.white.withValues(alpha: 0.9),
+        shadows: _softGlow(_neonCyan),
+      ),
+      bodySmall: base.bodySmall?.copyWith(
+        color: Colors.white.withValues(alpha: 0.78),
+        shadows: _softGlow(_neonCyan),
+      ),
+      labelLarge: base.labelLarge?.copyWith(
+        color: Colors.white,
+        shadows: _softGlow(_neonCyan),
+      ),
+      labelMedium: base.labelMedium?.copyWith(
+        color: Colors.white.withValues(alpha: 0.9),
+        shadows: _softGlow(_neonCyan),
+      ),
+      labelSmall: base.labelSmall?.copyWith(
+        color: Colors.white.withValues(alpha: 0.78),
+        shadows: _softGlow(_neonCyan),
+      ),
+    );
   }
 
   static final ThemeData _voidTheme = ThemeData(
     brightness: Brightness.dark,
     colorScheme: ColorScheme.dark(
       brightness: Brightness.dark,
-      primary: const Color(0xFF00E5FF),
-      onPrimary: const Color(0xFF001018),
-      secondary: const Color(0xFF64748B),
-      onSecondary: const Color(0xFFF1F5F9),
-      surface: const Color(0xFF0C0E12),
-      onSurface: const Color(0xFFE2E8F0),
-      surfaceContainerHighest: const Color(0xFF161B22),
-      outline: const Color(0xFF334155),
-      outlineVariant: const Color(0xFF1E293B),
+      primary: _neonCyan,
+      onPrimary: Colors.black,
+      secondary: _neonLime,
+      onSecondary: Colors.black,
+      surface: const Color(0xFF000000),
+      onSurface: Colors.white,
+      surfaceContainerHighest: const Color(0xFF0D1118),
+      outline: const Color(0xFF0B2A35),
+      outlineVariant: const Color(0xFF07202A),
     ),
     scaffoldBackgroundColor: const Color(0xFF000000),
     useMaterial3: true,
     cardTheme: const CardThemeData(color: Color(0xFF0D1118), elevation: 0),
   );
 
-  static final ThemeData _cyberTheme = ThemeData(
-    brightness: Brightness.dark,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFFD946EF),
-      brightness: Brightness.dark,
-      surface: Color(0xFF1A1D26),
-      primary: Color(0xFFE879F9),
-    ),
-    scaffoldBackgroundColor: const Color(0xFF1A1D26),
-    useMaterial3: true,
-    cardTheme: CardThemeData(
-      color: const Color(0xFF252936).withValues(alpha: 0.55),
-      elevation: 0,
-    ),
-  );
-
-  static final ThemeData _obsidianTheme = ThemeData(
-    brightness: Brightness.dark,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFFC0C5CE),
-      brightness: Brightness.dark,
-      surface: Color(0xFF2D3238),
-      primary: Color(0xFFC0C5CE),
-    ),
-    scaffoldBackgroundColor: const Color(0xFF2D3238),
-    useMaterial3: true,
-    cardTheme: const CardThemeData(color: Color(0xFF3D444D), elevation: 0),
-  );
-
-  static final ThemeData _glacierTheme = ThemeData(
-    brightness: Brightness.light,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF0EA5E9),
-      brightness: Brightness.light,
-      surface: Color(0xFFF8FAFC),
-      primary: Color(0xFF0284C7),
-      onSurface: Color(0xFF0A1628),
-    ),
-    scaffoldBackgroundColor: const Color(0xFFF0F9FF),
-    useMaterial3: true,
-    cardTheme: const CardThemeData(color: Color(0xFFEFF6FF), elevation: 0),
-  );
+  // Temas antigos (Cyber/Grimm/Hive) removidos: estética universal agora é Void.
 
   ThemeData _mergeAdaptive(ThemeData base, MentorAdaptiveVisuals v) {
+    final textTheme = _applyUniversalLegibleTextTheme(base.textTheme);
     return base.copyWith(
       scaffoldBackgroundColor: Colors.transparent,
       cardTheme: CardThemeData(
@@ -141,6 +164,17 @@ class AppThemeController extends ChangeNotifier {
         onSurface: v.textColor,
         onSurfaceVariant: v.secondaryTextColor,
       ),
+      textTheme: textTheme,
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: TextStyle(
+          color: Colors.white.withValues(alpha: 0.8),
+          shadows: _softGlow(_neonCyan),
+        ),
+        hintStyle: TextStyle(
+          color: Colors.white.withValues(alpha: 0.55),
+          shadows: _softGlow(_neonCyan),
+        ),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         foregroundColor: v.textColor,
@@ -152,6 +186,7 @@ class AppThemeController extends ChangeNotifier {
           color: v.textColor,
           fontSize: 20,
           fontWeight: FontWeight.w600,
+          shadows: _softGlow(_neonCyan),
         ),
       ),
       listTileTheme: ListTileThemeData(
@@ -182,28 +217,11 @@ class AppThemeController extends ChangeNotifier {
     _isLoading = true;
 
     final prefs = await SharedPreferences.getInstance();
-    final v2 = prefs.getInt(_themeKeyV2);
-    if (v2 != null && v2 >= 0 && v2 < AppThemeMode.values.length) {
-      _themeMode = AppThemeMode.values[v2];
-    } else {
-      final legacy = prefs.getInt(_themeKeyLegacy);
-      if (legacy != null && legacy >= 0 && legacy <= 2) {
-        _themeMode = switch (legacy) {
-          0 => AppThemeMode.glacier,
-          1 => AppThemeMode.voidTheme,
-          _ => AppThemeMode.obsidian,
-        };
-      } else {
-        _themeMode = AppThemeMode.voidTheme;
-      }
-      await prefs.setInt(_themeKeyV2, _themeMode.index);
-    }
+    // Estética universal: sempre Void, independentemente de prefs antigas.
+    _themeMode = AppThemeMode.voidTheme;
+    await prefs.setInt(_themeKeyV2, _themeMode.index);
 
     _isPremium = prefs.getBool(_isPremiumKey) ?? false;
-    if (!_isPremium && _themeMode.requiresPremiumEntitlement) {
-      _themeMode = AppThemeMode.voidTheme;
-      await prefs.setInt(_themeKeyV2, _themeMode.index);
-    }
     _recomputeAdaptiveVisuals();
 
     // Evitar poluição do console em produção.
@@ -221,16 +239,15 @@ class AppThemeController extends ChangeNotifier {
   }
 
   Future<void> setThemeMode(AppThemeMode mode) async {
-    if (mode.requiresPremiumEntitlement && !_isPremium) {
-      return;
-    }
-    if (_themeMode == mode) return;
-    _themeMode = mode;
+    // Universal Void: ignorar trocas para outros temas.
+    if (mode != AppThemeMode.voidTheme) return;
+    if (_themeMode == AppThemeMode.voidTheme) return;
+    _themeMode = AppThemeMode.voidTheme;
     _recomputeAdaptiveVisuals();
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_themeKeyV2, mode.index);
+    await prefs.setInt(_themeKeyV2, AppThemeMode.voidTheme.index);
   }
 
   Color get backgroundColor => backdropBaseColor;

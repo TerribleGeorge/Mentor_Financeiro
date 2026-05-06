@@ -104,6 +104,7 @@ dependencies:
   purchases_ui_flutter: ^10.0.1
   particles_flutter: ^2.0.2
   google_mobile_ads: ^6.0.0
+  flutter_notification_listener: ^1.4.0
   # firebase_ai: ^3.10.0  # Temporariamente desativado
 
 # ==============================================================================
@@ -173,6 +174,7 @@ flutter:
     - assets/.env
     - assets/icons/app_icon.png
     - assets/images/DevVoid_logo.png
+    - assets/images/devvoid_standard.png
     - assets/images/devvoid_cyber.png
     - assets/images/devvoid_grimm.png
     - assets/images/devvoid_hive.png
