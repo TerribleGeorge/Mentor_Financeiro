@@ -30,7 +30,10 @@ class _SettingsPageState extends State<SettingsPage> {
   String _nomeExibicao = 'Usuário';
   String? _photoUrl;
 
-  static const _chevron = Icon(Icons.chevron_right, color: Color(0x66FFFFFF));
+  Icon get _chevron => Icon(
+    Icons.chevron_right,
+    color: Theme.of(context).colorScheme.onSurfaceVariant,
+  );
 
   @override
   void initState() {
@@ -61,7 +64,9 @@ class _SettingsPageState extends State<SettingsPage> {
   bool get _podeAlterarSenha {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
-    return user.providerData.any((p) => p.providerId == EmailAuthProvider.PROVIDER_ID);
+    return user.providerData.any(
+      (p) => p.providerId == EmailAuthProvider.PROVIDER_ID,
+    );
   }
 
   Future<void> _abrirPaywall() async {
@@ -98,7 +103,9 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: const Color(0xFF0D1118),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: SettingsPage.voidCyan.withValues(alpha: 0.35)),
+          side: BorderSide(
+            color: SettingsPage.voidCyan.withValues(alpha: 0.35),
+          ),
         ),
         title: const Text(
           'Alterar palavra-passe',
@@ -179,7 +186,11 @@ class _SettingsPageState extends State<SettingsPage> {
     if (nova.length < 6) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('A nova palavra-passe deve ter pelo menos 6 caracteres.')),
+          const SnackBar(
+            content: Text(
+              'A nova palavra-passe deve ter pelo menos 6 caracteres.',
+            ),
+          ),
         );
       }
       return;
@@ -205,14 +216,16 @@ class _SettingsPageState extends State<SettingsPage> {
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Falha ao alterar a palavra-passe.')),
+          SnackBar(
+            content: Text(e.message ?? 'Falha ao alterar a palavra-passe.'),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     }
   }
@@ -224,7 +237,9 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: const Color(0xFF0D1118),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: SettingsPage.voidCyan.withValues(alpha: 0.35)),
+          side: BorderSide(
+            color: SettingsPage.voidCyan.withValues(alpha: 0.35),
+          ),
         ),
         title: const Text(
           'Terminar sessão',
@@ -269,17 +284,16 @@ class _SettingsPageState extends State<SettingsPage> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao sair: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao sair: $e')));
       }
     }
   }
 
   Future<void> _definirTema(AppThemeMode mode, AppThemeController theme) async {
     final sub = context.read<SubscriptionProvider>();
-    final premiumOk =
-        sub.isPremium || sub.hasPremiumEntitlementFromRevenueCat;
+    final premiumOk = sub.isPremium || sub.hasPremiumEntitlementFromRevenueCat;
     if (mode.requiresPremiumEntitlement && !premiumOk) {
       await _abrirPaywall();
       return;
@@ -308,21 +322,28 @@ class _SettingsPageState extends State<SettingsPage> {
     final subscription = context.watch<SubscriptionProvider>();
     final theme = context.watch<AppThemeController>();
     final brightnessTheme = context.watch<ThemeController>();
+    final scheme = Theme.of(context).colorScheme;
+    final textColor = scheme.onSurface;
+    final mutedColor = scheme.onSurfaceVariant;
+    final accentColor = scheme.primary;
+    final successColor = scheme.secondary;
+    final dividerColor = scheme.outlineVariant.withValues(alpha: 0.45);
+    final dropdownColor = scheme.surface;
     final user = FirebaseAuth.instance.currentUser;
     final userEmail = user?.email;
     final email = userEmail ?? 'Sem sessão iniciada';
 
     return Scaffold(
-      backgroundColor: SettingsPage.voidBlack,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: SettingsPage.voidBlack,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.white,
-        title: const Text(
+        foregroundColor: textColor,
+        title: Text(
           'Definições',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        iconTheme: const IconThemeData(color: SettingsPage.voidCyan),
+        iconTheme: IconThemeData(color: accentColor),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -333,17 +354,18 @@ class _SettingsPageState extends State<SettingsPage> {
             contentPadding: EdgeInsets.zero,
             leading: CircleAvatar(
               radius: 28,
-              backgroundColor: SettingsPage.voidCyan.withValues(alpha: 0.2),
-              foregroundImage:
-                  _photoUrl != null && _photoUrl!.isNotEmpty ? NetworkImage(_photoUrl!) : null,
+              backgroundColor: accentColor.withValues(alpha: 0.16),
+              foregroundImage: _photoUrl != null && _photoUrl!.isNotEmpty
+                  ? NetworkImage(_photoUrl!)
+                  : null,
               child: (_photoUrl == null || _photoUrl!.isEmpty)
-                  ? const Icon(Icons.person, color: SettingsPage.voidCyan, size: 28)
+                  ? Icon(Icons.person, color: accentColor, size: 28)
                   : null,
             ),
             title: Text(
               _nomeExibicao,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: textColor,
                 fontWeight: FontWeight.w700,
                 fontSize: 17,
               ),
@@ -352,64 +374,63 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.only(top: 6),
               child: Text(
                 email,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.55),
-                  fontSize: 13,
-                ),
+                style: TextStyle(color: mutedColor, fontSize: 13),
               ),
             ),
           ),
-          const Divider(height: 24, color: Color(0x14FFFFFF)),
+          Divider(height: 24, color: dividerColor),
           ListTile(
-            leading: const Icon(Icons.lock_outline_rounded, color: SettingsPage.voidCyan),
-            title: const Text(
+            leading: Icon(Icons.lock_outline_rounded, color: accentColor),
+            title: Text(
               'Alterar palavra-passe',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               _podeAlterarSenha
                   ? 'Actualizar credenciais Firebase'
                   : 'Indisponível para login só com Google',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 12),
+              style: TextStyle(color: mutedColor, fontSize: 12),
             ),
             trailing: _chevron,
             onTap: _mostrarAlterarSenha,
           ),
-          const Divider(height: 1, color: Color(0x14FFFFFF)),
+          Divider(height: 1, color: dividerColor),
           ListTile(
-            leading: const Icon(Icons.savings_outlined, color: SettingsPage.voidNeonGreen),
-            title: const Text(
+            leading: Icon(Icons.savings_outlined, color: successColor),
+            title: Text(
               'Renda e gastos fixos',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               'Configurar orçamento mensal',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 13),
+              style: TextStyle(color: mutedColor, fontSize: 13),
             ),
             trailing: _chevron,
             onTap: () {
               Navigator.of(context).push<void>(
-                MaterialPageRoute<void>(builder: (_) => const FinanceConfigurationPage()),
+                MaterialPageRoute<void>(
+                  builder: (_) => const FinanceConfigurationPage(),
+                ),
               );
             },
           ),
-          const Divider(height: 24, color: Color(0x14FFFFFF)),
+          Divider(height: 24, color: dividerColor),
           _secTitle('Brilho (Material)'),
           const SizedBox(height: 4),
           ListTile(
             leading: Icon(
               Icons.brightness_auto_rounded,
               color: brightnessTheme.themeMode == ThemeMode.system
-                  ? SettingsPage.voidCyan
-                  : Colors.white38,
+                  ? accentColor
+                  : mutedColor,
             ),
-            title: const Text(
+            title: Text(
               'Seguir sistema',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               'Usar claro ou escuro conforme o SO',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 12),
+              style: TextStyle(color: mutedColor, fontSize: 12),
             ),
             onTap: () => brightnessTheme.setThemeMode(ThemeMode.system),
           ),
@@ -417,16 +438,16 @@ class _SettingsPageState extends State<SettingsPage> {
             leading: Icon(
               Icons.light_mode_outlined,
               color: brightnessTheme.themeMode == ThemeMode.light
-                  ? SettingsPage.voidCyan
-                  : Colors.white38,
+                  ? accentColor
+                  : mutedColor,
             ),
-            title: const Text(
+            title: Text(
               'Claro',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               'Interface sempre clara',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 12),
+              style: TextStyle(color: mutedColor, fontSize: 12),
             ),
             onTap: () => brightnessTheme.setThemeMode(ThemeMode.light),
           ),
@@ -434,51 +455,50 @@ class _SettingsPageState extends State<SettingsPage> {
             leading: Icon(
               Icons.dark_mode_outlined,
               color: brightnessTheme.themeMode == ThemeMode.dark
-                  ? SettingsPage.voidCyan
-                  : Colors.white38,
+                  ? accentColor
+                  : mutedColor,
             ),
-            title: const Text(
+            title: Text(
               'Escuro',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               'Interface sempre escura',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 12),
+              style: TextStyle(color: mutedColor, fontSize: 12),
             ),
             onTap: () => brightnessTheme.setThemeMode(ThemeMode.dark),
           ),
-          const Divider(height: 24, color: Color(0x14FFFFFF)),
+          Divider(height: 24, color: dividerColor),
           _secTitle('Aparência (Void)'),
           const SizedBox(height: 4),
           ...AppThemeMode.values.map((mode) {
-            final premiumOk = subscription.isPremium ||
+            final premiumOk =
+                subscription.isPremium ||
                 subscription.hasPremiumEntitlementFromRevenueCat;
-            final locked =
-                mode.requiresPremiumEntitlement && !premiumOk;
+            final locked = mode.requiresPremiumEntitlement && !premiumOk;
             final selected = theme.themeMode == mode;
             return ListTile(
               leading: Icon(
                 selected ? Icons.radio_button_checked : Icons.radio_button_off,
-                color: selected ? SettingsPage.voidCyan : Colors.white38,
+                color: selected ? accentColor : mutedColor,
               ),
               title: Text(
                 themeLabel(mode),
                 style: TextStyle(
-                  color: selected ? SettingsPage.voidCyan : Colors.white,
+                  color: selected ? accentColor : textColor,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
               subtitle: Text(
-                locked ? 'Premium · toque para ver planos' : themeSubtitle(mode),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.45),
-                  fontSize: 12,
-                ),
+                locked
+                    ? 'Premium · toque para ver planos'
+                    : themeSubtitle(mode),
+                style: TextStyle(color: mutedColor, fontSize: 12),
               ),
               onTap: () => _definirTema(mode, theme),
             );
           }),
-          const Divider(height: 24, color: Color(0x14FFFFFF)),
+          Divider(height: 24, color: dividerColor),
           _secTitle('Idioma e moeda'),
           ListenableBuilder(
             listenable: Listenable.merge([
@@ -491,20 +511,23 @@ class _SettingsPageState extends State<SettingsPage> {
               return Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.language, color: SettingsPage.voidCyan),
-                    title: const Text(
+                    leading: Icon(Icons.language, color: accentColor),
+                    title: Text(
                       'Idioma da app',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     subtitle: Text(
                       _languageLabel(lc.locale.languageCode),
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                      style: TextStyle(color: mutedColor),
                     ),
                     trailing: DropdownButton<String>(
                       value: lc.locale.languageCode,
-                      dropdownColor: const Color(0xFF0D1118),
+                      dropdownColor: dropdownColor,
                       underline: const SizedBox.shrink(),
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: textColor),
                       items: LocaleController.supportedLanguageCodes
                           .map(
                             (code) => DropdownMenuItem(
@@ -519,22 +542,28 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.payments_outlined, color: SettingsPage.voidNeonGreen),
-                    title: const Text(
+                    leading: Icon(Icons.payments_outlined, color: successColor),
+                    title: Text(
                       'Moeda de exibição',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     subtitle: Text(
                       _rotuloMoeda(cc.mode),
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                      style: TextStyle(color: mutedColor),
                     ),
                     trailing: DropdownButton<String>(
                       value: cc.mode,
-                      dropdownColor: const Color(0xFF0D1118),
+                      dropdownColor: dropdownColor,
                       underline: const SizedBox.shrink(),
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: textColor),
                       items: const [
-                        DropdownMenuItem(value: 'AUTO', child: Text('Automática')),
+                        DropdownMenuItem(
+                          value: 'AUTO',
+                          child: Text('Automática'),
+                        ),
                         DropdownMenuItem(value: 'BRL', child: Text('BRL')),
                         DropdownMenuItem(value: 'USD', child: Text('USD')),
                         DropdownMenuItem(value: 'EUR', child: Text('EUR')),
@@ -548,20 +577,18 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
-          const Divider(height: 24, color: Color(0x14FFFFFF)),
+          Divider(height: 24, color: dividerColor),
           _secTitle('Assinatura'),
           ListTile(
             leading: Icon(
               subscription.isPremium
                   ? Icons.verified_outlined
                   : Icons.workspace_premium_outlined,
-              color: subscription.isPremium
-                  ? SettingsPage.voidNeonGreen
-                  : SettingsPage.voidCyan,
+              color: subscription.isPremium ? successColor : accentColor,
             ),
-            title: const Text(
+            title: Text(
               'Estado RevenueCat',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -571,13 +598,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         Icon(
                           Icons.circle,
                           size: 8,
-                          color: SettingsPage.voidNeonGreen.withValues(alpha: 0.95),
+                          color: successColor.withValues(alpha: 0.95),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Assinante activo',
                           style: TextStyle(
-                            color: SettingsPage.voidNeonGreen.withValues(alpha: 0.92),
+                            color: successColor.withValues(alpha: 0.92),
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -589,24 +616,28 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         Text(
                           'Plano Free · anúncios activos',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            fontSize: 13,
-                          ),
+                          style: TextStyle(color: mutedColor, fontSize: 13),
                         ),
                         const SizedBox(height: 10),
                         Align(
                           alignment: Alignment.centerLeft,
                           child: TextButton(
-                            onPressed: subscription.isLoading ? null : _abrirPaywall,
+                            onPressed: subscription.isLoading
+                                ? null
+                                : _abrirPaywall,
                             style: TextButton.styleFrom(
-                              foregroundColor: SettingsPage.voidCyan,
-                              backgroundColor: SettingsPage.voidCyan.withValues(alpha: 0.08),
+                              foregroundColor: accentColor,
+                              backgroundColor: accentColor.withValues(
+                                alpha: 0.08,
+                              ),
                               side: BorderSide(
-                                color: SettingsPage.voidCyan.withValues(alpha: 0.85),
+                                color: accentColor.withValues(alpha: 0.85),
                                 width: 1.2,
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -638,7 +669,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             subtitle: Text(
               'Sair deste dispositivo',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 13),
+              style: TextStyle(color: mutedColor, fontSize: 13),
             ),
             trailing: _chevron,
             onTap: _logout,
@@ -646,18 +677,18 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 24),
           if (userEmail?.trim().toLowerCase() ==
               'george.guimares@gmail.com') ...[
-            const Divider(height: 1, color: Color(0x14FFFFFF)),
+            Divider(height: 1, color: dividerColor),
             ListTile(
-              leading: Icon(Icons.bolt_rounded, color: SettingsPage.voidNeonGreen),
-              title: const Text(
+              leading: Icon(Icons.bolt_rounded, color: successColor),
+              title: Text(
                 'Simular Premium (Admin)',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
                 'Bypass · apenas administrador',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
+                style: TextStyle(color: mutedColor),
               ),
-              trailing: const Icon(Icons.chevron_right, color: Color(0x66FFFFFF)),
+              trailing: _chevron,
               onTap: subscription.isLoading
                   ? null
                   : () async {
@@ -677,17 +708,17 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _secTitle(String t) => Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          t,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.42),
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
-          ),
-        ),
-      );
+    alignment: Alignment.centerLeft,
+    child: Text(
+      t,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.2,
+      ),
+    ),
+  );
 
   static String themeLabel(AppThemeMode mode) {
     switch (mode) {

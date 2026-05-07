@@ -17,8 +17,9 @@ class MentorAppBackdrop extends StatefulWidget {
 
   static Future<String> _resolveLegacyBgAsset(BuildContext context) async {
     try {
-      final manifest =
-          await DefaultAssetBundle.of(context).loadString('AssetManifest.json');
+      final manifest = await DefaultAssetBundle.of(
+        context,
+      ).loadString('AssetManifest.json');
       if (manifest.contains(_legacyPreferredBg)) return _legacyPreferredBg;
     } catch (_) {}
     return _legacyFallbackBg;
@@ -47,11 +48,30 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
     super.dispose();
   }
 
-  bool _useVoidBackdrop(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    final preset = AppThemeController.instance.themeMode;
-    return brightness == Brightness.dark ||
-        preset == AppThemeMode.voidTheme;
+  String _assetForPreset(AppThemeMode preset) {
+    switch (preset) {
+      case AppThemeMode.voidTheme:
+        return 'assets/images/DevVoid_standard.png';
+      case AppThemeMode.cyber:
+        return 'assets/images/bg_cyber.png';
+      case AppThemeMode.obsidian:
+        return 'assets/images/bg_grimm.png';
+      case AppThemeMode.glacier:
+        return 'assets/images/hive_bg.png';
+    }
+  }
+
+  Color _accentForPreset(AppThemeMode preset) {
+    switch (preset) {
+      case AppThemeMode.voidTheme:
+        return const Color(0xFF6B7280);
+      case AppThemeMode.cyber:
+        return const Color(0xFFFFEA00);
+      case AppThemeMode.obsidian:
+        return const Color(0xFFFF1744);
+      case AppThemeMode.glacier:
+        return const Color(0xFFFF6D00);
+    }
   }
 
   @override
@@ -62,9 +82,13 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
         ThemeController.instance,
       ]),
       builder: (context, _) {
-        final showVoid = _useVoidBackdrop(context);
+        final brightness = Theme.of(context).brightness;
+        final isDark = brightness == Brightness.dark;
+        final preset = AppThemeController.instance.themeMode;
 
-        if (showVoid) {
+        if (isDark) {
+          final asset = _assetForPreset(preset);
+          final accent = _accentForPreset(preset);
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -76,7 +100,7 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
                     BlendMode.darken,
                   ),
                   child: Image.asset(
-                    'assets/images/DevVoid_standard.png',
+                    asset,
                     fit: BoxFit.cover,
                     gaplessPlayback: true,
                     filterQuality: FilterQuality.high,
@@ -92,7 +116,7 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
                     return CustomPaint(
                       painter: SmokeVortexPainter(
                         animationValue: _voidParticleController.value,
-                        accentTint: const Color(0xFF6B7280),
+                        accentTint: accent,
                       ),
                     );
                   },
@@ -113,21 +137,24 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
                   ),
                 ),
               ),
-              Positioned.fill(
-                child: widget.child ?? const SizedBox.shrink(),
-              ),
+              Positioned.fill(child: widget.child ?? const SizedBox.shrink()),
             ],
           );
         }
 
         return FutureBuilder<String>(
-          future: MentorAppBackdrop._resolveLegacyBgAsset(context),
+          future: preset == AppThemeMode.voidTheme
+              ? MentorAppBackdrop._resolveLegacyBgAsset(context)
+              : Future<String>.value(_assetForPreset(preset)),
           builder: (context, snap) {
-            final asset = snap.data ?? MentorAppBackdrop._legacyFallbackBg;
+            final asset = snap.data ?? _assetForPreset(preset);
+            final tint = _accentForPreset(preset);
             return Stack(
               fit: StackFit.expand,
               children: [
-                const Positioned.fill(child: ColoredBox(color: Colors.black)),
+                const Positioned.fill(
+                  child: ColoredBox(color: Color(0xFFF8FAFC)),
+                ),
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -143,7 +170,7 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                       child: Container(
-                        color: Colors.black.withValues(alpha: 0.28),
+                        color: Colors.white.withValues(alpha: 0.58),
                       ),
                     ),
                   ),
@@ -155,17 +182,15 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          const Color(0xFF000000).withValues(alpha: 0.65),
-                          const Color(0xFF07121B).withValues(alpha: 0.25),
-                          const Color(0xFF000000).withValues(alpha: 0.55),
+                          Colors.white.withValues(alpha: 0.82),
+                          tint.withValues(alpha: 0.10),
+                          Colors.white.withValues(alpha: 0.76),
                         ],
                       ),
                     ),
                   ),
                 ),
-                Positioned.fill(
-                  child: widget.child ?? const SizedBox.shrink(),
-                ),
+                Positioned.fill(child: widget.child ?? const SizedBox.shrink()),
               ],
             );
           },
