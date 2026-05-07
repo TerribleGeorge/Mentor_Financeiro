@@ -71,65 +71,67 @@ Future<void> _loadDotEnv() async {
 }
 
 Future<void> main() async {
-  runZonedGuarded<Future<void>>(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded<Future<void>>(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
-    if (!kIsWeb) {
-      FlutterError.onError =
-          FirebaseCrashlytics.instance.recordFlutterFatalError;
-    }
-
-    await _loadDotEnv();
-    unawaited(MobileAds.instance.initialize());
-
-    if (kDebugMode) {
-      final keyOk = AppSecrets.revenueCatAndroid != null &&
-          (AppSecrets.revenueCatAndroid ?? '').trim().isNotEmpty;
-      log(
-        'RevenueCat: REVENUECAT_ANDROID_API_KEY ${keyOk ? "carregada" : "ausente"}.',
-        name: 'mentor.bootstrap',
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
       );
-    }
 
-    unawaited(_bootstrapRevenueCat());
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-    unawaited(FirebaseDataService.instance.setupObservability());
+      if (!kIsWeb) {
+        FlutterError.onError =
+            FirebaseCrashlytics.instance.recordFlutterFatalError;
+      }
 
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: ThemeController.instance),
-          ChangeNotifierProvider.value(value: AppThemeController.instance),
-          ChangeNotifierProvider.value(value: LocaleController.instance),
-          ChangeNotifierProvider.value(
-            value: CurrencyPreferenceController.instance,
-          ),
-          ChangeNotifierProvider.value(value: regionalContextController),
-          ChangeNotifierProvider.value(value: investmentCategoryProvider),
-          ChangeNotifierProvider(
-            create: (_) => SubscriptionProvider()..initialize(),
-          ),
-          ChangeNotifierProvider<UserPersonaService>.value(
-            value: UserPersonaService.instance,
-          ),
-        ],
-        child: RevenueCatLifecycle(
-          child: const MentorApp(),
+      await _loadDotEnv();
+      unawaited(MobileAds.instance.initialize());
+
+      if (kDebugMode) {
+        final keyOk =
+            AppSecrets.revenueCatAndroid != null &&
+            (AppSecrets.revenueCatAndroid ?? '').trim().isNotEmpty;
+        log(
+          'RevenueCat: REVENUECAT_ANDROID_API_KEY ${keyOk ? "carregada" : "ausente"}.',
+          name: 'mentor.bootstrap',
+        );
+      }
+
+      unawaited(_bootstrapRevenueCat());
+
+      unawaited(FirebaseDataService.instance.setupObservability());
+
+      runApp(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: ThemeController.instance),
+            ChangeNotifierProvider.value(value: AppThemeController.instance),
+            ChangeNotifierProvider.value(value: LocaleController.instance),
+            ChangeNotifierProvider.value(
+              value: CurrencyPreferenceController.instance,
+            ),
+            ChangeNotifierProvider.value(value: regionalContextController),
+            ChangeNotifierProvider.value(value: investmentCategoryProvider),
+            ChangeNotifierProvider(
+              create: (_) => SubscriptionProvider()..initialize(),
+            ),
+            ChangeNotifierProvider<UserPersonaService>.value(
+              value: UserPersonaService.instance,
+            ),
+          ],
+          child: RevenueCatLifecycle(child: const MentorApp()),
         ),
-      ),
-    );
-  }, (error, stack) {
-    if (!kIsWeb) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    }
-    log('Erro fatal no main: $error');
-  });
+      );
+    },
+    (error, stack) {
+      if (!kIsWeb) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      }
+      log('Erro fatal no main: $error');
+    },
+  );
 }
 
 class MentorApp extends StatelessWidget {
@@ -138,9 +140,7 @@ class MentorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // ignore: deprecated_member_use
-    return ShowCaseWidget(
-      builder: (context) => const MentorAppContent(),
-    );
+    return ShowCaseWidget(builder: (context) => const MentorAppContent());
   }
 }
 
@@ -150,50 +150,56 @@ class MentorAppContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer3<ThemeController, AppThemeController, LocaleController>(
-      builder: (context, themeController, appThemeController, localeController,
-          child) {
-        return MaterialApp(
-          key: ValueKey<String>(
-            '${themeController.themeMode.index}_'
-            '${appThemeController.themeMode.index}',
-          ),
-          navigatorKey: mentorNavigatorKey,
-          navigatorObservers: [splashRouteNavigatorObserver],
-          debugShowCheckedModeBanner: false,
-          title: 'Mentor Financeiro',
-          theme: appThemeController.themeLight,
-          darkTheme: appThemeController.themeDark,
-          themeMode: themeController.themeMode,
-          locale: localeController.locale,
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          initialRoute: AppRoutes.splash,
-          onGenerateRoute: MentorAppRouter.onGenerateRoute,
-          builder: (context, child) {
-            final shellChild = child ?? const SizedBox.shrink();
-            return PopScope(
-              canPop: false,
-              onPopInvokedWithResult: (didPop, result) {
-                if (didPop) return;
-                final nav = mentorNavigatorKey.currentState;
-                if (nav != null && nav.canPop()) {
-                  nav.pop();
-                  return;
-                }
-                SystemNavigator.pop();
-              },
-              child: ValueListenableBuilder<bool>(
-                valueListenable: splashRouteVisibleNotifier,
-                builder: (context, onSplash, _) {
-                  return onSplash
-                      ? shellChild
-                      : MentorAppBackdrop(child: shellChild);
-                },
+      builder:
+          (
+            context,
+            themeController,
+            appThemeController,
+            localeController,
+            child,
+          ) {
+            return MaterialApp(
+              key: ValueKey<String>(
+                '${themeController.themeMode.index}_'
+                '${appThemeController.themeMode.index}',
               ),
+              navigatorKey: mentorNavigatorKey,
+              navigatorObservers: [splashRouteNavigatorObserver],
+              debugShowCheckedModeBanner: false,
+              title: 'Mentor Financeiro',
+              theme: appThemeController.themeLight,
+              darkTheme: appThemeController.themeDark,
+              themeMode: themeController.themeMode,
+              locale: localeController.locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              initialRoute: AppRoutes.splash,
+              onGenerateRoute: MentorAppRouter.onGenerateRoute,
+              builder: (context, child) {
+                final shellChild = child ?? const SizedBox.shrink();
+                return PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (didPop, result) {
+                    if (didPop) return;
+                    final nav = mentorNavigatorKey.currentState;
+                    if (nav != null && nav.canPop()) {
+                      nav.pop();
+                      return;
+                    }
+                    SystemNavigator.pop();
+                  },
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: splashRouteVisibleNotifier,
+                    builder: (context, onSplash, _) {
+                      return onSplash
+                          ? shellChild
+                          : MentorAppBackdrop(child: shellChild);
+                    },
+                  ),
+                );
+              },
             );
           },
-        );
-      },
     );
   }
 }
