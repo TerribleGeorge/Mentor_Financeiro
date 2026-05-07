@@ -5,6 +5,10 @@ plugins {
 }
 
 import java.util.Properties
+import org.gradle.api.JavaVersion
+import org.gradle.api.tasks.compile.JavaCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 android {
     namespace = "com.georgeguimares.mentorfinanceiro"
@@ -13,17 +17,13 @@ android {
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     defaultConfig {
         applicationId = "com.georgeguimares.mentorfinanceiro"
-        // RevenueCat Paywalls / UI requerem API 24+ (docs.revenuecat.com).
+        // Firebase funciona com minSdk ≥21; uso ≥24 por RevenueCat Paywalls/UI.
         minSdk = maxOf(24, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -51,8 +51,6 @@ android {
 
     buildTypes {
         release {
-            // Para publicar na Play Store, configure `android/key.properties`.
-            // Se não existir, ainda compila em modo release com debug (para dev).
             signingConfig =
                 if (keystorePropertiesFile.exists()) {
                     signingConfigs.getByName("release")
@@ -61,6 +59,20 @@ android {
                 }
         }
     }
+}
+
+// JDK 17 para Kotlin (não usar `java { toolchain }` dentro de `android {}`).
+kotlin {
+    jvmToolchain(17)
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    sourceCompatibility = JavaVersion.VERSION_17.toString()
+    targetCompatibility = JavaVersion.VERSION_17.toString()
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
 }
 
 dependencies {

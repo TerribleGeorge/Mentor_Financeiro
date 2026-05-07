@@ -1,17 +1,28 @@
+import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants/app_routes.dart';
-import '../../core/navigation/fade_route.dart';
-import '../widgets/void_loading_screen.dart';
-import '../splash/splash_asset_resolver.dart';
-import '../../services/firebase_service.dart';
-import '../../services/user_persona_service.dart';
+import '../../core/navigation/mentor_navigator.dart';
 import '../../services/app_theme_controller.dart';
+import '../../services/currency_preference_controller.dart';
+import '../../services/firebase_service.dart';
+import '../../services/regional_context_controller.dart';
 import '../../services/revenue_cat_subscription_service.dart';
+import '../../services/theme_controller.dart';
+import '../../services/user_persona_service.dart';
 
-/// Splash: integridade básica + autenticação + fluxo Mentor v2.
+/// Tempo mínimo que a arte DevVoid fica visível antes de navegar (produto).
+const Duration _kSplashMinimumOnScreen = Duration(seconds: 10);
+
+/// Limite para o conjunto de inicializações em paralelo (evita bloqueio eterno).
+const Duration _kSplashInitParallelCap = Duration(seconds: 10);
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -19,176 +30,262 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  late final DateTime _splashStartedAt;
-  ({String asset, Color background, Color progress, Color particles})? _branding;
-  bool _loading = true;
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
+  static const String _logoAsset = 'assets/images/DevVoid_logo.png';
+
+  late AnimationController _smokeController;
+  late AnimationController _progressController;
 
   @override
   void initState() {
     super.initState();
-    _splashStartedAt = DateTime.now();
-    // 1) Branding primeiro (CustomerInfo) para não dar "flash" de troca de logo.
-    _loadBranding();
-    // 2) Depois segue o fluxo de navegação/login.
-    _iniciarApp();
-  }
-
-  Future<void> _loadBranding() async {
-    try {
-      final info = await RevenueCatSubscriptionService.getCustomerInfoSafe()
-          .timeout(const Duration(seconds: 2), onTimeout: () => null);
-      final isPremium = info != null &&
-          RevenueCatSubscriptionService.customerHasPremiumAccess(info);
-
-      // Tema salvo nas prefs (AppThemeController já migra legacy e aplica gate).
-      final theme = AppThemeController.instance;
-      await theme.initialize();
-      await theme.setPremiumStatus(isPremium == true);
-      if (!isPremium && theme.themeMode.requiresPremiumEntitlement) {
-        await theme.setThemeMode(AppThemeMode.voidTheme);
-      }
-
-      final branding = SplashAssetResolver.resolveBranding(
-        isPremium: isPremium == true,
-        theme: theme.themeMode,
-      );
-      if (!mounted) return;
-      // Precache fora do build e sem forçar dependências que possam falhar com `!`.
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          if (!context.mounted) return;
-          await precacheImage(AssetImage(branding.asset), context);
-        } catch (_) {
-          /* asset opcional; VoidLoadingScreen tem fallback */
-        }
-        if (!context.mounted) return;
-        setState(() {
-          _branding = branding;
-          _loading = false;
-        });
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _branding = SplashAssetResolver.resolveBranding(
-          isPremium: false,
-          theme: AppThemeMode.voidTheme,
-        );
-        _loading = false;
-      });
-    }
-  }
-
-  Future<void> _ensureHoldBeforeHome() async {
-    final elapsed = DateTime.now().difference(_splashStartedAt);
-    final min = VoidLoadingScreen.minimumNavigationHold;
-    if (elapsed < min) {
-      await Future<void>.delayed(min - elapsed);
-    }
-  }
-
-  Future<void> _iniciarApp() async {
-    final prefs = await SharedPreferences.getInstance();
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      if (mounted) {
-        await pushReplacementNamedFade(context, AppRoutes.login);
-      }
-      return;
-    }
-
-    await prefs.setString('uid', user.uid);
-    await prefs.setString('email_usuario', user.email ?? '');
-
-    final dadosUsuario = await FirebaseService.buscarDadosUsuario(user.uid);
-    var legacyOnboardingComplete = false;
-
-    if (dadosUsuario != null) {
-      await prefs.setString('nome_usuario', dadosUsuario['nome'] ?? 'Usuário');
-      if (dadosUsuario['photoURL'] != null) {
-        await prefs.setString('photo_url', dadosUsuario['photoURL']);
-      }
-      if (dadosUsuario['perfilInvestidor'] != null) {
-        await prefs.setString(
-          'perfil_investidor',
-          dadosUsuario['perfilInvestidor'],
-        );
-      }
-
-      final isAdmin = FirebaseService.verificarAdmin(user.email);
-      final isPremium = isAdmin || (dadosUsuario['isPremium'] == true);
-      await prefs.setBool('isPremium', isPremium);
-
-      final onboardingCompleto = dadosUsuario['onboardingCompleto'] ?? false;
-      legacyOnboardingComplete = onboardingCompleto == true;
-      await prefs.setBool('onboarding_completo', onboardingCompleto);
-
-      final perfilCompleto = dadosUsuario['perfilCompleto'] ?? false;
-
-      if (!perfilCompleto) {
-        if (mounted) {
-          await pushReplacementNamedFade(context, AppRoutes.questionario);
-        }
-        return;
-      } else if (!onboardingCompleto) {
-        if (mounted) {
-          await pushReplacementNamedFade(context, AppRoutes.onboardingMentor);
-        }
-        return;
-      }
-    } else {
-      final photoUrl = user.photoURL;
-      await FirebaseService.criarUsuarioPrimeiroLogin(
-        uid: user.uid,
-        nome: user.displayName ?? 'Usuário',
-        email: user.email,
-        metodoLogin: 'google',
-        photoUrl: photoUrl,
-      );
-
-      if (mounted) {
-        await pushReplacementNamedFade(context, AppRoutes.onboardingMentor);
-      }
-      return;
-    }
-
-    if (!mounted) return;
-
-    await UserPersonaService.instance.migrateFromLegacyIfNeeded(
-      legacyOnboardingComplete: legacyOnboardingComplete,
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+      ),
     );
 
-    if (!mounted) return;
+    _smokeController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    )..repeat();
 
-    if (!UserPersonaService.instance.mentorOnboardingDone) {
-      await pushReplacementNamedFade(context, AppRoutes.onboardingMentor);
-      return;
+    _progressController = AnimationController(
+      vsync: this,
+      duration: _kSplashMinimumOnScreen,
+    )..forward();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      precacheImage(const AssetImage(_logoAsset), context);
+      unawaited(_carregarTudoEMover());
+    });
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+      ),
+    );
+    _smokeController.dispose();
+    _progressController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _carregarTudoEMover() async {
+    final watch = Stopwatch()..start();
+    final user = FirebaseAuth.instance.currentUser;
+    Map<String, dynamic>? dados;
+
+    try {
+      final regional = context.read<RegionalContextController>();
+      final futures = <Future<void>>[
+        ThemeController.instance.initialize(),
+        AppThemeController.instance.initialize(),
+        regional.initialize(),
+        UserPersonaService.instance.initialize(),
+        CurrencyPreferenceController.instance.initialize(),
+        RevenueCatSubscriptionService.getCustomerInfoSafe()
+            .timeout(const Duration(seconds: 3))
+            .then((_) {}),
+      ];
+
+      if (user != null) {
+        futures.add(
+          FirebaseService.buscarDadosUsuario(user.uid)
+              .timeout(const Duration(seconds: 12))
+              .then((d) => dados = d),
+        );
+      }
+
+      await Future.wait(futures).timeout(_kSplashInitParallelCap);
+    } catch (e) {
+      debugPrint('Splash init (timeout ou erro): $e');
+      if (user != null && dados == null) {
+        try {
+          dados = await FirebaseService.buscarDadosUsuario(user.uid).timeout(
+                const Duration(seconds: 12),
+              );
+        } catch (_) {}
+      }
     }
-    if (!UserPersonaService.instance.mentorPersonaSetupDone) {
-      await pushReplacementNamedFade(context, AppRoutes.personaSetup);
+
+    final remainingMs =
+        _kSplashMinimumOnScreen.inMilliseconds - watch.elapsedMilliseconds;
+    if (remainingMs > 0) {
+      await Future<void>.delayed(Duration(milliseconds: remainingMs));
+    }
+
+    if (!mounted) return;
+    if (_progressController.value < 1.0) {
+      await _progressController.forward();
+    }
+    if (!mounted) return;
+    _navigateWith(user, dados);
+  }
+
+  void _pushReplacementNamed(String routeName) {
+    final nav = mentorNavigatorKey.currentState;
+    if (nav != null) {
+      nav.pushReplacementNamed(routeName);
       return;
     }
     if (!mounted) return;
-    await _ensureHoldBeforeHome();
-    if (!mounted) return;
-    await pushReplacementNamedFade(context, AppRoutes.home);
+    Navigator.of(context).pushReplacementNamed(routeName);
+  }
+
+  void _navigateWith(User? user, Map<String, dynamic>? dados) {
+    if (user == null) {
+      _pushReplacementNamed(AppRoutes.login);
+      return;
+    }
+    if (dados != null) {
+      if (!(dados['perfilCompleto'] ?? false)) {
+        _pushReplacementNamed(AppRoutes.questionario);
+        return;
+      }
+      if (!(dados['onboardingCompleto'] ?? false)) {
+        _pushReplacementNamed(AppRoutes.onboardingMentor);
+        return;
+      }
+    }
+    _pushReplacementNamed(AppRoutes.home);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return Container(color: Colors.black);
-    final branding = _branding;
-    if (branding == null) {
-      // Evita flash: mostra só o vazio até a decisão do branding.
-      return const ColoredBox(color: Colors.black);
-    }
-    return VoidLoadingScreen(
-      splashAsset: branding.asset,
-      backgroundColor: branding.background,
-      progressColor: branding.progress,
-      particleColor: branding.particles,
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SizedBox.expand(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                _logoAsset,
+                fit: BoxFit.cover,
+                gaplessPlayback: true,
+                filterQuality: FilterQuality.high,
+                errorBuilder: (context, error, stackTrace) =>
+                    const ColoredBox(color: Colors.black),
+              ),
+            ),
+            // Logo dominante: preenche verticalmente (sem distorcer; pode recortar laterais).
+            Positioned.fill(
+              child: Image.asset(
+                _logoAsset,
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+                gaplessPlayback: true,
+                filterQuality: FilterQuality.high,
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
+              ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: SplashForegroundSmokeParticlesPainter(
+                    animation: _smokeController,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 24,
+              right: 24,
+              bottom: 20 + bottomInset,
+              child: AnimatedBuilder(
+                animation: _progressController,
+                builder: (context, child) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: LinearProgressIndicator(
+                      value: _progressController.value.clamp(0.0, 1.0),
+                      minHeight: 4,
+                      backgroundColor: Colors.white.withValues(alpha: 0.12),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFFE5E7EB),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
+}
+
+/// Partículas pretas + fumaça densa **por cima da logo** (imersão).
+class SplashForegroundSmokeParticlesPainter extends CustomPainter {
+  SplashForegroundSmokeParticlesPainter({required this.animation})
+      : super(repaint: animation);
+
+  final Animation<double> animation;
+
+  static const int _particleCount = 76;
+  static const int _smokeBlobCount = 22;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    final t = animation.value;
+    final shortest = size.shortestSide;
+
+    // Fumaça: densa, mas sem “apagar” a arte
+    final rndSmoke = math.Random(9001);
+    for (var i = 0; i < _smokeBlobCount; i++) {
+      final phase = rndSmoke.nextDouble();
+      final bx = rndSmoke.nextDouble() * size.width;
+      final by = rndSmoke.nextDouble() * size.height;
+      final br = shortest * (0.14 + rndSmoke.nextDouble() * 0.34);
+      final sway = math.sin(t * math.pi * 2 + phase * 6) * shortest * 0.04;
+      final a = 0.12 + rndSmoke.nextDouble() * 0.18;
+      final paint = Paint()
+        ..color = Colors.black.withValues(alpha: a)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 44);
+      canvas.drawCircle(Offset(bx + sway, by), br, paint);
+    }
+
+    // Partículas: grãos visíveis, mas equilibrados
+    final rndP = math.Random(1337);
+    for (var i = 0; i < _particleCount; i++) {
+      final seed = rndP.nextDouble();
+      final baseX = rndP.nextDouble() * size.width;
+      final baseY = rndP.nextDouble() * size.height;
+      final driftX = math.sin(t * math.pi * 2 * 1.3 + seed * 12) * 14;
+      final driftY = math.cos(t * math.pi * 2 * 0.9 + seed * 9) * 11 -
+          t * 18 * (0.3 + seed * 0.7);
+      final px = (baseX + driftX) % size.width;
+      final py = (baseY + driftY) % size.height;
+      final r = lerpDouble(1.6, 4.8, rndP.nextDouble())!;
+      // Partículas mais escuras/intensas (pedido: “no máximo”), sem escurecer a arte.
+      final alpha = 0.45 + rndP.nextDouble() * 0.50;
+      final blur = lerpDouble(0.0, 4.5, rndP.nextDouble())!;
+      final p = Paint()..color = Colors.black.withValues(alpha: alpha);
+      if (blur > 0.5) {
+        p.maskFilter = MaskFilter.blur(BlurStyle.normal, blur);
+      }
+      canvas.drawCircle(Offset(px, py), r, p);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant SplashForegroundSmokeParticlesPainter oldDelegate) =>
+      true;
 }

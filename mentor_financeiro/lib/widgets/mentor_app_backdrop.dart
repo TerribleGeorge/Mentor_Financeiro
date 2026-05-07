@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../presentation/widgets/void_loading_screen.dart';
+import '../presentation/widgets/smoke_vortex_particles.dart';
 import '../services/app_theme_controller.dart';
 import '../services/theme_controller.dart';
 
@@ -37,7 +37,7 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
     super.initState();
     _voidParticleController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 28),
+      duration: const Duration(seconds: 48),
     )..repeat();
   }
 
@@ -90,9 +90,9 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
                   animation: _voidParticleController,
                   builder: (context, _) {
                     return CustomPaint(
-                      painter: VoidParticlesPainter(
+                      painter: SmokeVortexPainter(
                         animationValue: _voidParticleController.value,
-                        particleColor: const Color(0xFF000000),
+                        accentTint: const Color(0xFF6B7280),
                       ),
                     );
                   },

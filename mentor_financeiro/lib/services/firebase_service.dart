@@ -34,11 +34,13 @@ class FirebaseService {
   // Importância: Login, logout, verificação de usuário logado
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Google Sign In: Permite login com conta Google
-  // Importância: SSO - usuário não precisa criar senha
-  static final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: <String>['email', 'profile'],
-  );
+  /// [GoogleSignIn.instance.initialize] deve completar antes de qualquer outro uso (google_sign_in 7+).
+  static Future<void>? _googleSignInInitialized;
+
+  static Future<void> _ensureGoogleSignInInitialized() {
+    return _googleSignInInitialized ??=
+        GoogleSignIn.instance.initialize();
+  }
 
   // Firestore: Banco de dados principal
   // Importância: Persistência de dados do usuário
@@ -204,23 +206,49 @@ class FirebaseService {
   // Impacto: Aumenta taxa de conversão de login
   static Future<User?> loginGoogle() async {
     try {
-      // Abre popup de seleção de conta Google
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
+      await _ensureGoogleSignInInitialized();
+      if (!GoogleSignIn.instance.supportsAuthenticate()) {
+        if (kDebugMode) {
+          debugPrint(
+            'Google Sign-In: fluxo interativo não disponível nesta plataforma.',
+          );
+        }
+        return null;
+      }
 
-      // Obtém credentials do Google
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      final GoogleSignInAccount googleUser =
+          await GoogleSignIn.instance.authenticate(
+        scopeHint: const <String>['email', 'profile'],
+      );
 
-      // Cria credential do Firebase Auth
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+      String? accessToken;
+      try {
+        final existing = await googleUser.authorizationClient
+            .authorizationForScopes(const <String>['email', 'profile']);
+        final GoogleSignInClientAuthorization authz = existing ??
+            await googleUser.authorizationClient
+                .authorizeScopes(const <String>['email', 'profile']);
+        accessToken = authz.accessToken;
+      } catch (_) {
+        accessToken = null;
+      }
+
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
+        accessToken: accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Realiza login no Firebase
       final userCredential = await _auth.signInWithCredential(credential);
       return userCredential.user;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          e.code == GoogleSignInExceptionCode.interrupted) {
+        return null;
+      }
+      if (kDebugMode) debugPrint('Erro no login Google: $e');
+      return null;
     } catch (e) {
       if (kDebugMode) debugPrint("Erro no login Google: $e");
       return null;
@@ -278,7 +306,7 @@ class FirebaseService {
   // Importance: Seguraança - usuário pode sair
   static Future<void> logout() async {
     await _auth.signOut();
-    await _googleSignIn.signOut();
+    await GoogleSignIn.instance.signOut();
   }
 
   // ==============================================================================

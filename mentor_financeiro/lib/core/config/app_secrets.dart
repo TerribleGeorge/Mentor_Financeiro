@@ -2,19 +2,26 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Chaves e identificadores sensíveis vêm apenas do `.env` (nunca versionar valores reais).
 abstract final class AppSecrets {
-  static String? get revenueCatAndroid =>
-      dotenv.env['REVENUECAT_ANDROID_API_KEY']?.trim();
+  static String? _env(String key) {
+    try {
+      return dotenv.env[key]?.trim();
+    } catch (_) {
+      // [DotEnv] ainda não inicializado ou load falhou — não rebentar o arranque.
+      return null;
+    }
+  }
 
-  static String? get revenueCatIos =>
-      dotenv.env['REVENUECAT_IOS_API_KEY']?.trim();
+  static String? get revenueCatAndroid =>
+      _env('REVENUECAT_ANDROID_API_KEY');
+
+  static String? get revenueCatIos => _env('REVENUECAT_IOS_API_KEY');
 
   /// Opcional: Alpha Vantage para cotações globais ([AlphaVantageFinancialDataProvider]).
-  static String? get alphaVantageApiKey =>
-      dotenv.env['ALPHA_VANTAGE_API_KEY']?.trim();
+  static String? get alphaVantageApiKey => _env('ALPHA_VANTAGE_API_KEY');
 
   /// Um ou mais e-mails admin separados por vírgula (ex.: `a@x.com,b@y.com`).
   static Set<String> get adminEmails {
-    final raw = dotenv.env['FIREBASE_ADMIN_EMAIL']?.trim() ?? '';
+    final raw = _env('FIREBASE_ADMIN_EMAIL') ?? '';
     if (raw.isEmpty) return {};
     return raw
         .split(',')

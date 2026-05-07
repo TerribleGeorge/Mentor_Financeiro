@@ -34,7 +34,7 @@ class MentorAdaptiveVisuals extends ThemeExtension<MentorAdaptiveVisuals> {
     accentNeon: Color(0xFF0288D1),
   );
 
-  /// Void: principal + branding app_icon2 — ciano sobre preto.
+  /// Void: principal + branding icone — ciano sobre preto.
   static const MentorAdaptiveVisuals presetVoid = MentorAdaptiveVisuals(
     textColor: Color(0xFFE8FDFF),
     secondaryTextColor: Color(0xB300E5FF),

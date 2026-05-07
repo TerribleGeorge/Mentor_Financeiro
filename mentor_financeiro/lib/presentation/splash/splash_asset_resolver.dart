@@ -1,54 +1,62 @@
-import 'package:flutter/material.dart';
-
 import '../../services/app_theme_controller.dart';
 
-/// Escolhe a arte da splash com base no entitlement RevenueCat e no tema guardado.
-abstract final class SplashAssetResolver {
-  /// Logo DevVoid (fundo transparente).
-  static const String devVoidLogo = 'assets/images/DevVoid_logo.png';
-  static const String cyber = 'assets/images/devvoid_cyber.png';
-  static const String grimm = 'assets/images/devvoid_grimm.png';
-  static const String hive = 'assets/images/devvoid_hive.png';
+/// Arte da splash: fundo full-bleed + logo central (sempre [logoSplash] nas presets).
+typedef SplashBranding = ({
+  String logoAsset,
+  String backgroundAsset,
+});
 
-  /// Premium: Cyber → Grimm → Hive conforme [AppThemeMode]; Void usa standard.
-  /// Não premium ou dados inválidos: sempre [standard].
-  static String resolve({
-    required bool isPremium,
-    required AppThemeMode theme,
-  }) {
-    try {
-      // Fallback da arte DevVoid transparente.
-      // Para a Splash, usamos sempre a logo DevVoid transparente e partículas por código.
-      return devVoidLogo;
-    } catch (_) {
-      return devVoidLogo;
-    }
+/// Escolhe fundo e logo conforme entitlement Premium e tema guardado.
+abstract final class SplashAssetResolver {
+  /// Logo central (especificação do produto — não distorcer; largura = largura do ecrã).
+  static const String logoSplash = 'assets/images/devvoid_logo.png';
+
+  /// Fundos por tema (full-bleed, [BoxFit.cover]).
+  static const String freeBackground = 'assets/images/devvoid_logo.png';
+  static const String grimmBackground = 'assets/images/devvoid_grimm.png';
+  static const String cyberBackground = 'assets/images/bg_cyber.png';
+  static const String hiveBackground = 'assets/images/hive_bg.png';
+
+  /// Alias para outros ecrãs (ex.: pré-visualização).
+  static const String cyberBg = cyberBackground;
+
+  /// Legado / compat.
+  static const String devVoidLogo = logoSplash;
+
+  /// Free / Void / fallback.
+  static SplashBranding resolveDefaultSplash() {
+    return (
+      logoAsset: logoSplash,
+      backgroundAsset: freeBackground,
+    );
   }
 
-  /// Retorna branding completo (asset + fundo + cor da barra).
-  ///
-  /// - Não-premium: sempre [devVoidLogo] em fundo preto, barra metálica/branca.
-  /// - Premium: logo por tema + cores do tema.
-  static ({String asset, Color background, Color progress, Color particles})
-      resolveBranding({
+  /// Cyber / Grimm / Hive — apenas se [AppThemeMode.requiresPremiumEntitlement].
+  static SplashBranding resolvePremiumSplash(AppThemeMode theme) {
+    return switch (theme) {
+      AppThemeMode.cyber => (
+          logoAsset: logoSplash,
+          backgroundAsset: cyberBackground,
+        ),
+      AppThemeMode.obsidian => (
+          logoAsset: logoSplash,
+          backgroundAsset: grimmBackground,
+        ),
+      AppThemeMode.glacier => (
+          logoAsset: logoSplash,
+          backgroundAsset: hiveBackground,
+        ),
+      AppThemeMode.voidTheme => resolveDefaultSplash(),
+    };
+  }
+
+  static SplashBranding resolveSplash({
     required bool isPremium,
     required AppThemeMode theme,
   }) {
-    // Splash: sempre a logo DevVoid central (BoxFit.contain) em fundo preto.
-    // A diferenciação visual fica nas partículas (cor) e, se quiser, na barra.
-    final particles = switch (theme) {
-      AppThemeMode.cyber => const Color(0xFFFFEA00),
-      AppThemeMode.obsidian => const Color(0xFFFF1744),
-      AppThemeMode.glacier => const Color(0xFFFF6D00),
-      AppThemeMode.voidTheme => const Color(0xFF0B0B0B),
-    };
-
-    return (
-      asset: devVoidLogo,
-      background: Colors.black,
-      // Barra neutra e elegante; pode ser personalizada depois.
-      progress: const Color(0xFFE5E7EB),
-      particles: isPremium ? particles : const Color(0xFF0B0B0B),
-    );
+    if (isPremium && theme.requiresPremiumEntitlement) {
+      return resolvePremiumSplash(theme);
+    }
+    return resolveDefaultSplash();
   }
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/mentor_app_router.dart';
 import '../../core/constants/app_routes.dart';
+import '../../presentation/splash/splash_asset_resolver.dart';
 import '../../presentation/widgets/void_loading_screen.dart';
 import '../../services/mentoria_service.dart';
 import '../../services/subscription_provider.dart';
@@ -286,9 +287,9 @@ class _MentoriaFogTransitionState extends State<_MentoriaFogTransition> {
   @override
   Widget build(BuildContext context) {
     return VoidLoadingScreen(
-      splashAsset: 'assets/images/DevVoid_logo.png',
+      logoAsset: SplashAssetResolver.logoSplash,
+      backgroundAsset: SplashAssetResolver.cyberBg,
       backgroundColor: Colors.black,
-      progressColor: const Color(0xFF00E5FF),
     );
   }
 }

@@ -59,7 +59,7 @@ dependencies:
   url_launcher: ^6.2.4
 
   # flutter_dotenv: Carrega variáveis de ambiente do arquivo .env
-  flutter_dotenv: ^5.2.1
+  flutter_dotenv: ^6.0.1
 
   # Firebase Core: Configuração base do Firebase
   # Importance: Inicializa serviços Firebase no app
@@ -89,21 +89,20 @@ dependencies:
   # Google Sign In: Login com conta Google
   # Importance: Authentication rápido usando conta Google existente
   # Impacto: Aumenta taxa de conversão de login (usuário não precisa criar senha)
-  google_sign_in: ^6.2.2
+  google_sign_in: ^7.2.0
   fl_chart: ^1.0.0
   intl: ^0.20.2
   flutter_localizations:
     sdk: flutter
-  geolocator: ^13.0.2
-  permission_handler: ^11.4.0
+  geolocator: ^14.0.2
+  permission_handler: ^12.0.1
   provider: ^6.1.2
   purchases_flutter: ^10.0.1
   firebase_crashlytics: ^5.2.0
   connectivity_plus: ^7.1.1
   showcaseview: ^5.0.2
   purchases_ui_flutter: ^10.0.1
-  particles_flutter: ^2.0.2
-  google_mobile_ads: ^6.0.0
+  google_mobile_ads: ^8.0.0
   flutter_notification_listener: ^1.4.0
   # firebase_ai: ^3.10.0  # Temporariamente desativado
 
@@ -139,20 +138,20 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icons/app_icon2.png"
+  image_path: "assets/icons/icone.png"
   adaptive_icon_background: "#000000"
-  adaptive_icon_foreground: "assets/icons/app_icon2.png"
+  adaptive_icon_foreground: "assets/icons/icone.png"
   remove_alpha_ios: true
   min_sdk_android: 21
 
 # Splash nativo (devvoid): fundo preto + logo centralizado.
 flutter_native_splash:
   color: "#000000"
-  image: assets/icons/app_icon2.png
+  image: assets/icons/icone.png
   fullscreen: true
   android_12:
     color: "#000000"
-    image: assets/icons/app_icon2.png
+    image: assets/icons/icone.png
 
 # ==============================================================================
 # CONFIGURAÇÕES DO FLUTTER
@@ -172,7 +171,7 @@ flutter:
   assets:
     - .env
     - assets/.env
-    - assets/icons/app_icon2.png
+    - assets/icons/icone.png
     - assets/images/DevVoid_logo.png
     - assets/images/DevVoid_standard.png
     - assets/images/devvoid_cyber.png
