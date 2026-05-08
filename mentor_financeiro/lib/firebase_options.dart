@@ -34,7 +34,9 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAb2ar5SCQEq3VlK5GGaaWdR4WvHgOlS00',
-    appId: '1:841128243215:android:3d956f69bcfb67d12ef37a',
+    // Deve bater com o `mobilesdk_app_id` do google-services.json para o package
+    // `com.georgeguimares.mentorfinanceiro`.
+    appId: '1:841128243215:android:61cd5390ef01a9a82ef37a',
     messagingSenderId: '841128243215',
     projectId: 'mentorfinanceiro',
     storageBucket: 'mentorfinanceiro.firebasestorage.app',

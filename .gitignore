@@ -1,0 +1,8 @@
+## Flutter / Android build artifacts (repo root)
+mentor_financeiro/build/
+mentor_financeiro/android/.gradle/
+mentor_financeiro/android/app/.cxx/
+mentor_financeiro/android/app/**/intermediates/
+mentor_financeiro/android/app/**/outputs/
+mentor_financeiro/android/app/**/reports/
+

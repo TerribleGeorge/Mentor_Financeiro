@@ -23,6 +23,15 @@ import 'package:flutter/foundation.dart';
 
 import '../core/config/app_secrets.dart';
 
+class GoogleLoginFailure implements Exception {
+  final String message;
+  final Object? cause;
+  GoogleLoginFailure(this.message, {this.cause});
+
+  @override
+  String toString() => 'GoogleLoginFailure($message)';
+}
+
 // CLASSE FIREBASE SERVICE
 // Singleton: Uma única instância para todo o app
 class FirebaseService {
@@ -222,6 +231,13 @@ class FirebaseService {
       );
 
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null || idToken.trim().isEmpty) {
+        throw GoogleLoginFailure(
+          'Falha ao obter token do Google (idToken vazio). '
+          'Geralmente é configuração do Firebase/Google Sign-In (SHA-1/SHA-256 do app).',
+        );
+      }
 
       String? accessToken;
       try {
@@ -237,21 +253,33 @@ class FirebaseService {
 
       final credential = GoogleAuthProvider.credential(
         accessToken: accessToken,
-        idToken: googleAuth.idToken,
+        idToken: idToken,
       );
 
       final userCredential = await _auth.signInWithCredential(credential);
-      return userCredential.user;
+      final user = userCredential.user;
+      if (user == null) {
+        throw GoogleLoginFailure('Login Google retornou usuário nulo.');
+      }
+      return user;
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled ||
           e.code == GoogleSignInExceptionCode.interrupted) {
         return null;
       }
       if (kDebugMode) debugPrint('Erro no login Google: $e');
-      return null;
+      throw GoogleLoginFailure('Erro no Google Sign-In: ${e.code}', cause: e);
+    } on FirebaseAuthException catch (e) {
+      if (kDebugMode) {
+        debugPrint('FirebaseAuthException no login Google: code=${e.code} message=${e.message}');
+      }
+      throw GoogleLoginFailure(
+        'Falha no Firebase Auth: ${e.code}${e.message == null ? "" : " (${e.message})"}',
+        cause: e,
+      );
     } catch (e) {
       if (kDebugMode) debugPrint("Erro no login Google: $e");
-      return null;
+      throw GoogleLoginFailure('Erro inesperado no login Google.', cause: e);
     }
   }
 

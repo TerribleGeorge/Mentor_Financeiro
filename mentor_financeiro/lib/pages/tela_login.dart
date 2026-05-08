@@ -618,16 +618,38 @@ class _TelaLoginState extends State<TelaLogin> {
   // Login Google
   Future<void> _loginGoogle() async {
     setState(() => _carregando = true);
-    final user = await FirebaseService.loginGoogle();
-    setState(() {
-      _carregando = false;
-      if (user != null) {
-        _usuarioFirebase = user;
-        _metodoLogin = "google";
-        _nomeController.text = user.displayName ?? '';
-        _pageController.jumpToPage(2); // Pula para página de nome
-      }
-    });
+    try {
+      final user = await FirebaseService.loginGoogle();
+      setState(() {
+        _carregando = false;
+        if (user != null) {
+          _usuarioFirebase = user;
+          _metodoLogin = "google";
+          _nomeController.text = user.displayName ?? '';
+          _pageController.jumpToPage(2); // Pula para página de nome
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login cancelado.')),
+          );
+        }
+      });
+    } on GoogleLoginFailure catch (e) {
+      setState(() => _carregando = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${e.message}\n'
+            'Se você estiver em Android, confirme o SHA-1/SHA-256 do app no Firebase e atualize o google-services.json.',
+          ),
+          duration: const Duration(seconds: 6),
+        ),
+      );
+    } catch (e) {
+      setState(() => _carregando = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Falha ao autenticar com Google.')),
+      );
+    }
   }
 
   // Login Apple

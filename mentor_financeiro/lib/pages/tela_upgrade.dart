@@ -1,5 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../services/google_play_billing_service.dart';
+import '../services/subscription_provider.dart';
 
 class TelaUpgrade extends StatefulWidget {
   const TelaUpgrade({super.key});
@@ -9,6 +15,36 @@ class TelaUpgrade extends StatefulWidget {
 }
 
 class _TelaUpgradeState extends State<TelaUpgrade> {
+  static const String _productId = 'premium_assinatura';
+  static const String _basePlanId = 'a-premium';
+
+  final GooglePlayBillingService _billing = GooglePlayBillingService.instance;
+
+  String? _pendingPlan;
+  bool _handledSuccess = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _billing.addListener(_onBillingChanged);
+    _billing.initialize(productId: _productId, basePlanId: _basePlanId);
+  }
+
+  @override
+  void dispose() {
+    _billing.removeListener(_onBillingChanged);
+    super.dispose();
+  }
+
+  void _onBillingChanged() {
+    if (!mounted) return;
+    if (_billing.hasActivePurchase && !_handledSuccess) {
+      _handledSuccess = true;
+      unawaited(_finalizePremiumActivation(_pendingPlan ?? 'mensal'));
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,6 +92,14 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
             _planoMensal(),
             const SizedBox(height: 16),
             _planoAnual(),
+            if (_billing.error != null && _billing.error!.trim().isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Text(
+                _billing.error!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+              ),
+            ],
             const SizedBox(height: 32),
             _botaoContinuarGratis(),
             const SizedBox(height: 24),
@@ -146,7 +190,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () => _contratarPlano("mensal"),
+              onPressed: _billing.isLoading ? null : () => _contratarPlano("mensal"),
               child: const Text(
                 "Começar Agora",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -259,7 +303,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () => _contratarPlano("anual"),
+              onPressed: _billing.isLoading ? null : () => _contratarPlano("anual"),
               child: const Text(
                 "Economizar 30%",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -314,20 +358,32 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
   }
 
   Future<void> _contratarPlano(String plano) async {
+    _pendingPlan = plano;
+    _handledSuccess = false;
+    await _billing.buySubscription(basePlanId: _basePlanId);
+  }
+
+  Future<void> _finalizePremiumActivation(String plano) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('plano_contratado', plano);
+    await prefs.setBool('is_premium', true);
+
+    // Mantém compatibilidade com o restante do app (temas/premium gate).
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            plano == "mensal"
-                ? "Plano mensal ativado! Bem-vindo ao Premium!"
-                : "Plano anual ativado! Você economizou 30%!",
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
+      await context.read<SubscriptionProvider>().updatePremiumStatus(true);
     }
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          plano == "mensal"
+              ? "Assinatura ativa! Bem-vindo ao Premium!"
+              : "Assinatura ativa! Premium liberado.",
+        ),
+        backgroundColor: Colors.green,
+      ),
+    );
+    Navigator.pop(context);
   }
 }

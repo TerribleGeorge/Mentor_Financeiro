@@ -7,17 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:841128243215:android:af6a290fda0ad9dd2ef37a",
+        "mobilesdk_app_id": "1:841128243215:android:61cd5390ef01a9a82ef37a",
         "android_client_info": {
-          "package_name": "com.example.mentor_financeiro"
+          "package_name": "com.georgeguimares.mentorfinanceiro"
         }
       },
       "oauth_client": [
         {
-          "client_id": "841128243215-62ehj5dpic6ej35a72rjvah2s7dg3k46.apps.googleusercontent.com",
+          "client_id": "841128243215-8chvms0drjrtn2ekpdl86vtc6h1lpfjf.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.mentor_financeiro",
+            "package_name": "com.georgeguimares.mentorfinanceiro",
             "certificate_hash": "3a41bc28f3045561f60a41d8badfff70dfe81e92"
           }
         },
