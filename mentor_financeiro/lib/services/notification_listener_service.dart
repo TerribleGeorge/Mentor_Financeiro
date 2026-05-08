@@ -352,8 +352,8 @@ class NotificationParserService {
     'inviato a',
   ];
 
-  /// Palavras-chave que indicam que **não** é gasto (segurança / ruído).
-  static const List<String> _blockKeywords = [
+  /// Palavras-chave de segurança que nunca devem virar transação.
+  static const List<String> _securityBlockKeywords = [
     // Segurança / login
     'código de verificação',
     'codigo de verificacao',
@@ -367,16 +367,13 @@ class NotificationParserService {
     'senha',
     'password',
     'login',
-    // Informativo (não é gasto)
-    'saldo',
-    'balance',
-    'limite',
-    'limit',
-    'disponível',
-    'disponivel',
-    'available',
-    // Entradas / estornos (por padrão ignoramos)
+  ];
+
+  /// Palavras-chave de entrada/estorno que não são gastos.
+  static const List<String> _incomingBlockKeywords = [
     'pix recebido',
+    'transferência recebida',
+    'transferencia recebida',
     'received',
     'credit received',
     'refund',
@@ -397,10 +394,7 @@ class NotificationParserService {
       '',
     );
     t = t.replaceAll(
-      RegExp(
-        r'comprovante\s+dispon[ií]vel.*$',
-        caseSensitive: false,
-      ),
+      RegExp(r'comprovante\s+dispon[ií]vel.*$', caseSensitive: false),
       '',
     );
 
@@ -478,11 +472,13 @@ class NotificationParserService {
   static bool isSpendingNotification(String texto) {
     final cleaned = _sanitize(texto);
     final t = cleaned.toLowerCase();
-    if (_blockKeywords.any((k) => t.contains(k))) return false;
+    if (_securityBlockKeywords.any((k) => t.contains(k))) return false;
+    if (_incomingBlockKeywords.any((k) => t.contains(k))) return false;
+
     final hasSpendKeyword = _spendKeywords.any((k) => t.contains(k));
-    if (!hasSpendKeyword) return false;
     final hasMoney = extrairValor(cleaned) != null;
-    return hasMoney;
+    if (!hasMoney) return false;
+    return hasSpendKeyword;
   }
 
   static double? extrairValor(String texto) {
@@ -685,10 +681,13 @@ class TransacaoRepository {
 
     final saldoConta = (saldoRaw is num) ? saldoRaw.toDouble() : 0.0;
     final limiteCartao = (limiteRaw is num) ? limiteRaw.toDouble() : 0.0;
-    final limiteUtilizado = (utilizadoRaw is num) ? utilizadoRaw.toDouble() : 0.0;
+    final limiteUtilizado = (utilizadoRaw is num)
+        ? utilizadoRaw.toDouble()
+        : 0.0;
 
     // Se o utilizador ainda não configurou saldo/limite, não bloqueia o registo.
-    final hasAnyConfig = saldoRaw != null || limiteRaw != null || utilizadoRaw != null;
+    final hasAnyConfig =
+        saldoRaw != null || limiteRaw != null || utilizadoRaw != null;
     if (!hasAnyConfig) {
       return ResultadoValidacao(
         podeSalvar: true,
@@ -790,7 +789,9 @@ class NotificationListenerService {
 
     final hasPermission = await verificarPermissao();
     if (!hasPermission) {
-      debugPrint('Permissão de notificações não concedida. Não iniciar automaticamente.');
+      debugPrint(
+        'Permissão de notificações não concedida. Não iniciar automaticamente.',
+      );
       return false;
     }
 
@@ -827,6 +828,10 @@ class NotificationListenerService {
 
     final notificationText = '$packageName $title $text';
 
+    if (kDebugMode) {
+      debugPrint('Notificação recebida [$packageName]: $title | $text');
+    }
+
     if (notificationText.trim().isEmpty) {
       return;
     }
@@ -846,7 +851,12 @@ class NotificationListenerService {
       'Caixa': ['caixa', 'br.com.caixa'],
       'Itaú': ['itau', 'itaú', 'com.itau', 'br.com.itau'],
       'Bradesco': ['bradesco', 'br.com.bradesco'],
-      'Banco do Brasil': ['banco do brasil', 'bancodobrasil', ' bb ', 'br.com.bb'],
+      'Banco do Brasil': [
+        'banco do brasil',
+        'bancodobrasil',
+        ' bb ',
+        'br.com.bb',
+      ],
       'Santander': ['santander', 'br.com.santander'],
       'Sicredi': ['sicredi'],
       'Sicoob': ['sicoob'],
@@ -892,17 +902,20 @@ class NotificationListenerService {
     final enabled = prefs.getBool(_monitoringEnabledKey) ?? true;
     if (!enabled) return;
 
+    final transacaoData = NotificationParserService.parse(texto);
+    if (transacaoData == null) {
+      if (kDebugMode) {
+        debugPrint('Notificação ignorada pelo parser: $texto');
+      }
+      return;
+    }
+
     if (await _jaProcessada(
       uid: user.uid,
       packageName: packageName,
       texto: texto,
       timestamp: timestamp,
     )) {
-      return;
-    }
-
-    final transacaoData = NotificationParserService.parse(texto);
-    if (transacaoData == null) {
       return;
     }
 

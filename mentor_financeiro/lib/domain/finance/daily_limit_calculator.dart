@@ -27,10 +27,7 @@ const List<String> kFinanceExpensePrefFieldNames = [
   'Reserva Emergência',
 ];
 
-const List<String> kFinanceIncomePrefFieldNames = [
-  'Renda Fixa',
-  'Renda Extra',
-];
+const List<String> kFinanceIncomePrefFieldNames = ['Renda Fixa', 'Renda Extra'];
 
 const String kSaldoAtualPrefFieldName = 'Saldo Atual';
 
@@ -63,8 +60,42 @@ class DailyLimitResult {
 class DailyLimitCalculator {
   DailyLimitCalculator._();
 
-  static double _parseMoney(String? s) =>
-      double.tryParse(s?.replaceAll(',', '.') ?? '0') ?? 0;
+  static double parseMoney(String? input) {
+    final raw = input?.trim();
+    if (raw == null || raw.isEmpty) return 0;
+
+    var cleaned = raw.replaceAll(RegExp(r'[^\d,.\-]'), '');
+    if (cleaned.isEmpty || cleaned == '-') return 0;
+
+    final isNegative = cleaned.startsWith('-');
+    cleaned = cleaned.replaceAll('-', '');
+
+    final lastComma = cleaned.lastIndexOf(',');
+    final lastDot = cleaned.lastIndexOf('.');
+    final lastSeparator = lastComma > lastDot ? ',' : '.';
+    final hasSeparator = lastComma >= 0 || lastDot >= 0;
+
+    String normalized;
+    if (hasSeparator) {
+      final parts = cleaned.split(lastSeparator);
+      final decimalPart = parts.length > 1 ? parts.last : '';
+      final integerPart = parts
+          .take(parts.length - 1)
+          .join()
+          .replaceAll(RegExp(r'[,.]'), '');
+
+      if (decimalPart.length <= 2) {
+        normalized = '$integerPart.$decimalPart';
+      } else {
+        normalized = cleaned.replaceAll(RegExp(r'[,.]'), '');
+      }
+    } else {
+      normalized = cleaned;
+    }
+
+    final parsed = double.tryParse(normalized) ?? 0;
+    return isNegative ? -parsed : parsed;
+  }
 
   static String _formatBrl(double value) {
     return NumberFormat.currency(locale: 'pt_BR', symbol: r'R$').format(value);
@@ -73,7 +104,10 @@ class DailyLimitCalculator {
   /// Mesma regra da [FinanceConfigurationPage]: só entra no cálculo se o campo
   /// está marcado como ativo; se [ativo_*] nunca existiu (dados antigos), usa
   /// valor gravado não vazio.
-  static bool fieldCountsTowardDailyLimit(SharedPreferences prefs, String name) {
+  static bool fieldCountsTowardDailyLimit(
+    SharedPreferences prefs,
+    String name,
+  ) {
     final ativo = prefs.getBool('ativo_$name');
     if (ativo != null) return ativo;
     final raw = prefs.getString('valor_$name');
@@ -87,7 +121,7 @@ class DailyLimitCalculator {
     var t = 0.0;
     for (final name in kFinanceIncomePrefFieldNames) {
       if (_fieldCounts(prefs, name)) {
-        t += _parseMoney(prefs.getString('valor_$name'));
+        t += parseMoney(prefs.getString('valor_$name'));
       }
     }
     return t;
@@ -97,18 +131,18 @@ class DailyLimitCalculator {
     var t = 0.0;
     for (final name in kFinanceExpensePrefFieldNames) {
       if (_fieldCounts(prefs, name)) {
-        t += _parseMoney(prefs.getString('valor_$name'));
+        t += parseMoney(prefs.getString('valor_$name'));
       }
     }
-    t += _parseMoney(prefs.getString('valor_Gastos Fixos'));
-    t += _parseMoney(prefs.getString('valor_Reserva'));
+    t += parseMoney(prefs.getString('valor_Gastos Fixos'));
+    t += parseMoney(prefs.getString('valor_Reserva'));
     return t;
   }
 
   static double _readSaldoAtual(SharedPreferences prefs) {
     final ativo = prefs.getBool('ativo_$kSaldoAtualPrefFieldName');
     if (ativo == false) return 0;
-    return _parseMoney(prefs.getString('valor_$kSaldoAtualPrefFieldName'));
+    return parseMoney(prefs.getString('valor_$kSaldoAtualPrefFieldName'));
   }
 
   /// (Renda mensal − Gastos fixos + Saldo atual) / dias restantes no mês.
@@ -121,8 +155,7 @@ class DailyLimitCalculator {
     final gastosFixosMensal = _sumExpenses(prefs);
     final saldoAtual = _readSaldoAtual(prefs);
 
-    final raw =
-        (rendaMensal - gastosFixosMensal + saldoAtual) / diasRestantes;
+    final raw = (rendaMensal - gastosFixosMensal + saldoAtual) / diasRestantes;
 
     if (raw <= 0) {
       final saldoFmt = _formatBrl(saldoAtual);

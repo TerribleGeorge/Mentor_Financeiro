@@ -28,6 +28,7 @@ object NotificationChannels {
     private const val EVENT_CHANNEL = "mentor_financeiro/notifications/stream"
 
     private var eventSink: EventChannel.EventSink? = null
+    private val pendingEvents = mutableListOf<Map<String, Any>>()
 
     fun register(messenger: io.flutter.plugin.common.BinaryMessenger) {
         MethodChannel(messenger, METHOD_CHANNEL).setMethodCallHandler { call, result ->
@@ -56,6 +57,10 @@ object NotificationChannels {
         EventChannel(messenger, EVENT_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 eventSink = events
+                if (events != null && pendingEvents.isNotEmpty()) {
+                    pendingEvents.forEach { events.success(it) }
+                    pendingEvents.clear()
+                }
             }
 
             override fun onCancel(arguments: Any?) {
@@ -71,28 +76,21 @@ object NotificationChannels {
             "text" to text,
             "timestamp" to timestamp
         )
-        eventSink?.success(data)
+        val sink = eventSink
+        if (sink != null) {
+            sink.success(data)
+        } else {
+            pendingEvents.add(data)
+            if (pendingEvents.size > 30) {
+                pendingEvents.removeAt(0)
+            }
+        }
     }
 }
 
 class CustomNotificationListener : NotificationListenerService() {
     companion object {
         private var isRunning = false
-
-        private val knownBankPackages = setOf(
-            "com.nu.production",
-            "br.com.inter.banking",
-            "br.com.caixa.mobi",
-            "br.com.bradesco.nativov2",
-            "com.itau",
-            "br.com.bb.android",
-            "br.com.santander.app",
-            "com.c6bank.app",
-            "com.neon",
-            "com.pagseguro",
-            "com.mercadopago.wallet",
-            "com.picpay",
-        )
 
         fun isServiceRunning(): Boolean = isRunning
 
@@ -109,10 +107,6 @@ class CustomNotificationListener : NotificationListenerService() {
             } catch (e: Exception) {
                 false
             }
-        }
-
-        fun isAuthorizedPackage(packageName: String): Boolean {
-            return knownBankPackages.any { packageName.equals(it, ignoreCase = true) } || packageName.isNotBlank()
         }
 
         fun getEnabledListeners(): String {
@@ -142,13 +136,23 @@ class CustomNotificationListener : NotificationListenerService() {
         sbn ?: return
 
         val packageName = sbn.packageName ?: return
-        if (!isAuthorizedPackage(packageName)) return
 
         val notification = sbn.notification ?: return
         val extras = notification.extras ?: return
 
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
-        val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
+        val text = listOf(
+            extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: "",
+            extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString() ?: "",
+            extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString() ?: "",
+            extras.getCharSequence(Notification.EXTRA_SUMMARY_TEXT)?.toString() ?: "",
+            extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES)
+                ?.joinToString(" ") { it.toString() } ?: ""
+        )
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .joinToString(" ")
         val timestamp = sbn.postTime
 
         NotificationChannels.sendNotification(packageName, title, text, timestamp)

@@ -201,8 +201,7 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
     // Inicializa controllers
     for (var campo in _campos) {
       _controllers[campo.nome] = TextEditingController();
-      _camposAtivos[campo.nome] =
-          campo.ehSaldoConta ? true : campo.obrigatorio;
+      _camposAtivos[campo.nome] = campo.ehSaldoConta ? true : campo.obrigatorio;
     }
     // Carrega dados salvos
     _carregarDados();
@@ -231,7 +230,8 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
         _controllers[campo.nome]?.text =
             prefs.getString('valor_${campo.nome}') ?? '';
         // Busca ativo/inativo
-        _camposAtivos[campo.nome] = prefs.getBool('ativo_${campo.nome}') ??
+        _camposAtivos[campo.nome] =
+            prefs.getBool('ativo_${campo.nome}') ??
             (campo.ehSaldoConta ? true : campo.obrigatorio);
       }
     });
@@ -265,7 +265,7 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
       // Adiciona às configurações se ativo
       if (_camposAtivos[campo.nome] ?? false) {
         configuracoes[campo.nome] = {
-          'valor': double.tryParse(valor.replaceAll(',', '.')) ?? 0,
+          'valor': DailyLimitCalculator.parseMoney(valor),
           'ativo': true,
         };
       }
@@ -461,6 +461,7 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  onChanged: (_) => setState(() {}),
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                   decoration: InputDecoration(
                     hintText: campo.hint,
@@ -516,11 +517,9 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
     for (var campo in _campos) {
       if (campo.ehSaldoConta) continue;
       if (_camposAtivos[campo.nome] ?? false) {
-        double valor =
-            double.tryParse(
-              _controllers[campo.nome]?.text.replaceAll(',', '.') ?? '0',
-            ) ??
-            0;
+        final valor = DailyLimitCalculator.parseMoney(
+          _controllers[campo.nome]?.text,
+        );
         if (campo.ehRenda) {
           rendaTotal += valor;
         } else {
@@ -602,8 +601,10 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
         ),
         Text(
           'R\$ ${valor.toStringAsFixed(2)}',
-          style: TextStyle(color: cor, fontWeight: FontWeight.bold)
-              .withFinancialShadows(context),
+          style: TextStyle(
+            color: cor,
+            fontWeight: FontWeight.bold,
+          ).withFinancialShadows(context),
         ),
       ],
     );

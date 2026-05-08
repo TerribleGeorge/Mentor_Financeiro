@@ -57,23 +57,15 @@ class _TelaMetasState extends State<TelaMetas> {
 
   void _calcular() async {
     final prefs = await SharedPreferences.getInstance();
-    double rF =
-        double.tryParse(
-          prefs.getString('valor_Renda Fixa')?.replaceAll(',', '.') ?? '0',
-        ) ??
-        0;
-    double rE =
-        double.tryParse(
-          prefs.getString('valor_Renda Extra')?.replaceAll(',', '.') ?? '0',
-        ) ??
-        0;
+    final rF = DailyLimitCalculator.parseMoney(
+      prefs.getString('valor_Renda Fixa'),
+    );
+    final rE = DailyLimitCalculator.parseMoney(
+      prefs.getString('valor_Renda Extra'),
+    );
     double gastos = 0;
     for (final g in kFinanceExpensePrefFieldNames) {
-      gastos +=
-          double.tryParse(
-            prefs.getString('valor_$g')?.replaceAll(',', '.') ?? '0',
-          ) ??
-          0;
+      gastos += DailyLimitCalculator.parseMoney(prefs.getString('valor_$g'));
     }
     double aporteMensal = (rF + rE) - gastos;
     double meta =
