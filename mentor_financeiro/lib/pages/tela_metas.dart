@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 
@@ -20,6 +21,12 @@ class _TelaMetasState extends State<TelaMetas> {
   );
   String _resultado = "Preencha para calcular";
   String _cotacaoDolar = "Carregando...";
+
+  static final NumberFormat _moneyInputFormat = NumberFormat.currency(
+    locale: 'pt_BR',
+    symbol: '',
+    decimalDigits: 2,
+  );
 
   @override
   void initState() {
@@ -49,27 +56,43 @@ class _TelaMetasState extends State<TelaMetas> {
   }
 
   Future<void> _salvarDados() async {
+    _normalizarValorObjetivo();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('sonho', _sonhoController.text);
     await prefs.setString('valor_sonho', _valorController.text);
     _calcular();
   }
 
+  void _normalizarValorObjetivo() {
+    final value = DailyLimitCalculator.parseMoney(_valorController.text);
+    if (value <= 0) return;
+    final formatted = _moneyInputFormat.format(value).trim();
+    if (_valorController.text == formatted) return;
+    _valorController.value = TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+
   void _calcular() async {
     final prefs = await SharedPreferences.getInstance();
-    final rF = DailyLimitCalculator.parseMoney(
-      prefs.getString('valor_Renda Fixa'),
-    );
-    final rE = DailyLimitCalculator.parseMoney(
-      prefs.getString('valor_Renda Extra'),
-    );
+    var renda = 0.0;
+    for (final income in kFinanceIncomePrefFieldNames) {
+      if (DailyLimitCalculator.fieldCountsTowardDailyLimit(prefs, income)) {
+        renda += DailyLimitCalculator.parseMoney(
+          prefs.getString('valor_$income'),
+        );
+      }
+    }
+
     double gastos = 0;
     for (final g in kFinanceExpensePrefFieldNames) {
-      gastos += DailyLimitCalculator.parseMoney(prefs.getString('valor_$g'));
+      if (DailyLimitCalculator.fieldCountsTowardDailyLimit(prefs, g)) {
+        gastos += DailyLimitCalculator.parseMoney(prefs.getString('valor_$g'));
+      }
     }
-    double aporteMensal = (rF + rE) - gastos;
-    double meta =
-        double.tryParse(_valorController.text.replaceAll(',', '.')) ?? 0;
+    double aporteMensal = renda - gastos;
+    double meta = DailyLimitCalculator.parseMoney(_valorController.text);
     double taxa =
         double.tryParse(_rentabilidadeController.text.replaceAll(',', '.')) ??
         0;
@@ -121,12 +144,14 @@ class _TelaMetasState extends State<TelaMetas> {
               "Valor do Objetivo (R\$)",
               _valorController,
               Icons.attach_money,
+              isMoney: true,
             ),
             const SizedBox(height: 15),
             _campo(
               "Rentabilidade Anual (%)",
               _rentabilidadeController,
               Icons.trending_up,
+              isNumeric: true,
             ),
             const SizedBox(height: 25),
             _resultadoCard(),
@@ -185,8 +210,10 @@ class _TelaMetasState extends State<TelaMetas> {
   Widget _campo(
     String label,
     TextEditingController controller,
-    IconData icone,
-  ) {
+    IconData icone, {
+    bool isMoney = false,
+    bool isNumeric = false,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1E293B),
@@ -194,6 +221,15 @@ class _TelaMetasState extends State<TelaMetas> {
       ),
       child: TextField(
         controller: controller,
+        keyboardType: isMoney || isNumeric
+            ? const TextInputType.numberWithOptions(decimal: true)
+            : TextInputType.text,
+        onEditingComplete: isMoney
+            ? () {
+                _normalizarValorObjetivo();
+                FocusScope.of(context).nextFocus();
+              }
+            : null,
         style: const TextStyle(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           labelText: label,
