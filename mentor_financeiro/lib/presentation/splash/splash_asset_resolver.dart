@@ -1,6 +1,7 @@
 import '../../services/app_theme_controller.dart';
+import '../../theme/theme_brand_assets.dart';
 
-/// Arte da splash: fundo full-bleed + logo central (sempre [logoSplash] nas presets).
+/// Arte da splash: fundo full-bleed + logo central.
 typedef SplashBranding = ({
   String logoAsset,
   String backgroundAsset,
@@ -8,20 +9,17 @@ typedef SplashBranding = ({
 
 /// Escolhe fundo e logo conforme entitlement Premium e tema guardado.
 abstract final class SplashAssetResolver {
-  /// Logo central (especificação do produto — não distorcer; largura = largura do ecrã).
-  static const String logoSplash = 'assets/images/devvoid_logo.png';
+  static const String logoSplash = ThemeBrandAssets.logoSplash;
+  static const String freeBackground = ThemeBrandAssets.freeSplashBackground;
+  static const String grimmBackground = ThemeBrandAssets.grimmBackdrop;
+  static const String cyberBackground = ThemeBrandAssets.cyberBackdrop;
+  static const String hiveBackground = ThemeBrandAssets.hiveBackdrop;
 
-  /// Fundos por tema (full-bleed, [BoxFit.cover]).
-  static const String freeBackground = 'assets/images/devvoid_logo.png';
-  static const String grimmBackground = 'assets/images/devvoid_grimm.png';
-  static const String cyberBackground = 'assets/images/bg_cyber.png';
-  static const String hiveBackground = 'assets/images/hive_bg.png';
-
-  /// Alias para outros ecrãs (ex.: pré-visualização).
-  static const String cyberBg = cyberBackground;
+  /// Outros ecrãs (ex.: loader Mentoria).
+  static const String cyberBg = ThemeBrandAssets.cyberBackdrop;
 
   /// Legado / compat.
-  static const String devVoidLogo = logoSplash;
+  static const String devVoidLogo = ThemeBrandAssets.logoSplash;
 
   /// Free / Void / fallback.
   static SplashBranding resolveDefaultSplash() {

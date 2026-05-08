@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 
+import '../domain/finance/daily_limit_calculator.dart';
 import '../services/exchange_rate_service.dart';
 
 class TelaMetas extends StatefulWidget {
@@ -67,19 +68,7 @@ class _TelaMetasState extends State<TelaMetas> {
         ) ??
         0;
     double gastos = 0;
-    for (var g in [
-      'Aluguel',
-      'Pensão',
-      'Condomínio',
-      'Internet',
-      'Luz',
-      'Gás',
-      'Mercado',
-      'Academia',
-      'Cartão',
-      'Seguro',
-      'Transporte',
-    ]) {
+    for (final g in kFinanceExpensePrefFieldNames) {
       gastos +=
           double.tryParse(
             prefs.getString('valor_$g')?.replaceAll(',', '.') ?? '0',

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/finance/daily_limit_calculator.dart';
+import '../widgets/home_daily_limit_panel.dart';
 import '../core/constants/app_routes.dart';
 import '../core/navigation/mentor_navigation.dart';
 import '../services/flutter_notification_interceptor.dart';
@@ -28,29 +29,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  double _limiteDiario = 0;
-  double _gastosHoje = 0;
-  // ignore: unused_field - Reservado para uso futuro (exibir ganhos do dia)
-  double _ganhosHoje = 0;
-  double _porcentagem = 0;
-  String? _alertaLimiteDiario;
   String _nomeUsuario = 'Usuário';
   String? _photoUrl;
   MentorLimitAlert? _mentorAlert;
   final ScrollController _scrollController = ScrollController();
-
-  final Map<String, TextEditingController> _budgetControllers = {
-    'Renda Fixa': TextEditingController(),
-    'Renda Extra': TextEditingController(),
-    'Aluguel': TextEditingController(),
-    'Internet': TextEditingController(),
-    'Luz': TextEditingController(),
-    'Mercado': TextEditingController(),
-    'Transporte': TextEditingController(),
-    'Cartão': TextEditingController(),
-  };
-
-  bool _budgetLoading = true;
 
   void _onFinanceConfigSaved() => _carregarDados();
 
@@ -76,9 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     FinanceConfigSignals.removeListener(_onFinanceConfigSaved);
     _scrollController.dispose();
-    for (final c in _budgetControllers.values) {
-      c.dispose();
-    }
     super.dispose();
   }
 
@@ -97,251 +76,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 : null));
 
     final limite = DailyLimitCalculator.computeFromPrefs(prefs);
-    _limiteDiario = limite.displayLimit;
-    _alertaLimiteDiario = limite.alertMessage;
-
-    final dataHoje = DateTime.now().toIso8601String().split('T')[0];
-    _gastosHoje = prefs.getDouble('gastos_$dataHoje') ?? 0;
-    _ganhosHoje = prefs.getDouble('ganhos_$dataHoje') ?? 0;
-    _porcentagem = _limiteDiario > 0
-        ? (_gastosHoje / _limiteDiario).clamp(0.0, 1.0)
-        : 0;
 
     _mentorAlert = await MentoriaService.mentorLimitAlertFromPrefs(
       prefs: prefs,
-      dailyLimit: _limiteDiario,
+      dailyLimit: limite.displayLimit,
     );
-
-    await _loadInlineBudget(prefs);
 
     if (mounted) setState(() {});
-  }
-
-  Future<void> _loadInlineBudget(SharedPreferences prefs) async {
-    for (final entry in _budgetControllers.entries) {
-      entry.value.text = prefs.getString('valor_${entry.key}') ?? '';
-    }
-    _budgetLoading = false;
-  }
-
-  double _parseMoney(String raw) {
-    final v = raw.trim().replaceAll(',', '.');
-    return double.tryParse(v) ?? 0;
-  }
-
-  Future<void> _saveInlineBudget() async {
-    final prefs = await SharedPreferences.getInstance();
-    for (final entry in _budgetControllers.entries) {
-      await prefs.setString('valor_${entry.key}', entry.value.text.trim());
-      await prefs.setBool('ativo_${entry.key}', true);
-    }
-    await prefs.setBool('configurado', true);
-    FinanceConfigSignals.notifySaved();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color(0xFF0D1118),
-        content: Text(
-          'Renda e gastos fixos guardados.',
-          style: TextStyle(
-            color: Colors.white,
-            shadows: ClassicModeStyle.secondaryTextShadows(context),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _inlineBudgetCard(ColorScheme scheme) {
-    if (_budgetLoading) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0B0F16),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: scheme.primary.withValues(alpha: 0.35)),
-        ),
-        child: Center(
-          child: SizedBox(
-            height: 18,
-            width: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: scheme.primary,
-            ),
-          ),
-        ),
-      );
-    }
-
-    final renda = _parseMoney(_budgetControllers['Renda Fixa']!.text) +
-        _parseMoney(_budgetControllers['Renda Extra']!.text);
-    final gastos = _parseMoney(_budgetControllers['Aluguel']!.text) +
-        _parseMoney(_budgetControllers['Internet']!.text) +
-        _parseMoney(_budgetControllers['Luz']!.text) +
-        _parseMoney(_budgetControllers['Mercado']!.text) +
-        _parseMoney(_budgetControllers['Transporte']!.text) +
-        _parseMoney(_budgetControllers['Cartão']!.text);
-
-    InputDecoration deco(String label) => InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-            color: Colors.white.withValues(alpha: 0.92),
-            shadows: ClassicModeStyle.secondaryTextShadows(context),
-          ),
-          filled: true,
-          fillColor: const Color(0xFF0D1118),
-          prefixText: 'R\$ ',
-          prefixStyle: TextStyle(
-            color: scheme.primary.withValues(alpha: 0.95),
-            shadows: ClassicModeStyle.secondaryTextShadows(context),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: scheme.primary.withValues(alpha: 0.22)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: scheme.primary.withValues(alpha: 0.22)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: scheme.primary.withValues(alpha: 0.55)),
-          ),
-        );
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF000000),
-            Color(0xFF07121B),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: scheme.primary.withValues(alpha: 0.75), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.16),
-            blurRadius: 24,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.tune, color: scheme.primary),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Orçamento mensal',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    shadows: ClassicModeStyle.primaryTextShadows(context),
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: _saveInlineBudget,
-                style: TextButton.styleFrom(foregroundColor: Colors.white),
-                child: const Text(
-                  'Guardar',
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Total renda: R\$ ${renda.toStringAsFixed(2)} · Total gastos fixos: R\$ ${gastos.toStringAsFixed(2)}',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.82),
-              fontSize: 12,
-              shadows: ClassicModeStyle.secondaryTextShadows(context),
-            ),
-          ),
-          const SizedBox(height: 18),
-          Text(
-            'Renda Mensal',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              shadows: ClassicModeStyle.primaryTextShadows(context),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _budgetControllers['Renda Fixa'],
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: const TextStyle(color: Colors.white),
-                  decoration: deco('Renda Fixa'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _budgetControllers['Renda Extra'],
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: const TextStyle(color: Colors.white),
-                  decoration: deco('Renda Extra'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Text(
-            'Gastos Fixos',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              shadows: ClassicModeStyle.primaryTextShadows(context),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _budgetSmallField(scheme, 'Aluguel', deco),
-              _budgetSmallField(scheme, 'Internet', deco),
-              _budgetSmallField(scheme, 'Luz', deco),
-              _budgetSmallField(scheme, 'Mercado', deco),
-              _budgetSmallField(scheme, 'Transporte', deco),
-              _budgetSmallField(scheme, 'Cartão', deco),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _budgetSmallField(
-    ColorScheme scheme,
-    String key,
-    InputDecoration Function(String) deco,
-  ) {
-    return SizedBox(
-      width: (MediaQuery.sizeOf(context).width - 20 * 2 - 12) / 2,
-      child: TextField(
-        controller: _budgetControllers[key],
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        style: const TextStyle(color: Colors.white),
-        decoration: deco(key),
-      ),
-    );
   }
 
   @override
@@ -489,90 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 16),
                       ],
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFF000000),
-                              const Color(0xFF07121B),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: scheme.primary.withValues(alpha: 0.18),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                          border: Border.all(
-                            color: scheme.primary.withValues(alpha: 0.55),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Limite Hoje',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.88),
-                                fontSize: 12,
-                                shadows: ClassicModeStyle.secondaryTextShadows(context),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'R\$ ${_limiteDiario.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ).withFinancialShadows(context),
-                            ),
-                            const SizedBox(height: 16),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: LinearProgressIndicator(
-                                value: _porcentagem,
-                                backgroundColor: const Color(0xFF0D1118),
-                                valueColor: AlwaysStoppedAnimation(
-                                  _porcentagem > 0.8
-                                      ? const Color(0xFFFC5C65)
-                                      : scheme.primary.withValues(alpha: 0.8),
-                                ),
-                                minHeight: 8,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _limiteDiario > 0
-                                  ? 'R\$ ${_gastosHoje.toStringAsFixed(2)} gastos de R\$ ${_limiteDiario.toStringAsFixed(2)}'
-                                  : 'R\$ ${_gastosHoje.toStringAsFixed(2)} gastos hoje (limite R\$ 0,00)',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.84),
-                                fontSize: 12,
-                              ).withFinancialShadows(context),
-                            ),
-                            if (_alertaLimiteDiario != null) ...[
-                              const SizedBox(height: 10),
-                              Text(
-                                _alertaLimiteDiario!,
-                                style: TextStyle(
-                                  color: const Color(0xFFFF6B6B),
-                                  fontSize: 11,
-                                  height: 1.35,
-                                  fontWeight: FontWeight.w700,
-                                  shadows: ClassicModeStyle.secondaryTextShadows(context),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      _inlineBudgetCard(scheme),
+                      const HomeDailyLimitPanel(),
                       const SizedBox(height: 24),
                       Text(
                         'Recursos',

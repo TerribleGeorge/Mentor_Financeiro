@@ -17,6 +17,8 @@ import '../../services/revenue_cat_subscription_service.dart';
 import '../../services/theme_controller.dart';
 import '../../services/user_persona_service.dart';
 
+import '../../theme/theme_brand_assets.dart';
+
 /// Tempo mínimo que a arte DevVoid fica visível antes de navegar (produto).
 const Duration _kSplashMinimumOnScreen = Duration(seconds: 10);
 
@@ -32,8 +34,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  static const String _logoAsset = 'assets/images/DevVoid_logo.png';
-
   late AnimationController _smokeController;
   late AnimationController _progressController;
 
@@ -60,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      precacheImage(const AssetImage(_logoAsset), context);
+      precacheImage(const AssetImage(ThemeBrandAssets.logoSplash), context);
       unawaited(_carregarTudoEMover());
     });
   }
@@ -174,7 +174,7 @@ class _SplashScreenState extends State<SplashScreen>
           children: [
             Positioned.fill(
               child: Image.asset(
-                _logoAsset,
+                ThemeBrandAssets.logoSplash,
                 fit: BoxFit.cover,
                 gaplessPlayback: true,
                 filterQuality: FilterQuality.high,
@@ -185,7 +185,7 @@ class _SplashScreenState extends State<SplashScreen>
             // Logo dominante: preenche verticalmente (sem distorcer; pode recortar laterais).
             Positioned.fill(
               child: Image.asset(
-                _logoAsset,
+                ThemeBrandAssets.logoSplash,
                 fit: BoxFit.cover,
                 alignment: Alignment.center,
                 gaplessPlayback: true,

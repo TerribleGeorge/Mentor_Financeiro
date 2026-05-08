@@ -3,18 +3,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Nomes dos campos de despesa em [FinanceConfigurationPage] (`valor_*` / `ativo_*`).
 /// Manter alinhado à lista de campos da tela de configuração.
+///
+/// Ordem: moradia e obrigações legais → utilidades → vida corrente → outros fixos → poupança.
 const List<String> kFinanceExpensePrefFieldNames = [
   'Aluguel',
   'Pensão',
   'Condomínio',
+  'Financiamento (imóvel)',
+  'IPTU (provisão mensal)',
   'Internet',
   'Luz',
+  'Água / esgoto',
   'Gás',
   'Mercado',
+  'Plano de saúde',
+  'Educação (escola/curso)',
   'Academia',
+  'Transporte',
   'Cartão',
   'Seguro',
-  'Transporte',
+  'Telefone / celular',
+  'Assinaturas digitais',
   'Reserva Emergência',
 ];
 
@@ -61,13 +70,18 @@ class DailyLimitCalculator {
     return NumberFormat.currency(locale: 'pt_BR', symbol: r'R$').format(value);
   }
 
-  /// Se [ativo_*] nunca foi salvo, considera ativo apenas quando há valor gravado.
-  static bool _fieldCounts(SharedPreferences prefs, String name) {
+  /// Mesma regra da [FinanceConfigurationPage]: só entra no cálculo se o campo
+  /// está marcado como ativo; se [ativo_*] nunca existiu (dados antigos), usa
+  /// valor gravado não vazio.
+  static bool fieldCountsTowardDailyLimit(SharedPreferences prefs, String name) {
     final ativo = prefs.getBool('ativo_$name');
     if (ativo != null) return ativo;
     final raw = prefs.getString('valor_$name');
     return raw != null && raw.trim().isNotEmpty;
   }
+
+  static bool _fieldCounts(SharedPreferences prefs, String name) =>
+      fieldCountsTowardDailyLimit(prefs, name);
 
   static double _sumIncome(SharedPreferences prefs) {
     var t = 0.0;

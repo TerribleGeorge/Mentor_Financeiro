@@ -17,6 +17,23 @@ extension AppThemeModePremium on AppThemeMode {
       this == AppThemeMode.glacier;
 }
 
+extension AppThemeModeLabels on AppThemeMode {
+  String get displayName => switch (this) {
+        AppThemeMode.voidTheme => 'Void',
+        AppThemeMode.cyber => 'Cyber',
+        AppThemeMode.obsidian => 'Grimm',
+        AppThemeMode.glacier => 'Hive',
+      };
+
+  /// Subtítulo na lista de Definições (preset Void).
+  String get settingsSubtitle => switch (this) {
+        AppThemeMode.voidTheme => 'Preto absoluto · Hollow Knight',
+        AppThemeMode.cyber => 'Amarelo neon · cinza escuro · premium',
+        AppThemeMode.obsidian => 'Vermelho e preto · premium',
+        AppThemeMode.glacier => 'Laranja e preto · vespa · premium',
+      };
+}
+
 class AppThemeController extends ChangeNotifier {
   static final AppThemeController instance = AppThemeController._internal();
 
@@ -351,6 +368,13 @@ class AppThemeController extends ChangeNotifier {
     }
 
     _isPremium = prefs.getBool(_isPremiumKey) ?? false;
+
+    // Tema premium na prefs sem flag premium → estado inválido (ex.: sub expirou).
+    if (_themeMode.requiresPremiumEntitlement && !_isPremium) {
+      _themeMode = AppThemeMode.voidTheme;
+      await prefs.setInt(_themeKeyV2, _themeMode.index);
+    }
+
     _recomputeAdaptiveVisuals();
 
     // Evitar poluição do console em produção.
@@ -360,11 +384,17 @@ class AppThemeController extends ChangeNotifier {
   }
 
   Future<void> setPremiumStatus(bool isPremium) async {
-    _isPremium = isPremium;
-    notifyListeners();
-
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_isPremiumKey, isPremium);
+    _isPremium = isPremium;
+
+    if (!isPremium && _themeMode.requiresPremiumEntitlement) {
+      _themeMode = AppThemeMode.voidTheme;
+      _recomputeAdaptiveVisuals();
+      await prefs.setInt(_themeKeyV2, _themeMode.index);
+    }
+
+    notifyListeners();
   }
 
   Future<void> setThemeMode(AppThemeMode mode) async {
@@ -380,18 +410,7 @@ class AppThemeController extends ChangeNotifier {
 
   Color get backgroundColor => backdropBaseColor;
 
-  String get themeName {
-    switch (_themeMode) {
-      case AppThemeMode.voidTheme:
-        return 'Void';
-      case AppThemeMode.cyber:
-        return 'Cyber';
-      case AppThemeMode.obsidian:
-        return 'Grimm';
-      case AppThemeMode.glacier:
-        return 'Hive';
-    }
-  }
+  String get themeName => _themeMode.displayName;
 }
 
 class GlassCard extends StatelessWidget {

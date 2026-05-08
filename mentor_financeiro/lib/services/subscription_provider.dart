@@ -32,6 +32,10 @@ class SubscriptionProvider extends ChangeNotifier {
   String _currentRegion = 'BR';
   DateTime? _subscriptionEndDate;
 
+  /// Preferido na UI: estado local ou entitlement RevenueCat (mesma regra do “tema bloqueado”).
+  bool get hasUnlockedPremium =>
+      _isPremium || hasPremiumEntitlementFromRevenueCat;
+
   bool get isPremium => _isPremium;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;

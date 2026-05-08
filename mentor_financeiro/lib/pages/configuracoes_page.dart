@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../core/navigation/subscription_paywall_flow.dart';
 import '../services/app_theme_controller.dart';
 import '../services/subscription_provider.dart';
-import 'paywall_screen.dart';
+import '../theme/theme_brand_assets.dart';
 
 class ConfiguracoesPage extends StatelessWidget {
   const ConfiguracoesPage({super.key});
@@ -52,41 +53,22 @@ class ConfiguracoesPage extends StatelessWidget {
               onPressed: subscription.isLoading
                   ? null
                   : () async {
-                      try {
-                        context.read<SubscriptionProvider>().clearErrorMessage();
-                        await Navigator.of(context).push<void>(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const PaywallScreen(),
+                      final sub = context.read<SubscriptionProvider>();
+                      final ok = await presentPaywallAndRefresh(context, sub);
+                      if (!context.mounted) return;
+                      if (ok) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Assinatura activa — temas Cyber, Grimm e Hive desbloqueados.',
+                            ),
                           ),
                         );
-                        if (!context.mounted) return;
-                        await context
-                            .read<SubscriptionProvider>()
-                            .refreshFromRevenueCat();
-                        if (!context.mounted) return;
-                        if (context
-                            .read<SubscriptionProvider>()
-                            .hasPremiumEntitlementFromRevenueCat) {
+                      } else {
+                        final err = sub.errorMessage;
+                        if (err != null && err.isNotEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Assinatura activa — temas Cyber, Grimm e Hive desbloqueados.',
-                              ),
-                            ),
-                          );
-                        } else {
-                          final err =
-                              context.read<SubscriptionProvider>().errorMessage;
-                          if (err != null && err.isNotEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(err)),
-                            );
-                          }
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Erro: $e')),
+                            SnackBar(content: Text(err)),
                           );
                         }
                       }
@@ -149,35 +131,31 @@ class ConfiguracoesPage extends StatelessWidget {
     final themes = [
       _ThemeOption(
         mode: AppThemeMode.voidTheme,
-        name: 'Void',
         icon: Icons.blur_on,
         color: const Color(0xFF00E5FF),
         previewColor: const Color(0xFF0A0A0A),
-        thumbnailAsset: null,
+        thumbnailAsset: ThemeBrandAssets.thumbnailAsset(AppThemeMode.voidTheme),
       ),
       _ThemeOption(
         mode: AppThemeMode.cyber,
-        name: 'Cyber',
         icon: Icons.hub_outlined,
         color: const Color(0xFFE879F9),
         previewColor: const Color(0xFF252936),
-        thumbnailAsset: 'assets/images/devvoid_cyber.png',
+        thumbnailAsset: ThemeBrandAssets.thumbnailAsset(AppThemeMode.cyber),
       ),
       _ThemeOption(
         mode: AppThemeMode.obsidian,
-        name: 'Grimm',
         icon: Icons.diamond_outlined,
         color: const Color(0xFFC0C5CE),
         previewColor: const Color(0xFF3D444D),
-        thumbnailAsset: 'assets/images/devvoid_grimm.png',
+        thumbnailAsset: ThemeBrandAssets.thumbnailAsset(AppThemeMode.obsidian),
       ),
       _ThemeOption(
         mode: AppThemeMode.glacier,
-        name: 'Hive',
         icon: Icons.hexagon_outlined,
         color: const Color(0xFF0EA5E9),
         previewColor: const Color(0xFFEFF6FF),
-        thumbnailAsset: 'assets/images/devvoid_hive.png',
+        thumbnailAsset: ThemeBrandAssets.thumbnailAsset(AppThemeMode.glacier),
       ),
     ];
 
@@ -190,8 +168,7 @@ class ConfiguracoesPage extends StatelessWidget {
             theme.previewColor.computeLuminance() > 0.55;
         // Cyber / Grimm / Hive: desbloqueados quando RC reporta
         // customerInfo.entitlements.all['premium']?.isActive (via [SubscriptionProvider]).
-        final premiumOk = subscription.isPremium ||
-            subscription.hasPremiumEntitlementFromRevenueCat;
+        final premiumOk = subscription.hasUnlockedPremium;
         final locked =
             theme.mode.requiresPremiumEntitlement && !premiumOk;
         return SizedBox(
@@ -204,37 +181,24 @@ class ConfiguracoesPage extends StatelessWidget {
                       await controller.setThemeMode(theme.mode);
                       return;
                     }
-                    try {
-                      subscription.clearErrorMessage();
-                      await Navigator.of(context).push<void>(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const PaywallScreen(),
+                    final ok =
+                        await presentPaywallAndRefresh(context, subscription);
+                    if (!context.mounted) return;
+                    if (ok) {
+                      await controller.setThemeMode(theme.mode);
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '${theme.mode.displayName} desbloqueado.',
+                          ),
                         ),
                       );
-                      if (!context.mounted) return;
-                      await subscription.refreshFromRevenueCat();
-                      if (!context.mounted) return;
-                      if (subscription.isPremium ||
-                          subscription.hasPremiumEntitlementFromRevenueCat) {
-                        await controller.setThemeMode(theme.mode);
-                        if (!context.mounted) return;
+                    } else {
+                      final err = subscription.errorMessage;
+                      if (err != null && err.isNotEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${theme.name} desbloqueado.'),
-                          ),
-                        );
-                      } else {
-                        final err = subscription.errorMessage;
-                        if (err != null && err.isNotEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(err)),
-                          );
-                        }
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Erro: $e')),
+                          SnackBar(content: Text(err)),
                         );
                       }
                     }
@@ -255,55 +219,40 @@ class ConfiguracoesPage extends StatelessWidget {
                     width: isSelected ? 2 : 1,
                   ),
                 ),
-                child: Stack(
-                  clipBehavior: Clip.none,
+                child: Column(
                   children: [
-                    Column(
-                      children: [
-                        if (theme.thumbnailAsset != null)
-                          SizedBox(
-                            width: 56,
-                            height: 56,
-                            child: Center(
-                              child: Image.asset(
-                                theme.thumbnailAsset!,
-                                fit: BoxFit.contain,
-                                alignment: Alignment.center,
-                                filterQuality: FilterQuality.medium,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Icon(
-                                  theme.icon,
-                                  color: theme.color,
-                                  size: 28,
-                                ),
-                              ),
+                    if (theme.thumbnailAsset != null)
+                      SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: Center(
+                          child: Image.asset(
+                            theme.thumbnailAsset!,
+                            fit: BoxFit.contain,
+                            alignment: Alignment.center,
+                            filterQuality: FilterQuality.medium,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Icon(
+                              theme.icon,
+                              color: theme.color,
+                              size: 28,
                             ),
-                          )
-                        else
-                          Icon(theme.icon, color: theme.color, size: 28),
-                        const SizedBox(height: 8),
-                        Text(
-                          theme.name,
-                          style: TextStyle(
-                            color: onLightPreview ? Colors.black87 : Colors.white,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.w500,
-                            fontSize: 13,
                           ),
                         ),
-                      ],
-                    ),
-                    if (locked)
-                      Positioned(
-                        right: -4,
-                        top: -6,
-                        child: Icon(
-                          Icons.lock_rounded,
-                          size: 18,
-                          color: theme.color.withValues(alpha: 0.95),
-                        ),
+                      )
+                    else
+                      Icon(theme.icon, color: theme.color, size: 28),
+                    const SizedBox(height: 8),
+                    Text(
+                      theme.mode.displayName,
+                      style: TextStyle(
+                        color: onLightPreview ? Colors.black87 : Colors.white,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                        fontSize: 13,
                       ),
+                    ),
                   ],
                 ),
               ),
@@ -371,7 +320,6 @@ class ConfiguracoesPage extends StatelessWidget {
 
 class _ThemeOption {
   final AppThemeMode mode;
-  final String name;
   final IconData icon;
   final Color color;
   final Color previewColor;
@@ -379,7 +327,6 @@ class _ThemeOption {
 
   const _ThemeOption({
     required this.mode,
-    required this.name,
     required this.icon,
     required this.color,
     required this.previewColor,

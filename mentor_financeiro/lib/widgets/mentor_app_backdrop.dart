@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../presentation/widgets/smoke_vortex_particles.dart';
 import '../services/app_theme_controller.dart';
 import '../services/theme_controller.dart';
+import '../theme/theme_brand_assets.dart';
 
 /// Fundo global: modo Void (DevVoid + partículas) ou arte blur legada em tema claro.
 class MentorAppBackdrop extends StatefulWidget {
@@ -12,8 +13,8 @@ class MentorAppBackdrop extends StatefulWidget {
 
   final Widget? child;
 
-  static const String _legacyPreferredBg = 'assets/images/DevVoid_standard.png';
-  static const String _legacyFallbackBg = 'assets/images/bg_cyber.png';
+  static const String _legacyPreferredBg = ThemeBrandAssets.voidBackdropDark;
+  static const String _legacyFallbackBg = ThemeBrandAssets.legacyLightFallback;
 
   static Future<String> _resolveLegacyBgAsset(BuildContext context) async {
     try {
@@ -48,18 +49,8 @@ class _MentorAppBackdropState extends State<MentorAppBackdrop>
     super.dispose();
   }
 
-  String _assetForPreset(AppThemeMode preset) {
-    switch (preset) {
-      case AppThemeMode.voidTheme:
-        return 'assets/images/DevVoid_standard.png';
-      case AppThemeMode.cyber:
-        return 'assets/images/bg_cyber.png';
-      case AppThemeMode.obsidian:
-        return 'assets/images/bg_grimm.png';
-      case AppThemeMode.glacier:
-        return 'assets/images/hive_bg.png';
-    }
-  }
+  String _assetForPreset(AppThemeMode preset) =>
+      ThemeBrandAssets.backdropAsset(preset);
 
   Color _accentForPreset(AppThemeMode preset) {
     switch (preset) {

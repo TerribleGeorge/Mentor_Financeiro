@@ -8,10 +8,10 @@ import '../services/theme_controller.dart';
 import '../services/currency_preference_controller.dart';
 import '../services/firebase_service.dart';
 import '../services/locale_controller.dart';
+import '../core/navigation/subscription_paywall_flow.dart';
 import '../services/revenue_cat_bootstrap.dart';
 import '../services/subscription_provider.dart';
 import 'finance_configuration_page.dart';
-import 'paywall_screen.dart';
 import 'tela_login.dart';
 
 /// Definições unificadas: perfil, senha, tema Void, moeda, localidade, assinatura, logout.
@@ -70,10 +70,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _abrirPaywall() async {
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(builder: (_) => const PaywallScreen()),
-    );
-    if (mounted) await context.read<SubscriptionProvider>().refreshStatus();
+    if (!mounted) return;
+    await presentPaywallAndRefresh(context, context.read<SubscriptionProvider>());
   }
 
   Future<void> _mostrarAlterarSenha() async {
@@ -293,7 +291,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _definirTema(AppThemeMode mode, AppThemeController theme) async {
     final sub = context.read<SubscriptionProvider>();
-    final premiumOk = sub.isPremium || sub.hasPremiumEntitlementFromRevenueCat;
+    final premiumOk = sub.hasUnlockedPremium;
     if (mode.requiresPremiumEntitlement && !premiumOk) {
       await _abrirPaywall();
       return;
@@ -472,9 +470,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _secTitle('Aparência (Void)'),
           const SizedBox(height: 4),
           ...AppThemeMode.values.map((mode) {
-            final premiumOk =
-                subscription.isPremium ||
-                subscription.hasPremiumEntitlementFromRevenueCat;
+            final premiumOk = subscription.hasUnlockedPremium;
             final locked = mode.requiresPremiumEntitlement && !premiumOk;
             final selected = theme.themeMode == mode;
             return ListTile(
@@ -483,7 +479,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 color: selected ? accentColor : mutedColor,
               ),
               title: Text(
-                themeLabel(mode),
+                mode.displayName,
                 style: TextStyle(
                   color: selected ? accentColor : textColor,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
@@ -492,7 +488,7 @@ class _SettingsPageState extends State<SettingsPage> {
               subtitle: Text(
                 locked
                     ? 'Premium · toque para ver planos'
-                    : themeSubtitle(mode),
+                    : mode.settingsSubtitle,
                 style: TextStyle(color: mutedColor, fontSize: 12),
               ),
               onTap: () => _definirTema(mode, theme),
@@ -719,32 +715,6 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     ),
   );
-
-  static String themeLabel(AppThemeMode mode) {
-    switch (mode) {
-      case AppThemeMode.voidTheme:
-        return 'Void';
-      case AppThemeMode.cyber:
-        return 'Cyber';
-      case AppThemeMode.obsidian:
-        return 'Grimm';
-      case AppThemeMode.glacier:
-        return 'Hive';
-    }
-  }
-
-  static String themeSubtitle(AppThemeMode mode) {
-    switch (mode) {
-      case AppThemeMode.voidTheme:
-        return 'Preto absoluto · Hollow Knight';
-      case AppThemeMode.cyber:
-        return 'Amarelo neon · cinza escuro · premium';
-      case AppThemeMode.obsidian:
-        return 'Vermelho e preto · premium';
-      case AppThemeMode.glacier:
-        return 'Laranja e preto · vespa · premium';
-    }
-  }
 
   static String _languageLabel(String code) {
     switch (code) {

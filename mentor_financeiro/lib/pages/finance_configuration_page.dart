@@ -7,11 +7,13 @@
 //
 
 // Flutter Material
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // Armazenamento local
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../domain/finance/daily_limit_calculator.dart';
 import '../core/constants/app_routes.dart';
 import '../theme/classic_mode_style.dart';
 
@@ -77,22 +79,34 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
       ehSaldoConta: true,
       cor: Color(0xFF38BDF8),
     ),
-    // GASTOS
+    // GASTOS FIXOS (alinhado a [kFinanceExpensePrefFieldNames])
     const _CampoConfig(
       'Aluguel',
-      'Valor do aluguel',
+      'Valor do aluguel ou renda da casa',
       true,
       cor: Colors.redAccent,
     ),
     const _CampoConfig(
       'Pensão',
-      'Pensão alimentícia',
+      'Pensão alimentícia ou acordo judicial',
       false,
       cor: Colors.redAccent,
     ),
     const _CampoConfig(
       'Condomínio',
-      'Valor do condomínio',
+      'Taxa condominial',
+      false,
+      cor: Colors.redAccent,
+    ),
+    const _CampoConfig(
+      'Financiamento (imóvel)',
+      'Prestação do financiamento habitacional',
+      false,
+      cor: Colors.redAccent,
+    ),
+    const _CampoConfig(
+      'IPTU (provisão mensal)',
+      'Provisão mensal (IPTU e taxas do imóvel)',
       false,
       cor: Colors.redAccent,
     ),
@@ -103,11 +117,34 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
       cor: Colors.redAccent,
     ),
     const _CampoConfig('Luz', 'Conta de luz', true, cor: Colors.redAccent),
-    const _CampoConfig('Gás', 'Botijão de gás', false, cor: Colors.redAccent),
+    const _CampoConfig(
+      'Água / esgoto',
+      'Conta de água e esgoto',
+      false,
+      cor: Colors.redAccent,
+    ),
+    const _CampoConfig(
+      'Gás',
+      'Botijão ou gás encanado',
+      false,
+      cor: Colors.redAccent,
+    ),
     const _CampoConfig(
       'Mercado',
       'Supermercado mensal',
       true,
+      cor: Colors.redAccent,
+    ),
+    const _CampoConfig(
+      'Plano de saúde',
+      'Mensalidade de plano ou convênio',
+      false,
+      cor: Colors.redAccent,
+    ),
+    const _CampoConfig(
+      'Educação (escola/curso)',
+      'Mensalidades e cursos recorrentes',
+      false,
       cor: Colors.redAccent,
     ),
     const _CampoConfig(
@@ -117,21 +154,33 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
       cor: Colors.redAccent,
     ),
     const _CampoConfig(
+      'Transporte',
+      'Transporte público / combustível',
+      true,
+      cor: Colors.redAccent,
+    ),
+    const _CampoConfig(
       'Cartão',
-      'Cartão de crédito',
+      'Cartão de crédito (fatura/mínimo)',
       true,
       cor: Colors.redAccent,
     ),
     const _CampoConfig(
       'Seguro',
-      'Seguro do carro/casa',
+      'Seguro do carro / casa / vida',
       false,
       cor: Colors.redAccent,
     ),
     const _CampoConfig(
-      'Transporte',
-      'Transporte público/combustível',
-      true,
+      'Telefone / celular',
+      'Linha móvel ou fixa',
+      false,
+      cor: Colors.redAccent,
+    ),
+    const _CampoConfig(
+      'Assinaturas digitais',
+      'Streaming, apps, cloud, etc.',
+      false,
       cor: Colors.redAccent,
     ),
     const _CampoConfig(
@@ -157,6 +206,17 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
     }
     // Carrega dados salvos
     _carregarDados();
+
+    assert(
+      listEquals(
+        _campos
+            .where((c) => !c.ehRenda && !c.ehSaldoConta)
+            .map((c) => c.nome)
+            .toList(),
+        kFinanceExpensePrefFieldNames,
+      ),
+      'Alinhar _campos (gastos) com kFinanceExpensePrefFieldNames.',
+    );
   }
 
   // ==============================================================================
