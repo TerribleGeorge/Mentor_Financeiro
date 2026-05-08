@@ -235,8 +235,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             });
           }
 
+          final bottomInset =
+              MediaQuery.paddingOf(context).bottom + kFloatingActionButtonMargin + 56;
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            // Evita competição de gestos com fl_chart: scroll vertical estável.
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -421,6 +425,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             height: 210,
             child: LineChart(
               LineChartData(
+                lineTouchData: const LineTouchData(
+                  enabled: false,
+                  handleBuiltInTouches: false,
+                ),
                 minX: 1,
                 maxX: daily.length.toDouble(),
                 minY: 0,
@@ -740,8 +748,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (categorias.isEmpty) return const SizedBox.shrink();
 
     final total = categorias.values.fold(0.0, (acc, v) => acc + v);
-    int touchedIndex = -1;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -759,35 +765,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
           height: 220,
           child: PieChart(
             PieChartData(
-              pieTouchData: PieTouchData(
-                touchCallback: (event, response) {
-                  setState(() {
-                    if (!event.isInterestedForInteractions ||
-                        response == null ||
-                        response.touchedSection == null) {
-                      touchedIndex = -1;
-                      return;
-                    }
-                    touchedIndex = response.touchedSection!.touchedSectionIndex;
-                  });
-                },
-              ),
+              // Touch desligado: dentro de [SingleChildScrollView] o pie roubava o drag vertical.
+              pieTouchData: PieTouchData(enabled: false),
               sectionsSpace: 2,
               centerSpaceRadius: 50,
-              sections: categorias.entries.toList().asMap().entries.map((
-                entry,
-              ) {
-                final index = entry.key;
-                final cat = entry.value.key;
-                final value = entry.value.value;
-                final isTouched = index == touchedIndex;
+              sections: categorias.entries.map((entry) {
+                final cat = entry.key;
+                final value = entry.value;
                 final percentage = (value / total * 100).toStringAsFixed(1);
 
                 return PieChartSectionData(
                   color: _getCategoryColor(cat),
                   value: value,
-                  title: isTouched ? '$percentage%' : '',
-                  radius: isTouched ? 70 : 60,
+                  title: '$percentage%',
+                  radius: 60,
                   titleStyle: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -889,6 +880,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             height: 200,
             child: BarChart(
               BarChartData(
+                barTouchData: const BarTouchData(enabled: false),
                 alignment: BarChartAlignment.spaceAround,
                 maxY: maxY <= 0 ? 1 : (maxY * 1.15),
                 gridData: FlGridData(
@@ -1042,27 +1034,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               alignment: BarChartAlignment.spaceAround,
               maxY: maxY > _metaDiaria ? maxY * 1.2 : _metaDiaria * 1.2,
               minY: 0,
-              barTouchData: BarTouchData(
-                touchTooltipData: BarTouchTooltipData(
-                  getTooltipColor: (group) => const Color(0xFF1E293B),
-                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                    final date = entries[group.x.toInt()].key;
-                    final value = rod.toY;
-                    final acimaDaMeta = value > _metaDiaria;
-                    return BarTooltipItem(
-                      '${DateFormat('dd/MM').format(date)}\n${_formatarMoeda(value)}',
-                      TextStyle(
-                        color: acimaDaMeta
-                            ? const Color(0xFFFF6B6B)
-                            : const Color(0xFF2ED573),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        shadows: ClassicModeStyle.financialValueShadows(context),
-                      ),
-                    );
-                  },
-                ),
-              ),
+              barTouchData: const BarTouchData(enabled: false),
               titlesData: FlTitlesData(
                 show: true,
                 bottomTitles: AxisTitles(

@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.georgeguimares.mentorfinanceiro"
-        // Firebase funciona com minSdk ≥21; uso ≥24 por RevenueCat Paywalls/UI.
+        // Firebase funciona com minSdk ≥21; mantemos ≥24 por compatibilidade UI/plugins.
         minSdk = maxOf(24, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

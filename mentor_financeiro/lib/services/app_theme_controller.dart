@@ -10,7 +10,7 @@ import '../theme/mentor_adaptive_visuals.dart';
 enum AppThemeMode { voidTheme, cyber, obsidian, glacier }
 
 extension AppThemeModePremium on AppThemeMode {
-  /// Cyber, Grimm (obsidian) e Hive (glacier) exigem entitlement premium RevenueCat.
+  /// Cyber, Grimm (obsidian) e Hive (glacier) exigem perfil Premium.
   bool get requiresPremiumEntitlement =>
       this == AppThemeMode.cyber ||
       this == AppThemeMode.obsidian ||

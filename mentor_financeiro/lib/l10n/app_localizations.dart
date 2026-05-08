@@ -1003,7 +1003,7 @@ abstract class AppLocalizations {
   /// No description provided for @investRegionHintGlobal.
   ///
   /// In pt, this message translates to:
-  /// **'País efetivo: {country} · catálogo global (ETFs, NYSE/NASDAQ…). Prioridade: loja (RevenueCat) · fallback locale/IP.'**
+  /// **'País efetivo: {country} · catálogo global (ETFs, NYSE/NASDAQ…). Prioridade: país do dispositivo · fallback locale/IP.'**
   String investRegionHintGlobal(String country);
 
   /// No description provided for @strategy_sectionCoreTitle.

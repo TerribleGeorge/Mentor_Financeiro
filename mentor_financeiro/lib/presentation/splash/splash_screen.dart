@@ -13,7 +13,6 @@ import '../../services/app_theme_controller.dart';
 import '../../services/currency_preference_controller.dart';
 import '../../services/firebase_service.dart';
 import '../../services/regional_context_controller.dart';
-import '../../services/revenue_cat_subscription_service.dart';
 import '../../services/theme_controller.dart';
 import '../../services/user_persona_service.dart';
 
@@ -95,9 +94,6 @@ class _SplashScreenState extends State<SplashScreen>
         regional.initialize(),
         UserPersonaService.instance.initialize(),
         CurrencyPreferenceController.instance.initialize(),
-        RevenueCatSubscriptionService.getCustomerInfoSafe()
-            .timeout(const Duration(seconds: 3))
-            .then((_) {}),
       ];
 
       if (user != null) {

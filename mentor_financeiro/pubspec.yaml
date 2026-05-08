@@ -97,11 +97,9 @@ dependencies:
   geolocator: ^14.0.2
   permission_handler: ^12.0.1
   provider: ^6.1.2
-  purchases_flutter: ^10.0.1
   firebase_crashlytics: ^5.2.0
   connectivity_plus: ^7.1.1
   showcaseview: ^5.0.2
-  purchases_ui_flutter: ^10.0.1
   google_mobile_ads: ^8.0.0
   flutter_notification_listener: ^1.4.0
   # Splash nativo: precisa estar em `dependencies` para o Gradle incluir o plugin Android em release.

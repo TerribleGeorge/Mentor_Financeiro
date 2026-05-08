@@ -9,7 +9,6 @@ import '../services/currency_preference_controller.dart';
 import '../services/firebase_service.dart';
 import '../services/locale_controller.dart';
 import '../core/navigation/subscription_paywall_flow.dart';
-import '../services/revenue_cat_bootstrap.dart';
 import '../services/subscription_provider.dart';
 import 'currency_settings_page.dart';
 import 'language_settings_page.dart';
@@ -275,7 +274,6 @@ class _SettingsPageState extends State<SettingsPage> {
     try {
       await FirebaseAuth.instance.signOut();
       await FirebaseService.logout();
-      await RevenueCatBootstrap.logOutIfConfigured();
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute<void>(builder: (_) => const TelaLogin()),
@@ -559,7 +557,7 @@ class _SettingsPageState extends State<SettingsPage> {
               color: subscription.isPremium ? successColor : accentColor,
             ),
             title: Text(
-              'Estado RevenueCat',
+              'Estado Premium',
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Padding(

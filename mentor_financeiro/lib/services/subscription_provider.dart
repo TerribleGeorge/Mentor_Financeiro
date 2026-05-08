@@ -1,16 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/subscription_constants.dart';
+import '../core/constants/play_store_billing.dart';
 import 'app_theme_controller.dart';
-import 'revenue_cat_bootstrap.dart';
-import 'revenue_cat_subscription_service.dart';
-import 'revenue_cat_unauthorized_prefs.dart';
 
 class SubscriptionProvider extends ChangeNotifier {
   static const String _ownerEmail = 'george.guimares@gmail.com';
@@ -21,20 +18,13 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   bool _isPremium = false;
-  /// Quando true, ignora actualizações vindas do RevenueCat para não sobrescrever [simulatePremium].
   bool _simulatePremiumActive = false;
-  /// `true` só após [CustomerInfo] aplicado (entitlement vindo do RevenueCat), nunca por fallback Firestore sozinho.
-  bool _premiumEntitlementFromRevenueCat = false;
-  /// `customerInfo.entitlements.all['premium']?.isActive` na última sincronização RC.
-  bool _premiumEntitlementActive = false;
   bool _isLoading = false;
   String? _errorMessage;
   String _currentRegion = 'BR';
   DateTime? _subscriptionEndDate;
 
-  /// Preferido na UI: estado local ou entitlement RevenueCat (mesma regra do “tema bloqueado”).
-  bool get hasUnlockedPremium =>
-      _isPremium || hasPremiumEntitlementFromRevenueCat;
+  bool get hasUnlockedPremium => _isPremium;
 
   bool get isPremium => _isPremium;
   bool get isLoading => _isLoading;
@@ -48,143 +38,48 @@ class SubscriptionProvider extends ChangeNotifier {
     return _subscriptionEndDate!.isAfter(DateTime.now());
   }
 
-  /// Temas Cyber / Grimm / Hive: SDK pronto e `entitlements.all['premium']?.isActive == true`.
-  bool get hasPremiumEntitlementFromRevenueCat {
-    // Estado já aplicado (RC real ou [simulatePremium]) não deve ficar bloqueado só porque o SDK não está pronto.
-    if (_premiumEntitlementFromRevenueCat && _premiumEntitlementActive) return true;
-    if (!RevenueCatBootstrap.isSdkReady) return false;
-    if (!_premiumEntitlementFromRevenueCat) return false;
-    return _premiumEntitlementActive;
-  }
-
   bool get _firebaseReady => Firebase.apps.isNotEmpty;
 
   Future<void> initialize() async {
     _isLoading = true;
     notifyListeners();
 
-    if (RevenueCatBootstrap.isSdkReady) {
-      await refreshFromRevenueCat();
-    } else {
-      await _loadPremiumStatusFallback();
-      await _enforcePremiumThemeGate();
-      notifyListeners();
-    }
+    await _loadPremiumStatusFallback();
+    await _enforcePremiumThemeGate();
 
     _isLoading = false;
     notifyListeners();
   }
 
   Future<void> _enforcePremiumThemeGate() async {
-    if (hasPremiumEntitlementFromRevenueCat) return;
+    if (_isPremium) return;
     final mode = AppThemeController.instance.themeMode;
     if (!mode.requiresPremiumEntitlement) return;
     await AppThemeController.instance.setThemeMode(AppThemeMode.voidTheme);
   }
 
-  /// Limpa mensagem de erro da última compra (ex.: antes de abrir o modal de paywall).
   void clearErrorMessage() {
     _errorMessage = null;
     notifyListeners();
   }
 
-  /// Consulta [Purchases.getCustomerInfo], aplica entitlements (`premium`, …) e
-  /// devolve se o utilizador tem assinatura premium activa.
   Future<bool> syncPremiumFromCustomerInfo() async {
-    await refreshFromRevenueCat();
+    await refreshStatus();
     return hasActiveSubscription;
   }
 
-  /// Fonte de verdade quando o SDK RevenueCat está configurado.
-  Future<void> refreshFromRevenueCat() async {
+  Future<void> refreshStatus() async {
     if (_simulatePremiumActive) {
       notifyListeners();
       return;
     }
-    if (!RevenueCatBootstrap.isSdkReady) {
-      await _loadPremiumStatusFallback();
-      await _enforcePremiumThemeGate();
-      notifyListeners();
-      return;
-    }
-    try {
-      final info = await Purchases.getCustomerInfo();
-      await RevenueCatUnauthorizedPrefs.clear();
-      await _applyCustomerInfo(info);
-      _errorMessage = null;
-    } catch (e, st) {
-      debugPrint('refreshFromRevenueCat: $e\n$st');
-      _errorMessage = e.toString();
-      if (RevenueCatUnauthorizedPrefs.exceptionIndicatesUnauthorized(e)) {
-        await RevenueCatUnauthorizedPrefs.mark();
-      }
-      await _loadPremiumStatusFallback();
-    }
+    await _loadPremiumStatusFallback();
     await _enforcePremiumThemeGate();
     notifyListeners();
   }
 
-  Future<void> _applyCustomerInfo(CustomerInfo info) async {
-    _premiumEntitlementFromRevenueCat = true;
-    _premiumEntitlementActive =
-        RevenueCatSubscriptionService.isPremiumEntitlementActive(info);
-    _isPremium = _premiumEntitlementActive;
-    final ent = RevenueCatSubscriptionService.activePremiumEntitlement(info);
-    if (ent?.expirationDate != null) {
-      _subscriptionEndDate = DateTime.tryParse(ent!.expirationDate!);
-    } else {
-      _subscriptionEndDate = null;
-    }
-
-    await AppThemeController.instance.setPremiumStatus(_isPremium);
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_premium', _isPremium);
-
-    await _mirrorPremiumToFirestore();
-  }
-
-  /// Atualização em tempo real ([Purchases.addCustomerInfoUpdateListener]) sem novo pedido HTTP.
-  Future<void> applyCustomerInfo(CustomerInfo info) async {
-    if (_simulatePremiumActive) return;
-    await _applyCustomerInfo(info);
-    await _enforcePremiumThemeGate();
-    notifyListeners();
-  }
-
-  Future<void> _mirrorPremiumToFirestore() async {
-    if (!_firebaseReady) return;
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-    try {
-      await FirebaseFirestore.instance.collection('usuarios').doc(user.uid).set(
-        {
-          'isPremium': _isPremium,
-          if (_subscriptionEndDate != null)
-            'premiumEndDate': Timestamp.fromDate(_subscriptionEndDate!),
-        },
-        SetOptions(merge: true),
-      );
-    } catch (e) {
-      debugPrint('mirrorPremiumToFirestore: $e');
-    }
-  }
-
-  /// Fallback: Firestore / prefs quando o SDK não está pronto.
   Future<void> _loadPremiumStatusFallback() async {
     if (_simulatePremiumActive) return;
-
-    _premiumEntitlementFromRevenueCat = false;
-    _premiumEntitlementActive = false;
-
-    if (await RevenueCatUnauthorizedPrefs.isMarked()) {
-      final markedPrefs = await SharedPreferences.getInstance();
-      _isPremium = false;
-      _subscriptionEndDate = null;
-      await markedPrefs.setBool('is_premium', false);
-      await AppThemeController.instance.setPremiumStatus(false);
-      return;
-    }
 
     final prefs = await SharedPreferences.getInstance();
     try {
@@ -218,92 +113,51 @@ class SubscriptionProvider extends ChangeNotifier {
         }
       }
     } finally {
-      await AppThemeController.instance
-          .setPremiumStatus(hasPremiumEntitlementFromRevenueCat);
+      await AppThemeController.instance.setPremiumStatus(_isPremium);
     }
   }
 
-  Future<bool> _purchasePackage(Package? pkg) async {
-    if (pkg == null) {
-      _errorMessage = 'Pacote não disponível. Configure a offering no RevenueCat.';
-      notifyListeners();
-      return false;
-    }
-    if (!RevenueCatBootstrap.isSdkReady) {
-      _errorMessage = 'Compras indisponíveis (RevenueCat não configurado).';
-      notifyListeners();
-      return false;
-    }
-
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
+  Future<bool> _launchPlayUri(Uri uri) async {
     try {
-      await Purchases.purchase(PurchaseParams.package(pkg));
-      await refreshFromRevenueCat();
-      _isLoading = false;
-      notifyListeners();
-      return _isPremium;
-    } on PlatformException catch (e) {
-      final code = PurchasesErrorHelper.getErrorCode(e);
-      if (code != PurchasesErrorCode.purchaseCancelledError) {
-        _errorMessage = e.message ?? e.toString();
-      } else {
-        _errorMessage = null;
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok) {
+        _errorMessage = 'Não foi possível abrir a Play Store.';
+        notifyListeners();
+        return false;
       }
-      _isLoading = false;
-      notifyListeners();
-      return false;
+      _errorMessage = null;
+      return true;
     } catch (e) {
       _errorMessage = e.toString();
-      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
-  Future<bool> purchaseMonthly() async {
-    final offerings = await RevenueCatSubscriptionService.getOfferingsSafe();
-    final offering =
-        RevenueCatSubscriptionService.resolvePrimaryOffering(offerings);
-    final pkg = RevenueCatSubscriptionService.resolveMonthly(offering);
-    return _purchasePackage(pkg);
+  /// Abre a ficha da app na Play Store para subscrever (produtos definidos na Play Console).
+  Future<bool> purchaseMonthly() async => openPlayStoreListing();
+
+  Future<bool> purchaseYearly() async => openPlayStoreListing();
+
+  Future<bool> purchaseLifetime() async => openPlayStoreListing();
+
+  Future<bool> openPlayStoreListing() async {
+    notifyListeners();
+    return _launchPlayUri(PlayStoreBilling.appListing);
   }
 
-  Future<bool> purchaseYearly() async {
-    final offerings = await RevenueCatSubscriptionService.getOfferingsSafe();
-    final offering =
-        RevenueCatSubscriptionService.resolvePrimaryOffering(offerings);
-    final pkg = RevenueCatSubscriptionService.resolveYearly(offering);
-    return _purchasePackage(pkg);
+  Future<bool> openManageSubscriptions() async {
+    notifyListeners();
+    return _launchPlayUri(PlayStoreBilling.manageAppSubscriptions);
   }
 
-  Future<bool> purchaseLifetime() async {
-    final offerings = await RevenueCatSubscriptionService.getOfferingsSafe();
-    final offering =
-        RevenueCatSubscriptionService.resolvePrimaryOffering(offerings);
-    final pkg = RevenueCatSubscriptionService.resolveLifetime(offering);
-    return _purchasePackage(pkg);
-  }
-
+  /// Volta a ler Firestore/prefs. Após comprar na Play, actualize o perfil no backend ou abra sessão de novo.
   Future<void> restorePurchases() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    if (RevenueCatBootstrap.isSdkReady) {
-      try {
-        await Purchases.restorePurchases();
-        await refreshFromRevenueCat();
-      } on PlatformException catch (e) {
-        _errorMessage = e.message ?? e.toString();
-      } catch (e) {
-        _errorMessage = e.toString();
-      }
-    } else {
-      await _loadPremiumStatusFallback();
-    }
+    await refreshStatus();
 
     _isLoading = false;
     notifyListeners();
@@ -336,20 +190,26 @@ class SubscriptionProvider extends ChangeNotifier {
     await _mirrorPremiumToFirestore();
   }
 
-  Future<void> refreshStatus() async {
-    if (RevenueCatBootstrap.isSdkReady) {
-      await refreshFromRevenueCat();
-    } else {
-      await _loadPremiumStatusFallback();
-      notifyListeners();
+  Future<void> _mirrorPremiumToFirestore() async {
+    if (!_firebaseReady) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      await FirebaseFirestore.instance.collection('usuarios').doc(user.uid).set(
+        {
+          'isPremium': _isPremium,
+          if (_subscriptionEndDate != null)
+            'premiumEndDate': Timestamp.fromDate(_subscriptionEndDate!),
+        },
+        SetOptions(merge: true),
+      );
+    } catch (e) {
+      debugPrint('mirrorPremiumToFirestore: $e');
     }
   }
 
-  /// Simula premium activo (ex.: botão admin em Definições). Mantém [debugSimulatePremiumPurchase].
   Future<void> simulatePremium() async {
     _simulatePremiumActive = true;
-    _premiumEntitlementFromRevenueCat = true;
-    _premiumEntitlementActive = true;
     _isPremium = true;
     _subscriptionEndDate = DateTime.now().add(const Duration(days: 365));
     _errorMessage = null;
@@ -362,7 +222,6 @@ class SubscriptionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Só em **debug**: delega para [simulatePremium] para não duplicar lógica.
   Future<void> debugSimulatePremiumPurchase() async {
     if (!kDebugMode) return;
     await simulatePremium();

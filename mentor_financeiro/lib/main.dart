@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer' show log;
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -14,7 +13,6 @@ import 'package:showcaseview/showcaseview.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'app/mentor_app_router.dart';
-import 'core/config/app_secrets.dart';
 import 'core/constants/app_routes.dart';
 import 'core/navigation/mentor_navigator.dart';
 import 'core/navigation/splash_route_observer.dart';
@@ -26,32 +24,18 @@ import 'services/currency_preference_controller.dart';
 import 'services/investment_category_provider.dart';
 import 'services/locale_controller.dart';
 import 'services/regional_context_controller.dart';
-import 'services/revenue_cat_bootstrap.dart';
 import 'services/subscription_provider.dart';
 import 'services/theme_controller.dart';
 import 'services/user_persona_service.dart';
 import 'widgets/mentor_app_backdrop.dart';
-import 'widgets/revenue_cat_lifecycle.dart';
+import 'widgets/auth_subscription_sync.dart';
 
 final RegionalContextController regionalContextController =
     RegionalContextController();
 final InvestmentCategoryProvider investmentCategoryProvider =
     InvestmentCategoryProvider(regionalContextController);
 
-Future<void> _bootstrapRevenueCat() async {
-  try {
-    await RevenueCatBootstrap.run(FirebaseAuth.instance.currentUser?.uid);
-  } catch (e, st) {
-    log(
-      'RevenueCat bootstrap: $e',
-      name: 'mentor.bootstrap',
-      error: e,
-      stackTrace: st,
-    );
-  }
-}
-
-/// Carrega variáveis antes de [AppSecrets] / RevenueCat / logs em debug.
+/// Carrega variáveis opcionais (.env) antes do arranque.
 Future<void> _loadDotEnv() async {
   try {
     await dotenv.load(fileName: '.env');
@@ -63,7 +47,7 @@ Future<void> _loadDotEnv() async {
     await dotenv.load(fileName: 'assets/.env');
   } catch (e, st) {
     log(
-      'assets/.env: $e — RevenueCat e chaves .env ficam indisponíveis até existir ficheiro.',
+      'assets/.env: $e — chaves .env opcionais indisponíveis até existir ficheiro.',
       name: 'mentor.bootstrap',
       error: e,
       stackTrace: st,
@@ -90,20 +74,6 @@ Future<void> main() async {
       await _loadDotEnv();
       unawaited(MobileAds.instance.initialize());
 
-      if (kDebugMode) {
-        final keyOk =
-            AppSecrets.revenueCatAndroid != null &&
-            (AppSecrets.revenueCatAndroid ?? '').trim().isNotEmpty;
-        log(
-          'RevenueCat: REVENUECAT_ANDROID_API_KEY ${keyOk ? "carregada" : "ausente"}.',
-          name: 'mentor.bootstrap',
-        );
-      }
-
-      // Esperar o bootstrap para [RevenueCatLifecycle] ver [isSdkReady] ao primeiro frame
-      // e registar listeners / authStateChanges; caso contrário o RC ficava “mudo”.
-      await _bootstrapRevenueCat();
-
       unawaited(FirebaseDataService.instance.setupObservability());
 
       runApp(
@@ -124,7 +94,7 @@ Future<void> main() async {
               value: UserPersonaService.instance,
             ),
           ],
-          child: RevenueCatLifecycle(child: const MentorApp()),
+          child: AuthSubscriptionSync(child: const MentorApp()),
         ),
       );
     },

@@ -11,11 +11,6 @@ abstract final class AppSecrets {
     }
   }
 
-  static String? get revenueCatAndroid =>
-      _env('REVENUECAT_ANDROID_API_KEY');
-
-  static String? get revenueCatIos => _env('REVENUECAT_IOS_API_KEY');
-
   /// Opcional: Alpha Vantage para cotações globais ([AlphaVantageFinancialDataProvider]).
   static String? get alphaVantageApiKey => _env('ALPHA_VANTAGE_API_KEY');
 

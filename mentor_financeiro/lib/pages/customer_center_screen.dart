@@ -1,71 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:purchases_flutter/models/customer_info_wrapper.dart';
-import 'package:purchases_flutter/models/purchases_error.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 
-import '../services/revenue_cat_bootstrap.dart';
 import '../services/subscription_provider.dart';
 
-/// Customer Center RevenueCat (gestão de subscrição, restauro, suporte).
-///
-/// Requer SDK configurado e Customer Center ativado no dashboard RevenueCat.
+/// Gestão de subscrição via Google Play (sem RevenueCat).
 class CustomerCenterScreen extends StatelessWidget {
   const CustomerCenterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!RevenueCatBootstrap.isSdkReady) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Assinatura')),
-        body: const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text(
-              'Centro de cliente indisponível: RevenueCat não está configurado.',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      );
-    }
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Gerir assinatura'),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await RevenueCatUI.presentCustomerCenter(
-                onRestoreCompleted: (CustomerInfo customerInfo) {
-                  context.read<SubscriptionProvider>().refreshFromRevenueCat();
-                },
-                onRestoreFailed: (PurchasesError error) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(error.message)),
-                  );
-                },
+      appBar: AppBar(title: const Text('Gerir assinatura')),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Consumer<SubscriptionProvider>(
+            builder: (context, sub, _) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    sub.isPremium
+                        ? 'Conta com Premium activo neste perfil.'
+                        : 'Sem Premium neste perfil. Subscrições são tratadas na Google Play.',
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: () => sub.openManageSubscriptions(),
+                    icon: const Icon(Icons.subscriptions_outlined),
+                    label: const Text('Gerir subscrições na Play'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => sub.openPlayStoreListing(),
+                    icon: const Icon(Icons.storefront_outlined),
+                    label: const Text('Ver app na Play Store'),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.tonal(
+                    onPressed: sub.isLoading
+                        ? null
+                        : () async {
+                            await sub.restorePurchases();
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  sub.isPremium
+                                      ? 'Estado actualizado.'
+                                      : 'Perfil recarregado.',
+                                ),
+                              ),
+                            );
+                          },
+                    child: sub.isLoading
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Actualizar estado no app'),
+                  ),
+                  if (sub.errorMessage != null &&
+                      sub.errorMessage!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      sub.errorMessage!,
+                      style: TextStyle(color: theme.colorScheme.error),
+                    ),
+                  ],
+                ],
               );
             },
-            child: const Text('Modal nativo'),
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: CustomerCenterView(
-          onDismiss: () => Navigator.of(context).maybePop(),
-          onRestoreCompleted: (customerInfo) {
-            context.read<SubscriptionProvider>().refreshFromRevenueCat();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Restauro concluído.')),
-            );
-          },
-          onRestoreFailed: (error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(error.message)),
-            );
-          },
         ),
       ),
     );

@@ -1,21 +1,12 @@
 class SubscriptionConstants {
-  // ==============================================================================
-  // CONFIGURAÇÕES REVENUECAT - ANDROID
-  // ==============================================================================
-  // IMPORTANTE: Substitua pelas suas chaves reais do RevenueCat Dashboard
-
-  // Chave pública do app (Android) - Encontrada em Project Settings > API Keys
+  // Referências antigas (RC); não usadas pelo fluxo actual — mantidas por compatibilidade.
   static const String revenueCatApiKey = 'your_revenuecat_api_key_here';
-
-  // IDs dos produtos (entitlement IDs) - Criados no RevenueCat Dashboard
   static const String premiumMonthlyEntitlementId = 'premium_monthly';
   static const String premiumYearlyEntitlementId = 'premium_yearly';
-
-  // IDs das ofertas (offerings) - Encontrados em Offerings
   static const String defaultOfferingId = 'premium_offering';
 
   // ==============================================================================
-  // PREÇOS POR REGIÃO (Fallback se não carregar do RevenueCat)
+  // PREÇOS POR REGIÃO (fallback na UI; valores reais vêm da Google Play)
   // ==============================================================================
   static const Map<String, double> regionalPrices = {
     'BR': 9.90, // Brasil

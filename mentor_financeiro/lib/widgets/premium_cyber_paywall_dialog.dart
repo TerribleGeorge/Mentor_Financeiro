@@ -2,23 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../pages/paywall_screen.dart';
-import '../services/revenue_cat_bootstrap.dart';
 import '../services/subscription_provider.dart';
 
-/// Modal para o tema Cyber: paywall + compra mensal (sandbox Google Play) via RevenueCat.
+/// Modal para o tema Cyber: atalho para paywall / Play Store.
 abstract final class PremiumCyberPaywallDialog {
   static Future<void> show(BuildContext context) async {
-    if (!RevenueCatBootstrap.isSdkReady) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Compras indisponíveis. Confirme REVENUECAT_ANDROID_API_KEY no .env e reinicie o app.',
-          ),
-        ),
-      );
-      return;
-    }
-
     context.read<SubscriptionProvider>().clearErrorMessage();
 
     await showDialog<void>(
@@ -37,9 +25,8 @@ abstract final class PremiumCyberPaywallDialog {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'O tema Cyber faz parte da assinatura. Ao subscrever o plano '
-                      'mensal, o acesso premium é ativado no RevenueCat (teste '
-                      'no sandbox da Play Store).',
+                      'O tema Cyber faz parte da assinatura Premium. A subscrição é feita na '
+                      'Google Play; depois o estado Premium deve estar reflectido no teu perfil.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     if (sub.isLoading) ...[
@@ -59,7 +46,7 @@ abstract final class PremiumCyberPaywallDialog {
                       onPressed: sub.isLoading
                           ? null
                           : () async {
-                              final ok = await sub.purchaseMonthly();
+                              final ok = await sub.openPlayStoreListing();
                               if (!dialogContext.mounted) return;
                               Navigator.of(dialogContext).pop();
                               if (!context.mounted) return;
@@ -67,14 +54,14 @@ abstract final class PremiumCyberPaywallDialog {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
-                                      'Assinatura ativa. Escolha o tema Cyber acima.',
+                                      'Na Play Store, subscreve o Premium. Depois actualiza o perfil ou reinicia o app.',
                                     ),
                                   ),
                                 );
                               }
                             },
-                      icon: const Icon(Icons.shopping_cart_checkout_outlined),
-                      label: const Text('Assinar plano mensal'),
+                      icon: const Icon(Icons.storefront_outlined),
+                      label: const Text('Abrir Play Store'),
                     ),
                     const SizedBox(height: 8),
                     TextButton(
@@ -88,7 +75,7 @@ abstract final class PremiumCyberPaywallDialog {
                                 ),
                               );
                             },
-                      child: const Text('Ver todos os planos'),
+                      child: const Text('Ver ecrã de assinatura'),
                     ),
                   ],
                 ),

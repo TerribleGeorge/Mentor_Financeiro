@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import '../../pages/paywall_screen.dart';
 import '../../services/subscription_provider.dart';
 
-/// Abre [PaywallScreen] e sincroniza estado via [SubscriptionProvider.refreshStatus]
-/// (respeita SDK indisponível → fallback, como em Definições).
+/// Abre [PaywallScreen] e sincroniza estado via [SubscriptionProvider.refreshStatus].
 ///
 /// Devolve `true` se [SubscriptionProvider.hasUnlockedPremium] após sincronizar.
 Future<bool> presentPaywallAndRefresh(

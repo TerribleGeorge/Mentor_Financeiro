@@ -160,8 +160,7 @@ class ConfiguracoesPage extends StatelessWidget {
       children: themes.map((theme) {
         final isSelected = controller.themeMode == theme.mode;
         final onLightPreview = theme.previewColor.computeLuminance() > 0.55;
-        // Cyber / Grimm / Hive: desbloqueados quando RC reporta
-        // customerInfo.entitlements.all['premium']?.isActive (via [SubscriptionProvider]).
+        // Cyber / Grimm / Hive: exigem [SubscriptionProvider.hasUnlockedPremium].
         final premiumOk = subscription.hasUnlockedPremium;
         final locked = theme.mode.requiresPremiumEntitlement && !premiumOk;
         return SizedBox(
