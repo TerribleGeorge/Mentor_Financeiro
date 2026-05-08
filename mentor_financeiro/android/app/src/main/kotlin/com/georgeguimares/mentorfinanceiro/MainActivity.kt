@@ -2,7 +2,10 @@ package com.georgeguimares.mentorfinanceiro
 
 import android.app.Notification
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -10,6 +13,8 @@ import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import org.json.JSONArray
+import org.json.JSONObject
 
 class MainActivity : FlutterFragmentActivity() {
     companion object {
@@ -26,9 +31,12 @@ class MainActivity : FlutterFragmentActivity() {
 object NotificationChannels {
     private const val METHOD_CHANNEL = "mentor_financeiro/notifications"
     private const val EVENT_CHANNEL = "mentor_financeiro/notifications/stream"
+    private const val PENDING_PREFS = "mentor_notification_listener"
+    private const val PENDING_EVENTS_KEY = "pending_events"
+    private const val MAX_PENDING_EVENTS = 50
 
     private var eventSink: EventChannel.EventSink? = null
-    private val pendingEvents = mutableListOf<Map<String, Any>>()
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     fun register(messenger: io.flutter.plugin.common.BinaryMessenger) {
         MethodChannel(messenger, METHOD_CHANNEL).setMethodCallHandler { call, result ->
@@ -50,6 +58,13 @@ object NotificationChannels {
                 "getEnabledListeners" -> {
                     result.success(CustomNotificationListener.getEnabledListeners())
                 }
+                "drainPendingNotifications" -> {
+                    try {
+                        result.success(drainPendingNotifications(MainActivity.instance))
+                    } catch (e: Exception) {
+                        result.success(emptyList<Map<String, Any>>())
+                    }
+                }
                 else -> result.notImplemented()
             }
         }
@@ -57,10 +72,6 @@ object NotificationChannels {
         EventChannel(messenger, EVENT_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 eventSink = events
-                if (events != null && pendingEvents.isNotEmpty()) {
-                    pendingEvents.forEach { events.success(it) }
-                    pendingEvents.clear()
-                }
             }
 
             override fun onCancel(arguments: Any?) {
@@ -69,7 +80,13 @@ object NotificationChannels {
         })
     }
 
-    fun sendNotification(packageName: String, title: String, text: String, timestamp: Long) {
+    fun sendNotification(
+        context: Context,
+        packageName: String,
+        title: String,
+        text: String,
+        timestamp: Long
+    ) {
         val data = mapOf(
             "package" to packageName,
             "title" to title,
@@ -78,13 +95,41 @@ object NotificationChannels {
         )
         val sink = eventSink
         if (sink != null) {
-            sink.success(data)
+            mainHandler.post { sink.success(data) }
         } else {
-            pendingEvents.add(data)
-            if (pendingEvents.size > 30) {
-                pendingEvents.removeAt(0)
-            }
+            persistPendingNotification(context, data)
         }
+    }
+
+    private fun persistPendingNotification(context: Context, data: Map<String, Any>) {
+        val prefs = context.applicationContext.getSharedPreferences(PENDING_PREFS, Context.MODE_PRIVATE)
+        val current = JSONArray(prefs.getString(PENDING_EVENTS_KEY, "[]") ?: "[]")
+        current.put(JSONObject(data))
+        while (current.length() > MAX_PENDING_EVENTS) {
+            current.remove(0)
+        }
+        prefs.edit().putString(PENDING_EVENTS_KEY, current.toString()).apply()
+    }
+
+    private fun drainPendingNotifications(context: Context): List<Map<String, Any>> {
+        val prefs = context.applicationContext.getSharedPreferences(PENDING_PREFS, Context.MODE_PRIVATE)
+        val current = JSONArray(prefs.getString(PENDING_EVENTS_KEY, "[]") ?: "[]")
+        val out = mutableListOf<Map<String, Any>>()
+
+        for (i in 0 until current.length()) {
+            val item = current.optJSONObject(i) ?: continue
+            out.add(
+                mapOf(
+                    "package" to item.optString("package"),
+                    "title" to item.optString("title"),
+                    "text" to item.optString("text"),
+                    "timestamp" to item.optLong("timestamp")
+                )
+            )
+        }
+
+        prefs.edit().remove(PENDING_EVENTS_KEY).apply()
+        return out
     }
 }
 
@@ -146,6 +191,7 @@ class CustomNotificationListener : NotificationListenerService() {
             extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString() ?: "",
             extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString() ?: "",
             extras.getCharSequence(Notification.EXTRA_SUMMARY_TEXT)?.toString() ?: "",
+            notification.tickerText?.toString() ?: "",
             extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES)
                 ?.joinToString(" ") { it.toString() } ?: ""
         )
@@ -155,7 +201,7 @@ class CustomNotificationListener : NotificationListenerService() {
             .joinToString(" ")
         val timestamp = sbn.postTime
 
-        NotificationChannels.sendNotification(packageName, title, text, timestamp)
+        NotificationChannels.sendNotification(this, packageName, title, text, timestamp)
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {}

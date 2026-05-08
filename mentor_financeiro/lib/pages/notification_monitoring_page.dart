@@ -1,5 +1,9 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../services/notification_listener_service.dart';
 
 class NotificationMonitoringPage extends StatefulWidget {
   const NotificationMonitoringPage({super.key});
@@ -11,9 +15,12 @@ class NotificationMonitoringPage extends StatefulWidget {
       _NotificationMonitoringPageState();
 }
 
-class _NotificationMonitoringPageState extends State<NotificationMonitoringPage> {
+class _NotificationMonitoringPageState
+    extends State<NotificationMonitoringPage> {
+  final _listener = NotificationListenerService();
   bool _enabled = true;
   bool _loading = true;
+  bool? _androidPermissionGranted;
 
   @override
   void initState() {
@@ -24,9 +31,13 @@ class _NotificationMonitoringPageState extends State<NotificationMonitoringPage>
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final v = prefs.getBool(NotificationMonitoringPage.prefsKey);
+    final hasPermission = Platform.isAndroid
+        ? await _listener.verificarPermissao()
+        : null;
     if (!mounted) return;
     setState(() {
       _enabled = v ?? true;
+      _androidPermissionGranted = hasPermission;
       _loading = false;
     });
   }
@@ -35,6 +46,16 @@ class _NotificationMonitoringPageState extends State<NotificationMonitoringPage>
     setState(() => _enabled = v);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(NotificationMonitoringPage.prefsKey, v);
+    if (v && Platform.isAndroid) {
+      await _listener.iniciar();
+      await _load();
+    }
+  }
+
+  Future<void> _openAndroidPermission() async {
+    await _listener.solicitarPermissao();
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+    await _load();
   }
 
   @override
@@ -79,8 +100,12 @@ class _NotificationMonitoringPageState extends State<NotificationMonitoringPage>
                 ),
                 const SizedBox(height: 12),
                 _bullet('Não fazemos login em banco / cartão.'),
-                _bullet('Não capturamos códigos (OTP), senha ou mensagens de segurança.'),
-                _bullet('Processamos e filtramos apenas gastos (compras/pagamentos).'),
+                _bullet(
+                  'Não capturamos códigos (OTP), senha ou mensagens de segurança.',
+                ),
+                _bullet(
+                  'Processamos e filtramos apenas gastos (compras/pagamentos).',
+                ),
               ],
             ),
           ),
@@ -97,7 +122,9 @@ class _NotificationMonitoringPageState extends State<NotificationMonitoringPage>
             child: Row(
               children: [
                 Icon(
-                  _enabled ? Icons.notifications_active : Icons.notifications_off,
+                  _enabled
+                      ? Icons.notifications_active
+                      : Icons.notifications_off,
                   color: _enabled
                       ? const Color(0xFF26DE81)
                       : scheme.onSurface.withValues(alpha: 0.55),
@@ -113,8 +140,10 @@ class _NotificationMonitoringPageState extends State<NotificationMonitoringPage>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        _enabled
+                        _enabled && (_androidPermissionGranted ?? true)
                             ? 'Lendo apenas notificações de gastos'
+                            : _enabled
+                            ? 'Ative o acesso a notificações no Android'
                             : 'Monitoramento pausado',
                         style: TextStyle(
                           color: scheme.onSurface.withValues(alpha: 0.7),
@@ -131,14 +160,53 @@ class _NotificationMonitoringPageState extends State<NotificationMonitoringPage>
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 else
-                  Switch(
-                    value: _enabled,
-                    onChanged: (v) => _setEnabled(v),
-                  ),
+                  Switch(value: _enabled, onChanged: (v) => _setEnabled(v)),
               ],
             ),
           ),
           const SizedBox(height: 14),
+          if (Platform.isAndroid) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: scheme.surface.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: scheme.onSurface.withValues(alpha: 0.08),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _androidPermissionGranted == true
+                        ? Icons.verified_outlined
+                        : Icons.warning_amber_rounded,
+                    color: _androidPermissionGranted == true
+                        ? const Color(0xFF26DE81)
+                        : Colors.amber,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _androidPermissionGranted == true
+                          ? 'Permissão Android concedida para o Mentor Financeiro.'
+                          : 'Permissão Android ainda não concedida. Sem ela, o app não recebe notificações.',
+                      style: TextStyle(
+                        color: scheme.onSurface.withValues(alpha: 0.75),
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  TextButton(
+                    onPressed: _openAndroidPermission,
+                    child: const Text('Abrir'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -188,4 +256,3 @@ class _NotificationMonitoringPageState extends State<NotificationMonitoringPage>
     );
   }
 }
-

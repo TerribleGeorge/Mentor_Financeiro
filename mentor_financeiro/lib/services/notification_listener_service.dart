@@ -279,10 +279,16 @@ class NotificationParserService {
     // PT
     'compra aprovada',
     'compra realizada',
+    'compra',
     'compra de',
+    'pagamento',
     'pagamento aprovado',
     'pagamento realizado',
     'pagamento efetuado',
+    'transação',
+    'transacao',
+    'transação aprovada',
+    'transacao aprovada',
     'debito',
     'débito',
     'cartao',
@@ -781,6 +787,10 @@ class NotificationListenerService {
   /// Inicia o stream **sem** disparar pedido de permissão automaticamente.
   /// Retorna `false` se a permissão ainda não foi concedida.
   Future<bool> iniciar() async {
+    if (_subscription != null) {
+      return true;
+    }
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       debugPrint('Nenhum usuário logado. Serviço não iniciado.');
@@ -800,6 +810,8 @@ class NotificationListenerService {
       onError: _onError,
     );
 
+    await _drainPendingNotifications();
+
     debugPrint(
       'NotificationListenerService iniciado para usuário: ${user.uid}',
     );
@@ -814,6 +826,21 @@ class NotificationListenerService {
       return false;
     }
     return iniciar();
+  }
+
+  Future<void> _drainPendingNotifications() async {
+    try {
+      final pending = await _channel.invokeMethod<List<dynamic>>(
+        'drainPendingNotifications',
+      );
+      if (pending == null || pending.isEmpty) return;
+
+      for (final event in pending) {
+        _onNotificationReceived(event);
+      }
+    } on PlatformException catch (e) {
+      debugPrint('Erro ao recuperar notificações pendentes: ${e.message}');
+    }
   }
 
   void _onNotificationReceived(dynamic event) {
