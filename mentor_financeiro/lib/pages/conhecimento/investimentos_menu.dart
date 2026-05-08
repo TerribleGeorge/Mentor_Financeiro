@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../content/content_repository.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/investment_category_provider.dart';
 import 'tesouro_direto_completo_page.dart';
 import 'acoes_detalhe_page.dart';
 import 'cdb_detalhe_page.dart';
@@ -16,7 +18,7 @@ class InvestimentosMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isBrazil = ContentRepository.isPtBrLocale(Localizations.localeOf(context));
+    final isBrazil = context.watch<InvestmentCategoryProvider>().isBrazilMarket;
     final items = ContentRepository.investmentMenuItems(
       l10n: l10n,
       isBrazil: isBrazil,

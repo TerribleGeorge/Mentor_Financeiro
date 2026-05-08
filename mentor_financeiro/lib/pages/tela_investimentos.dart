@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../l10n/app_localizations.dart';
-import '../content/content_repository.dart';
 import '../core/constants/app_routes.dart';
 import '../core/widgets/mentor_insight_card.dart';
 import '../domain/entities/financial_market_region.dart';
@@ -16,8 +15,6 @@ class TelaInvestimentos extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cat = context.watch<InvestmentCategoryProvider>();
-    final isBrazilLocale =
-        ContentRepository.isPtBrLocale(Localizations.localeOf(context));
     final topics = cat.educationCategories;
 
     return Scaffold(
@@ -47,7 +44,7 @@ class TelaInvestimentos extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            isBrazilLocale
+            cat.isBrazilMarket
                 ? l10n.investRegionHintBr(cat.effectiveCountryCode)
                 : l10n.investRegionHintGlobal(cat.effectiveCountryCode),
             style: const TextStyle(color: Colors.white70, fontSize: 13),

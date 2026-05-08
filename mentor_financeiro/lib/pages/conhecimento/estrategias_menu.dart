@@ -5,6 +5,7 @@ import '../../content/content_repository.dart';
 import '../../content/content_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/app_theme_controller.dart';
+import '../../services/investment_category_provider.dart';
 
 class EstrategiasMenu extends StatelessWidget {
   const EstrategiasMenu({super.key});
@@ -20,8 +21,7 @@ class EstrategiasMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Regionalização por Locale (pt_BR vs != pt_BR).
-    final isBrazil = ContentRepository.isPtBrLocale(Localizations.localeOf(context));
+    final isBrazil = context.watch<InvestmentCategoryProvider>().isBrazilMarket;
     final theme = context.watch<AppThemeController>();
     final isPremium = ContentRepository.isPremiumForContent(theme);
 

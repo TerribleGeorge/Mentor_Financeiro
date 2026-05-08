@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/suitability_engine.dart';
 import '../l10n/app_localizations.dart';
-import '../content/content_repository.dart';
 import '../services/ad_manager_service.dart';
+import '../services/investment_category_provider.dart';
 import '../services/subscription_provider.dart';
 
 class SimuladoPage extends StatefulWidget {
@@ -496,7 +496,7 @@ class _ResultPage extends StatelessWidget {
   }
 
   List<String> _getSuggestions(BuildContext context) {
-    final isBrazil = ContentRepository.isPtBrLocale(Localizations.localeOf(context));
+    final isBrazil = context.read<InvestmentCategoryProvider>().isBrazilMarket;
     switch (profile) {
       case Profile.conservador:
         return isBrazil

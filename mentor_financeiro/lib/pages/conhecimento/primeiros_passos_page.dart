@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../content/content_repository.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/investment_category_provider.dart';
 
 class PrimeirosPassosPage extends StatelessWidget {
   const PrimeirosPassosPage({super.key});
@@ -9,8 +11,7 @@ class PrimeirosPassosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context);
-    final isBrazil = ContentRepository.isPtBrLocale(locale);
+    final isBrazil = context.watch<InvestmentCategoryProvider>().isBrazilMarket;
     final passos = ContentRepository.investmentFirstSteps(
       l10n: l10n,
       isBrazil: isBrazil,
