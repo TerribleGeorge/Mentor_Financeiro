@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import '../constants/subscription_constants.dart';
 import '../services/revenue_cat_bootstrap.dart';
 import '../services/revenue_cat_subscription_service.dart';
 import '../services/subscription_provider.dart';
@@ -82,9 +83,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     } finally {
       if (mounted) {
@@ -165,8 +166,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
           }
 
           final offerings = snapshot.data;
-          final offering =
-              RevenueCatSubscriptionService.resolvePrimaryOffering(offerings);
+          final offering = RevenueCatSubscriptionService.resolvePrimaryOffering(
+            offerings,
+          );
           final packages = offering?.availablePackages ?? const <Package>[];
 
           if (packages.isEmpty) {
@@ -179,7 +181,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     Icon(
                       Icons.cloud_off_outlined,
                       size: 56,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.45,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -204,74 +208,80 @@ class _PaywallScreenState extends State<PaywallScreen> {
           return SafeArea(
             child: Column(
               children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: _PremiumBenefitsCard(
+                    benefits: SubscriptionConstants.getBenefitsForLocale(
+                      Localizations.localeOf(context).languageCode,
+                    ),
+                  ),
+                ),
                 Expanded(
                   child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                     itemCount: sorted.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 16),
                     itemBuilder: (context, index) {
-                final pkg = sorted[index];
-                final product = pkg.storeProduct;
-                final title = product.title.trim().isNotEmpty
-                    ? product.title
-                    : 'Plano Premium';
-                final description = product.description.trim().isNotEmpty
-                    ? product.description
-                    : 'Inclui todos os temas premium e benefícios Mentor Pro.';
-                final busy = _purchasingPackageIdentifier == pkg.identifier;
+                      final pkg = sorted[index];
+                      final product = pkg.storeProduct;
+                      final title = product.title.trim().isNotEmpty
+                          ? product.title
+                          : 'Plano Premium';
+                      final description = product.description.trim().isNotEmpty
+                          ? product.description
+                          : 'Inclui os recursos premium do Mentor Financeiro.';
+                      final busy =
+                          _purchasingPackageIdentifier == pkg.identifier;
 
-                return Card(
-                  elevation: 0,
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.35,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          title,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          product.priceString,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          description,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.85,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        FilledButton(
-                          onPressed: busy
-                              ? null
-                              : () => _purchase(pkg),
-                          child: busy
-                              ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                      return Card(
+                        elevation: 0,
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.35),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                title,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                product.priceString,
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                description,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.85,
                                   ),
-                                )
-                              : const Text('Subscrever'),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              FilledButton(
+                                onPressed: busy ? null : () => _purchase(pkg),
+                                child: busy
+                                    ? const SizedBox(
+                                        height: 22,
+                                        width: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text('Assinar'),
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                );
+                      );
                     },
                   ),
                 ),
@@ -290,6 +300,63 @@ class _PaywallScreenState extends State<PaywallScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _PremiumBenefitsCard extends StatelessWidget {
+  const _PremiumBenefitsCard({required this.benefits});
+
+  final List<String> benefits;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.22),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'O que o Premium libera',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ...benefits.map(
+              (benefit) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      size: 18,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(benefit, style: theme.textTheme.bodyMedium),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Sem promessa de consultoria individual, suporte 24h ou resultado financeiro garantido.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

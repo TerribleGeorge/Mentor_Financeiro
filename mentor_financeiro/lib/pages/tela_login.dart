@@ -388,11 +388,11 @@ class _TelaLoginState extends State<TelaLogin> {
           // Plano Premium
           _planoCard("PREMIUM", "R\$ 9,90/mês", Colors.amber, [
             "✨ Tudo do Free",
-            "✨ Mentoria completa",
-            "✨ Análises personalizadas",
-            "✨ Estratégias avançadas",
-            "✨ Relatórios mensais",
-            "✨ Suporte prioritário",
+            "✨ Relatórios mensais detalhados",
+            "✨ Gráficos avançados",
+            "✨ Insights automáticos",
+            "✨ Monitoramento de notificações compatíveis",
+            "✨ Sem anúncios",
           ], isPro: true),
         ],
       ),
@@ -616,20 +616,24 @@ class _TelaLoginState extends State<TelaLogin> {
     setState(() => _carregando = true);
     try {
       final user = await FirebaseService.loginGoogle();
+      if (!mounted) return;
       setState(() {
         _carregando = false;
         if (user != null) {
           _usuarioFirebase = user;
           _metodoLogin = "google";
           _nomeController.text = user.displayName ?? '';
-          _pageController.jumpToPage(2); // Pula para página de nome
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login cancelado.')),
-          );
         }
       });
+      if (user != null) {
+        _pageController.jumpToPage(2); // Pula para página de nome
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Login cancelado.')));
+      }
     } on GoogleLoginFailure catch (e) {
+      if (!mounted) return;
       setState(() => _carregando = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -641,6 +645,7 @@ class _TelaLoginState extends State<TelaLogin> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() => _carregando = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Falha ao autenticar com Google.')),
@@ -726,7 +731,10 @@ class _TelaLoginState extends State<TelaLogin> {
     final email = _emailController.text.trim();
     final senha = _senhaController.text;
 
-    var user = await FirebaseService.loginEmailSenha(email: email, senha: senha);
+    var user = await FirebaseService.loginEmailSenha(
+      email: email,
+      senha: senha,
+    );
     user ??= await FirebaseService.cadastrarEmailSenha(
       email: email,
       senha: senha,
@@ -740,9 +748,9 @@ class _TelaLoginState extends State<TelaLogin> {
         _nomeController.text = user.displayName ?? _nomeController.text;
         _pageController.jumpToPage(2);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Falha ao autenticar.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Falha ao autenticar.')));
       }
     });
   }

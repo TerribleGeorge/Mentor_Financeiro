@@ -11,6 +11,8 @@ import '../services/locale_controller.dart';
 import '../core/navigation/subscription_paywall_flow.dart';
 import '../services/revenue_cat_bootstrap.dart';
 import '../services/subscription_provider.dart';
+import 'currency_settings_page.dart';
+import 'language_settings_page.dart';
 import 'tela_login.dart';
 import 'notification_monitoring_page.dart';
 
@@ -71,7 +73,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _abrirPaywall() async {
     if (!mounted) return;
-    await presentPaywallAndRefresh(context, context.read<SubscriptionProvider>());
+    await presentPaywallAndRefresh(
+      context,
+      context.read<SubscriptionProvider>(),
+    );
   }
 
   Future<void> _mostrarAlterarSenha() async {
@@ -185,9 +190,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'A nova senha deve ter pelo menos 6 caracteres.',
-            ),
+            content: Text('A nova senha deve ter pelo menos 6 caracteres.'),
           ),
         );
       }
@@ -207,16 +210,14 @@ class _SettingsPageState extends State<SettingsPage> {
       await user.reauthenticateWithCredential(cred);
       await user.updatePassword(nova);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Senha atualizada.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Senha atualizada.')));
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.message ?? 'Falha ao alterar a senha.'),
-          ),
+          SnackBar(content: Text(e.message ?? 'Falha ao alterar a senha.')),
         );
       }
     } catch (e) {
@@ -300,21 +301,6 @@ class _SettingsPageState extends State<SettingsPage> {
     if (mounted) setState(() {});
   }
 
-  String _rotuloMoeda(String mode) {
-    switch (mode.toUpperCase()) {
-      case 'AUTO':
-        return 'Automática (idioma)';
-      case 'BRL':
-        return 'Real (BRL)';
-      case 'USD':
-        return 'Dólar (USD)';
-      case 'EUR':
-        return 'Euro (EUR)';
-      default:
-        return mode;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final subscription = context.watch<SubscriptionProvider>();
@@ -326,7 +312,6 @@ class _SettingsPageState extends State<SettingsPage> {
     final accentColor = scheme.primary;
     final successColor = scheme.secondary;
     final dividerColor = scheme.outlineVariant.withValues(alpha: 0.45);
-    final dropdownColor = scheme.surface;
     final user = FirebaseAuth.instance.currentUser;
     final userEmail = user?.email;
     final email = userEmail ?? 'Sem sessão iniciada';
@@ -394,7 +379,10 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           Divider(height: 1, color: dividerColor),
           ListTile(
-            leading: Icon(Icons.notifications_active_outlined, color: successColor),
+            leading: Icon(
+              Icons.notifications_active_outlined,
+              color: successColor,
+            ),
             title: Text(
               'Monitoramento por notificações',
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
@@ -502,6 +490,15 @@ class _SettingsPageState extends State<SettingsPage> {
             builder: (context, _) {
               final lc = LocaleController.instance;
               final cc = CurrencyPreferenceController.instance;
+              final languageCode = lc.locale.languageCode;
+              final selectableLanguageCode =
+                  LocaleController.isSelectableLanguageCode(languageCode)
+                  ? languageCode
+                  : 'en';
+              final languageUsesFallback =
+                  !LocaleController.isTranslatedLanguageCode(
+                    selectableLanguageCode,
+                  );
               return Column(
                 children: [
                   ListTile(
@@ -514,25 +511,18 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     subtitle: Text(
-                      _languageLabel(lc.locale.languageCode),
+                      languageUsesFallback
+                          ? '${LocaleController.languageLabel(selectableLanguageCode)} · fallback em inglês'
+                          : LocaleController.languageLabel(
+                              selectableLanguageCode,
+                            ),
                       style: TextStyle(color: mutedColor),
                     ),
-                    trailing: DropdownButton<String>(
-                      value: lc.locale.languageCode,
-                      dropdownColor: dropdownColor,
-                      underline: const SizedBox.shrink(),
-                      style: TextStyle(color: textColor),
-                      items: LocaleController.supportedLanguageCodes
-                          .map(
-                            (code) => DropdownMenuItem(
-                              value: code,
-                              child: Text(_languageLabel(code)),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (code) {
-                        if (code != null) lc.setLanguageCode(code);
-                      },
+                    trailing: _chevron,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LanguageSettingsPage(),
+                      ),
                     ),
                   ),
                   ListTile(
@@ -545,26 +535,14 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     subtitle: Text(
-                      _rotuloMoeda(cc.mode),
+                      CurrencyPreferenceController.currencyLabel(cc.mode),
                       style: TextStyle(color: mutedColor),
                     ),
-                    trailing: DropdownButton<String>(
-                      value: cc.mode,
-                      dropdownColor: dropdownColor,
-                      underline: const SizedBox.shrink(),
-                      style: TextStyle(color: textColor),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'AUTO',
-                          child: Text('Automática'),
-                        ),
-                        DropdownMenuItem(value: 'BRL', child: Text('BRL')),
-                        DropdownMenuItem(value: 'USD', child: Text('USD')),
-                        DropdownMenuItem(value: 'EUR', child: Text('EUR')),
-                      ],
-                      onChanged: (m) {
-                        if (m != null) cc.setCurrencyMode(m);
-                      },
+                    trailing: _chevron,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const CurrencySettingsPage(),
+                      ),
                     ),
                   ),
                 ],
@@ -713,15 +691,4 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     ),
   );
-
-  static String _languageLabel(String code) {
-    switch (code) {
-      case 'en':
-        return 'English';
-      case 'es':
-        return 'Español';
-      default:
-        return 'Português';
-    }
-  }
 }

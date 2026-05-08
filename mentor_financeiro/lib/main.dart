@@ -154,7 +154,10 @@ class MentorAppContent extends StatelessWidget {
     final device = WidgetsBinding.instance.platformDispatcher.locales;
     final out = <Locale>[];
     void add(Locale l) {
-      if (out.any((e) => e.languageCode == l.languageCode && e.countryCode == l.countryCode)) {
+      if (out.any(
+        (e) =>
+            e.languageCode == l.languageCode && e.countryCode == l.countryCode,
+      )) {
         return;
       }
       out.add(l);
@@ -169,6 +172,9 @@ class MentorAppContent extends StatelessWidget {
     add(const Locale('pt'));
     add(const Locale('en'));
     add(const Locale('es'));
+    for (final option in LocaleController.languageOptions) {
+      add(Locale(option.code));
+    }
     return out;
   }
 

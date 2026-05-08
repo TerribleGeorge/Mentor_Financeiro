@@ -38,7 +38,7 @@ abstract final class PremiumCyberPaywallDialog {
                   children: [
                     Text(
                       'O tema Cyber faz parte da assinatura. Ao subscrever o plano '
-                      'mensal, o entitlement premium é activado no RevenueCat (teste '
+                      'mensal, o acesso premium é ativado no RevenueCat (teste '
                       'no sandbox da Play Store).',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
@@ -51,10 +51,7 @@ abstract final class PremiumCyberPaywallDialog {
                       const SizedBox(height: 12),
                       Text(
                         sub.errorMessage!,
-                        style: TextStyle(
-                          color: scheme.error,
-                          fontSize: 13,
-                        ),
+                        style: TextStyle(color: scheme.error, fontSize: 13),
                       ),
                     ],
                     const SizedBox(height: 20),
@@ -70,14 +67,14 @@ abstract final class PremiumCyberPaywallDialog {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
-                                      'Assinatura activa. Escolha o tema Cyber acima.',
+                                      'Assinatura ativa. Escolha o tema Cyber acima.',
                                     ),
                                   ),
                                 );
                               }
                             },
                       icon: const Icon(Icons.shopping_cart_checkout_outlined),
-                      label: const Text('Subscrever plano mensal'),
+                      label: const Text('Assinar plano mensal'),
                     ),
                     const SizedBox(height: 8),
                     TextButton(
@@ -91,15 +88,16 @@ abstract final class PremiumCyberPaywallDialog {
                                 ),
                               );
                             },
-                      child: const Text('Ver todos os planos (paywall completo)'),
+                      child: const Text('Ver todos os planos'),
                     ),
                   ],
                 ),
               ),
               actions: [
                 TextButton(
-                  onPressed:
-                      sub.isLoading ? null : () => Navigator.of(dialogContext).pop(),
+                  onPressed: sub.isLoading
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
                   child: const Text('Fechar'),
                 ),
               ],

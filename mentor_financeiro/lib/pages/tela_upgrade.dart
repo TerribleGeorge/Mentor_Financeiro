@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../constants/subscription_constants.dart';
 import '../services/google_play_billing_service.dart';
 import '../services/subscription_provider.dart';
 
@@ -74,7 +75,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
             ),
             const SizedBox(height: 24),
             const Text(
-              "Desbloqueie Seu Potencial Financeiro",
+              "Premium para organizar melhor seu dinheiro",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 28,
@@ -84,15 +85,18 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
             ),
             const SizedBox(height: 12),
             const Text(
-              "Tenha acesso ao Mentor IA, estratégias avançadas e mapa de estudos personalizado pelo preço de uma coxinha",
+              "Recursos extras para acompanhar gastos, relatórios e gráficos com mais clareza.",
               style: TextStyle(color: Colors.white70, fontSize: 16),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 28),
+            _beneficiosPremium(),
+            const SizedBox(height: 28),
             _planoMensal(),
             const SizedBox(height: 16),
             _planoAnual(),
-            if (_billing.error != null && _billing.error!.trim().isNotEmpty) ...[
+            if (_billing.error != null &&
+                _billing.error!.trim().isNotEmpty) ...[
               const SizedBox(height: 14),
               Text(
                 _billing.error!,
@@ -152,7 +156,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
           ),
           const SizedBox(height: 8),
           const Text(
-            "O preço de um café para mudar sua vida financeira",
+            "Para quem quer acompanhar o mês com mais detalhes",
             style: TextStyle(color: Colors.white60, fontSize: 14),
           ),
           const SizedBox(height: 16),
@@ -190,7 +194,9 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: _billing.isLoading ? null : () => _contratarPlano("mensal"),
+              onPressed: _billing.isLoading
+                  ? null
+                  : () => _contratarPlano("mensal"),
               child: const Text(
                 "Começar Agora",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -244,7 +250,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
           ),
           const SizedBox(height: 8),
           const Text(
-            "É o plano para quem está focado no longo prazo",
+            "Mesmos recursos premium com melhor custo no ano",
             style: TextStyle(color: Colors.white60, fontSize: 14),
           ),
           const SizedBox(height: 16),
@@ -303,7 +309,9 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: _billing.isLoading ? null : () => _contratarPlano("anual"),
+              onPressed: _billing.isLoading
+                  ? null
+                  : () => _contratarPlano("anual"),
               child: const Text(
                 "Economizar 30%",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -334,11 +342,67 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
       ),
       child: Column(
         children: [
-          _itemGarantia(Icons.lock, "Pagamento 100% seguro"),
+          _itemGarantia(Icons.lock, "Pagamento processado pela Play Store"),
           const SizedBox(height: 12),
           _itemGarantia(Icons.weekend, "Cancele quando quiser"),
           const SizedBox(height: 12),
-          _itemGarantia(Icons.verified_user, "7 dias de garantia"),
+          _itemGarantia(
+            Icons.info_outline,
+            "Sem consultoria individual ou promessa de resultado",
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _beneficiosPremium() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B).withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF00D9FF).withValues(alpha: 0.35),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "O que está incluso",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 14),
+          ...SubscriptionConstants.premiumBenefits.map(
+            (benefit) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.check_circle_outline,
+                    color: Color(0xFF00D9FF),
+                    size: 19,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      benefit,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

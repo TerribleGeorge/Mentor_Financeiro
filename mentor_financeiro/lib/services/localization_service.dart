@@ -7,8 +7,59 @@ class LocalizationService {
   static String _currencySymbol = r'R$';
   static String _currencyCode = 'BRL';
 
-  /// `AUTO` segue o idioma/região atual; caso contrário ISO (`BRL`, `USD`, `EUR`).
+  /// `AUTO` segue o idioma/região atual; caso contrário usa o ISO escolhido.
   static String _currencyMode = 'AUTO';
+
+  static const List<({String code, String label, String symbol})>
+  currencyOptions = [
+    (code: 'BRL', label: 'Real brasileiro', symbol: r'R$'),
+    (code: 'USD', label: 'Dólar americano', symbol: r'$'),
+    (code: 'EUR', label: 'Euro', symbol: '€'),
+    (code: 'GBP', label: 'Libra esterlina', symbol: '£'),
+    (code: 'CAD', label: 'Dólar canadense', symbol: r'C$'),
+    (code: 'AUD', label: 'Dólar australiano', symbol: r'A$'),
+    (code: 'NZD', label: 'Dólar neozelandês', symbol: r'NZ$'),
+    (code: 'CHF', label: 'Franco suíço', symbol: 'CHF'),
+    (code: 'JPY', label: 'Iene japonês', symbol: '¥'),
+    (code: 'CNY', label: 'Yuan chinês', symbol: '¥'),
+    (code: 'HKD', label: 'Dólar de Hong Kong', symbol: r'HK$'),
+    (code: 'SGD', label: 'Dólar de Singapura', symbol: r'S$'),
+    (code: 'INR', label: 'Rupia indiana', symbol: '₹'),
+    (code: 'KRW', label: 'Won sul-coreano', symbol: '₩'),
+    (code: 'MXN', label: 'Peso mexicano', symbol: r'MX$'),
+    (code: 'ARS', label: 'Peso argentino', symbol: r'AR$'),
+    (code: 'CLP', label: 'Peso chileno', symbol: r'CLP$'),
+    (code: 'COP', label: 'Peso colombiano', symbol: r'COL$'),
+    (code: 'PEN', label: 'Sol peruano', symbol: 'S/'),
+    (code: 'UYU', label: 'Peso uruguaio', symbol: r'$U'),
+    (code: 'PYG', label: 'Guarani paraguaio', symbol: '₲'),
+    (code: 'BOB', label: 'Boliviano', symbol: 'Bs'),
+    (code: 'VES', label: 'Bolívar venezuelano', symbol: 'Bs'),
+    (code: 'SEK', label: 'Coroa sueca', symbol: 'kr'),
+    (code: 'NOK', label: 'Coroa norueguesa', symbol: 'kr'),
+    (code: 'DKK', label: 'Coroa dinamarquesa', symbol: 'kr'),
+    (code: 'PLN', label: 'Zlóti polonês', symbol: 'zł'),
+    (code: 'CZK', label: 'Coroa tcheca', symbol: 'Kč'),
+    (code: 'HUF', label: 'Florim húngaro', symbol: 'Ft'),
+    (code: 'RON', label: 'Leu romeno', symbol: 'lei'),
+    (code: 'RUB', label: 'Rublo russo', symbol: '₽'),
+    (code: 'TRY', label: 'Lira turca', symbol: '₺'),
+    (code: 'ZAR', label: 'Rand sul-africano', symbol: 'R'),
+    (code: 'AED', label: 'Dirham dos Emirados', symbol: 'د.إ'),
+    (code: 'SAR', label: 'Riyal saudita', symbol: '﷼'),
+    (code: 'ILS', label: 'Novo shekel israelense', symbol: '₪'),
+    (code: 'EGP', label: 'Libra egípcia', symbol: 'E£'),
+    (code: 'NGN', label: 'Naira nigeriana', symbol: '₦'),
+    (code: 'KES', label: 'Xelim queniano', symbol: 'KSh'),
+    (code: 'GHS', label: 'Cedi ganês', symbol: '₵'),
+    (code: 'MAD', label: 'Dirham marroquino', symbol: 'DH'),
+    (code: 'THB', label: 'Baht tailandês', symbol: '฿'),
+    (code: 'IDR', label: 'Rupia indonésia', symbol: 'Rp'),
+    (code: 'MYR', label: 'Ringgit malaio', symbol: 'RM'),
+    (code: 'PHP', label: 'Peso filipino', symbol: '₱'),
+    (code: 'VND', label: 'Dong vietnamita', symbol: '₫'),
+    (code: 'TWD', label: 'Novo dólar taiwanês', symbol: r'NT$'),
+  ];
 
   static Locale get currentLocale => _currentLocale;
   static String get currencySymbol => _currencySymbol;
@@ -17,14 +68,14 @@ class LocalizationService {
 
   static Future<void> initializeCurrencyMode() async {
     final prefs = await SharedPreferences.getInstance();
-    _currencyMode = prefs.getString('moeda') ?? 'AUTO';
+    _currencyMode = (prefs.getString('moeda') ?? 'AUTO').trim().toUpperCase();
     _applyCurrencyDisplay();
   }
 
   static Future<void> setCurrencyMode(String mode) async {
-    _currencyMode = mode;
+    _currencyMode = mode.trim().toUpperCase();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('moeda', mode);
+    await prefs.setString('moeda', _currencyMode);
     _applyCurrencyDisplay();
   }
 
@@ -92,22 +143,15 @@ class LocalizationService {
   }
 
   static void _applyIsoCurrency(String iso) {
-    switch (iso.toUpperCase()) {
-      case 'BRL':
-        _currencySymbol = r'R$';
-        _currencyCode = 'BRL';
-        break;
-      case 'USD':
-        _currencySymbol = r'$';
-        _currencyCode = 'USD';
-        break;
-      case 'EUR':
-        _currencySymbol = '€';
-        _currencyCode = 'EUR';
-        break;
-      default:
-        _applyLocaleDefaultCurrency(_currentLocale);
+    final normalized = iso.toUpperCase();
+    for (final option in currencyOptions) {
+      if (option.code == normalized) {
+        _currencySymbol = option.symbol;
+        _currencyCode = option.code;
+        return;
+      }
     }
+    _applyLocaleDefaultCurrency(_currentLocale);
   }
 
   static List<Locale> get supportedLocales => const [
@@ -132,5 +176,22 @@ class LocalizationService {
     if (locale.languageCode == 'en') return 'English (US)';
     if (locale.languageCode == 'es') return 'Español (ES)';
     return 'Português (BR)';
+  }
+
+  static bool isSelectableCurrencyCode(String code) {
+    final normalized = code.trim().toUpperCase();
+    if (normalized == 'AUTO') return true;
+    return currencyOptions.any((option) => option.code == normalized);
+  }
+
+  static String currencyLabel(String mode) {
+    final normalized = mode.trim().toUpperCase();
+    if (normalized == 'AUTO') return 'Automática (idioma)';
+    for (final option in currencyOptions) {
+      if (option.code == normalized) {
+        return '${option.label} (${option.code})';
+      }
+    }
+    return normalized;
   }
 }

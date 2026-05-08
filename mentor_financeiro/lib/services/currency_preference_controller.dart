@@ -20,4 +20,15 @@ class CurrencyPreferenceController extends ChangeNotifier {
   }
 
   String get mode => LocalizationService.currencyMode;
+
+  String get displayLabel => LocalizationService.currencyLabel(mode);
+
+  static List<({String code, String label, String symbol})>
+  get currencyOptions => LocalizationService.currencyOptions;
+
+  static bool isSelectableCurrencyCode(String code) =>
+      LocalizationService.isSelectableCurrencyCode(code);
+
+  static String currencyLabel(String mode) =>
+      LocalizationService.currencyLabel(mode);
 }

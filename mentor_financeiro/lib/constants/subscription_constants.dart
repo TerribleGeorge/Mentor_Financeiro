@@ -54,29 +54,29 @@ class SubscriptionConstants {
   // BENEFÍCIOS DO PREMIUM
   // ==============================================================================
   static const List<String> premiumBenefits = [
-    'Temas Escuro e Médio',
-    'Fundo de imagem personalizado',
-    'Gráfico de velas detalhado',
-    'Relatórios ilimitados',
-    'Análise de investimentos IA',
+    'Relatórios mensais detalhados',
+    'Gráficos avançados por categoria e pagamento',
+    'Insights automáticos de organização financeira',
+    'Monitoramento inteligente de notificações compatíveis',
+    'Temas premium e personalização visual',
     'Sem anúncios',
   ];
 
   static const List<String> premiumBenefitsEn = [
-    'Dark and Medium themes',
-    'Custom background image',
-    'Detailed candle chart',
-    'Unlimited reports',
-    'AI investment analysis',
+    'Detailed monthly reports',
+    'Advanced charts by category and payment method',
+    'Automatic financial organization insights',
+    'Smart monitoring for compatible spending notifications',
+    'Premium themes and visual customization',
     'No ads',
   ];
 
   static const List<String> premiumBenefitsEs = [
-    'Temas Oscuro y Medio',
-    'Imagen de fondo personalizada',
-    'Gráfico de velas detallado',
-    'Informes ilimitados',
-    'Análisis de inversión IA',
+    'Informes mensuales detallados',
+    'Gráficos avanzados por categoría y método de pago',
+    'Ideas automáticas para organizar tus finanzas',
+    'Monitoreo inteligente de notificaciones compatibles de gastos',
+    'Temas premium y personalización visual',
     'Sin anuncios',
   ];
 

@@ -32,14 +32,18 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartTourFromHome());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _maybeStartTourFromHome(),
+    );
   }
 
   void _maybeStartTourFromHome() {
     if (_homeTourKickoffDone || !mounted) return;
     if (!context.read<UserPersonaService>().shouldShowTour) return;
     _homeTourKickoffDone = true;
-    ShowcaseView.get().startShowCase(<GlobalKey>[MentorTourKeys.homeCalculadora]);
+    ShowcaseView.get().startShowCase(<GlobalKey>[
+      MentorTourKeys.homeCalculadora,
+    ]);
   }
 
   @override
@@ -154,7 +158,10 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
         actions: [
           TextButton(
             onPressed: () => mentorPushNamed(context, AppRoutes.principal),
-            child: const Text('Modo clássico', style: TextStyle(color: Color(0xFF00D9FF))),
+            child: const Text(
+              'Modo clássico',
+              style: TextStyle(color: Color(0xFF00D9FF)),
+            ),
           ),
         ],
       ),
@@ -207,28 +214,42 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ListTile(
-                            leading: const Icon(Icons.psychology, color: Color(0xFF00D9FF)),
+                            leading: const Icon(
+                              Icons.psychology,
+                              color: Color(0xFF00D9FF),
+                            ),
                             title: Text(
                               l10n.homeShowcaseProfileSimTitle,
                               style: TextStyle(color: v.textColor),
                             ),
-                            trailing: Icon(Icons.chevron_right, color: v.secondaryTextColor),
+                            trailing: Icon(
+                              Icons.chevron_right,
+                              color: v.secondaryTextColor,
+                            ),
                             onTap: () {
                               Navigator.of(ctx).pop();
                               mentorPushNamed(context, AppRoutes.simulado);
                             },
                           ),
                           ListTile(
-                            leading: const Icon(Icons.auto_graph, color: Color(0xFF6366F1)),
+                            leading: const Icon(
+                              Icons.auto_graph,
+                              color: Color(0xFF6366F1),
+                            ),
                             title: Text(
                               l10n.homeShowcaseStrategiesTitle,
                               style: TextStyle(color: v.textColor),
                             ),
-                            trailing: Icon(Icons.chevron_right, color: v.secondaryTextColor),
+                            trailing: Icon(
+                              Icons.chevron_right,
+                              color: v.secondaryTextColor,
+                            ),
                             onTap: () {
                               Navigator.of(ctx).pop();
                               mentorPushNamed(
-                                  context, AppRoutes.conhecimentoEstrategias);
+                                context,
+                                AppRoutes.conhecimentoEstrategias,
+                              );
                             },
                           ),
                         ],
@@ -251,8 +272,8 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
             vitrineCard(
               icon: Icons.psychology_alt,
               accent: const Color(0xFFFF4D4D),
-              title: 'Mentoria completa',
-              subtitle: 'Dicas personalizadas e recomendações avançadas',
+              title: 'Insights automáticos',
+              subtitle: 'Dicas geradas a partir dos seus registros',
               locked: !subscription.isPremium,
               onTap: () => mentorPushNamed(context, AppRoutes.mentoria),
             ),
@@ -260,8 +281,8 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
             vitrineCard(
               icon: Icons.query_stats,
               accent: const Color(0xFF00D9FF),
-              title: 'Análises personalizadas',
-              subtitle: 'Dashboards avançados com seus dados',
+              title: 'Gráficos avançados',
+              subtitle: 'Dashboards por categoria e forma de pagamento',
               locked: !subscription.isPremium,
               onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
             ),
@@ -269,8 +290,8 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
             vitrineCard(
               icon: Icons.picture_as_pdf,
               accent: const Color(0xFFE5B100),
-              title: 'Relatórios mensais',
-              subtitle: 'Visão detalhada do mês e exportação',
+              title: 'Relatórios mensais detalhados',
+              subtitle: 'Visão organizada do mês e exportação',
               locked: !subscription.isPremium,
               onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
             ),

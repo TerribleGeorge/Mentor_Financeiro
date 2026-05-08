@@ -22,15 +22,10 @@ class ConfiguracoesPage extends StatelessWidget {
         elevation: 0,
         title: Text(
           'Personalização',
-          style: TextStyle(
-            color: scheme.onSurface,
-          ),
+          style: TextStyle(color: scheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: scheme.onSurface,
-          ),
+          icon: Icon(Icons.arrow_back, color: scheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -60,16 +55,16 @@ class ConfiguracoesPage extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
-                              'Assinatura activa — temas Cyber, Grimm e Hive desbloqueados.',
+                              'Assinatura ativa. Temas premium desbloqueados.',
                             ),
                           ),
                         );
                       } else {
                         final err = sub.errorMessage;
                         if (err != null && err.isNotEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(err)),
-                          );
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(err)));
                         }
                       }
                     },
@@ -164,13 +159,11 @@ class ConfiguracoesPage extends StatelessWidget {
       runSpacing: 12,
       children: themes.map((theme) {
         final isSelected = controller.themeMode == theme.mode;
-        final onLightPreview =
-            theme.previewColor.computeLuminance() > 0.55;
+        final onLightPreview = theme.previewColor.computeLuminance() > 0.55;
         // Cyber / Grimm / Hive: desbloqueados quando RC reporta
         // customerInfo.entitlements.all['premium']?.isActive (via [SubscriptionProvider]).
         final premiumOk = subscription.hasUnlockedPremium;
-        final locked =
-            theme.mode.requiresPremiumEntitlement && !premiumOk;
+        final locked = theme.mode.requiresPremiumEntitlement && !premiumOk;
         return SizedBox(
           width: (MediaQuery.sizeOf(context).width - 40 - 12) / 2,
           child: GestureDetector(
@@ -181,8 +174,10 @@ class ConfiguracoesPage extends StatelessWidget {
                       await controller.setThemeMode(theme.mode);
                       return;
                     }
-                    final ok =
-                        await presentPaywallAndRefresh(context, subscription);
+                    final ok = await presentPaywallAndRefresh(
+                      context,
+                      subscription,
+                    );
                     if (!context.mounted) return;
                     if (ok) {
                       await controller.setThemeMode(theme.mode);
@@ -197,9 +192,9 @@ class ConfiguracoesPage extends StatelessWidget {
                     } else {
                       final err = subscription.errorMessage;
                       if (err != null && err.isNotEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(err)),
-                        );
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(err)));
                       }
                     }
                   },
@@ -232,11 +227,7 @@ class ConfiguracoesPage extends StatelessWidget {
                             alignment: Alignment.center,
                             filterQuality: FilterQuality.medium,
                             errorBuilder: (context, error, stackTrace) =>
-                                Icon(
-                              theme.icon,
-                              color: theme.color,
-                              size: 28,
-                            ),
+                                Icon(theme.icon, color: theme.color, size: 28),
                           ),
                         ),
                       )
