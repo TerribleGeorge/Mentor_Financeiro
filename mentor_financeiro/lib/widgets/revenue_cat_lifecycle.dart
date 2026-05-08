@@ -24,6 +24,9 @@ class RevenueCatLifecycle extends StatefulWidget {
 class _RevenueCatLifecycleState extends State<RevenueCatLifecycle> {
   StreamSubscription<User?>? _authSub;
   CustomerInfoUpdateListener? _customerListener;
+  int _attachAttempts = 0;
+  static const int _maxAttachAttempts = 75; // ~15s a 200 ms
+  bool _listenersAttached = false;
 
   @override
   void initState() {
@@ -32,7 +35,16 @@ class _RevenueCatLifecycleState extends State<RevenueCatLifecycle> {
   }
 
   void _attach() {
-    if (!mounted || !RevenueCatBootstrap.isSdkReady) return;
+    if (!mounted || _listenersAttached) return;
+    if (!RevenueCatBootstrap.isSdkReady) {
+      // Defesa: bootstrap tardio; não repetir para sempre se RC nunca configurar.
+      if (_attachAttempts >= _maxAttachAttempts) return;
+      _attachAttempts++;
+      Future<void>.delayed(const Duration(milliseconds: 200), _attach);
+      return;
+    }
+
+    _listenersAttached = true;
 
     final subscription = context.read<SubscriptionProvider>();
 

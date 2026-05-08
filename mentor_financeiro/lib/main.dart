@@ -99,7 +99,9 @@ Future<void> main() async {
         );
       }
 
-      unawaited(_bootstrapRevenueCat());
+      // Esperar o bootstrap para [RevenueCatLifecycle] ver [isSdkReady] ao primeiro frame
+      // e registar listeners / authStateChanges; caso contrário o RC ficava “mudo”.
+      await _bootstrapRevenueCat();
 
       unawaited(FirebaseDataService.instance.setupObservability());
 
