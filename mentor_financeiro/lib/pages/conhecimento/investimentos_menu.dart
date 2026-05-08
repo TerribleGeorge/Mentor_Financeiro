@@ -11,9 +11,33 @@ import 'fiis_detalhe_page.dart';
 import 'fundos_detalhe_page.dart';
 import 'internacional_detalhe_page.dart';
 import 'cripto_detalhe_page.dart';
+import '../../widgets/mentor_menu_card.dart';
 
 class InvestimentosMenu extends StatelessWidget {
   const InvestimentosMenu({super.key});
+
+  static Color _accentForId(String id) {
+    switch (id) {
+      case 'tesouro':
+        return const Color(0xFF00D9FF);
+      case 'cdb':
+        return const Color(0xFF26DE81);
+      case 'reits_fiis':
+        return const Color(0xFFFECA57);
+      case 'funds':
+        return const Color(0xFF6366F1);
+      case 'stocks':
+        return const Color(0xFFFF4D4D);
+      case 'international':
+      case 'etfs':
+      case 'sp500':
+        return const Color(0xFF00D9FF);
+      case 'crypto':
+        return const Color(0xFF6366F1);
+      default:
+        return const Color(0xFF00D9FF);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,59 +49,34 @@ class InvestimentosMenu extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         title: Text(
           l10n.investimentos,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: items.map((i) => _buildItem(context, i.title, i.icon, i.id))
+        children: items
+            .map(
+              (i) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: MentorMenuCard(
+                  icon: i.icon,
+                  title: i.title,
+                  subtitle: l10n.confirmarTransacao,
+                  accent: _accentForId(i.id),
+                  onTap: () => _openPage(context, i.id),
+                ),
+              ),
+            )
             .toList(),
-      ),
-    );
-  }
-
-  Widget _buildItem(
-    BuildContext context,
-    String titulo,
-    IconData icone,
-    String id,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.indigo.withAlpha(25),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icone, color: Colors.indigo, size: 20),
-        ),
-        title: Text(
-          titulo,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        trailing: const Icon(Icons.chevron_right, color: Colors.white38),
-        onTap: () => _openPage(context, id),
       ),
     );
   }

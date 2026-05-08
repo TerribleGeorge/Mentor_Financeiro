@@ -276,7 +276,7 @@ class MentoriaService {
             tipo: TipoDica.alerta,
             titulo: 'Dica: Regra dos 30%',
             mensagem:
-                'Tente manter seu uso abaixo de 30% para melhorar seu Score Bancário.',
+                'Tente manter seu uso abaixo de 30% para melhorar seu score bancário.',
             colorTypeEnum: ColorTypeEnum.orange,
           ),
         );

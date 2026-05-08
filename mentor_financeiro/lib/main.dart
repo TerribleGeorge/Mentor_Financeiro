@@ -7,6 +7,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -19,7 +20,7 @@ import 'core/navigation/mentor_navigator.dart';
 import 'core/navigation/splash_route_observer.dart';
 import 'data/services/firebase_data_service.dart';
 import 'firebase_options.dart';
-import 'l10n/app_localizations.dart';
+import 'l10n/app_localizations_fallback.dart';
 import 'services/app_theme_controller.dart';
 import 'services/currency_preference_controller.dart';
 import 'services/investment_category_provider.dart';
@@ -149,6 +150,28 @@ class MentorApp extends StatelessWidget {
 class MentorAppContent extends StatelessWidget {
   const MentorAppContent({super.key});
 
+  List<Locale> _effectiveSupportedLocales() {
+    final device = WidgetsBinding.instance.platformDispatcher.locales;
+    final out = <Locale>[];
+    void add(Locale l) {
+      if (out.any((e) => e.languageCode == l.languageCode && e.countryCode == l.countryCode)) {
+        return;
+      }
+      out.add(l);
+    }
+
+    for (final l in device) {
+      add(Locale(l.languageCode, l.countryCode));
+      add(Locale(l.languageCode));
+    }
+
+    // Garantir que nossos ARBs existam na lista.
+    add(const Locale('pt'));
+    add(const Locale('en'));
+    add(const Locale('es'));
+    return out;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer3<ThemeController, AppThemeController, LocaleController>(
@@ -173,8 +196,13 @@ class MentorAppContent extends StatelessWidget {
               darkTheme: appThemeController.themeDark,
               themeMode: themeController.themeMode,
               locale: localeController.locale,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: _effectiveSupportedLocales(),
+              localizationsDelegates: [
+                const AppLocalizationsFallbackDelegate(),
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
               initialRoute: AppRoutes.splash,
               onGenerateRoute: MentorAppRouter.onGenerateRoute,
               builder: (context, child) {

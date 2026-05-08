@@ -373,7 +373,7 @@ abstract class AppLocalizations {
   /// Monitoring description
   ///
   /// In pt, this message translates to:
-  /// **' Permite que o app monitore automaticamente suas transações bancárias para organizar suas finanças.'**
+  /// **'Permite que o app monitore automaticamente suas transações bancárias para organizar suas finanças.'**
   String get descricaoMonitoramento;
 
   /// Language
@@ -571,7 +571,7 @@ abstract class AppLocalizations {
   /// 30% rule message
   ///
   /// In pt, this message translates to:
-  /// **'Tente manter seu uso abaixo de 30% para melhorar seu Score Bancário.'**
+  /// **'Tente manter seu uso abaixo de 30% para melhorar seu score bancário.'**
   String get regra30Msg;
 
   /// Golden day tip
@@ -919,7 +919,7 @@ abstract class AppLocalizations {
   /// No description provided for @investFirstSteps_tipBodyBr.
   ///
   /// In pt, this message translates to:
-  /// **'Comece devagar, invista consistentemente e evite tentar “timar” o mercado. O tempo é seu maior aliado.'**
+  /// **'Comece devagar, invista com consistência e evite tentar acertar o “timing” do mercado. O tempo é seu maior aliado.'**
   String get investFirstSteps_tipBodyBr;
 
   /// No description provided for @investFirstSteps_tipBodyGlobal.

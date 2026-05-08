@@ -32,18 +32,16 @@ class EstrategiasMenu extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         title: Text(
           l10n.estrategias,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: ListView(
@@ -99,16 +97,20 @@ class EstrategiasMenu extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF0D1118),
         borderRadius: BorderRadius.circular(16),
         border: auraColor != null
             ? Border.all(color: auraColor.withValues(alpha: 0.55), width: 1.2)
-            : null,
+            : Border.all(
+                color: const Color(0xFF6366F1).withValues(alpha: 0.55),
+                width: 1.2,
+              ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(25),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color:
+                (auraColor ?? const Color(0xFF6366F1)).withValues(alpha: 0.14),
+            blurRadius: 18,
+            spreadRadius: 1,
           ),
           if (auraColor != null)
             BoxShadow(
@@ -125,8 +127,12 @@ class EstrategiasMenu extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: (auraColor ?? const Color(0xFF6366F1)).withAlpha(25),
+            color: (auraColor ?? const Color(0xFF6366F1)).withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color:
+                  (auraColor ?? const Color(0xFF6366F1)).withValues(alpha: 0.42),
+            ),
           ),
           child: Icon(icon, color: auraColor ?? const Color(0xFF6366F1), size: 20),
         ),

@@ -1,5 +1,8 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'home_screen.dart';
 import 'graficos_screen.dart';
@@ -19,6 +22,8 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   late int _currentIndex;
   final _notificationListener = NotificationListenerService();
+  bool _listenerStarted = false;
+  late final _Lifecycle _lifecycle = _Lifecycle(this);
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -31,13 +36,36 @@ class _MainNavigationState extends State<MainNavigation> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex.clamp(0, _screens.length - 1);
-    // Permissão de leitura automática via notificações bancárias deve ser manual (Configurações).
+    WidgetsBinding.instance.addObserver(_lifecycle);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureNotificationListenerStarted();
+    });
   }
 
   @override
   void dispose() {
     _notificationListener.parar();
+    WidgetsBinding.instance.removeObserver(_lifecycle);
     super.dispose();
+  }
+
+  Future<void> _ensureNotificationListenerStarted() async {
+    if (!Platform.isAndroid) return;
+    if (_listenerStarted) return;
+
+    final started = await _notificationListener.iniciar();
+    if (started) {
+      _listenerStarted = true;
+      return;
+    }
+
+    // Primeira vez: abre ecrã do Android para o utilizador autorizar o listener.
+    final prefs = await SharedPreferences.getInstance();
+    final prompted = prefs.getBool('notif_listener_prompted') ?? false;
+    if (!prompted) {
+      await prefs.setBool('notif_listener_prompted', true);
+      await _notificationListener.solicitarPermissao();
+    }
   }
 
   void _onTabTapped(int index) {
@@ -183,5 +211,17 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
       ),
     );
+  }
+}
+
+class _Lifecycle extends WidgetsBindingObserver {
+  final _MainNavigationState owner;
+  _Lifecycle(this.owner);
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      owner._ensureNotificationListenerStarted();
+    }
   }
 }

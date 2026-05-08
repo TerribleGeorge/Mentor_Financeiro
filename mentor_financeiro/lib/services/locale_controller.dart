@@ -10,6 +10,7 @@ class LocaleController extends ChangeNotifier {
   factory LocaleController() => instance;
 
   static const String prefsKey = 'idioma';
+  /// Idiomas que têm ARB no projeto; outros idiomas fazem fallback em runtime.
   static const Set<String> supportedLanguageCodes = {'pt', 'en', 'es'};
 
   Locale _locale = const Locale('pt');
@@ -24,14 +25,15 @@ class LocaleController extends ChangeNotifier {
   }
 
   void _applyLanguageCode(String code) {
-    final c = supportedLanguageCodes.contains(code) ? code : 'pt';
+    final c = code.trim().isEmpty ? 'pt' : code.trim().toLowerCase();
     _locale = Locale(c);
+    // Para Intl, só temos formatação garantida nos 3 idiomas.
     LocalizationService.setLocale(_fullLocaleForIntl(c));
   }
 
   /// Locale com país para formatação (datas, moeda) em [LocalizationService].
   static Locale fullLocaleForIntl(String languageCode) => _fullLocaleForIntl(
-        supportedLanguageCodes.contains(languageCode) ? languageCode : 'pt',
+        supportedLanguageCodes.contains(languageCode) ? languageCode : 'en',
       );
 
   static Locale _fullLocaleForIntl(String code) {
@@ -40,16 +42,17 @@ class LocaleController extends ChangeNotifier {
         return const Locale('en', 'US');
       case 'es':
         return const Locale('es', 'ES');
-      default:
+      case 'pt':
         return const Locale('pt', 'BR');
+      default:
+        return const Locale('en', 'US');
     }
   }
 
   Future<void> setLanguageCode(String code) async {
-    if (!supportedLanguageCodes.contains(code)) return;
     _applyLanguageCode(code);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(prefsKey, code);
+    await prefs.setString(prefsKey, code.trim().toLowerCase());
     notifyListeners();
   }
 }

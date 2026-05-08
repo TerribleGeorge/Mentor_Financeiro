@@ -10,6 +10,7 @@ import '../pages/conhecimento/impostos_detalhe_page.dart';
 import '../pages/conhecimento/investimentos_menu.dart';
 import '../pages/conhecimento/perigos_page.dart';
 import '../pages/conhecimento/primeiros_passos_page.dart';
+import '../pages/conhecimento/golpes_page.dart';
 import '../pages/main_navigation.dart';
 import '../pages/historico_screen.dart';
 import '../pages/relatorios_screen.dart';
@@ -67,7 +68,7 @@ class MentorAppRouter {
       case AppRoutes.home:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const HomeScreen(),
+          builder: (_) => const MainNavigation(),
         );
       case AppRoutes.calculadoraMentora:
       case AppRoutes.ferramentasCalculadoraJuros:
@@ -168,6 +169,11 @@ class MentorAppRouter {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const FerramentasPage(),
+        );
+      case AppRoutes.conhecimentoGolpes:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const GolpesPage(),
         );
       case AppRoutes.simulado:
         return MaterialPageRoute<void>(

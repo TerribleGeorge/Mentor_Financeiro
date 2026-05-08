@@ -7,21 +7,44 @@ import '../../widgets/ads/native_ad_card.dart';
 class ConhecimentoHub extends StatelessWidget {
   const ConhecimentoHub({super.key});
 
+  static const _bgCard = Color(0xFF0D1118);
+
+  static Color _cardAccentForRoute(String rota) {
+    switch (rota) {
+      case '/conhecimento/investimentos':
+        return const Color(0xFF00D9FF);
+      case '/conhecimento/estrategias':
+        return const Color(0xFF6366F1);
+      case '/conhecimento/dicionario':
+        return const Color(0xFF00D9FF);
+      case '/conhecimento/primeiros-passos':
+        return const Color(0xFF26DE81);
+      case '/conhecimento/impostos':
+        return const Color(0xFFFECA57);
+      case '/conhecimento/perigos':
+        return const Color(0xFFFF4D4D);
+      case '/conhecimento/ferramentas':
+        return const Color(0xFF6366F1);
+      case '/conhecimento/golpes':
+        return const Color(0xFFFF4D4D);
+      default:
+        return const Color(0xFF00D9FF);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         title: const Text(
           'Conhecimento',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: ListView(
@@ -83,29 +106,43 @@ class ConhecimentoHub extends StatelessWidget {
             rota: '/conhecimento/ferramentas',
           ),
           const SizedBox(height: 16),
+          _buildCard(
+            context,
+            icone: Icons.shield_outlined,
+            titulo: 'Golpes',
+            subtitulo: 'Como se proteger no dia a dia',
+            rota: '/conhecimento/golpes',
+          ),
+          const SizedBox(height: 16),
           GestureDetector(
             onTap: () => Navigator.pushNamed(context, '/quiz-conhecimento'),
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF00D9FF).withAlpha(40),
-                    const Color(0xFF00D9FF).withAlpha(15),
-                  ],
-                ),
+                color: _bgCard,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFF00D9FF).withAlpha(128),
+                  color: const Color(0xFF00D9FF).withValues(alpha: 0.78),
+                  width: 1.2,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00D9FF).withValues(alpha: 0.14),
+                    blurRadius: 18,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00D9FF).withAlpha(40),
+                      color: const Color(0xFF00D9FF).withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFF00D9FF).withValues(alpha: 0.42),
+                      ),
                     ),
                     child: const Icon(
                       Icons.quiz,
@@ -117,8 +154,8 @@ class ConhecimentoHub extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
+                      children: const [
+                        Text(
                           'Simulado de Conhecimento',
                           style: TextStyle(
                             color: Color(0xFF00D9FF),
@@ -126,7 +163,7 @@ class ConhecimentoHub extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
                           'Teste seus conhecimentos',
                           style: TextStyle(color: Colors.white54, fontSize: 13),
@@ -153,23 +190,33 @@ class ConhecimentoHub extends StatelessWidget {
     required String subtitulo,
     required String rota,
   }) {
+    final accent = _cardAccentForRoute(rota);
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, rota),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: _bgCard,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: accent.withValues(alpha: 0.78), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: accent.withValues(alpha: 0.14),
+              blurRadius: 18,
+              spreadRadius: 1,
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.indigo.withAlpha(25),
+                color: accent.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: accent.withValues(alpha: 0.42)),
               ),
-              child: Icon(icone, color: Colors.indigo, size: 32),
+              child: Icon(icone, color: accent, size: 32),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -178,8 +225,8 @@ class ConhecimentoHub extends StatelessWidget {
                 children: [
                   Text(
                     titulo,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.95),
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -192,7 +239,7 @@ class ConhecimentoHub extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.white38),
+            Icon(Icons.chevron_right, color: accent.withValues(alpha: 0.85)),
           ],
         ),
       ),

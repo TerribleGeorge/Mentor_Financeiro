@@ -180,7 +180,7 @@
   "@ativarMonitoramento": {
     "description": "Enable expense monitoring"
   },
-  "descricaoMonitoramento": " Permite que o app monitore automaticamente suas transações bancárias para organizar suas finanças.",
+  "descricaoMonitoramento": "Permite que o app monitore automaticamente suas transações bancárias para organizar suas finanças.",
   "@descricaoMonitoramento": {
     "description": "Monitoring description"
   },
@@ -322,7 +322,7 @@
   "@regra30": {
     "description": "30% rule tip"
   },
-  "regra30Msg": "Tente manter seu uso abaixo de 30% para melhorar seu Score Bancário.",
+  "regra30Msg": "Tente manter seu uso abaixo de 30% para melhorar seu score bancário.",
   "@regra30Msg": {
     "description": "30% rule message"
   },
@@ -452,7 +452,7 @@
   "investFirstSteps_firstAssetBodyBr": "Comece pela reserva de emergência (Tesouro Selic ou CDB com liquidez diária). Depois, diversifique gradualmente.",
   "investFirstSteps_firstAssetBodyGlobal": "Comece pela reserva de emergência (conta remunerada, money market ou Treasury bonds de curto prazo). Depois, diversifique gradualmente.",
   "investFirstSteps_tipTitle": "Dica do Mentor:",
-  "investFirstSteps_tipBodyBr": "Comece devagar, invista consistentemente e evite tentar “timar” o mercado. O tempo é seu maior aliado.",
+  "investFirstSteps_tipBodyBr": "Comece devagar, invista com consistência e evite tentar acertar o “timing” do mercado. O tempo é seu maior aliado.",
   "investFirstSteps_tipBodyGlobal": "Comece devagar, invista com consistência e evite tentar acertar o “timing” do mercado. O tempo é seu maior aliado.",
 
   "investMenu_tesouroTitle": "Tesouro Direto",

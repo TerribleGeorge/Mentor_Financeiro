@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +7,6 @@ import '../domain/finance/daily_limit_calculator.dart';
 import '../widgets/home_daily_limit_panel.dart';
 import '../core/constants/app_routes.dart';
 import '../core/navigation/mentor_navigation.dart';
-import '../services/flutter_notification_interceptor.dart';
 import '../services/subscription_provider.dart';
 import '../services/mentoria_service.dart';
 import '../services/ad_manager_service.dart';
@@ -47,9 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!sub.isPremium) {
         // fire-and-forget
         AdManagerService.instance.preloadInterstitial(sub);
-      }
-      if (Platform.isAndroid) {
-        FlutterNotificationInterceptor.tryStartServiceIfPermitted();
       }
     });
   }

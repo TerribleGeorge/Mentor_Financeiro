@@ -274,100 +274,264 @@ class CategoriaTransacao {
 }
 
 class NotificationParserService {
-  static const List<String> _bancosPermitidos = [
-    'nubank',
-    'caixa',
-    'inter',
-    'bradesco',
-    'itau',
-    'santander',
-    'bb',
-    'banco do brasil',
-    'sicredi',
-    'sicoob',
-    'c6',
-    'neon',
-    'pagbank',
-    'mercadopago',
-    'picpay',
+  /// Palavras-chave (multi-idioma) que indicam **gasto/saída**.
+  static const List<String> _spendKeywords = [
+    // PT
+    'compra aprovada',
+    'compra realizada',
+    'compra de',
+    'pagamento aprovado',
+    'pagamento realizado',
+    'pagamento efetuado',
+    'debito',
+    'débito',
+    'cartao',
+    'cartão',
+    'credito',
+    'crédito',
+    'saque',
+    'transferencia enviada',
+    'transferência enviada',
+    'pix enviado',
+    'transferencia realizada',
+    'transferência realizada',
+    'transferencia para',
+    'transferência para',
+    'pix para',
+    'pix: enviado',
+    'pix enviado para',
+    'pix realizado',
+    // EN
+    'card purchase',
+    'purchase',
+    'payment',
+    'card charged',
+    'charged',
+    'debit',
+    'withdrawal',
+    'transfer sent',
+    'transfer to',
+    'sent to',
+    'money sent',
+    'you sent',
+    // ES
+    'compra aprobada',
+    'pago',
+    'pago con',
+    'pago en',
+    'débito',
+    'debito',
+    'crédito',
+    'credito',
+    'retiro',
+    'transferencia enviada',
+    'transferencia realizada',
+    'transferencia a',
+    'enviado a',
+    // FR
+    'paiement',
+    'achat',
+    'débit',
+    'retrait',
+    'virement',
+    'virement vers',
+    // DE
+    'zahlung',
+    'kauf',
+    'abbuchung',
+    'abhebung',
+    'überweisung',
+    'ueberweisung',
+    'gesendet an',
+    // IT
+    'pagamento',
+    'acquisto',
+    'addebito',
+    'prelievo',
+    'bonifico',
+    'inviato a',
   ];
 
-  static List<RegExp> _getRegexPorLocale(String currencyCode) {
-    final patterns = <RegExp>[];
+  /// Palavras-chave que indicam que **não** é gasto (segurança / ruído).
+  static const List<String> _blockKeywords = [
+    // Segurança / login
+    'código de verificação',
+    'codigo de verificacao',
+    'verification code',
+    'security code',
+    'otp',
+    'token',
+    '2fa',
+    'código',
+    'codigo',
+    'senha',
+    'password',
+    'login',
+    // Informativo (não é gasto)
+    'saldo',
+    'balance',
+    'limite',
+    'limit',
+    'disponível',
+    'disponivel',
+    'available',
+    // Entradas / estornos (por padrão ignoramos)
+    'pix recebido',
+    'received',
+    'credit received',
+    'refund',
+    'estorno',
+    'reembolso',
+    'chargeback',
+  ];
 
-    if (currencyCode == 'BRL') {
-      patterns.add(
-        RegExp(
-          r'R\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?|\d+,\d{2})',
-          caseSensitive: false,
-        ),
-      );
-    } else if (currencyCode == 'USD') {
-      patterns.add(
-        RegExp(
-          r'\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+\.\d{2})',
-          caseSensitive: false,
-        ),
-      );
-    } else if (currencyCode == 'EUR') {
-      patterns.add(
-        RegExp(
-          r'€\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?|\d+,\d{2})',
-          caseSensitive: false,
-        ),
-      );
-    }
+  static String _sanitize(String texto) {
+    var t = texto;
 
-    patterns.add(
+    // Remove pedaços comuns que assustam ou poluem (sem impedir a transação).
+    t = t.replaceAll(
       RegExp(
-        r'(?:R\$|\$|€|USD|EUR|BRL)\s*(\d+(?:[.,]\d{1,2})?)',
+        r'(autentica(?:ção|cao)|auth(?:entication)?|authorization)\s*[:\-]\s*[A-Za-z0-9\- ]{3,}',
         caseSensitive: false,
       ),
+      '',
+    );
+    t = t.replaceAll(
+      RegExp(
+        r'comprovante\s+dispon[ií]vel.*$',
+        caseSensitive: false,
+      ),
+      '',
     );
 
-    return patterns;
+    // Normaliza espaços.
+    t = t.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return t;
   }
+
+  static final List<RegExp> _moneyPatterns = [
+    // Símbolo antes (com separadores)
+    RegExp(
+      r'([€£¥₹$]|R\$)\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)',
+      caseSensitive: false,
+    ),
+    // Código ISO antes
+    RegExp(
+      r'\b(usd|eur|brl|gbp|jpy|inr|cad|aud|chf)\b\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)',
+      caseSensitive: false,
+    ),
+    // Valor antes do código (ex.: 12.34 USD)
+    RegExp(
+      r'(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*\b(usd|eur|brl|gbp|jpy|inr|cad|aud|chf)\b',
+      caseSensitive: false,
+    ),
+  ];
 
   static final RegExp _regexEstabelecimento = RegExp(
     r'(?:pagamento|pago|compra|debito|transferencia|transferência|recebimento|depósito|deposito)\s+(?:de\s+)?([A-Za-zÀ-ÖØ-öø-ÿ\s]+?)(?:\s+(?:no|em|para|atrás|realizado|aprovado|confirmado))?',
     caseSensitive: false,
   );
 
-  static bool isNotificacaoBancaria(String texto) {
-    final textoLower = texto.toLowerCase();
-    return _bancosPermitidos.any((banco) => textoLower.contains(banco));
+  // Padrões comuns: "Compra Aprovada: LOJA - R$ 12,34 ..."
+  static final List<RegExp> _estabelecimentoStrongPatterns = [
+    RegExp(
+      r'compra\s+aprovad[ao]\s*[:\-]\s*(.+?)\s*-\s*(?:R\$|€|£|¥|₹|\$)',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'payment\s+(?:approved|successful)\s*[:\-]\s*(.+?)\s*-\s*(?:R\$|€|£|¥|₹|\$)',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'compra\s+aprobada\s*[:\-]\s*(.+?)\s*-\s*(?:R\$|€|£|¥|₹|\$)',
+      caseSensitive: false,
+    ),
+    // Cartão: "NOME DO CARTÃO: Compra de R$ 10,00 em LOJA."
+    RegExp(
+      r'compra\s+de\s+(?:R\$|€|£|¥|₹|\$)\s*[\d.,]+\s+em\s+(.+?)(?:[.\n]|$)',
+      caseSensitive: false,
+    ),
+    // Pagamento de boleto
+    RegExp(
+      r'\bboleto\b.*?\bvalor\b.*?(?:R\$|€|£|¥|₹|\$)\s*[\d.,]+',
+      caseSensitive: false,
+    ),
+    // PIX / transferência (destinatário)
+    RegExp(
+      r'\bpix\b.*?\b(?:enviado|enviada|realizado|realizada)\b.*?\b(?:para|to|a|vers|an)\b\s*([^\n\-–—:]+?)(?:\s*[-–—]\s*|\s+(?:R\$|€|£|¥|₹|\$|\b(?:usd|eur|brl|gbp|jpy|inr|cad|aud|chf)\b))',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\btransfer(?:e|ê)ncia\b.*?\b(?:enviad[ao]|realizad[ao])\b.*?\b(?:para|to|a|vers|an)\b\s*([^\n\-–—:]+?)(?:\s*[-–—]\s*|\s+(?:R\$|€|£|¥|₹|\$|\b(?:usd|eur|brl|gbp|jpy|inr|cad|aud|chf)\b))',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'enviado\s+para\s+a\s+conta\s+de\s+([^\n\-–—:]+?)(?:[.\n]|$)',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\btransfer\s+(?:sent|successful)\b.*?\b(?:to)\b\s*([^\n\-–—:]+?)(?:\s*[-–—]\s*|\s+(?:R\$|€|£|¥|₹|\$|\b(?:usd|eur|brl|gbp|jpy|inr|cad|aud|chf)\b))',
+      caseSensitive: false,
+    ),
+  ];
+
+  static bool isSpendingNotification(String texto) {
+    final cleaned = _sanitize(texto);
+    final t = cleaned.toLowerCase();
+    if (_blockKeywords.any((k) => t.contains(k))) return false;
+    final hasSpendKeyword = _spendKeywords.any((k) => t.contains(k));
+    if (!hasSpendKeyword) return false;
+    final hasMoney = extrairValor(cleaned) != null;
+    return hasMoney;
   }
 
-  static double? extrairValor(String texto, {String currencyCode = 'BRL'}) {
-    final regexList = _getRegexPorLocale(currencyCode);
+  static double? extrairValor(String texto) {
+    for (final r in _moneyPatterns) {
+      final m = r.firstMatch(texto);
+      if (m == null) continue;
+      final raw = (m.groupCount >= 2 ? m.group(2) : null) ?? m.group(1);
+      if (raw == null) continue;
 
-    for (final regex in regexList) {
-      final match = regex.firstMatch(texto);
-      if (match != null) {
-        final valorString = match.group(1);
-        if (valorString == null) continue;
-
-        final isDotDecimal = currencyCode == 'USD';
-        String valorNormalizado;
-        if (isDotDecimal) {
-          valorNormalizado = valorString.replaceAll(',', '');
+      // Normalização:
+      // - remove espaços
+      // - tenta inferir decimal pelo último separador (',' ou '.')
+      final cleaned = raw.replaceAll(' ', '');
+      final lastComma = cleaned.lastIndexOf(',');
+      final lastDot = cleaned.lastIndexOf('.');
+      final lastSep = (lastComma > lastDot) ? ',' : '.';
+      String normalized;
+      if (cleaned.contains(',') && cleaned.contains('.')) {
+        // Tem ambos: assume que o último separador é decimal.
+        normalized = cleaned.replaceAll(lastSep == ',' ? '.' : ',', '');
+        normalized = normalized.replaceAll(lastSep, '.');
+      } else if (cleaned.contains(',') || cleaned.contains('.')) {
+        // Só um tipo: se houver 2 casas no final, assume decimal; senão remove separadores.
+        final sep = cleaned.contains(',') ? ',' : '.';
+        final parts = cleaned.split(sep);
+        if (parts.length == 2 && parts[1].length <= 2) {
+          normalized = '${parts[0].replaceAll(RegExp(r"\\D"), '')}.${parts[1]}';
         } else {
-          valorNormalizado = valorString
-              .replaceAll('.', '')
-              .replaceAll(',', '.');
+          normalized = cleaned.replaceAll(RegExp(r'[.,]'), '');
         }
-
-        final result = double.tryParse(valorNormalizado);
-        if (result != null && result > 0) {
-          return result;
-        }
+      } else {
+        normalized = cleaned;
       }
+
+      final v = double.tryParse(normalized);
+      if (v != null && v > 0) return v;
     }
     return null;
   }
 
   static String? extrairEstabelecimento(String texto) {
-    final match = _regexEstabelecimento.firstMatch(texto);
+    final cleaned = _sanitize(texto);
+    for (final r in _estabelecimentoStrongPatterns) {
+      final m = r.firstMatch(cleaned);
+      final g = m?.group(1)?.trim();
+      if (g != null && g.isNotEmpty) return g;
+    }
+
+    final match = _regexEstabelecimento.firstMatch(cleaned);
     if (match == null) return null;
 
     final estabelecimento = match.group(1)?.trim();
@@ -381,6 +545,8 @@ class NotificationParserService {
     final keywordsCredito = [
       'cartão',
       'cartão de crédito',
+      'cartão final',
+      'cartao final',
       'credito',
       'credit',
       'final',
@@ -431,19 +597,23 @@ class NotificationParserService {
     String notificationText, {
     String currencyCode = 'BRL',
   }) {
-    if (!isNotificacaoBancaria(notificationText)) {
+    final cleaned = _sanitize(notificationText);
+    if (!isSpendingNotification(cleaned)) {
       return null;
     }
 
-    final valor = extrairValor(notificationText, currencyCode: currencyCode);
+    final valor = extrairValor(cleaned);
     if (valor == null) return null;
 
     final descricao =
-        extrairEstabelecimento(notificationText) ?? 'Transação bancária';
+        extrairEstabelecimento(cleaned) ??
+        (cleaned.toLowerCase().contains('boleto')
+            ? 'Boleto pago'
+            : 'Gasto identificado');
 
-    final categoria = CategoriaTransacao.definirCategoria(notificationText);
-    final tipoPagamento = identificarTipoPagamento(notificationText);
-    final limiteDisponivel = extrairLimiteDisponivel(notificationText);
+    final categoria = CategoriaTransacao.definirCategoria(cleaned);
+    final tipoPagamento = identificarTipoPagamento(cleaned);
+    final limiteDisponivel = extrairLimiteDisponivel(cleaned);
 
     return TransacaoData(
       valor: valor,
@@ -506,11 +676,25 @@ class TransacaoRepository {
     String uid,
     TransacaoModel transacao,
   ) async {
-    final dadosUsuario = await _firestore.collection('usuarios').doc(uid).get();
-    final saldoConta =
-        (dadosUsuario.get('saldoConta') as num?)?.toDouble() ?? 0.0;
-    final limiteCartao =
-        (dadosUsuario.get('limiteTotalCartao') as num?)?.toDouble() ?? 0.0;
+    final snap = await _firestore.collection('usuarios').doc(uid).get();
+    final data = snap.data() ?? const <String, dynamic>{};
+
+    final saldoRaw = data['saldoConta'];
+    final limiteRaw = data['limiteTotalCartao'];
+    final utilizadoRaw = data['limiteUtilizado'];
+
+    final saldoConta = (saldoRaw is num) ? saldoRaw.toDouble() : 0.0;
+    final limiteCartao = (limiteRaw is num) ? limiteRaw.toDouble() : 0.0;
+    final limiteUtilizado = (utilizadoRaw is num) ? utilizadoRaw.toDouble() : 0.0;
+
+    // Se o utilizador ainda não configurou saldo/limite, não bloqueia o registo.
+    final hasAnyConfig = saldoRaw != null || limiteRaw != null || utilizadoRaw != null;
+    if (!hasAnyConfig) {
+      return ResultadoValidacao(
+        podeSalvar: true,
+        mensagem: 'Configuração financeira ausente — registo permitido',
+      );
+    }
 
     if (transacao.tipoPagamento == TipoPagamento.debito) {
       if (saldoConta >= transacao.valor) {
@@ -527,8 +711,6 @@ class TransacaoRepository {
         tipo: 'debito',
       );
     } else {
-      final limiteUtilizado =
-          (dadosUsuario.get('limiteUtilizado') as num?)?.toDouble() ?? 0.0;
       final limiteDisponivel = limiteCartao - limiteUtilizado;
       if (limiteDisponivel >= transacao.valor) {
         return ResultadoValidacao(
@@ -575,6 +757,7 @@ class NotificationListenerService {
   final TransacaoRepository _repository = TransacaoRepository();
   static const _dedupeKey = 'notification_dedupe_ids';
   static const _dedupeMax = 80;
+  static const _monitoringEnabledKey = 'notif_monitoring_enabled';
 
   Future<bool> verificarPermissao() async {
     try {
@@ -704,6 +887,10 @@ class NotificationListenerService {
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final enabled = prefs.getBool(_monitoringEnabledKey) ?? true;
+    if (!enabled) return;
 
     if (await _jaProcessada(
       uid: user.uid,

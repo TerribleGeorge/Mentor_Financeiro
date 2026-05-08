@@ -106,9 +106,12 @@ class _TelaMetasState extends State<TelaMetas> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: Text(
           "MERCADO: $_cotacaoDolar",
           style: const TextStyle(color: Color(0xFF00D9FF), fontSize: 14),

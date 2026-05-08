@@ -145,7 +145,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get descricaoMonitoramento =>
-      ' Permite que o app monitore automaticamente suas transações bancárias para organizar suas finanças.';
+      'Permite que o app monitore automaticamente suas transações bancárias para organizar suas finanças.';
 
   @override
   String get idioma => 'Idioma';
@@ -252,7 +252,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get regra30Msg =>
-      'Tente manter seu uso abaixo de 30% para melhorar seu Score Bancário.';
+      'Tente manter seu uso abaixo de 30% para melhorar seu score bancário.';
 
   @override
   String get diaDeOuro => 'Dia de Ouro!';
@@ -445,7 +445,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get investFirstSteps_tipBodyBr =>
-      'Comece devagar, invista consistentemente e evite tentar “timar” o mercado. O tempo é seu maior aliado.';
+      'Comece devagar, invista com consistência e evite tentar acertar o “timing” do mercado. O tempo é seu maior aliado.';
 
   @override
   String get investFirstSteps_tipBodyGlobal =>

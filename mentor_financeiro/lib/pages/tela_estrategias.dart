@@ -3,20 +3,20 @@ import 'package:flutter/material.dart';
 class TelaEstrategias extends StatelessWidget {
   const TelaEstrategias({super.key});
 
+  static const _accent = Color(0xFF6366F1);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: const Text(
           'Estratégias',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: ListView(
@@ -32,13 +32,13 @@ class TelaEstrategias extends StatelessWidget {
             icone: Icons.savings,
             titulo: 'Pagando-se Primeiro',
             descricao:
-                'Reserve para investimentos antes de gastar em necessidades. Configure transferência automática para investimento no dia do recebimento. Treat sua economia como uma conta a pagar.',
+                'Reserve para investimentos antes de gastar com necessidades. Configure uma transferência automática para investimentos no dia do recebimento. Trate sua economia como uma conta a pagar.',
           ),
           _ExpansionTopico(
             icone: Icons.workspace_premium,
             titulo: 'Regra dos 90 Dias',
             descricao:
-                'Antes de comprar algo não essencial, aguarde 90 dias. Se ainda quiser após esse período, compre. Evita compras por impulso e regret.',
+                'Antes de comprar algo não essencial, aguarde 90 dias. Se ainda quiser após esse período, compre. Isso evita compras por impulso e arrependimento.',
           ),
           _ExpansionTopico(
             icone: Icons.trending_down,
@@ -50,7 +50,7 @@ class TelaEstrategias extends StatelessWidget {
             icone: Icons.account_balance_wallet,
             titulo: 'Orçamento Base Zero',
             descricao:
-                'Cada real tem um destino. Allocate toda a renda antes do mês começar. Nada fica "sem destino". O restante vai para economias.',
+                'Cada real tem um destino. Distribua toda a renda antes do mês começar. Nada fica "sem destino". O restante vai para economias.',
           ),
           _ExpansionTopico(
             icone: Icons.pie_chart,
@@ -104,21 +104,30 @@ class _ExpansionTopico extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF0D1118),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: TelaEstrategias._accent.withValues(alpha: 0.55), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: TelaEstrategias._accent.withValues(alpha: 0.14),
+            blurRadius: 18,
+            spreadRadius: 1,
+          ),
+        ],
       ),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        collapsedIconColor: const Color(0xFF6366F1),
-        iconColor: const Color(0xFF6366F1),
+        collapsedIconColor: TelaEstrategias._accent,
+        iconColor: TelaEstrategias._accent,
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF6366F1).withAlpha(25),
+            color: TelaEstrategias._accent.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: TelaEstrategias._accent.withValues(alpha: 0.42)),
           ),
-          child: Icon(icone, color: const Color(0xFF6366F1), size: 20),
+          child: Icon(icone, color: TelaEstrategias._accent, size: 20),
         ),
         title: Text(
           titulo,

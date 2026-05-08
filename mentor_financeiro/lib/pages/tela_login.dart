@@ -7,9 +7,6 @@
 // 4. Plano - Escolha do plano (Free/Premium)
 //
 
-// Flutter Material
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 
 // Armazenamento local
@@ -20,9 +17,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 // Serviço Firebase
 import '../services/firebase_service.dart';
-import '../services/flutter_notification_interceptor.dart';
-
-import 'home_screen.dart';
+// Notification listener é iniciado em `MainNavigation` (Android).
+import 'main_navigation.dart';
 
 // WIDGET STATEFUL
 class TelaLogin extends StatefulWidget {
@@ -792,14 +788,10 @@ class _TelaLoginState extends State<TelaLogin> {
       }
     }
 
-    if (Platform.isAndroid) {
-      await FlutterNotificationInterceptor.promptAfterLogin();
-    }
-
     // Próxima etapa: Dashboard/Home (limpa a pilha para o "voltar" não quebrar).
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+        MaterialPageRoute<void>(builder: (_) => const MainNavigation()),
         (route) => false,
       );
     }

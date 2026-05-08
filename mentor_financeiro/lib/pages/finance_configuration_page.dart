@@ -295,9 +295,12 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: const Text(
           'Configure suas Finanças',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

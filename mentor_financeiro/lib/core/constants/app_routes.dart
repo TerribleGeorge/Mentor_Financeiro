@@ -25,6 +25,7 @@ abstract final class AppRoutes {
   static const String conhecimentoImpostos = '/conhecimento/impostos';
   static const String conhecimentoPerigos = '/conhecimento/perigos';
   static const String conhecimentoFerramentas = '/conhecimento/ferramentas';
+  static const String conhecimentoGolpes = '/conhecimento/golpes';
   static const String ferramentasCalculadoraJuros = '/ferramentas/calculadora-juros';
   static const String simulado = '/simulado';
   static const String quizConhecimento = '/quiz-conhecimento';

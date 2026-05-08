@@ -65,8 +65,6 @@ object NotificationChannels {
     }
 
     fun sendNotification(packageName: String, title: String, text: String, timestamp: Long) {
-        if (!isBankingNotification(packageName, title, text)) return
-
         val data = mapOf(
             "package" to packageName,
             "title" to title,
@@ -74,43 +72,6 @@ object NotificationChannels {
             "timestamp" to timestamp
         )
         eventSink?.success(data)
-    }
-
-    private fun isBankingNotification(packageName: String, title: String, text: String): Boolean {
-        val apps = listOf(
-            "nubank",
-            "nu",
-            "caixa",
-            "bancointer",
-            "inter",
-            "bradesco",
-            "itau",
-            "itaú",
-            "santander",
-            "bancodobrasil",
-            "banco do brasil",
-            "bb",
-            "sicredi",
-            "sicoob",
-            "c6",
-            "c6bank",
-            "neon",
-            "pagbank",
-            "pagseguro",
-            "mercadopago",
-            "mercado pago",
-            "picpay",
-            "cartão",
-            "cartao",
-            "crédito",
-            "credito",
-            "compra aprovada",
-            "pagamento aprovado",
-            "pagamento realizado",
-            "pix",
-        )
-        val combined = "$packageName $title $text".lowercase()
-        return apps.any { combined.contains(it) }
     }
 }
 

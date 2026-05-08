@@ -11,8 +11,8 @@ import '../services/locale_controller.dart';
 import '../core/navigation/subscription_paywall_flow.dart';
 import '../services/revenue_cat_bootstrap.dart';
 import '../services/subscription_provider.dart';
-import 'finance_configuration_page.dart';
 import 'tela_login.dart';
+import 'notification_monitoring_page.dart';
 
 /// Definições unificadas: perfil, senha, tema Void, moeda, localidade, assinatura, logout.
 class SettingsPage extends StatefulWidget {
@@ -80,7 +80,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Alteração de senha só está disponível para contas com e-mail e palavra-passe.',
+            'Alteração de senha só está disponível para contas com e-mail e senha.',
           ),
         ),
       );
@@ -106,7 +106,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         title: const Text(
-          'Alterar palavra-passe',
+          'Alterar senha',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         content: SingleChildScrollView(
@@ -118,7 +118,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 obscureText: true,
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
-                  labelText: 'Palavra-passe actual',
+                  labelText: 'Senha atual',
                   labelStyle: TextStyle(color: Colors.white54),
                 ),
               ),
@@ -128,7 +128,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 obscureText: true,
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
-                  labelText: 'Nova palavra-passe',
+                  labelText: 'Nova senha',
                   labelStyle: TextStyle(color: Colors.white54),
                 ),
               ),
@@ -156,7 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text(
-              'Guardar',
+              'Salvar',
               style: TextStyle(
                 color: SettingsPage.voidCyan,
                 fontWeight: FontWeight.w600,
@@ -186,7 +186,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'A nova palavra-passe deve ter pelo menos 6 caracteres.',
+              'A nova senha deve ter pelo menos 6 caracteres.',
             ),
           ),
         );
@@ -208,14 +208,14 @@ class _SettingsPageState extends State<SettingsPage> {
       await user.updatePassword(nova);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Palavra-passe actualizada.')),
+          const SnackBar(content: Text('Senha atualizada.')),
         );
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.message ?? 'Falha ao alterar a palavra-passe.'),
+            content: Text(e.message ?? 'Falha ao alterar a senha.'),
           ),
         );
       }
@@ -385,7 +385,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             subtitle: Text(
               _podeAlterarSenha
-                  ? 'Actualizar credenciais Firebase'
+                  ? 'Atualizar credenciais do Firebase'
                   : 'Indisponível para login só com Google',
               style: TextStyle(color: mutedColor, fontSize: 12),
             ),
@@ -394,23 +394,21 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           Divider(height: 1, color: dividerColor),
           ListTile(
-            leading: Icon(Icons.savings_outlined, color: successColor),
+            leading: Icon(Icons.notifications_active_outlined, color: successColor),
             title: Text(
-              'Renda e gastos fixos',
+              'Monitoramento por notificações',
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
-              'Configurar orçamento mensal',
-              style: TextStyle(color: mutedColor, fontSize: 13),
+              'Ler apenas notificações de gastos (sem acessar conta bancária)',
+              style: TextStyle(color: mutedColor, fontSize: 12),
             ),
             trailing: _chevron,
-            onTap: () {
-              Navigator.of(context).push<void>(
-                MaterialPageRoute<void>(
-                  builder: (_) => const FinanceConfigurationPage(),
-                ),
-              );
-            },
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const NotificationMonitoringPage(),
+              ),
+            ),
           ),
           Divider(height: 24, color: dividerColor),
           _secTitle('Brilho (Material)'),
