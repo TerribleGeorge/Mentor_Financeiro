@@ -172,9 +172,6 @@ class MentorAppContent extends StatelessWidget {
     add(const Locale('pt'));
     add(const Locale('en'));
     add(const Locale('es'));
-    for (final option in LocaleController.languageOptions) {
-      add(Locale(option.code));
-    }
     return out;
   }
 
