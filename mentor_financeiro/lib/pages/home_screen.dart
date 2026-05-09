@@ -62,12 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
         (user?.displayName?.trim().isNotEmpty == true
             ? user!.displayName!.trim()
             : (prefs.getString('nome_usuario') ?? 'Usuário'));
-    final photoSalva = prefs.getString('photo_url');
-    _photoUrl = (photoSalva?.trim().isNotEmpty == true)
-        ? photoSalva!.trim()
-        : (user?.photoURL?.trim().isNotEmpty == true
-            ? user!.photoURL!.trim()
-            : null);
+    _photoUrl = user?.photoURL?.trim().isNotEmpty == true
+        ? user!.photoURL!.trim()
+        : null;
 
     final limite = DailyLimitCalculator.computeFromPrefs(prefs);
 

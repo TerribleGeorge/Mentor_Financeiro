@@ -850,9 +850,6 @@ class _TelaLoginState extends State<TelaLogin> {
         }
         await prefs.setString('uid', _usuarioFirebase!.uid);
         await prefs.setString('email_usuario', _usuarioFirebase!.email ?? '');
-        if (photoUrl != null && photoUrl.isNotEmpty) {
-          await prefs.setString('photo_url', photoUrl);
-        }
       }
 
       // Próxima etapa: Dashboard/Home (limpa a pilha para o "voltar" não quebrar).

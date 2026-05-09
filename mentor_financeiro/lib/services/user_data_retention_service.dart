@@ -17,7 +17,6 @@ abstract final class UserDataRetentionPrefs {
   static const Set<String> exactKeys = {
     'nome_usuario',
     'email_usuario',
-    'photo_url',
     'uid',
     'metodo_login',
     'configurado',
