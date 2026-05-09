@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
@@ -30,6 +31,13 @@ class GooglePlayBillingService extends ChangeNotifier {
 
   ProductDetails? _product;
   ProductDetails? get product => _product;
+
+  String _availableBasePlans(ProductDetails product) {
+    if (product is! GooglePlayProductDetails) return 'indisponível';
+    final offers = product.productDetails.subscriptionOfferDetails;
+    if (offers == null || offers.isEmpty) return 'nenhum plano retornado';
+    return offers.map((o) => o.basePlanId).join(', ');
+  }
 
   /// Inicializa listener e tenta carregar detalhes do produto.
   Future<void> initialize({
@@ -81,7 +89,8 @@ class GooglePlayBillingService extends ChangeNotifier {
       final token = _tryResolveOfferToken(_product!, basePlanId: basePlanId);
       if (token == null) {
         _error =
-            'Plano básico `$basePlanId` não encontrado no produto `$productId`.';
+            'Plano básico `$basePlanId` não encontrado no produto `$productId`. '
+            'Planos retornados pela Play: ${_availableBasePlans(_product!)}.';
       }
     }
 
@@ -112,7 +121,9 @@ class GooglePlayBillingService extends ChangeNotifier {
         p is GooglePlayProductDetails &&
         offerToken == null) {
       _error =
-          'Plano básico `$basePlanId` não encontrado. Verifique se ele está ativo no Play Console.';
+          'Plano básico `$basePlanId` não encontrado. '
+          'Planos retornados pela Play: ${_availableBasePlans(p)}. '
+          'Verifique se o plano está ativo no Play Console.';
       notifyListeners();
       return;
     }
@@ -129,10 +140,19 @@ class GooglePlayBillingService extends ChangeNotifier {
             applicationUserName: null,
           );
 
-    _setLoading(true);
-    final ok = await _iap.buyNonConsumable(purchaseParam: purchaseParam);
-    if (!ok) {
-      _error = 'Não foi possível iniciar a compra.';
+    try {
+      _setLoading(true);
+      final ok = await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+      if (!ok) {
+        _error = 'Não foi possível iniciar a compra.';
+        _setLoading(false);
+      }
+    } on PlatformException catch (e) {
+      _error =
+          'Erro ao abrir a compra na Play Store: ${e.code}${e.message == null ? '' : ' - ${e.message}'}';
+      _setLoading(false);
+    } catch (e) {
+      _error = 'Erro inesperado ao abrir a compra: $e';
       _setLoading(false);
     }
   }
@@ -164,6 +184,10 @@ class GooglePlayBillingService extends ChangeNotifier {
         if (p.pendingCompletePurchase) {
           await _iap.completePurchase(p);
         }
+      }
+
+      if (p.status == PurchaseStatus.canceled) {
+        _error = 'Compra cancelada na Play Store.';
       }
     }
     _setLoading(false);
