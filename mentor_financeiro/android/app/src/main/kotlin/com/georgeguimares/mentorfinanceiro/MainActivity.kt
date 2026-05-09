@@ -24,7 +24,10 @@ class MainActivity : FlutterFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         instance = this
-        NotificationChannels.register(flutterEngine.dartExecutor.binaryMessenger)
+        NotificationChannels.register(
+            applicationContext,
+            flutterEngine.dartExecutor.binaryMessenger,
+        )
     }
 }
 
@@ -37,8 +40,10 @@ object NotificationChannels {
 
     private var eventSink: EventChannel.EventSink? = null
     private val mainHandler = Handler(Looper.getMainLooper())
+    private lateinit var appContext: Context
 
-    fun register(messenger: io.flutter.plugin.common.BinaryMessenger) {
+    fun register(appContext: Context, messenger: io.flutter.plugin.common.BinaryMessenger) {
+        this.appContext = appContext.applicationContext
         MethodChannel(messenger, METHOD_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "checkPermission" -> {
@@ -46,7 +51,11 @@ object NotificationChannels {
                 }
                 "requestPermission" -> {
                     try {
-                        val context = MainActivity.instance
+                        val context = try {
+                            MainActivity.instance
+                        } catch (_: Exception) {
+                            appContext
+                        }
                         val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(intent)
@@ -60,7 +69,7 @@ object NotificationChannels {
                 }
                 "drainPendingNotifications" -> {
                     try {
-                        result.success(drainPendingNotifications(MainActivity.instance))
+                        result.success(drainPendingNotifications(appContext))
                     } catch (e: Exception) {
                         result.success(emptyList<Map<String, Any>>())
                     }
@@ -137,11 +146,26 @@ class CustomNotificationListener : NotificationListenerService() {
     companion object {
         private var isRunning = false
 
+        /** Contexto da app para [Settings.Secure] sem depender da MainActivity estar viva. */
+        @Volatile
+        private var permissionCheckContext: Context? = null
+
         fun isServiceRunning(): Boolean = isRunning
+
+        private fun contextForPermissionCheck(): Context? {
+            permissionCheckContext?.let {
+                return it
+            }
+            return try {
+                MainActivity.instance
+            } catch (_: Exception) {
+                null
+            }
+        }
 
         fun isNotificationListenerEnabled(): Boolean {
             return try {
-                val context = MainActivity.instance
+                val context = contextForPermissionCheck() ?: return false
                 val enabled = Settings.Secure.getString(
                     context.contentResolver,
                     "enabled_notification_listeners"
@@ -156,7 +180,7 @@ class CustomNotificationListener : NotificationListenerService() {
 
         fun getEnabledListeners(): String {
             return try {
-                val context = MainActivity.instance
+                val context = contextForPermissionCheck() ?: return ""
                 Settings.Secure.getString(
                     context.contentResolver,
                     "enabled_notification_listeners"
@@ -170,6 +194,7 @@ class CustomNotificationListener : NotificationListenerService() {
     override fun onCreate() {
         super.onCreate()
         isRunning = true
+        permissionCheckContext = applicationContext
     }
 
     override fun onDestroy() {

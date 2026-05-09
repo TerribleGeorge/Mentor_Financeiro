@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/config/app_secrets.dart';
 import '../services/notification_listener_service.dart';
 import '../services/user_data_retention_service.dart';
 
@@ -18,7 +20,7 @@ class NotificationMonitoringPage extends StatefulWidget {
 }
 
 class _NotificationMonitoringPageState
-    extends State<NotificationMonitoringPage> {
+    extends State<NotificationMonitoringPage> with WidgetsBindingObserver {
   final _listener = NotificationListenerService();
   bool _enabled = true;
   bool _loading = true;
@@ -28,7 +30,42 @@ class _NotificationMonitoringPageState
   @override
   void initState() {
     super.initState();
-    _load();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!AppSecrets.isDeveloperUiAccount(
+        FirebaseAuth.instance.currentUser?.email,
+      )) {
+        Navigator.of(context).pop();
+        return;
+      }
+      unawaited(_syncAndLoad());
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        AppSecrets.isDeveloperUiAccount(
+          FirebaseAuth.instance.currentUser?.email,
+        )) {
+      unawaited(_syncAndLoad());
+    }
+  }
+
+  /// Garante drenagem das notificações guardadas nativamente e recarrega a lista.
+  Future<void> _syncAndLoad() async {
+    if (Platform.isAndroid) {
+      await _listener.sincronizarPendentes();
+      await _listener.iniciar();
+    }
+    await _load();
   }
 
   Future<void> _load() async {
@@ -59,14 +96,14 @@ class _NotificationMonitoringPageState
     );
     if (v && Platform.isAndroid) {
       await _listener.iniciar();
-      await _load();
+      await _syncAndLoad();
     }
   }
 
   Future<void> _openAndroidPermission() async {
     await _listener.solicitarPermissao();
     await Future<void>.delayed(const Duration(milliseconds: 350));
-    await _load();
+    await _syncAndLoad();
   }
 
   Future<void> _clearDiagnostics() async {
@@ -248,7 +285,7 @@ class _NotificationMonitoringPageState
                     ),
                     IconButton(
                       tooltip: 'Atualizar',
-                      onPressed: _load,
+                      onPressed: _syncAndLoad,
                       icon: const Icon(Icons.refresh),
                     ),
                     IconButton(
@@ -263,7 +300,8 @@ class _NotificationMonitoringPageState
                 const SizedBox(height: 8),
                 if (_diagnostics.isEmpty)
                   Text(
-                    'Nenhuma notificação chegou ao listener ainda.',
+                    'Nenhuma leitura registada. Toque em atualizar após uma notificação '
+                    'ou confira se o acesso a notificações está activo para o Mentor Financeiro.',
                     style: TextStyle(
                       color: scheme.onSurface.withValues(alpha: 0.7),
                       height: 1.35,
@@ -271,7 +309,7 @@ class _NotificationMonitoringPageState
                   )
                 else
                   ..._diagnostics
-                      .take(5)
+                      .take(20)
                       .map((entry) => _diagnosticTile(entry)),
               ],
             ),

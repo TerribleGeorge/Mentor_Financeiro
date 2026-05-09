@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/config/app_secrets.dart';
 import '../services/app_theme_controller.dart';
 import '../services/theme_controller.dart';
 import '../services/currency_preference_controller.dart';
@@ -69,6 +70,10 @@ class _SettingsPageState extends State<SettingsPage> {
       (p) => p.providerId == EmailAuthProvider.PROVIDER_ID,
     );
   }
+
+  /// Conta do desenvolvedor (atalhos: simulador Premium, monitor de notificações).
+  bool get _isDeveloperAccount =>
+      AppSecrets.isDeveloperUiAccount(FirebaseAuth.instance.currentUser?.email);
 
   Future<void> _abrirPaywall() async {
     if (!mounted) return;
@@ -391,27 +396,32 @@ class _SettingsPageState extends State<SettingsPage> {
             trailing: _chevron,
             onTap: _mostrarAlterarSenha,
           ),
-          Divider(height: 1, color: dividerColor),
-          ListTile(
-            leading: Icon(
-              Icons.notifications_active_outlined,
-              color: successColor,
-            ),
-            title: Text(
-              'Monitoramento por notificações',
-              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              'Ler apenas notificações de gastos (sem acessar conta bancária)',
-              style: TextStyle(color: mutedColor, fontSize: 12),
-            ),
-            trailing: _chevron,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const NotificationMonitoringPage(),
+          if (_isDeveloperAccount) ...[
+            Divider(height: 1, color: dividerColor),
+            ListTile(
+              leading: Icon(
+                Icons.notifications_active_outlined,
+                color: successColor,
+              ),
+              title: Text(
+                'Monitoramento por notificações',
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                'Ferramenta de desenvolvimento · leitura de notificações',
+                style: TextStyle(color: mutedColor, fontSize: 12),
+              ),
+              trailing: _chevron,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const NotificationMonitoringPage(),
+                ),
               ),
             ),
-          ),
+          ],
           Divider(height: 24, color: dividerColor),
           _secTitle('Dados'),
           ListTile(
@@ -680,8 +690,7 @@ class _SettingsPageState extends State<SettingsPage> {
             onTap: _logout,
           ),
           const SizedBox(height: 24),
-          if (userEmail?.trim().toLowerCase() ==
-              'george.guimares@gmail.com') ...[
+          if (_isDeveloperAccount) ...[
             Divider(height: 1, color: dividerColor),
             ListTile(
               leading: Icon(Icons.bolt_rounded, color: successColor),

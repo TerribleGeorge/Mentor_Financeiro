@@ -279,6 +279,9 @@ class NotificationParserService {
     // PT
     'compra aprovada',
     'compra realizada',
+    'você pagou',
+    'voce pagou',
+    'compra no valor',
     'compra',
     'compra de',
     'pagamento',
@@ -310,6 +313,7 @@ class NotificationParserService {
     // EN
     'card purchase',
     'purchase',
+    'you paid',
     'payment',
     'card charged',
     'charged',
@@ -359,17 +363,20 @@ class NotificationParserService {
   ];
 
   /// Palavras-chave de segurança que nunca devem virar transação.
+  /// Importante: não usar só «código» — bloqueia «código de barras» em boletos/compras.
   static const List<String> _securityBlockKeywords = [
-    // Segurança / login
     'código de verificação',
     'codigo de verificacao',
+    'código de segurança',
+    'codigo de seguranca',
+    'código de acesso',
+    'codigo de acesso',
     'verification code',
     'security code',
+    'authentication code',
     'otp',
     'token',
     '2fa',
-    'código',
-    'codigo',
     'senha',
     'password',
     'login',
@@ -410,6 +417,11 @@ class NotificationParserService {
   }
 
   static final List<RegExp> _moneyPatterns = [
+    // "Valor: 12,34" / "Valor R$ 12,34" (comum em apps bancários)
+    RegExp(
+      r'\bvalor\b\s*[:\-]?\s*(?:R\$|€|£|\$)?\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)',
+      caseSensitive: false,
+    ),
     // Símbolo antes (com separadores)
     RegExp(
       r'([€£¥₹$]|R\$)\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)',
@@ -745,6 +757,11 @@ class ResultadoValidacao {
 }
 
 class NotificationListenerService {
+  NotificationListenerService._();
+  static final NotificationListenerService _instance =
+      NotificationListenerService._();
+  factory NotificationListenerService() => _instance;
+
   static const MethodChannel _channel = MethodChannel(
     'mentor_financeiro/notifications',
   );
@@ -805,6 +822,11 @@ class NotificationListenerService {
     await prefs.setStringList(_diagnosticsKey, items);
   }
 
+  bool get estaAtivo => _subscription != null;
+
+  /// Drena eventos guardados nativamente (ex. app em segundo plano sem EventSink).
+  Future<void> sincronizarPendentes() => _drainPendingNotifications();
+
   /// Inicia o stream **sem** disparar pedido de permissão automaticamente.
   /// Retorna `false` se a permissão ainda não foi concedida.
   Future<bool> iniciar() async {
@@ -828,7 +850,13 @@ class NotificationListenerService {
 
     _subscription = _eventChannel.receiveBroadcastStream().listen(
       _onNotificationReceived,
-      onError: _onError,
+      onError: (Object e, StackTrace _) {
+        _onError(e);
+        _subscription = null;
+      },
+      onDone: () {
+        _subscription = null;
+      },
     );
 
     await _drainPendingNotifications();
@@ -851,28 +879,50 @@ class NotificationListenerService {
 
   Future<void> _drainPendingNotifications() async {
     try {
-      final pending = await _channel.invokeMethod<List<dynamic>>(
-        'drainPendingNotifications',
-      );
-      if (pending == null || pending.isEmpty) return;
+      final raw =
+          await _channel.invokeMethod<dynamic>('drainPendingNotifications');
+      if (raw is! List) return;
 
-      for (final event in pending) {
-        _onNotificationReceived(event);
+      for (final item in raw) {
+        final map = _normalizeNotificationEvent(item);
+        if (map != null) {
+          _onNotificationReceived(map);
+        }
       }
     } on PlatformException catch (e) {
       debugPrint('Erro ao recuperar notificações pendentes: ${e.message}');
     }
   }
 
-  void _onNotificationReceived(dynamic event) {
-    if (event is! Map) {
-      return;
+  Map<String, dynamic>? _normalizeNotificationEvent(dynamic event) {
+    if (event is! Map) return null;
+    final out = <String, dynamic>{};
+    for (final e in event.entries) {
+      final key = e.key?.toString() ?? '';
+      if (key.isEmpty) continue;
+      final v = e.value;
+      if (key == 'timestamp' && v is num) {
+        out[key] = v.toInt();
+      } else if (key == 'timestamp') {
+        out[key] = int.tryParse(v?.toString() ?? '') ?? 0;
+      } else {
+        out[key] = v;
+      }
     }
+    return out;
+  }
 
-    final title = event['title'] as String? ?? '';
-    final text = event['text'] as String? ?? '';
-    final packageName = event['package'] as String? ?? '';
-    final timestamp = (event['timestamp'] as num?)?.toInt() ?? 0;
+  void _onNotificationReceived(dynamic event) {
+    final map = _normalizeNotificationEvent(event);
+    if (map == null) return;
+
+    final title = map['title']?.toString() ?? '';
+    final text = map['text']?.toString() ?? '';
+    final packageName = map['package']?.toString() ?? '';
+    final rawTs = map['timestamp'];
+    final timestamp = rawTs is num
+        ? rawTs.toInt()
+        : int.tryParse(rawTs?.toString() ?? '') ?? 0;
 
     final notificationText = '$packageName $title $text';
 

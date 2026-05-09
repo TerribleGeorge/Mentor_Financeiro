@@ -59,7 +59,22 @@ class _MainNavigationState extends State<MainNavigation> {
 
   Future<void> _ensureNotificationListenerStarted() async {
     if (!Platform.isAndroid) return;
-    if (_listenerStarted) return;
+
+    if (_listenerStarted) {
+      final stillOk = await _notificationListener.verificarPermissao();
+      if (!stillOk) {
+        _notificationListener.parar();
+        _listenerStarted = false;
+      } else {
+        await _notificationListener.sincronizarPendentes();
+        if (!_notificationListener.estaAtivo) {
+          _notificationListener.parar();
+          final restarted = await _notificationListener.iniciar();
+          _listenerStarted = restarted;
+        }
+        return;
+      }
+    }
 
     final started = await _notificationListener.iniciar();
     if (started) {

@@ -29,4 +29,10 @@ abstract final class AppSecrets {
     if (email == null || email.isEmpty) return false;
     return adminEmails.contains(email.toLowerCase());
   }
+
+  /// Conta do desenvolvedor: mesmos atalhos que «Simular Premium (Admin)» nas Definições.
+  static bool isDeveloperUiAccount(String? email) {
+    if (email == null || email.isEmpty) return false;
+    return email.trim().toLowerCase() == 'george.guimares@gmail.com';
+  }
 }
