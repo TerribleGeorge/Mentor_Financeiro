@@ -1,0 +1,14 @@
+rules_version = '2';
+// Firebase Console → Storage → Regras → colar isto → Publicar.
+// Ou: firebase deploy --only storage (com firebase.json na raiz do repo).
+//
+// Caminho usado pelo app: profile_photos/{uid do Auth}/avatar_*.jpg
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /profile_photos/{userId}/{allPaths=**} {
+      // getDownloadURL() precisa de leitura para o utilizador autenticado.
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

@@ -21,11 +21,27 @@ abstract final class ProfilePhotoService {
 
   static final ImagePicker _picker = ImagePicker();
 
-  static FirebaseStorage _storageForApp() {
-    final bucket = Firebase.app().options.storageBucket;
-    if (bucket == null || bucket.isEmpty) {
-      return FirebaseStorage.instance;
+  /// Buckets a tentar (novo domínio `.firebasestorage.app` e o bucket clássico
+  /// `PROJECT_ID.appspot.com`). O object-not-found com upload "ok" costuma ser
+  /// bucket errado no projeto ou regras que impedem criar/ler o objeto.
+  static List<String> _storageBucketCandidates() {
+    final options = Firebase.app().options;
+    final out = <String>[];
+    void addRaw(String? raw) {
+      if (raw == null || raw.isEmpty) return;
+      final b = raw.startsWith('gs://') ? raw.substring(5) : raw;
+      if (!out.contains(b)) out.add(b);
     }
+
+    addRaw(options.storageBucket);
+    final pid = options.projectId;
+    if (pid.isNotEmpty) {
+      addRaw('$pid.appspot.com');
+    }
+    return out;
+  }
+
+  static FirebaseStorage _storageNamed(String bucket) {
     return FirebaseStorage.instanceFor(app: Firebase.app(), bucket: bucket);
   }
 
@@ -125,47 +141,60 @@ abstract final class ProfilePhotoService {
     final mime = xFile.mimeType ?? 'image/jpeg';
     final objectName =
         'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final objectPath = 'profile_photos/$uid/$objectName';
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       await user.getIdToken(true);
     }
 
-    final ref = _storageForApp()
-        .ref()
-        .child('profile_photos')
-        .child(uid)
-        .child(objectName);
-
-    final snapshot = await _uploadBytes(ref, bytes, mime);
-    if (snapshot.state != TaskState.success) {
+    var buckets = List<String>.from(_storageBucketCandidates());
+    if (buckets.isEmpty) {
       throw StateError(
-        'Upload Storage não concluído (estado ${snapshot.state}).',
-      );
-    }
-    if (snapshot.totalBytes > 0 &&
-        snapshot.bytesTransferred != snapshot.totalBytes) {
-      throw StateError(
-        'Upload Storage incompleto (${snapshot.bytesTransferred}/'
-        '${snapshot.totalBytes} bytes).',
+        'Firebase sem storageBucket: configure firebase_options / google-services.',
       );
     }
 
-    // Valida que o objeto existe antes do token; repetir ajuda com
-    // [object-not-found] logo após o upload (principalmente em Android).
-    for (var attempt = 0; attempt < 8; attempt++) {
+    for (var bi = 0; bi < buckets.length; bi++) {
+      final bucketName = buckets[bi];
       try {
-        await snapshot.ref.getMetadata();
-        return await snapshot.ref.getDownloadURL();
+        final storage = _storageNamed(bucketName);
+        final ref = storage.ref(objectPath);
+        final snapshot = await _uploadBytes(ref, bytes, mime);
+        if (snapshot.state != TaskState.success) {
+          throw StateError(
+            'Upload Storage não concluído (estado ${snapshot.state}).',
+          );
+        }
+        if (snapshot.totalBytes > 0 &&
+            snapshot.bytesTransferred != snapshot.totalBytes) {
+          throw StateError(
+            'Upload Storage incompleto (${snapshot.bytesTransferred}/'
+            '${snapshot.totalBytes} bytes).',
+          );
+        }
+
+        for (var attempt = 0; attempt < 8; attempt++) {
+          try {
+            await snapshot.ref.getMetadata();
+            return await snapshot.ref.getDownloadURL();
+          } on FirebaseException catch (e) {
+            if (e.code != 'object-not-found') rethrow;
+            if (attempt == 7) rethrow;
+            await Future<void>.delayed(
+              Duration(milliseconds: 200 + (attempt * 150)),
+            );
+          }
+        }
+        throw StateError('ProfilePhotoService: getDownloadURL sem URL');
       } on FirebaseException catch (e) {
-        if (e.code != 'object-not-found') rethrow;
-        if (attempt == 7) rethrow;
-        await Future<void>.delayed(
-          Duration(milliseconds: 200 + (attempt * 150)),
-        );
+        final tryNext = bi < buckets.length - 1 &&
+            (e.code == 'object-not-found' || e.code == 'unauthorized');
+        if (tryNext) continue;
+        rethrow;
       }
     }
-    throw StateError('ProfilePhotoService: getDownloadURL sem URL');
+    throw StateError('ProfilePhotoService: falha inesperada no Storage.');
   }
 
   static Future<void> applyPhotoUrl({

@@ -165,9 +165,10 @@ class _SettingsPageState extends State<SettingsPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Não foi possível actualizar a foto. Confirme Storage activo, '
-              'regras com leitura e escrita em profile_photos/{o seu uid}, e '
-              'permissões da galeria/câmara. ($e)',
+              'Não foi possível actualizar a foto. No Firebase → Storage → '
+              'Regras, publique o conteúdo de storage.rules na raiz do Git '
+              '(leitura e escrita em profile_photos para o uid autenticado). '
+              'Detalhe: $e',
             ),
           ),
         );
