@@ -461,29 +461,32 @@ class _TelaLoginState extends State<TelaLogin> {
         border: Border.all(color: cor, width: isPro ? 2 : 1),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                titulo,
-                style: TextStyle(
-                  color: cor,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                preco,
-                style: const TextStyle(color: Colors.white70, fontSize: 16),
-              ),
-            ],
+          Text(
+            titulo,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: cor,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            preco,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70, fontSize: 16),
           ),
           const SizedBox(height: 15),
           ...beneficios.map(
             (b) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(b, style: const TextStyle(color: Colors.white70)),
+              child: Text(
+                b,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white70),
+              ),
             ),
           ),
         ],
@@ -617,21 +620,18 @@ class _TelaLoginState extends State<TelaLogin> {
     try {
       final user = await FirebaseService.loginGoogle();
       if (!mounted) return;
+      if (user == null) {
+        throw GoogleLoginFailure(
+          'O Google não retornou usuário. Isso pode indicar interrupção do login ou configuração incompleta do Google Sign-In.',
+        );
+      }
       setState(() {
         _carregando = false;
-        if (user != null) {
-          _usuarioFirebase = user;
-          _metodoLogin = "google";
-          _nomeController.text = user.displayName ?? '';
-        }
+        _usuarioFirebase = user;
+        _metodoLogin = "google";
+        _nomeController.text = user.displayName ?? '';
       });
-      if (user != null) {
-        _pageController.jumpToPage(2); // Pula para página de nome
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Login cancelado.')));
-      }
+      _pageController.jumpToPage(2); // Pula para página de nome
     } on GoogleLoginFailure catch (e) {
       if (!mounted) return;
       setState(() => _carregando = false);

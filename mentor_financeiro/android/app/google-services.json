@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "841128243215-u0li1f57nsj1ir2ms3utqkf437hk5lqp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.georgeguimares.mentorfinanceiro",
+            "certificate_hash": "d11519dddaf0b0cd9da6fc1b2316b311dd5f3945"
+          }
+        },
+        {
           "client_id": "841128243215-t5lkthv9odaect1sj7heodftkv200dni.apps.googleusercontent.com",
           "client_type": 3
         }

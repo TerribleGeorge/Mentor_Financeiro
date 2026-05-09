@@ -45,10 +45,13 @@ class FirebaseService {
 
   /// [GoogleSignIn.instance.initialize] deve completar antes de qualquer outro uso (google_sign_in 7+).
   static Future<void>? _googleSignInInitialized;
+  static const String _googleWebClientId =
+      '841128243215-t5lkthv9odaect1sj7heodftkv200dni.apps.googleusercontent.com';
 
   static Future<void> _ensureGoogleSignInInitialized() {
-    return _googleSignInInitialized ??=
-        GoogleSignIn.instance.initialize();
+    return _googleSignInInitialized ??= GoogleSignIn.instance.initialize(
+      serverClientId: _googleWebClientId,
+    );
   }
 
   // Firestore: Banco de dados principal
@@ -222,13 +225,13 @@ class FirebaseService {
             'Google Sign-In: fluxo interativo não disponível nesta plataforma.',
           );
         }
-        return null;
+        throw GoogleLoginFailure(
+          'Google Sign-In indisponível neste dispositivo/plataforma.',
+        );
       }
 
-      final GoogleSignInAccount googleUser =
-          await GoogleSignIn.instance.authenticate(
-        scopeHint: const <String>['email', 'profile'],
-      );
+      final GoogleSignInAccount googleUser = await GoogleSignIn.instance
+          .authenticate(scopeHint: const <String>['email', 'profile']);
 
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
@@ -243,9 +246,12 @@ class FirebaseService {
       try {
         final existing = await googleUser.authorizationClient
             .authorizationForScopes(const <String>['email', 'profile']);
-        final GoogleSignInClientAuthorization authz = existing ??
-            await googleUser.authorizationClient
-                .authorizeScopes(const <String>['email', 'profile']);
+        final GoogleSignInClientAuthorization authz =
+            existing ??
+            await googleUser.authorizationClient.authorizeScopes(const <String>[
+              'email',
+              'profile',
+            ]);
         accessToken = authz.accessToken;
       } catch (_) {
         accessToken = null;
@@ -265,13 +271,20 @@ class FirebaseService {
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled ||
           e.code == GoogleSignInExceptionCode.interrupted) {
-        return null;
+        if (kDebugMode) debugPrint('Google Sign-In interrompido: $e');
+        throw GoogleLoginFailure(
+          'O Google interrompeu o login (${e.code}). '
+          'Se você não cancelou manualmente, reinstale a versão mais recente do teste interno e confirme os SHA da Play no Firebase.',
+          cause: e,
+        );
       }
       if (kDebugMode) debugPrint('Erro no login Google: $e');
       throw GoogleLoginFailure('Erro no Google Sign-In: ${e.code}', cause: e);
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
-        debugPrint('FirebaseAuthException no login Google: code=${e.code} message=${e.message}');
+        debugPrint(
+          'FirebaseAuthException no login Google: code=${e.code} message=${e.message}',
+        );
       }
       throw GoogleLoginFailure(
         'Falha no Firebase Auth: ${e.code}${e.message == null ? "" : " (${e.message})"}',
