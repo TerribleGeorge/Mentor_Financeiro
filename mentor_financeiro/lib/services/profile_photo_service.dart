@@ -1,9 +1,12 @@
-import 'dart:io' show Platform;
+import 'dart:io' show File, Platform;
+import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode, kIsWeb;
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,12 +14,20 @@ import 'firebase_service.dart';
 
 /// Galeria/câmara → Firebase Storage → URL pública de download.
 ///
-/// No console Firebase: activar **Storage** e regras que permitam
-/// `write` em `profile_photos/{uid}/**` apenas se `request.auth.uid == uid`.
+/// No console Firebase: activar **Storage** e regras (v2) com leitura e
+/// escrita em `profile_photos/{uid}/**` para `request.auth.uid == uid`.
 abstract final class ProfilePhotoService {
   ProfilePhotoService._();
 
   static final ImagePicker _picker = ImagePicker();
+
+  static FirebaseStorage _storageForApp() {
+    final bucket = Firebase.app().options.storageBucket;
+    if (bucket == null || bucket.isEmpty) {
+      return FirebaseStorage.instance;
+    }
+    return FirebaseStorage.instanceFor(app: Firebase.app(), bucket: bucket);
+  }
 
   /// Garante permissões antes de [pickAndUpload]. Em Android/iOS pede ao sistema;
   /// se estiver permanentemente negado, abre as definições da app.
@@ -72,6 +83,29 @@ abstract final class ProfilePhotoService {
     return true;
   }
 
+  static Future<TaskSnapshot> _uploadBytes(
+    Reference ref,
+    Uint8List bytes,
+    String mime,
+  ) async {
+    final meta = SettableMetadata(contentType: mime);
+    if (kIsWeb) {
+      return ref.putData(bytes, meta);
+    }
+
+    final dir = await getTemporaryDirectory();
+    final safeName = 'mentor_profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final file = File('${dir.path}/$safeName');
+    try {
+      await file.writeAsBytes(bytes, flush: true);
+      return ref.putFile(file, meta);
+    } finally {
+      try {
+        if (await file.exists()) await file.delete();
+      } catch (_) {}
+    }
+  }
+
   /// [null] se o utilizador cancelar o selector.
   static Future<String?> pickAndUpload({
     required String uid,
@@ -89,36 +123,45 @@ abstract final class ProfilePhotoService {
     if (bytes.isEmpty) return null;
 
     final mime = xFile.mimeType ?? 'image/jpeg';
-    // Nome único evita corrida em sobrescritas e falhas esporádicas de
-    // getDownloadURL logo a seguir ao upload.
     final objectName =
         'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final ref = FirebaseStorage.instance
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await user.getIdToken(true);
+    }
+
+    final ref = _storageForApp()
         .ref()
         .child('profile_photos')
         .child(uid)
         .child(objectName);
 
-    final snapshot = await ref.putData(
-      bytes,
-      SettableMetadata(contentType: mime),
-    );
+    final snapshot = await _uploadBytes(ref, bytes, mime);
     if (snapshot.state != TaskState.success) {
       throw StateError(
         'Upload Storage não concluído (estado ${snapshot.state}).',
       );
     }
+    if (snapshot.totalBytes > 0 &&
+        snapshot.bytesTransferred != snapshot.totalBytes) {
+      throw StateError(
+        'Upload Storage incompleto (${snapshot.bytesTransferred}/'
+        '${snapshot.totalBytes} bytes).',
+      );
+    }
 
-    // Em alguns dispositivos/rede o objeto ainda não aparece para a API de
-    // token; repetir brevemente costuma resolver o [object-not-found].
-    for (var attempt = 0; attempt < 6; attempt++) {
+    // Valida que o objeto existe antes do token; repetir ajuda com
+    // [object-not-found] logo após o upload (principalmente em Android).
+    for (var attempt = 0; attempt < 8; attempt++) {
       try {
+        await snapshot.ref.getMetadata();
         return await snapshot.ref.getDownloadURL();
       } on FirebaseException catch (e) {
         if (e.code != 'object-not-found') rethrow;
-        if (attempt == 5) rethrow;
+        if (attempt == 7) rethrow;
         await Future<void>.delayed(
-          Duration(milliseconds: 180 * (attempt + 1)),
+          Duration(milliseconds: 200 + (attempt * 150)),
         );
       }
     }
