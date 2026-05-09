@@ -80,10 +80,8 @@ class GooglePlayBillingService extends ChangeNotifier {
     if (basePlanId != null) {
       final token = _tryResolveOfferToken(_product!, basePlanId: basePlanId);
       if (token == null) {
-        // Não bloqueia compra; apenas ajuda no debug.
         _error =
-            'Oferta do base plan `$basePlanId` não encontrada no produto `$productId`. '
-            'Vou tentar comprar com a 1ª oferta disponível.';
+            'Plano básico `$basePlanId` não encontrado no produto `$productId`.';
       }
     }
 
@@ -109,13 +107,17 @@ class GooglePlayBillingService extends ChangeNotifier {
 
     final offerToken = basePlanId == null
         ? _tryResolveOfferToken(p)
-        : _tryResolveOfferToken(p, basePlanId: basePlanId) ??
-            _tryResolveOfferToken(p);
+        : _tryResolveOfferToken(p, basePlanId: basePlanId);
+    if (basePlanId != null &&
+        p is GooglePlayProductDetails &&
+        offerToken == null) {
+      _error =
+          'Plano básico `$basePlanId` não encontrado. Verifique se ele está ativo no Play Console.';
+      notifyListeners();
+      return;
+    }
 
-    final param = PurchaseParam(
-      productDetails: p,
-      applicationUserName: null,
-    );
+    final param = PurchaseParam(productDetails: p, applicationUserName: null);
 
     // Para assinaturas no Android, o offerToken é essencial quando existe.
     // O plugin aceita via GooglePlayPurchaseParam.
@@ -187,4 +189,3 @@ class GooglePlayBillingService extends ChangeNotifier {
     return offers.first.offerIdToken;
   }
 }
-

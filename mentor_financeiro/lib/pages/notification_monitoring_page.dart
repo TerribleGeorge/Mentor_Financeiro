@@ -21,6 +21,7 @@ class _NotificationMonitoringPageState
   bool _enabled = true;
   bool _loading = true;
   bool? _androidPermissionGranted;
+  List<String> _diagnostics = const <String>[];
 
   @override
   void initState() {
@@ -34,10 +35,13 @@ class _NotificationMonitoringPageState
     final hasPermission = Platform.isAndroid
         ? await _listener.verificarPermissao()
         : null;
+    final diagnostics =
+        await NotificationListenerService.carregarDiagnosticos();
     if (!mounted) return;
     setState(() {
       _enabled = v ?? true;
       _androidPermissionGranted = hasPermission;
+      _diagnostics = diagnostics;
       _loading = false;
     });
   }
@@ -55,6 +59,11 @@ class _NotificationMonitoringPageState
   Future<void> _openAndroidPermission() async {
     await _listener.solicitarPermissao();
     await Future<void>.delayed(const Duration(milliseconds: 350));
+    await _load();
+  }
+
+  Future<void> _clearDiagnostics() async {
+    await NotificationListenerService.limparDiagnosticos();
     await _load();
   }
 
@@ -216,6 +225,60 @@ class _NotificationMonitoringPageState
                 color: scheme.onSurface.withValues(alpha: 0.08),
               ),
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Últimas leituras do listener',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Atualizar',
+                      onPressed: _load,
+                      icon: const Icon(Icons.refresh),
+                    ),
+                    IconButton(
+                      tooltip: 'Limpar',
+                      onPressed: _diagnostics.isEmpty
+                          ? null
+                          : _clearDiagnostics,
+                      icon: const Icon(Icons.delete_outline),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (_diagnostics.isEmpty)
+                  Text(
+                    'Nenhuma notificação chegou ao listener ainda.',
+                    style: TextStyle(
+                      color: scheme.onSurface.withValues(alpha: 0.7),
+                      height: 1.35,
+                    ),
+                  )
+                else
+                  ..._diagnostics
+                      .take(5)
+                      .map((entry) => _diagnosticTile(entry)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: scheme.surface.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: scheme.onSurface.withValues(alpha: 0.08),
+              ),
+            ),
             child: Text(
               'Dica: você controla essa permissão também nas configurações do Android '
               '(Acesso a notificações). Se desativar lá, o app não consegue ler nenhuma notificação.',
@@ -252,6 +315,53 @@ class _NotificationMonitoringPageState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _diagnosticTile(String entry) {
+    final scheme = Theme.of(context).colorScheme;
+    final parts = entry.split('|');
+    final date = parts.isNotEmpty ? DateTime.tryParse(parts[0]) : null;
+    final status = parts.length > 1 ? parts[1] : 'evento';
+    final text = parts.length > 2 ? parts.sublist(2).join('|') : entry;
+    final time = date == null
+        ? ''
+        : '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              time.isEmpty ? status : '$time · $status',
+              style: TextStyle(
+                color: scheme.primary,
+                fontWeight: FontWeight.w800,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              text,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: scheme.onSurface.withValues(alpha: 0.72),
+                fontSize: 12,
+                height: 1.3,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -17,7 +17,8 @@ class TelaUpgrade extends StatefulWidget {
 
 class _TelaUpgradeState extends State<TelaUpgrade> {
   static const String _productId = 'premium_assinatura';
-  static const String _basePlanId = 'a-premium';
+  static const String _monthlyBasePlanId = 'a-premium';
+  static const String _yearlyBasePlanId = 'premium-anual';
 
   final GooglePlayBillingService _billing = GooglePlayBillingService.instance;
 
@@ -28,7 +29,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
   void initState() {
     super.initState();
     _billing.addListener(_onBillingChanged);
-    _billing.initialize(productId: _productId, basePlanId: _basePlanId);
+    _billing.initialize(productId: _productId, basePlanId: _monthlyBasePlanId);
   }
 
   @override
@@ -424,7 +425,10 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
   Future<void> _contratarPlano(String plano) async {
     _pendingPlan = plano;
     _handledSuccess = false;
-    await _billing.buySubscription(basePlanId: _basePlanId);
+    final basePlanId = plano == 'anual'
+        ? _yearlyBasePlanId
+        : _monthlyBasePlanId;
+    await _billing.buySubscription(basePlanId: basePlanId);
   }
 
   Future<void> _finalizePremiumActivation(String plano) async {

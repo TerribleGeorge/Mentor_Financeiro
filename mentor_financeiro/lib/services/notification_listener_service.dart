@@ -655,12 +655,6 @@ class TransacaoRepository {
       return false;
     }
 
-    final validacao = await validarSaldo(user.uid, transacao);
-    if (!validacao.podeSalvar) {
-      debugPrint('Transação negada: ${validacao.mensagem}');
-      return false;
-    }
-
     try {
       await _firestore
           .collection('usuarios')
@@ -763,6 +757,18 @@ class NotificationListenerService {
   static const _dedupeKey = 'notification_dedupe_ids';
   static const _dedupeMax = 80;
   static const _monitoringEnabledKey = 'notif_monitoring_enabled';
+  static const _diagnosticsKey = 'notification_listener_diagnostics';
+  static const _diagnosticsMax = 20;
+
+  static Future<List<String>> carregarDiagnosticos() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_diagnosticsKey) ?? const <String>[];
+  }
+
+  static Future<void> limparDiagnosticos() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_diagnosticsKey);
+  }
 
   Future<bool> verificarPermissao() async {
     try {
@@ -782,6 +788,21 @@ class NotificationListenerService {
       debugPrint('Erro ao solicitar permissão: ${e.message}');
       return false;
     }
+  }
+
+  Future<void> _registrarDiagnostico(String status, String texto) async {
+    final prefs = await SharedPreferences.getInstance();
+    final cleaned = texto.replaceAll(RegExp(r'\s+'), ' ').trim();
+    final snippet = cleaned.length > 280
+        ? '${cleaned.substring(0, 280)}...'
+        : cleaned;
+    final entry = '${DateTime.now().toIso8601String()}|$status|$snippet';
+    final items = prefs.getStringList(_diagnosticsKey) ?? <String>[];
+    items.insert(0, entry);
+    if (items.length > _diagnosticsMax) {
+      items.removeRange(_diagnosticsMax, items.length);
+    }
+    await prefs.setStringList(_diagnosticsKey, items);
   }
 
   /// Inicia o stream **sem** disparar pedido de permissão automaticamente.
@@ -858,6 +879,7 @@ class NotificationListenerService {
     if (kDebugMode) {
       debugPrint('Notificação recebida [$packageName]: $title | $text');
     }
+    unawaited(_registrarDiagnostico('recebida', notificationText));
 
     if (notificationText.trim().isEmpty) {
       return;
@@ -923,14 +945,21 @@ class NotificationListenerService {
     required int timestamp,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      await _registrarDiagnostico('sem usuário logado', texto);
+      return;
+    }
 
     final prefs = await SharedPreferences.getInstance();
     final enabled = prefs.getBool(_monitoringEnabledKey) ?? true;
-    if (!enabled) return;
+    if (!enabled) {
+      await _registrarDiagnostico('monitoramento pausado', texto);
+      return;
+    }
 
     final transacaoData = NotificationParserService.parse(texto);
     if (transacaoData == null) {
+      await _registrarDiagnostico('ignorada pelo parser', texto);
       if (kDebugMode) {
         debugPrint('Notificação ignorada pelo parser: $texto');
       }
@@ -943,6 +972,7 @@ class NotificationListenerService {
       texto: texto,
       timestamp: timestamp,
     )) {
+      await _registrarDiagnostico('duplicada', texto);
       return;
     }
 
@@ -959,9 +989,15 @@ class NotificationListenerService {
 
     final sucesso = await _repository.salvarTransacao(transacao);
     if (sucesso) {
+      await _registrarDiagnostico(
+        'salva no histórico',
+        '${transacaoData.descricao} - ${transacaoData.valor}',
+      );
       debugPrint(
         'Transação salva: ${transacaoData.descricao} - R\$ ${transacaoData.valor}',
       );
+    } else {
+      await _registrarDiagnostico('falha ao salvar', texto);
     }
   }
 
