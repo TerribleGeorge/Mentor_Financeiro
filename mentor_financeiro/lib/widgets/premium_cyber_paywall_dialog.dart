@@ -26,7 +26,8 @@ abstract final class PremiumCyberPaywallDialog {
                   children: [
                     Text(
                       'O tema Cyber faz parte da assinatura Premium. A subscrição é feita na '
-                      'Google Play; depois o estado Premium deve estar reflectido no teu perfil.',
+                      'Google Play (incluindo período de teste gratuito quando a loja o mostrar); '
+                      'depois o estado Premium deve estar reflectido no teu perfil.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     if (sub.isLoading) ...[

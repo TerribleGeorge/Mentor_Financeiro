@@ -22,7 +22,8 @@ class PaywallScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               children: [
                 Text(
-                  'O Premium é gerido pela Google Play. Planos e preços mostram-se na loja conforme a Play Console.',
+                  'O Premium inclui período de teste gratuito quando a Google Play o oferecer para novos subscritores. '
+                  'Preços e datas de cobrança aparecem na loja.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
                   ),

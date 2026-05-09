@@ -42,9 +42,53 @@ class SubscriptionConstants {
   }
 
   // ==============================================================================
+  // TESTE GRÁTIS (Play Console — alinhar com a oferta configurada na loja)
+  // ==============================================================================
+  static const String playFreeTrialHeadlinePt = '7 dias grátis na Google Play';
+  static const String playFreeTrialHeadlineEn =
+      '7-day free trial on Google Play';
+  static const String playFreeTrialHeadlineEs = '7 días gratis en Google Play';
+
+  /// Texto curto para botões e destaques.
+  static const String playFreeTrialCtaPt = 'Experimentar 7 dias grátis';
+  static const String playFreeTrialCtaEn = 'Start 7-day free trial';
+  static const String playFreeTrialCtaEs = 'Probar 7 días gratis';
+
+  /// Aviso legal leve: o que manda é o ecrã da Play Store.
+  static const String playFreeTrialDisclaimerPt =
+      'A oferta de teste gratuito é gerida pela Google Play. A data em que a '
+      'cobrança começa e as condições exactas aparecem no ecrã de compra antes '
+      'de confirmares.';
+  static const String playFreeTrialDisclaimerEn =
+      'The free trial is handled by Google Play. Billing date and exact '
+      'terms are shown on the purchase screen before you confirm.';
+  static const String playFreeTrialDisclaimerEs =
+      'La prueba gratuita la gestiona Google Play. La fecha de cobro y los '
+      'términos exactos aparecen en la pantalla de compra antes de confirmar.';
+
+  static String freeTrialHeadlineForLocale(String locale) {
+    if (locale.startsWith('en')) return playFreeTrialHeadlineEn;
+    if (locale.startsWith('es')) return playFreeTrialHeadlineEs;
+    return playFreeTrialHeadlinePt;
+  }
+
+  static String freeTrialCtaForLocale(String locale) {
+    if (locale.startsWith('en')) return playFreeTrialCtaEn;
+    if (locale.startsWith('es')) return playFreeTrialCtaEs;
+    return playFreeTrialCtaPt;
+  }
+
+  static String freeTrialDisclaimerForLocale(String locale) {
+    if (locale.startsWith('en')) return playFreeTrialDisclaimerEn;
+    if (locale.startsWith('es')) return playFreeTrialDisclaimerEs;
+    return playFreeTrialDisclaimerPt;
+  }
+
+  // ==============================================================================
   // BENEFÍCIOS DO PREMIUM
   // ==============================================================================
   static const List<String> premiumBenefits = [
+    '7 dias grátis para experimentar o Premium (detalhes e renovação no checkout da Google Play)',
     'Relatórios mensais detalhados',
     'Gráficos avançados por categoria e pagamento',
     'Insights automáticos de organização financeira',
@@ -54,6 +98,7 @@ class SubscriptionConstants {
   ];
 
   static const List<String> premiumBenefitsEn = [
+    '7-day free trial to try Premium (details and renewal in the Google Play checkout)',
     'Detailed monthly reports',
     'Advanced charts by category and payment method',
     'Automatic financial organization insights',
@@ -63,6 +108,7 @@ class SubscriptionConstants {
   ];
 
   static const List<String> premiumBenefitsEs = [
+    '7 días gratis para probar Premium (detalles y renovación en el checkout de Google Play)',
     'Informes mensuales detallados',
     'Gráficos avanzados por categoría y método de pago',
     'Ideas automáticas para organizar tus finanzas',

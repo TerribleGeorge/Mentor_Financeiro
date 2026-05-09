@@ -393,7 +393,7 @@ class _TelaLoginState extends State<TelaLogin> {
           // Plano Premium
           _planoCard(
             "PREMIUM",
-            "R\$ 9,90/mês",
+            "7 dias grátis na Play · depois a partir de R\$ 9,90/mês",
             Colors.amber,
             [
               "✨ Tudo do Free",
@@ -511,7 +511,7 @@ class _TelaLoginState extends State<TelaLogin> {
               if (onTap != null) ...[
                 const SizedBox(height: 8),
                 Text(
-                  'Toque para assinar',
+                  'Toque para experimentar com período gratuito',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: cor, fontWeight: FontWeight.bold),
                 ),

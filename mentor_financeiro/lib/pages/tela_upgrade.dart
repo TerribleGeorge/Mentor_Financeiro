@@ -49,6 +49,15 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
 
   @override
   Widget build(BuildContext context) {
+    final localeTag = Localizations.localeOf(context).languageCode;
+    final trialHeadline = SubscriptionConstants.freeTrialHeadlineForLocale(
+      localeTag,
+    );
+    final trialDisclaimer = SubscriptionConstants.freeTrialDisclaimerForLocale(
+      localeTag,
+    );
+    final trialCta = SubscriptionConstants.freeTrialCtaForLocale(localeTag);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
@@ -90,12 +99,57 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
               style: TextStyle(color: Colors.white70, fontSize: 16),
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 20),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00D9FF).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: const Color(0xFF00D9FF).withValues(alpha: 0.45),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.redeem_outlined,
+                        color: Color(0xFF00D9FF),
+                        size: 26,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          trialHeadline,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    trialDisclaimer,
+                    style: const TextStyle(
+                      color: Colors.white60,
+                      fontSize: 13,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 28),
             _beneficiosPremium(),
             const SizedBox(height: 28),
-            _planoMensal(),
+            _planoMensal(trialCta),
             const SizedBox(height: 16),
-            _planoAnual(),
+            _planoAnual(trialCta),
             if (_billing.error != null &&
                 _billing.error!.trim().isNotEmpty) ...[
               const SizedBox(height: 14),
@@ -115,7 +169,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
     );
   }
 
-  Widget _planoMensal() {
+  Widget _planoMensal(String trialCta) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -198,9 +252,12 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
               onPressed: _billing.isLoading
                   ? null
                   : () => _contratarPlano("mensal"),
-              child: const Text(
-                "Começar Agora",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              child: Text(
+                trialCta,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
@@ -209,7 +266,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
     );
   }
 
-  Widget _planoAnual() {
+  Widget _planoAnual(String trialCta) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -313,9 +370,12 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
               onPressed: _billing.isLoading
                   ? null
                   : () => _contratarPlano("anual"),
-              child: const Text(
-                "Economizar 30%",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              child: Text(
+                trialCta,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
@@ -343,6 +403,11 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
       ),
       child: Column(
         children: [
+          _itemGarantia(
+            Icons.calendar_month_outlined,
+            "Período gratuito conforme a oferta na Play Store; renovação automática após o teste, salvo cancelamento a tempo.",
+          ),
+          const SizedBox(height: 12),
           _itemGarantia(Icons.lock, "Pagamento processado pela Play Store"),
           const SizedBox(height: 12),
           _itemGarantia(Icons.weekend, "Cancele quando quiser"),
