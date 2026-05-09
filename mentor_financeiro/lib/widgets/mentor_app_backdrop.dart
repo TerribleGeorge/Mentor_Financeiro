@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show AssetManifest;
 
 import '../presentation/widgets/smoke_vortex_particles.dart';
 import '../services/app_theme_controller.dart';
@@ -18,10 +19,12 @@ class MentorAppBackdrop extends StatefulWidget {
 
   static Future<String> _resolveLegacyBgAsset(BuildContext context) async {
     try {
-      final manifest = await DefaultAssetBundle.of(
-        context,
-      ).loadString('AssetManifest.json');
-      if (manifest.contains(_legacyPreferredBg)) return _legacyPreferredBg;
+      final manifest = await AssetManifest.loadFromAssetBundle(
+        DefaultAssetBundle.of(context),
+      );
+      if (manifest.listAssets().contains(_legacyPreferredBg)) {
+        return _legacyPreferredBg;
+      }
     } catch (_) {}
     return _legacyFallbackBg;
   }

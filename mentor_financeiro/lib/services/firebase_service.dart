@@ -516,13 +516,13 @@ class FirebaseService {
   // Obtém status isPremium em tempo real
   static Future<bool> verificarPremium(String uid) async {
     final doc = await _firestore.collection('usuarios').doc(uid).get();
-    return doc.get('isPremium') ?? false;
+    return doc.data()?['isPremium'] == true;
   }
 
   // Obtém status isAdmin em tempo real
   static Future<bool> verificarAdminUid(String uid) async {
     final doc = await _firestore.collection('usuarios').doc(uid).get();
-    return doc.get('isAdmin') ?? false;
+    return doc.data()?['isAdmin'] == true;
   }
 
   // Atualiza configurações do usuário

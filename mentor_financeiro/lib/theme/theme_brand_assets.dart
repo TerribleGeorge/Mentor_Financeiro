@@ -14,7 +14,7 @@ abstract final class ThemeBrandAssets {
   /// Splash utilizador free / fallback de fundo “marca”.
   static const String freeSplashBackground = logoSplash;
 
-  static const String voidBackdropDark = 'assets/images/DevVoid_standard.png';
+  static const String voidBackdropDark = 'assets/images/devvoid_standard.png';
 
   static const String cyberBackdrop = 'assets/images/bg_cyber.png';
   static const String grimmBackdrop = 'assets/images/devvoid_grimm.png';
@@ -27,34 +27,33 @@ abstract final class ThemeBrandAssets {
   /// Referência documental — não usar como fundo principal.
   static const String legacyGrimmFullBleedWithLock =
       'assets/images/bg_grimm.png';
-  static const String legacyHiveFullBleedWithLock =
-      'assets/images/hive_bg.png';
+  static const String legacyHiveFullBleedWithLock = 'assets/images/hive_bg.png';
 
   static const String legacyLightFallback = 'assets/images/bg_cyber.png';
 
   /// Fundo escuro atrás do stack global ([MentorAppBackdrop]).
   static String backdropAsset(AppThemeMode mode) => switch (mode) {
-        AppThemeMode.voidTheme => voidBackdropDark,
-        AppThemeMode.cyber => cyberBackdrop,
-        AppThemeMode.obsidian => grimmBackdrop,
-        AppThemeMode.glacier => hiveBackdrop,
-      };
+    AppThemeMode.voidTheme => voidBackdropDark,
+    AppThemeMode.cyber => cyberBackdrop,
+    AppThemeMode.obsidian => grimmBackdrop,
+    AppThemeMode.glacier => hiveBackdrop,
+  };
 
   /// Fundo full-bleed da splash quando o utilizador tem premium neste preset.
   static String premiumSplashBackground(AppThemeMode mode) => switch (mode) {
-        AppThemeMode.cyber => cyberBackdrop,
-        AppThemeMode.obsidian => grimmBackdrop,
-        AppThemeMode.glacier => hiveBackdrop,
-        AppThemeMode.voidTheme => freeSplashBackground,
-      };
+    AppThemeMode.cyber => cyberBackdrop,
+    AppThemeMode.obsidian => grimmBackdrop,
+    AppThemeMode.glacier => hiveBackdrop,
+    AppThemeMode.voidTheme => freeSplashBackground,
+  };
 
   /// Miniatura na grelha de temas; Void usa só ícone.
   static String? thumbnailAsset(AppThemeMode mode) => switch (mode) {
-        AppThemeMode.voidTheme => null,
-        AppThemeMode.cyber => cyberThumbnail,
-        AppThemeMode.obsidian => grimmThumbnail,
-        AppThemeMode.glacier => hiveThumbnail,
-      };
+    AppThemeMode.voidTheme => null,
+    AppThemeMode.cyber => cyberThumbnail,
+    AppThemeMode.obsidian => grimmThumbnail,
+    AppThemeMode.glacier => hiveThumbnail,
+  };
 
   /// Garante que presets premium não apontam por engano para arte com cadeado.
   static void assertPolicy() {

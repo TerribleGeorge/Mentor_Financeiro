@@ -123,7 +123,8 @@ class MentoriaService {
             ],
             checkpoint: MentoriaCheckpoint(
               title: 'Checkpoint',
-              prompt: r'Qual é sua meta de fundo de emergência (R$) para 30 dias?',
+              prompt:
+                  r'Qual é sua meta de fundo de emergência (R$) para 30 dias?',
             ),
           ),
         ],
@@ -150,7 +151,8 @@ class MentoriaService {
             ],
             checkpoint: MentoriaCheckpoint(
               title: 'Exercício',
-              prompt: r'Qual renda extra mensal (R$) você quer atingir em 60 dias?',
+              prompt:
+                  r'Qual renda extra mensal (R$) você quer atingir em 60 dias?',
             ),
           ),
         ],
@@ -160,14 +162,16 @@ class MentoriaService {
 
   static Future<Set<String>> completedLessonIds() async {
     final prefs = await SharedPreferences.getInstance();
-    final ids = prefs.getStringList(_prefsMentoriaCompletedLessonsKey) ?? const [];
+    final ids =
+        prefs.getStringList(_prefsMentoriaCompletedLessonsKey) ?? const [];
     return ids.toSet();
   }
 
   static Future<void> markLessonCompleted(String lessonId) async {
     final prefs = await SharedPreferences.getInstance();
-    final ids = (prefs.getStringList(_prefsMentoriaCompletedLessonsKey) ?? const [])
-        .toSet();
+    final ids =
+        (prefs.getStringList(_prefsMentoriaCompletedLessonsKey) ?? const [])
+            .toSet();
     ids.add(lessonId);
     await prefs.setStringList(_prefsMentoriaCompletedLessonsKey, ids.toList());
   }
@@ -196,7 +200,8 @@ class MentoriaService {
     int streak = 0;
     for (int i = 0; i < 3; i++) {
       final d = now.subtract(Duration(days: i));
-      final key = '${d.year.toString().padLeft(4, '0')}-'
+      final key =
+          '${d.year.toString().padLeft(4, '0')}-'
           '${d.month.toString().padLeft(2, '0')}-'
           '${d.day.toString().padLeft(2, '0')}';
       final spent = prefs.getDouble('gastos_$key') ?? 0.0;
@@ -223,25 +228,25 @@ class MentoriaService {
 
   static Future<double> buscarSaldoConta(String uid) async {
     final doc = await _firestore.collection('usuarios').doc(uid).get();
-    final saldo = doc.get('saldoConta');
+    final saldo = doc.data()?['saldoConta'];
     return saldo is num ? saldo.toDouble() : 0.0;
   }
 
   static Future<double> buscarRendaMensal(String uid) async {
     final doc = await _firestore.collection('usuarios').doc(uid).get();
-    final renda = doc.get('rendaMensal');
+    final renda = doc.data()?['rendaMensal'];
     return renda is num ? renda.toDouble() : 0.0;
   }
 
   static Future<bool> usuarioTemInvestimentos(String uid) async {
     final doc = await _firestore.collection('usuarios').doc(uid).get();
-    final investimentos = doc.get('temInvestimentos');
+    final investimentos = doc.data()?['temInvestimentos'];
     return investimentos == true;
   }
 
   static Future<int> buscarQuantidadeDiasSemJuros(String uid) async {
     final doc = await _firestore.collection('usuarios').doc(uid).get();
-    final dias = doc.get('diasSemJuros');
+    final dias = doc.data()?['diasSemJuros'];
     return dias is int ? dias : 0;
   }
 
@@ -525,12 +530,12 @@ class MentoriaContentBlock {
 
 class _MentoriaParagraphBlock extends MentoriaContentBlock {
   const _MentoriaParagraphBlock(String text)
-      : super._(MentoriaBlockType.paragraph, text: text);
+    : super._(MentoriaBlockType.paragraph, text: text);
 }
 
 class _MentoriaBulletsBlock extends MentoriaContentBlock {
   const _MentoriaBulletsBlock(List<String> items)
-      : super._(MentoriaBlockType.bullets, items: items);
+    : super._(MentoriaBlockType.bullets, items: items);
 }
 
 class MentorLimitAlert {
