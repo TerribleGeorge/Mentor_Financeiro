@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io' show File, Platform;
 import 'dart:typed_data';
 
@@ -5,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode, kIsWeb;
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -39,6 +41,64 @@ abstract final class ProfilePhotoService {
       addRaw('$pid.appspot.com');
     }
     return out;
+  }
+
+  static Future<String> _downloadUrlViaStorageRestApi(Reference ref) async {
+    final authUser = FirebaseAuth.instance.currentUser;
+    if (authUser == null) {
+      throw StateError('Sem sessão para obter URL no Storage.');
+    }
+    final token = await authUser.getIdToken();
+    if (token == null || token.isEmpty) {
+      throw StateError('Token Firebase indisponível.');
+    }
+
+    var bucket = ref.bucket;
+    if (bucket.startsWith('gs://')) {
+      bucket = bucket.substring(5);
+    }
+    final encodedPath = Uri.encodeComponent(ref.fullPath);
+    final metaUri = Uri.parse(
+      'https://firebasestorage.googleapis.com/v0/b/$bucket/o/$encodedPath',
+    );
+
+    final resp = await http
+        .get(metaUri, headers: {'Authorization': 'Bearer $token'})
+        .timeout(const Duration(seconds: 25));
+
+    if (resp.statusCode == 404) {
+      throw FirebaseException(
+        plugin: 'firebase_storage',
+        code: 'object-not-found',
+        message:
+            'REST: ficheiro não encontrado no bucket. Publique as regras em '
+            'Storage (storage.rules) e confirme que o bucket está correcto.',
+      );
+    }
+    if (resp.statusCode != 200) {
+      throw FirebaseException(
+        plugin: 'firebase_storage',
+        code: 'rest-error',
+        message: 'Metadata Storage HTTP ${resp.statusCode}: ${resp.body}',
+      );
+    }
+
+    final map = jsonDecode(resp.body) as Map<String, dynamic>;
+    final raw = map['downloadTokens'];
+    String? first;
+    if (raw is String && raw.isNotEmpty) {
+      first = raw.split(',').first.trim();
+    }
+    if (first == null || first.isEmpty) {
+      throw FirebaseException(
+        plugin: 'firebase_storage',
+        code: 'no-download-token',
+        message:
+            'REST: sem downloadTokens (normalmente falta permissão de leitura nas regras).',
+      );
+    }
+
+    return '${metaUri.toString()}?alt=media&token=$first';
   }
 
   static FirebaseStorage _storageNamed(String bucket) {
@@ -180,13 +240,18 @@ abstract final class ProfilePhotoService {
             return await snapshot.ref.getDownloadURL();
           } on FirebaseException catch (e) {
             if (e.code != 'object-not-found') rethrow;
-            if (attempt == 7) rethrow;
+            if (attempt == 7) break;
             await Future<void>.delayed(
               Duration(milliseconds: 200 + (attempt * 150)),
             );
           }
         }
-        throw StateError('ProfilePhotoService: getDownloadURL sem URL');
+        if (kDebugMode) {
+          debugPrint(
+            'ProfilePhotoService: getDownloadURL nativo falhou; a tentar REST.',
+          );
+        }
+        return _downloadUrlViaStorageRestApi(snapshot.ref);
       } on FirebaseException catch (e) {
         final tryNext = bi < buckets.length - 1 &&
             (e.code == 'object-not-found' || e.code == 'unauthorized');
