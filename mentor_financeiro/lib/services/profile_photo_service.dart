@@ -1,6 +1,10 @@
+import 'dart:io' show Platform;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_service.dart';
@@ -13,6 +17,60 @@ abstract final class ProfilePhotoService {
   ProfilePhotoService._();
 
   static final ImagePicker _picker = ImagePicker();
+
+  /// Garante permissões antes de [pickAndUpload]. Em Android/iOS pede ao sistema;
+  /// se estiver permanentemente negado, abre as definições da app.
+  static Future<bool> requestPermissionsFor(ImageSource source) async {
+    if (kIsWeb) return true;
+
+    if (source == ImageSource.camera) {
+      var status = await Permission.camera.status;
+      if (!status.isGranted) {
+        status = await Permission.camera.request();
+      }
+      if (status.isGranted) return true;
+      if (status.isPermanentlyDenied) {
+        await openAppSettings();
+      }
+      return false;
+    }
+
+    // Galeria / ficheiros de imagem
+    if (Platform.isIOS) {
+      var status = await Permission.photos.status;
+      if (!status.isGranted && !status.isLimited) {
+        status = await Permission.photos.request();
+      }
+      if (status.isGranted || status.isLimited) return true;
+      if (status.isPermanentlyDenied) {
+        await openAppSettings();
+      }
+      return false;
+    }
+
+    if (Platform.isAndroid) {
+      var photosStatus = await Permission.photos.status;
+      if (!photosStatus.isGranted && !photosStatus.isLimited) {
+        photosStatus = await Permission.photos.request();
+      }
+      if (photosStatus.isGranted || photosStatus.isLimited) return true;
+
+      // Android ≤12 (READ_EXTERNAL_STORAGE)
+      var storageStatus = await Permission.storage.status;
+      if (!storageStatus.isGranted) {
+        storageStatus = await Permission.storage.request();
+      }
+      if (storageStatus.isGranted) return true;
+
+      if (photosStatus.isPermanentlyDenied ||
+          storageStatus.isPermanentlyDenied) {
+        await openAppSettings();
+      }
+      return false;
+    }
+
+    return true;
+  }
 
   /// [null] se o utilizador cancelar o selector.
   static Future<String?> pickAndUpload({

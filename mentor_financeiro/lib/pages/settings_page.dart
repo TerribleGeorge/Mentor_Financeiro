@@ -119,6 +119,22 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (!mounted || source == null) return;
 
+    final permitted = await ProfilePhotoService.requestPermissionsFor(source);
+    if (!mounted) return;
+    if (!permitted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(seconds: 6),
+          content: Text(
+            'Permissão da galeria ou da câmara necessária. '
+            'Em Definições → Aplicativos → Mentor Financeiro → Permissões, '
+            'active Fotos / Ficheiros e câmara.',
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() => _uploadingPhoto = true);
     try {
       final url = await ProfilePhotoService.pickAndUpload(
