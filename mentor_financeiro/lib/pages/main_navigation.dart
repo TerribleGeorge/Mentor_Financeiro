@@ -40,6 +40,9 @@ class _MainNavigationState extends State<MainNavigation> {
     _currentIndex = widget.initialIndex.clamp(0, _screens.length - 1);
     WidgetsBinding.instance.addObserver(_lifecycle);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Remove SnackBars pendentes (ex.: erro de foto antigo ao voltar das Definições).
+      ScaffoldMessenger.of(context).clearSnackBars();
       _ensureNotificationListenerStarted();
       unawaited(
         UserDataRetentionService.instance.backupNow(reason: 'main_navigation'),
@@ -76,6 +79,10 @@ class _MainNavigationState extends State<MainNavigation> {
   void _onTabTapped(int index) {
     if (index != _currentIndex) {
       HapticFeedback.lightImpact();
+      // Ao voltar ao Início, remove SnackBars presos (ex.: mensagem antiga de foto).
+      if (mounted && index == 0) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+      }
       setState(() {
         _currentIndex = index;
       });
