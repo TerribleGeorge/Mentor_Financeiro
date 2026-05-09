@@ -174,7 +174,9 @@ abstract final class ProfilePhotoService {
     final file = File('${dir.path}/$safeName');
     try {
       await file.writeAsBytes(bytes, flush: true);
-      return ref.putFile(file, meta);
+      // Importante: await antes de apagar — senão o `finally` corria logo a
+      // seguir ao `putFile` e removia o ficheiro com o upload ainda a ler.
+      return await ref.putFile(file, meta);
     } finally {
       try {
         if (await file.exists()) await file.delete();
