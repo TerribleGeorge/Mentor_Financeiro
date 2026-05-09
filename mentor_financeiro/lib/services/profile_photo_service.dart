@@ -2,7 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode, kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -89,14 +89,40 @@ abstract final class ProfilePhotoService {
     if (bytes.isEmpty) return null;
 
     final mime = xFile.mimeType ?? 'image/jpeg';
+    // Nome único evita corrida em sobrescritas e falhas esporádicas de
+    // getDownloadURL logo a seguir ao upload.
+    final objectName =
+        'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
     final ref = FirebaseStorage.instance
         .ref()
         .child('profile_photos')
         .child(uid)
-        .child('avatar.jpg');
+        .child(objectName);
 
-    await ref.putData(bytes, SettableMetadata(contentType: mime));
-    return ref.getDownloadURL();
+    final snapshot = await ref.putData(
+      bytes,
+      SettableMetadata(contentType: mime),
+    );
+    if (snapshot.state != TaskState.success) {
+      throw StateError(
+        'Upload Storage não concluído (estado ${snapshot.state}).',
+      );
+    }
+
+    // Em alguns dispositivos/rede o objeto ainda não aparece para a API de
+    // token; repetir brevemente costuma resolver o [object-not-found].
+    for (var attempt = 0; attempt < 6; attempt++) {
+      try {
+        return await snapshot.ref.getDownloadURL();
+      } on FirebaseException catch (e) {
+        if (e.code != 'object-not-found') rethrow;
+        if (attempt == 5) rethrow;
+        await Future<void>.delayed(
+          Duration(milliseconds: 180 * (attempt + 1)),
+        );
+      }
+    }
+    throw StateError('ProfilePhotoService: getDownloadURL sem URL');
   }
 
   static Future<void> applyPhotoUrl({
@@ -108,15 +134,24 @@ abstract final class ProfilePhotoService {
       throw StateError('Nenhuma sessão iniciada.');
     }
 
-    await user.updatePhotoURL(downloadUrl);
-    await user.reload();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('photo_url', downloadUrl);
 
     await FirebaseService.atualizarDadosUsuario(
       uid: uid,
       photoUrl: downloadUrl,
     );
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('photo_url', downloadUrl);
+    try {
+      await user.updatePhotoURL(downloadUrl);
+      await user.reload();
+    } on FirebaseAuthException catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          'ProfilePhotoService: updatePhotoURL não aplicado (${e.code}): $e',
+        );
+      }
+      // URL guardada em prefs e Firestore; a UI usa `photo_url` local.
+    }
   }
 }

@@ -58,9 +58,12 @@ class _SettingsPageState extends State<SettingsPage> {
     final nome = (user?.displayName?.trim().isNotEmpty == true)
         ? user!.displayName!.trim()
         : (nomeSalvo ?? 'Usuário');
-    final photo = (user?.photoURL?.trim().isNotEmpty == true)
-        ? user!.photoURL!.trim()
-        : (photoSalva?.trim().isNotEmpty == true ? photoSalva : null);
+    // Preferir foto em prefs (upload recente) sobre photoURL do Auth.
+    final photo = (photoSalva?.trim().isNotEmpty == true)
+        ? photoSalva!.trim()
+        : (user?.photoURL?.trim().isNotEmpty == true
+            ? user!.photoURL!.trim()
+            : null);
 
     if (!mounted) return;
     setState(() {
@@ -162,8 +165,9 @@ class _SettingsPageState extends State<SettingsPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Não foi possível actualizar a foto. Confirme que o Storage '
-              'está activo no Firebase e as permissões da galeria/câmara. ($e)',
+              'Não foi possível actualizar a foto. Confirme Storage activo, '
+              'regras com leitura e escrita em profile_photos/{o seu uid}, e '
+              'permissões da galeria/câmara. ($e)',
             ),
           ),
         );

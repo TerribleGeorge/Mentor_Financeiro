@@ -480,7 +480,12 @@ class FirebaseService {
     if (nome != null) updates['nome'] = nome;
     if (photoUrl != null) updates['photoURL'] = photoUrl;
     if (nome != null) updates['displayName'] = nome;
-    await _firestore.collection('usuarios').doc(uid).update(updates);
+    if (updates.isEmpty) return;
+    // merge: true evita falha quando o doc `usuarios/{uid}` ainda não existe.
+    await _firestore.collection('usuarios').doc(uid).set(
+          updates,
+          SetOptions(merge: true),
+        );
   }
 
   // Salva perfil completo do usuário
