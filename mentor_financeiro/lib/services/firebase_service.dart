@@ -6,6 +6,8 @@
 // - Google Sign In (login com Google)
 //
 
+import 'dart:async';
+
 // Pacotes Firebase para autenticação
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -35,6 +37,9 @@ class GoogleLoginFailure implements Exception {
 // CLASSE FIREBASE SERVICE
 // Singleton: Uma única instância para todo o app
 class FirebaseService {
+  static const Duration _googleSignInTimeout = Duration(seconds: 20);
+  static const Duration _firebaseAuthTimeout = Duration(seconds: 15);
+
   // ==============================================================================
   // INSTÂNCIAS DOS SERVIÇOS FIREBASE
   // ==============================================================================
@@ -49,9 +54,9 @@ class FirebaseService {
       '841128243215-t5lkthv9odaect1sj7heodftkv200dni.apps.googleusercontent.com';
 
   static Future<void> _ensureGoogleSignInInitialized() {
-    return _googleSignInInitialized ??= GoogleSignIn.instance.initialize(
-      serverClientId: _googleWebClientId,
-    );
+    return _googleSignInInitialized ??= GoogleSignIn.instance
+        .initialize(serverClientId: _googleWebClientId)
+        .timeout(_googleSignInTimeout);
   }
 
   // Firestore: Banco de dados principal
@@ -231,7 +236,8 @@ class FirebaseService {
       }
 
       final GoogleSignInAccount googleUser = await GoogleSignIn.instance
-          .authenticate(scopeHint: const <String>['email', 'profile']);
+          .authenticate(scopeHint: const <String>['email', 'profile'])
+          .timeout(_googleSignInTimeout);
 
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
@@ -262,7 +268,9 @@ class FirebaseService {
         idToken: idToken,
       );
 
-      final userCredential = await _auth.signInWithCredential(credential);
+      final userCredential = await _auth
+          .signInWithCredential(credential)
+          .timeout(_firebaseAuthTimeout);
       final user = userCredential.user;
       if (user == null) {
         throw GoogleLoginFailure('Login Google retornou usuário nulo.');
@@ -288,6 +296,11 @@ class FirebaseService {
       }
       throw GoogleLoginFailure(
         'Falha no Firebase Auth: ${e.code}${e.message == null ? "" : " (${e.message})"}',
+        cause: e,
+      );
+    } on TimeoutException catch (e) {
+      throw GoogleLoginFailure(
+        'Tempo esgotado ao autenticar com Google. No emulador, confirme internet, Google Play Services e se a conta Google está ativa.',
         cause: e,
       );
     } catch (e) {

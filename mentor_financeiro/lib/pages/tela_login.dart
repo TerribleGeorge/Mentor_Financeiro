@@ -7,6 +7,8 @@
 // 4. Plano - Escolha do plano (Free/Premium)
 //
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 // Armazenamento local
@@ -19,6 +21,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_service.dart';
 // Notification listener é iniciado em `MainNavigation` (Android).
 import 'main_navigation.dart';
+import 'tela_upgrade.dart';
 
 // WIDGET STATEFUL
 class TelaLogin extends StatefulWidget {
@@ -30,6 +33,8 @@ class TelaLogin extends StatefulWidget {
 
 // ESTADO DA TELA LOGIN
 class _TelaLoginState extends State<TelaLogin> {
+  static const Duration _firestoreLoginTimeout = Duration(seconds: 12);
+
   // ==============================================================================
   // CONTROLADORES
   // ==============================================================================
@@ -386,14 +391,21 @@ class _TelaLoginState extends State<TelaLogin> {
           const SizedBox(height: 20),
 
           // Plano Premium
-          _planoCard("PREMIUM", "R\$ 9,90/mês", Colors.amber, [
-            "✨ Tudo do Free",
-            "✨ Relatórios mensais detalhados",
-            "✨ Gráficos avançados",
-            "✨ Insights automáticos",
-            "✨ Monitoramento de notificações compatíveis",
-            "✨ Sem anúncios",
-          ], isPro: true),
+          _planoCard(
+            "PREMIUM",
+            "R\$ 9,90/mês",
+            Colors.amber,
+            [
+              "✨ Tudo do Free",
+              "✨ Relatórios mensais detalhados",
+              "✨ Gráficos avançados",
+              "✨ Insights automáticos",
+              "✨ Monitoramento de notificações compatíveis",
+              "✨ Sem anúncios",
+            ],
+            isPro: true,
+            onTap: _abrirAssinaturaPremium,
+          ),
         ],
       ),
     );
@@ -452,46 +464,69 @@ class _TelaLoginState extends State<TelaLogin> {
     Color cor,
     List<String> beneficios, {
     bool isPro = false,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: cor, width: isPro ? 2 : 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            titulo,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: cor,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: cor, width: isPro ? 2 : 1),
           ),
-          const SizedBox(height: 6),
-          Text(
-            preco,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70, fontSize: 16),
-          ),
-          const SizedBox(height: 15),
-          ...beneficios.map(
-            (b) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                b,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                titulo,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(
+                  color: cor,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
+              const SizedBox(height: 6),
+              Text(
+                preco,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white70, fontSize: 16),
+              ),
+              const SizedBox(height: 15),
+              ...beneficios.map(
+                (b) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    b,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                ),
+              ),
+              if (onTap != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Toque para assinar',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: cor, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  Future<void> _abrirAssinaturaPremium() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const TelaUpgrade()));
   }
 
   // ==============================================================================
@@ -760,47 +795,78 @@ class _TelaLoginState extends State<TelaLogin> {
   // ==============================================================================
   Future<void> _finalizarLogin() async {
     setState(() => _carregando = true);
+    try {
+      // Salva no SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final nome = _nomeController.text.trim();
+      await prefs.setString('nome_usuario', nome);
+      await prefs.setString('metodo_login', _metodoLogin ?? "anonimo");
+      await prefs.setBool('configurado', false);
 
-    // Salva no SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    final nome = _nomeController.text.trim();
-    await prefs.setString('nome_usuario', nome);
-    await prefs.setString('metodo_login', _metodoLogin ?? "anonimo");
-    await prefs.setBool('configurado', false);
+      // Salva no Firestore se usuário logado
+      if (_usuarioFirebase != null) {
+        final photoUrl = _usuarioFirebase?.photoURL;
+        try {
+          final jaExiste = await FirebaseService.usuarioExiste(
+            _usuarioFirebase!.uid,
+          ).timeout(_firestoreLoginTimeout);
+          if (!jaExiste) {
+            await FirebaseService.criarUsuarioPrimeiroLogin(
+              uid: _usuarioFirebase!.uid,
+              nome: nome,
+              email: _usuarioFirebase!.email,
+              metodoLogin: _metodoLogin ?? "google",
+              photoUrl: photoUrl,
+            ).timeout(_firestoreLoginTimeout);
+          } else {
+            await FirebaseService.atualizarDadosUsuario(
+              uid: _usuarioFirebase!.uid,
+              nome: nome,
+              photoUrl: photoUrl,
+            ).timeout(_firestoreLoginTimeout);
+          }
+        } on TimeoutException {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Login feito. A sincronização com a nuvem demorou e será retomada quando a conexão estabilizar.',
+                ),
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Login feito, mas não foi possível sincronizar o perfil agora: $e',
+                ),
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+        }
+        await prefs.setString('uid', _usuarioFirebase!.uid);
+        await prefs.setString('email_usuario', _usuarioFirebase!.email ?? '');
+        if (photoUrl != null && photoUrl.isNotEmpty) {
+          await prefs.setString('photo_url', photoUrl);
+        }
+      }
 
-    // Salva no Firestore se usuário logado
-    if (_usuarioFirebase != null) {
-      final jaExiste = await FirebaseService.usuarioExiste(
-        _usuarioFirebase!.uid,
-      );
-      final photoUrl = _usuarioFirebase?.photoURL;
-      if (!jaExiste) {
-        await FirebaseService.criarUsuarioPrimeiroLogin(
-          uid: _usuarioFirebase!.uid,
-          nome: nome,
-          email: _usuarioFirebase!.email,
-          metodoLogin: _metodoLogin ?? "google",
-          photoUrl: photoUrl,
-        );
-      } else {
-        await FirebaseService.atualizarDadosUsuario(
-          uid: _usuarioFirebase!.uid,
-          nome: nome,
-          photoUrl: photoUrl,
+      // Próxima etapa: Dashboard/Home (limpa a pilha para o "voltar" não quebrar).
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute<void>(builder: (_) => const MainNavigation()),
+          (route) => false,
         );
       }
-      await prefs.setString('uid', _usuarioFirebase!.uid);
-      await prefs.setString('email_usuario', _usuarioFirebase!.email ?? '');
-      if (photoUrl != null && photoUrl.isNotEmpty) {
-        await prefs.setString('photo_url', photoUrl);
-      }
-    }
-
-    // Próxima etapa: Dashboard/Home (limpa a pilha para o "voltar" não quebrar).
-    if (mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute<void>(builder: (_) => const MainNavigation()),
-        (route) => false,
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _carregando = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Não foi possível finalizar o login: $e')),
       );
     }
   }
