@@ -412,15 +412,23 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(12),
-          // Bordacolorida se ativo
-          border: ativo
-              ? Border.all(color: campo.cor.withValues(alpha: 0.5))
-              : Border.all(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  style: BorderStyle.solid,
-                ),
+          color: const Color(0xFF0D1118),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: ativo
+                ? campo.cor.withValues(alpha: 0.78)
+                : Colors.white.withValues(alpha: 0.12),
+            width: 1.2,
+          ),
+          boxShadow: ativo
+              ? [
+                  BoxShadow(
+                    color: campo.cor.withValues(alpha: 0.14),
+                    blurRadius: 18,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : const [],
         ),
         child: Column(
           children: [
@@ -539,6 +547,8 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
     // Positivo ou negativo
     bool positivo = sobra >= 0;
 
+    final corDestaque = positivo ? Colors.greenAccent : Colors.redAccent;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -553,10 +563,18 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
                   Colors.red.withValues(alpha: 0.1),
                 ],
         ),
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: positivo ? Colors.greenAccent : Colors.redAccent,
+          color: corDestaque.withValues(alpha: 0.78),
+          width: 1.2,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: corDestaque.withValues(alpha: 0.14),
+            blurRadius: 18,
+            spreadRadius: 1,
+          ),
+        ],
       ),
       child: Column(
         children: [

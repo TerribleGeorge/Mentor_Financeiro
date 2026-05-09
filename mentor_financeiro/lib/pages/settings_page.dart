@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,6 +11,8 @@ import '../services/theme_controller.dart';
 import '../services/currency_preference_controller.dart';
 import '../services/firebase_service.dart';
 import '../services/locale_controller.dart';
+import '../services/profile_photo_service.dart';
+import '../services/user_data_retention_service.dart';
 import '../core/navigation/subscription_paywall_flow.dart';
 import '../services/subscription_provider.dart';
 import 'currency_settings_page.dart';
@@ -31,6 +36,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   String _nomeExibicao = 'Usuário';
   String? _photoUrl;
+  bool _uploadingPhoto = false;
 
   Icon get _chevron => Icon(
     Icons.chevron_right,
@@ -61,6 +67,92 @@ class _SettingsPageState extends State<SettingsPage> {
       _nomeExibicao = nome;
       _photoUrl = photo;
     });
+  }
+
+  Future<void> _mostrarOpcoesFotoPerfil() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Inicie sessão para alterar a foto de perfil.'),
+        ),
+      );
+      return;
+    }
+
+    if (_uploadingPhoto) return;
+
+    final scheme = Theme.of(context).colorScheme;
+    final source = await showModalBottomSheet<ImageSource?>(
+      context: context,
+      backgroundColor: scheme.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(
+                Icons.photo_library_outlined,
+                color: scheme.primary,
+              ),
+              title: const Text('Escolher da galeria'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: Icon(Icons.photo_camera_outlined, color: scheme.primary),
+              title: const Text('Tirar foto'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: Icon(Icons.close, color: scheme.onSurfaceVariant),
+              title: const Text('Cancelar'),
+              onTap: () => Navigator.pop(ctx),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (!mounted || source == null) return;
+
+    setState(() => _uploadingPhoto = true);
+    try {
+      final url = await ProfilePhotoService.pickAndUpload(
+        uid: user.uid,
+        source: source,
+      );
+      if (!mounted) return;
+      if (url == null || url.isEmpty) {
+        setState(() => _uploadingPhoto = false);
+        return;
+      }
+      await ProfilePhotoService.applyPhotoUrl(uid: user.uid, downloadUrl: url);
+      unawaited(
+        UserDataRetentionService.instance.backupNow(reason: 'profile_photo'),
+      );
+      await _carregarPerfil();
+      if (!mounted) return;
+      setState(() => _uploadingPhoto = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Foto de perfil actualizada.')),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _uploadingPhoto = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Não foi possível actualizar a foto. Confirme que o Storage '
+              'está activo no Firebase e as permissões da galeria/câmara. ($e)',
+            ),
+          ),
+        );
+      }
+    }
   }
 
   bool get _podeAlterarSenha {
@@ -334,15 +426,63 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 8),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: CircleAvatar(
-              radius: 28,
-              backgroundColor: accentColor.withValues(alpha: 0.16),
-              foregroundImage: _photoUrl != null && _photoUrl!.isNotEmpty
-                  ? NetworkImage(_photoUrl!)
-                  : null,
-              child: (_photoUrl == null || _photoUrl!.isEmpty)
-                  ? Icon(Icons.person, color: accentColor, size: 28)
-                  : null,
+            onTap: _uploadingPhoto ? null : _mostrarOpcoesFotoPerfil,
+            leading: SizedBox(
+              width: 56,
+              height: 56,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: accentColor.withValues(alpha: 0.16),
+                    foregroundImage: _photoUrl != null && _photoUrl!.isNotEmpty
+                        ? NetworkImage(_photoUrl!)
+                        : null,
+                    child: (_photoUrl == null || _photoUrl!.isEmpty)
+                        ? Icon(Icons.person, color: accentColor, size: 28)
+                        : null,
+                  ),
+                  if (_uploadingPhoto)
+                    Positioned.fill(
+                      child: Material(
+                        color: Colors.black45,
+                        shape: const CircleBorder(),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 26,
+                            height: 26,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  else if (user != null)
+                    Positioned(
+                      right: -2,
+                      bottom: -2,
+                      child: Material(
+                        color: scheme.surface,
+                        elevation: 1,
+                        shape: CircleBorder(
+                          side: BorderSide(color: dividerColor),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Icon(
+                            Icons.camera_alt_outlined,
+                            size: 14,
+                            color: accentColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
             title: Text(
               _nomeExibicao,
@@ -354,9 +494,25 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: Text(
-                email,
-                style: TextStyle(color: mutedColor, fontSize: 13),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    email,
+                    style: TextStyle(color: mutedColor, fontSize: 13),
+                  ),
+                  if (user != null && !_uploadingPhoto) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Galeria ou câmara · toque para alterar',
+                      style: TextStyle(
+                        color: accentColor.withValues(alpha: 0.92),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),

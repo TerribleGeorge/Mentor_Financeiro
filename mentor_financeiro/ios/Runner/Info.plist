@@ -79,5 +79,9 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>O Mentor Financeiro precisa de aceder às suas fotos para definir a imagem de perfil.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>O Mentor Financeiro usa a câmara apenas se quiser tirar uma nova foto de perfil.</string>
 	</dict>
 </plist>
