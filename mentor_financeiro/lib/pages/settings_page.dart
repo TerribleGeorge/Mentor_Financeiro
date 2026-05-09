@@ -12,6 +12,7 @@ import '../core/navigation/subscription_paywall_flow.dart';
 import '../services/subscription_provider.dart';
 import 'currency_settings_page.dart';
 import 'language_settings_page.dart';
+import 'backup_restore_page.dart';
 import 'tela_login.dart';
 import 'notification_monitoring_page.dart';
 
@@ -393,6 +394,25 @@ class _SettingsPageState extends State<SettingsPage> {
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const NotificationMonitoringPage(),
+              ),
+            ),
+          ),
+          Divider(height: 24, color: dividerColor),
+          _secTitle('Dados'),
+          ListTile(
+            leading: Icon(Icons.cloud_sync_outlined, color: accentColor),
+            title: Text(
+              'Backup e restauração',
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              'Salvar preferências e restaurar dados da nuvem',
+              style: TextStyle(color: mutedColor, fontSize: 12),
+            ),
+            trailing: _chevron,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const BackupRestorePage(),
               ),
             ),
           ),

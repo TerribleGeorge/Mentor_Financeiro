@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'user_data_retention_service.dart';
 
 /// Controla [ThemeMode] do [MaterialApp] (claro / escuro / sistema).
 class ThemeController extends ChangeNotifier {
@@ -18,9 +22,7 @@ class ThemeController extends ChangeNotifier {
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getInt(_prefsKey);
-    if (raw != null &&
-        raw >= 0 &&
-        raw < ThemeMode.values.length) {
+    if (raw != null && raw >= 0 && raw < ThemeMode.values.length) {
       _themeMode = ThemeMode.values[raw];
     } else {
       _themeMode = ThemeMode.system;
@@ -34,6 +36,9 @@ class ThemeController extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_prefsKey, mode.index);
+    unawaited(
+      UserDataRetentionService.instance.backupNow(reason: 'theme_mode'),
+    );
     notifyListeners();
   }
 }

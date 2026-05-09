@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/notification_listener_service.dart';
+import '../services/user_data_retention_service.dart';
 
 class NotificationMonitoringPage extends StatefulWidget {
   const NotificationMonitoringPage({super.key});
@@ -50,6 +52,11 @@ class _NotificationMonitoringPageState
     setState(() => _enabled = v);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(NotificationMonitoringPage.prefsKey, v);
+    unawaited(
+      UserDataRetentionService.instance.backupNow(
+        reason: 'notification_monitoring',
+      ),
+    );
     if (v && Platform.isAndroid) {
       await _listener.iniciar();
       await _load();

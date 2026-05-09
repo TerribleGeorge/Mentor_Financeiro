@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme/mentor_adaptive_visuals.dart';
+import 'user_data_retention_service.dart';
 
 /// Temas predefinidos devvoid (sem imagem de fundo personalizada).
 /// [obsidian] e [glacier] correspondem à marca **Grimm** e **Hive** na UI.
@@ -19,19 +21,19 @@ extension AppThemeModePremium on AppThemeMode {
 
 extension AppThemeModeLabels on AppThemeMode {
   String get displayName => switch (this) {
-        AppThemeMode.voidTheme => 'Void',
-        AppThemeMode.cyber => 'Cyber',
-        AppThemeMode.obsidian => 'Grimm',
-        AppThemeMode.glacier => 'Hive',
-      };
+    AppThemeMode.voidTheme => 'Void',
+    AppThemeMode.cyber => 'Cyber',
+    AppThemeMode.obsidian => 'Grimm',
+    AppThemeMode.glacier => 'Hive',
+  };
 
   /// Subtítulo na lista de Definições (preset Void).
   String get settingsSubtitle => switch (this) {
-        AppThemeMode.voidTheme => 'Preto absoluto · Hollow Knight',
-        AppThemeMode.cyber => 'Amarelo neon · cinza escuro · premium',
-        AppThemeMode.obsidian => 'Vermelho e preto · premium',
-        AppThemeMode.glacier => 'Laranja e preto · vespa · premium',
-      };
+    AppThemeMode.voidTheme => 'Preto absoluto · Hollow Knight',
+    AppThemeMode.cyber => 'Amarelo neon · cinza escuro · premium',
+    AppThemeMode.obsidian => 'Vermelho e preto · premium',
+    AppThemeMode.glacier => 'Laranja e preto · vespa · premium',
+  };
 }
 
 class AppThemeController extends ChangeNotifier {
@@ -117,12 +119,12 @@ class AppThemeController extends ChangeNotifier {
   static const _neonLime = Color(0xFF26DE81);
 
   static List<Shadow> _softGlow(Color c) => [
-        Shadow(
-          color: c.withValues(alpha: 0.35),
-          blurRadius: 10,
-          offset: const Offset(0, 1.5),
-        ),
-      ];
+    Shadow(
+      color: c.withValues(alpha: 0.35),
+      blurRadius: 10,
+      offset: const Offset(0, 1.5),
+    ),
+  ];
 
   static TextTheme _applyLegibleDarkTextTheme(
     TextTheme base,
@@ -229,10 +231,7 @@ class AppThemeController extends ChangeNotifier {
     ),
     scaffoldBackgroundColor: Colors.white,
     useMaterial3: true,
-    cardTheme: const CardThemeData(
-      color: Color(0xFFF1F5F9),
-      elevation: 0,
-    ),
+    cardTheme: const CardThemeData(color: Color(0xFFF1F5F9), elevation: 0),
   );
 
   ThemeData _mergeAdaptiveLight(ThemeData base, MentorAdaptiveVisuals v) {
@@ -329,10 +328,7 @@ class AppThemeController extends ChangeNotifier {
           fontWeight: FontWeight.w600,
           fontSize: 16,
         ),
-        subtitleTextStyle: TextStyle(
-          color: v.secondaryTextColor,
-          fontSize: 13,
-        ),
+        subtitleTextStyle: TextStyle(color: v.secondaryTextColor, fontSize: 13),
       ),
     );
   }
@@ -359,9 +355,7 @@ class AppThemeController extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getInt(_themeKeyV2);
-    if (stored != null &&
-        stored >= 0 &&
-        stored < AppThemeMode.values.length) {
+    if (stored != null && stored >= 0 && stored < AppThemeMode.values.length) {
       _themeMode = AppThemeMode.values[stored];
     } else {
       _themeMode = AppThemeMode.voidTheme;
@@ -386,6 +380,9 @@ class AppThemeController extends ChangeNotifier {
   Future<void> setPremiumStatus(bool isPremium) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_isPremiumKey, isPremium);
+    unawaited(
+      UserDataRetentionService.instance.backupNow(reason: 'premium_status'),
+    );
     _isPremium = isPremium;
 
     if (!isPremium && _themeMode.requiresPremiumEntitlement) {
@@ -405,6 +402,7 @@ class AppThemeController extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_themeKeyV2, _themeMode.index);
+    unawaited(UserDataRetentionService.instance.backupNow(reason: 'app_theme'));
     notifyListeners();
   }
 

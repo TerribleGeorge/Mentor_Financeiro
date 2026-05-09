@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/entities/financial_market_region.dart';
+import 'user_data_retention_service.dart';
 
 /// Origem do país/detecção (telemetria / debugging).
 enum RegionalDetectionSource { locale, cached, ip, manual }
@@ -47,8 +48,8 @@ class RegionalContextController extends ChangeNotifier {
     final locale = SchedulerBinding.instance.platformDispatcher.locale;
     final fromLocale =
         (locale.countryCode != null && locale.countryCode!.length == 2)
-            ? locale.countryCode!.toUpperCase()
-            : 'BR';
+        ? locale.countryCode!.toUpperCase()
+        : 'BR';
 
     _countryCode = (cached != null && cached.length == 2)
         ? cached.toUpperCase()
@@ -104,6 +105,7 @@ class RegionalContextController extends ChangeNotifier {
     _countryCode = code;
     _source = RegionalDetectionSource.manual;
     notifyListeners();
+    unawaited(UserDataRetentionService.instance.backupNow(reason: 'region'));
   }
 
   /// Remove override manual e volta à detecção automática.
@@ -111,5 +113,6 @@ class RegionalContextController extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_kManualCountry);
     await initialize();
+    unawaited(UserDataRetentionService.instance.backupNow(reason: 'region'));
   }
 }

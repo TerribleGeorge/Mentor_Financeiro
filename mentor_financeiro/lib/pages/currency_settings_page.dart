@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../services/currency_preference_controller.dart';
+import '../services/user_data_retention_service.dart';
 
 class CurrencySettingsPage extends StatelessWidget {
   const CurrencySettingsPage({super.key});
@@ -47,8 +50,16 @@ class CurrencySettingsPage extends StatelessWidget {
                   title: 'Automática (idioma)',
                   subtitle: 'Segue a moeda padrão do idioma/região',
                   selected: selectedMode == 'AUTO',
-                  onTap: () => CurrencyPreferenceController.instance
-                      .setCurrencyMode('AUTO'),
+                  onTap: () async {
+                    await CurrencyPreferenceController.instance.setCurrencyMode(
+                      'AUTO',
+                    );
+                    unawaited(
+                      UserDataRetentionService.instance.backupNow(
+                        reason: 'currency',
+                      ),
+                    );
+                  },
                 );
               }
 
@@ -58,8 +69,16 @@ class CurrencySettingsPage extends StatelessWidget {
                 title: '${option.label} (${option.code})',
                 subtitle: option.symbol,
                 selected: selectedMode == option.code,
-                onTap: () => CurrencyPreferenceController.instance
-                    .setCurrencyMode(option.code),
+                onTap: () async {
+                  await CurrencyPreferenceController.instance.setCurrencyMode(
+                    option.code,
+                  );
+                  unawaited(
+                    UserDataRetentionService.instance.backupNow(
+                      reason: 'currency',
+                    ),
+                  );
+                },
               );
             },
           );

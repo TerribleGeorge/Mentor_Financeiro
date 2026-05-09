@@ -6,6 +6,8 @@
 // - Gastos Fixos (aluguel, luz, internet, etc)
 //
 
+import 'dart:async';
+
 // Flutter Material
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +22,7 @@ import '../theme/classic_mode_style.dart';
 // Serviço Firebase (para backup na nuvem)
 import '../services/firebase_service.dart';
 import '../services/finance_config_signals.dart';
+import '../services/user_data_retention_service.dart';
 
 /// Configuração de renda, saldo e gastos fixos (persistência local + Firestore).
 class FinanceConfigurationPage extends StatefulWidget {
@@ -280,6 +283,9 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
     await prefs.setBool('configurado', true);
 
     FinanceConfigSignals.notifySaved();
+    unawaited(
+      UserDataRetentionService.instance.backupNow(reason: 'finance_config'),
+    );
 
     if (!mounted) return;
     if (Navigator.of(context).canPop()) {

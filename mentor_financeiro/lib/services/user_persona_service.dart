@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +11,7 @@ import '../data/services/firebase_data_service.dart';
 import '../domain/entities/compound_interest_result.dart';
 import '../domain/entities/user_persona.dart';
 import '../domain/models/mentor_llm_context.dart';
+import 'user_data_retention_service.dart';
 
 /// Estado reativo do perfil adaptativo + flags do fluxo Mentor v2.
 class UserPersonaService extends ChangeNotifier {
@@ -36,7 +39,8 @@ class UserPersonaService extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(prefsKey);
     _persona = _parse(raw) ?? UserPersona.novice;
-    _mentorOnboardingDone = prefs.getBool(AppPrefs.mentorOnboardingDone) ?? false;
+    _mentorOnboardingDone =
+        prefs.getBool(AppPrefs.mentorOnboardingDone) ?? false;
     _mentorPersonaSetupDone =
         prefs.getBool(AppPrefs.mentorPersonaSetupDone) ?? false;
     _mentorTourCompleted = prefs.getBool(AppPrefs.mentorTourCompleted) ?? false;
@@ -51,7 +55,9 @@ class UserPersonaService extends ChangeNotifier {
     if (uid == null) return;
     if (!await ConnectivityService.isOnline()) return;
     try {
-      final data = await FirebaseDataService.instance.fetchUserMentorProfile(uid);
+      final data = await FirebaseDataService.instance.fetchUserMentorProfile(
+        uid,
+      );
       if (data == null) return;
 
       final personaRaw = data['persona']?.toString();
@@ -130,6 +136,9 @@ class UserPersonaService extends ChangeNotifier {
     _mentorOnboardingDone = true;
     notifyListeners();
     await _syncMentorDocumentToCloud();
+    unawaited(
+      UserDataRetentionService.instance.backupNow(reason: 'mentor_onboarding'),
+    );
   }
 
   Future<void> setMentorPersonaSetupComplete() async {
@@ -138,6 +147,11 @@ class UserPersonaService extends ChangeNotifier {
     _mentorPersonaSetupDone = true;
     notifyListeners();
     await _syncMentorDocumentToCloud();
+    unawaited(
+      UserDataRetentionService.instance.backupNow(
+        reason: 'mentor_persona_setup',
+      ),
+    );
   }
 
   UserPersona? _parse(String? raw) {
@@ -155,6 +169,7 @@ class UserPersonaService extends ChangeNotifier {
     await prefs.setString(prefsKey, value.name);
     notifyListeners();
     await _syncMentorDocumentToCloud();
+    unawaited(UserDataRetentionService.instance.backupNow(reason: 'persona'));
   }
 
   /// Marca o tour guiado como concluído (SharedPreferences + Firestore via [_syncMentorDocumentToCloud]).
@@ -165,6 +180,9 @@ class UserPersonaService extends ChangeNotifier {
     _mentorTourCompleted = true;
     notifyListeners();
     await _syncMentorDocumentToCloud();
+    unawaited(
+      UserDataRetentionService.instance.backupNow(reason: 'mentor_tour'),
+    );
   }
 
   MentorLlmContext compoundLlmContext({

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../services/locale_controller.dart';
+import '../services/user_data_retention_service.dart';
 
 class LanguageSettingsPage extends StatelessWidget {
   const LanguageSettingsPage({super.key});
@@ -57,8 +60,14 @@ class LanguageSettingsPage extends StatelessWidget {
                 subtitle: translated
                     ? const Text('Tradução nativa disponível')
                     : const Text('Usa textos em inglês como fallback'),
-                onTap: () =>
-                    LocaleController.instance.setLanguageCode(option.code),
+                onTap: () async {
+                  await LocaleController.instance.setLanguageCode(option.code);
+                  unawaited(
+                    UserDataRetentionService.instance.backupNow(
+                      reason: 'language',
+                    ),
+                  );
+                },
               );
             },
           );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'graficos_screen.dart';
 import 'historico_screen.dart';
 import 'perfil_screen.dart';
 import '../services/notification_listener_service.dart';
+import '../services/user_data_retention_service.dart';
 
 class MainNavigation extends StatefulWidget {
   final int initialIndex;
@@ -39,6 +41,9 @@ class _MainNavigationState extends State<MainNavigation> {
     WidgetsBinding.instance.addObserver(_lifecycle);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureNotificationListenerStarted();
+      unawaited(
+        UserDataRetentionService.instance.backupNow(reason: 'main_navigation'),
+      );
     });
   }
 
@@ -148,7 +153,14 @@ class _MainNavigationState extends State<MainNavigation> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(0, Icons.home_outlined, Icons.home, 'Início', accent, labelIdle),
+                _buildNavItem(
+                  0,
+                  Icons.home_outlined,
+                  Icons.home,
+                  'Início',
+                  accent,
+                  labelIdle,
+                ),
                 _buildNavItem(
                   1,
                   Icons.pie_chart_outline,
@@ -165,7 +177,14 @@ class _MainNavigationState extends State<MainNavigation> {
                   accent,
                   labelIdle,
                 ),
-                _buildNavItem(3, Icons.person_outline, Icons.person, 'Perfil', accent, labelIdle),
+                _buildNavItem(
+                  3,
+                  Icons.person_outline,
+                  Icons.person,
+                  'Perfil',
+                  accent,
+                  labelIdle,
+                ),
               ],
             ),
           ),
@@ -191,7 +210,9 @@ class _MainNavigationState extends State<MainNavigation> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? accent.withValues(alpha: 0.12) : Colors.transparent,
+          color: isSelected
+              ? accent.withValues(alpha: 0.12)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

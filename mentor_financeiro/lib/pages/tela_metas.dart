@@ -1,10 +1,13 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:math';
 
 import '../domain/finance/daily_limit_calculator.dart';
 import '../services/exchange_rate_service.dart';
+import '../services/user_data_retention_service.dart';
 
 class TelaMetas extends StatefulWidget {
   const TelaMetas({super.key});
@@ -60,6 +63,7 @@ class _TelaMetasState extends State<TelaMetas> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('sonho', _sonhoController.text);
     await prefs.setString('valor_sonho', _valorController.text);
+    unawaited(UserDataRetentionService.instance.backupNow(reason: 'goals'));
     _calcular();
   }
 

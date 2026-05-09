@@ -106,6 +106,7 @@ dependencies:
   flutter_native_splash: ^2.4.7
   in_app_purchase: ^3.2.3
   in_app_purchase_android: ^0.4.0
+  package_info_plus: ^9.0.1
   # firebase_ai: ^3.10.0  # Temporariamente desativado
 
 # ==============================================================================
