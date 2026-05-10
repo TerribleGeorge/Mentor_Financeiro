@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../core/config/app_secrets.dart';
 import '../services/app_theme_controller.dart';
 import '../services/theme_controller.dart';
 import '../services/currency_preference_controller.dart';
@@ -13,7 +12,6 @@ import '../core/navigation/subscription_paywall_flow.dart';
 import '../services/subscription_provider.dart';
 import 'currency_settings_page.dart';
 import 'language_settings_page.dart';
-import 'backup_restore_page.dart';
 import 'tela_login.dart';
 import 'notification_monitoring_page.dart';
 
@@ -48,13 +46,14 @@ class _SettingsPageState extends State<SettingsPage> {
     final user = FirebaseAuth.instance.currentUser;
     final prefs = await SharedPreferences.getInstance();
     final nomeSalvo = prefs.getString('nome_usuario');
+    final photoSalva = prefs.getString('photo_url');
 
     final nome = (user?.displayName?.trim().isNotEmpty == true)
         ? user!.displayName!.trim()
         : (nomeSalvo ?? 'Usuário');
-    final photo = user?.photoURL?.trim().isNotEmpty == true
+    final photo = (user?.photoURL?.trim().isNotEmpty == true)
         ? user!.photoURL!.trim()
-        : null;
+        : (photoSalva?.trim().isNotEmpty == true ? photoSalva : null);
 
     if (!mounted) return;
     setState(() {
@@ -71,9 +70,10 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  /// Conta do desenvolvedor (atalhos: simulador Premium, monitor de notificações).
-  bool get _isDeveloperAccount =>
-      AppSecrets.isDeveloperUiAccount(FirebaseAuth.instance.currentUser?.email);
+  bool get _isDeveloperAccount {
+    final e = FirebaseAuth.instance.currentUser?.email?.trim().toLowerCase();
+    return e == 'george.guimares@gmail.com';
+  }
 
   Future<void> _abrirPaywall() async {
     if (!mounted) return;
@@ -358,25 +358,9 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    email,
-                    style: TextStyle(color: mutedColor, fontSize: 13),
-                  ),
-                  if (user != null) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      'A foto de perfil é a da sua conta de início de sessão '
-                      '(por exemplo Google).',
-                      style: TextStyle(
-                        color: mutedColor,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ],
+              child: Text(
+                email,
+                style: TextStyle(color: mutedColor, fontSize: 13),
               ),
             ),
           ),
@@ -422,25 +406,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ],
-          Divider(height: 24, color: dividerColor),
-          _secTitle('Dados'),
-          ListTile(
-            leading: Icon(Icons.cloud_sync_outlined, color: accentColor),
-            title: Text(
-              'Backup e restauração',
-              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              'Salvar preferências e restaurar dados da nuvem',
-              style: TextStyle(color: mutedColor, fontSize: 12),
-            ),
-            trailing: _chevron,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const BackupRestorePage(),
-              ),
-            ),
-          ),
           Divider(height: 24, color: dividerColor),
           _secTitle('Brilho (Material)'),
           const SizedBox(height: 4),

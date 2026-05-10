@@ -46,7 +46,7 @@ abstract final class RelatorioPdfExporter {
         .fold<double>(0, (a, t) => a + t.valor);
 
     final doc = pw.Document();
-    const edgeInsets = pw.EdgeInsets.all(40);
+    final edgeInsets = pw.EdgeInsets.all(40);
 
     doc.addPage(
       pw.MultiPage(

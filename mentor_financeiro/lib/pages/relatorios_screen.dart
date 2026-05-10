@@ -1,17 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import '../models/transacao_model.dart';
 import '../services/localization_service.dart';
 import '../services/mentoria_service.dart';
 import '../services/exchange_rate_service.dart';
-import '../services/relatorio_pdf_exporter.dart';
 import 'adicionar_transacao_page.dart';
 import '../theme/classic_mode_style.dart';
 import '../widgets/premium_wrapper.dart';
@@ -40,7 +35,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? _filtroTipoPagamento;
   List<DicaFinanceira> _dicas = [];
   NotaSaudeFinanceira? _notaSaude;
-
   /// Evita recalcular mentoria a cada frame quando os dados não mudaram.
   String? _mentoriaCacheKey;
 
@@ -122,18 +116,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             : null,
         actions: [
           IconButton(
-            tooltip: 'Exportar PDF',
-            icon: Icon(
-              Icons.picture_as_pdf_outlined,
-              color: scheme.onSurface.withValues(alpha: 0.72),
-            ),
-            onPressed: () => _exportarRelatorioPdf(context),
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.settings,
-              color: scheme.onSurface.withValues(alpha: 0.72),
-            ),
+            icon: Icon(Icons.settings, color: scheme.onSurface.withValues(alpha: 0.72)),
             onPressed: () {},
           ),
         ],
@@ -175,11 +158,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.cloud_off,
-                      color: Colors.white54,
-                      size: 48,
-                    ),
+                    const Icon(Icons.cloud_off, color: Colors.white54, size: 48),
                     const SizedBox(height: 16),
                     Text(
                       'Não foi possível carregar os relatórios.',
@@ -257,9 +236,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           }
 
           final bottomInset =
-              MediaQuery.paddingOf(context).bottom +
-              kFloatingActionButtonMargin +
-              56;
+              MediaQuery.paddingOf(context).bottom + kFloatingActionButtonMargin + 56;
           return SingleChildScrollView(
             // Evita competição de gestos com fl_chart: scroll vertical estável.
             physics: const AlwaysScrollableScrollPhysics(),
@@ -340,11 +317,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(
-                    Icons.currency_exchange,
-                    color: Colors.white70,
-                    size: 20,
-                  ),
+                  const Icon(Icons.currency_exchange, color: Colors.white70, size: 20),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
@@ -372,30 +345,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               else if (data == null || usdBrl == null)
                 Text(
                   'Sem dados (offline). Abra “Ver todas” quando estiver com internet.',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
                 )
               else
                 Wrap(
                   spacing: 10,
                   runSpacing: 10,
                   children: [
-                    _buildStatChip(
-                      'USD→BRL: ${usdBrl.toStringAsFixed(2)}',
-                      Icons.attach_money,
-                    ),
+                    _buildStatChip('USD→BRL: ${usdBrl.toStringAsFixed(2)}', Icons.attach_money),
                     if (usdEur != null)
-                      _buildStatChip(
-                        'USD→EUR: ${usdEur.toStringAsFixed(4)}',
-                        Icons.euro,
-                      ),
+                      _buildStatChip('USD→EUR: ${usdEur.toStringAsFixed(4)}', Icons.euro),
                     if (usdGbp != null)
-                      _buildStatChip(
-                        'USD→GBP: ${usdGbp.toStringAsFixed(4)}',
-                        Icons.currency_pound,
-                      ),
+                      _buildStatChip('USD→GBP: ${usdGbp.toStringAsFixed(4)}', Icons.currency_pound),
                   ],
                 ),
             ],
@@ -406,18 +367,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildMoneyUsedLineChart(List<TransacaoModel> transacoes) {
-    final daysInMonth = DateTime(
-      _selectedMonth.year,
-      _selectedMonth.month + 1,
-      0,
-    ).day;
+    final daysInMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0).day;
     final daily = List<double>.filled(daysInMonth, 0);
 
     for (final t in transacoes) {
-      if (t.data.year != _selectedMonth.year ||
-          t.data.month != _selectedMonth.month) {
-        continue;
-      }
+      if (t.data.year != _selectedMonth.year || t.data.month != _selectedMonth.month) continue;
       final idx = t.data.day - 1;
       if (idx >= 0 && idx < daily.length) daily[idx] += t.valor;
     }
@@ -488,12 +442,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 titlesData: FlTitlesData(
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -517,9 +467,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       interval: (daily.length / 6).clamp(1, 10).toDouble(),
                       getTitlesWidget: (value, meta) {
                         final v = value.toInt();
-                        if (v < 1 || v > daily.length) {
-                          return const SizedBox.shrink();
-                        }
+                        if (v < 1 || v > daily.length) return const SizedBox.shrink();
                         return Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
@@ -567,10 +515,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.filter_alt_off,
-            color: Colors.amber.withValues(alpha: 0.9),
-          ),
+          Icon(Icons.filter_alt_off, color: Colors.amber.withValues(alpha: 0.9)),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -785,10 +730,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(width: 6),
           Text(
             text,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-            ).withFinancialShadows(context),
+            style: const TextStyle(color: Colors.white70, fontSize: 12)
+                .withFinancialShadows(context),
           ),
         ],
       ),
@@ -870,10 +813,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(width: 4),
                 Text(
                   _formatarMoeda(entry.value),
-                  style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 11,
-                  ).withFinancialShadows(context),
+                  style: const TextStyle(color: Colors.white54, fontSize: 11)
+                      .withFinancialShadows(context),
                 ),
               ],
             );
@@ -1290,126 +1231,5 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
     );
-  }
-
-  Future<List<TransacaoModel>> _fetchTransacoesDoMes() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return [];
-    final start = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
-    final end = DateTime(
-      _selectedMonth.year,
-      _selectedMonth.month + 1,
-      0,
-      23,
-      59,
-      59,
-    );
-    final snap = await FirebaseFirestore.instance
-        .collection('usuarios')
-        .doc(user.uid)
-        .collection('transacoes')
-        .where('data', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-        .where('data', isLessThanOrEqualTo: Timestamp.fromDate(end))
-        .orderBy('data', descending: true)
-        .get();
-    return snap.docs.map((d) => TransacaoModel.fromMap(d.data())).toList();
-  }
-
-  Future<void> _exportarRelatorioPdf(BuildContext context) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    messenger.showSnackBar(
-      const SnackBar(
-        content: Text('A gerar PDF…'),
-        duration: Duration(seconds: 45),
-      ),
-    );
-
-    try {
-      final all = await _fetchTransacoesDoMes();
-      if (!context.mounted) return;
-
-      if (all.isEmpty) {
-        messenger.hideCurrentSnackBar();
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Não há transações neste mês.')),
-        );
-        return;
-      }
-
-      var lista = all;
-      if (_filtroTipoPagamento == 'debito') {
-        lista = all.where((t) => t.isDebito).toList();
-      } else if (_filtroTipoPagamento == 'credito') {
-        lista = all.where((t) => t.isCredito).toList();
-      }
-
-      if (lista.isEmpty) {
-        messenger.hideCurrentSnackBar();
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Nenhuma transação com este filtro. Use «Tudo» ou escolha outro tipo.',
-            ),
-          ),
-        );
-        return;
-      }
-
-      final filtroNome = _filtroTipoPagamento == null
-          ? 'Tudo'
-          : _filtroTipoPagamento == 'debito'
-          ? 'Débito'
-          : 'Crédito';
-
-      String? nomeCliente;
-      final dn = user.displayName?.trim();
-      if (dn != null && dn.isNotEmpty) {
-        nomeCliente = dn;
-      } else {
-        final em = user.email?.trim();
-        if (em != null && em.isNotEmpty) nomeCliente = em;
-      }
-
-      final bytes = await RelatorioPdfExporter.build(
-        month: _selectedMonth,
-        transacoes: lista,
-        filtroLabel: filtroNome,
-        geradoPara: nomeCliente,
-      );
-
-      final dir = await getTemporaryDirectory();
-      final fileName =
-          'MentorRelatorio_${DateFormat('yyyy_MM').format(_selectedMonth)}.pdf';
-      final file = File('${dir.path}/$fileName');
-      await file.writeAsBytes(bytes, flush: true);
-
-      if (!context.mounted) return;
-      messenger.hideCurrentSnackBar();
-
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [
-            XFile(
-              file.path,
-              mimeType: 'application/pdf',
-              name: fileName,
-            ),
-          ],
-          subject: 'Relatório Mentor Financeiro',
-          text:
-              'Relatório em PDF — $filtroNome (${DateFormat('MM/yyyy').format(_selectedMonth)})',
-        ),
-      );
-    } catch (e) {
-      if (context.mounted) {
-        messenger.hideCurrentSnackBar();
-        messenger.showSnackBar(
-          SnackBar(content: Text('Não foi possível gerar o PDF: $e')),
-        );
-      }
-    }
   }
 }

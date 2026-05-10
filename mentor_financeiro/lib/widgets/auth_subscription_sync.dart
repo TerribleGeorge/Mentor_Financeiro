@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 
 import '../services/investment_category_provider.dart';
 import '../services/subscription_provider.dart';
-import '../services/user_data_retention_service.dart';
 
 /// Mantém [SubscriptionProvider] e país do catálogo alinhados ao login Firebase,
 /// sem RevenueCat.
@@ -27,34 +26,19 @@ class _AuthSubscriptionSyncState extends State<AuthSubscriptionSync> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final investmentProvider = context.read<InvestmentCategoryProvider>();
-      final subscriptionProvider = context.read<SubscriptionProvider>();
-      unawaited(investmentProvider.syncStorefrontFromDeviceLocale());
-      unawaited(subscriptionProvider.refreshStatus());
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        unawaited(_syncRetentionForUser(reason: 'initial_auth'));
-      }
-      _authSub = FirebaseAuth.instance.authStateChanges().listen((user) async {
+      unawaited(
+        context.read<InvestmentCategoryProvider>().syncStorefrontFromDeviceLocale(),
+      );
+      unawaited(context.read<SubscriptionProvider>().refreshStatus());
+      _authSub = FirebaseAuth.instance.authStateChanges().listen((_) async {
         if (!mounted) return;
-        if (user != null) {
-          await UserDataRetentionService.instance.restoreIfNeeded();
-        }
-        await investmentProvider.syncStorefrontFromDeviceLocale();
+        await context
+            .read<InvestmentCategoryProvider>()
+            .syncStorefrontFromDeviceLocale();
         if (!mounted) return;
-        await subscriptionProvider.refreshStatus();
-        if (user != null) {
-          unawaited(
-            UserDataRetentionService.instance.backupNow(reason: 'auth_state'),
-          );
-        }
+        await context.read<SubscriptionProvider>().refreshStatus();
       });
     });
-  }
-
-  Future<void> _syncRetentionForUser({required String reason}) async {
-    await UserDataRetentionService.instance.restoreIfNeeded();
-    await UserDataRetentionService.instance.backupNow(reason: reason);
   }
 
   @override

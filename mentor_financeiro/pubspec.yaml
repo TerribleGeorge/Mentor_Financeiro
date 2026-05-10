@@ -19,7 +19,7 @@ description: "Mentor Financeiro - O melhor app de organização financeira do Br
 publish_to: 'none'
 
 # Versão do app no formato semântico: MAJOR.MINOR.PATCH+BUILD
-version: 1.0.2+16
+version: 1.0.1+9
 
 # ==============================================================================
 # AMBIENTE DE EXECUÇÃO
@@ -106,11 +106,7 @@ dependencies:
   flutter_native_splash: ^2.4.7
   in_app_purchase: ^3.2.3
   in_app_purchase_android: ^0.4.0
-  package_info_plus: ^9.0.1
   pdf: ^3.12.0
-  path_provider: ^2.1.5
-  share_plus: ^12.0.2
-  in_app_update: ^4.2.5
   # firebase_ai: ^3.10.0  # Temporariamente desativado
 
 # ==============================================================================

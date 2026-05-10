@@ -42,53 +42,9 @@ class SubscriptionConstants {
   }
 
   // ==============================================================================
-  // TESTE GRÁTIS (Play Console — alinhar com a oferta configurada na loja)
-  // ==============================================================================
-  static const String playFreeTrialHeadlinePt = '7 dias grátis na Google Play';
-  static const String playFreeTrialHeadlineEn =
-      '7-day free trial on Google Play';
-  static const String playFreeTrialHeadlineEs = '7 días gratis en Google Play';
-
-  /// Texto curto para botões e destaques.
-  static const String playFreeTrialCtaPt = 'Experimentar 7 dias grátis';
-  static const String playFreeTrialCtaEn = 'Start 7-day free trial';
-  static const String playFreeTrialCtaEs = 'Probar 7 días gratis';
-
-  /// Aviso legal leve: o que manda é o ecrã da Play Store.
-  static const String playFreeTrialDisclaimerPt =
-      'A oferta de teste gratuito é gerida pela Google Play. A data em que a '
-      'cobrança começa e as condições exactas aparecem no ecrã de compra antes '
-      'de confirmares.';
-  static const String playFreeTrialDisclaimerEn =
-      'The free trial is handled by Google Play. Billing date and exact '
-      'terms are shown on the purchase screen before you confirm.';
-  static const String playFreeTrialDisclaimerEs =
-      'La prueba gratuita la gestiona Google Play. La fecha de cobro y los '
-      'términos exactos aparecen en la pantalla de compra antes de confirmar.';
-
-  static String freeTrialHeadlineForLocale(String locale) {
-    if (locale.startsWith('en')) return playFreeTrialHeadlineEn;
-    if (locale.startsWith('es')) return playFreeTrialHeadlineEs;
-    return playFreeTrialHeadlinePt;
-  }
-
-  static String freeTrialCtaForLocale(String locale) {
-    if (locale.startsWith('en')) return playFreeTrialCtaEn;
-    if (locale.startsWith('es')) return playFreeTrialCtaEs;
-    return playFreeTrialCtaPt;
-  }
-
-  static String freeTrialDisclaimerForLocale(String locale) {
-    if (locale.startsWith('en')) return playFreeTrialDisclaimerEn;
-    if (locale.startsWith('es')) return playFreeTrialDisclaimerEs;
-    return playFreeTrialDisclaimerPt;
-  }
-
-  // ==============================================================================
   // BENEFÍCIOS DO PREMIUM
   // ==============================================================================
   static const List<String> premiumBenefits = [
-    '7 dias grátis para experimentar o Premium (detalhes e renovação no checkout da Google Play)',
     'Relatórios mensais detalhados',
     'Gráficos avançados por categoria e pagamento',
     'Insights automáticos de organização financeira',
@@ -98,7 +54,6 @@ class SubscriptionConstants {
   ];
 
   static const List<String> premiumBenefitsEn = [
-    '7-day free trial to try Premium (details and renewal in the Google Play checkout)',
     'Detailed monthly reports',
     'Advanced charts by category and payment method',
     'Automatic financial organization insights',
@@ -108,7 +63,6 @@ class SubscriptionConstants {
   ];
 
   static const List<String> premiumBenefitsEs = [
-    '7 días gratis para probar Premium (detalles y renovación en el checkout de Google Play)',
     'Informes mensuales detallados',
     'Gráficos avanzados por categoría y método de pago',
     'Ideas automáticas para organizar tus finanzas',
@@ -121,5 +75,40 @@ class SubscriptionConstants {
     if (locale.startsWith('en')) return premiumBenefitsEn;
     if (locale.startsWith('es')) return premiumBenefitsEs;
     return premiumBenefits;
+  }
+
+  /// Título do destaque do teste gratuito (Play Store / faturação Google).
+  static String freeTrialHeadlineForLocale(String locale) {
+    if (locale.startsWith('en')) {
+      return '7-day free trial included';
+    }
+    if (locale.startsWith('es')) {
+      return 'Incluye 7 días de prueba gratuita';
+    }
+    return 'Inclui 7 dias de teste grátis';
+  }
+
+  /// Aviso breve sobre renovação e gestão na Play Store.
+  static String freeTrialDisclaimerForLocale(String locale) {
+    if (locale.startsWith('en')) {
+      return 'After the trial, billing continues on Google Play unless you cancel '
+          'at least 24 hours before renewal. You can manage or cancel anytime in Play '
+          'Store → Payments & subscriptions → Subscriptions.';
+    }
+    if (locale.startsWith('es')) {
+      return 'Tras la prueba, el cobro continúa en Google Play salvo que canceles '
+          'con al menos 24 h de antelación. Puedes gestionar o cancelar en Play Store '
+          '→ Pagos y suscripciones → Suscripciones.';
+    }
+    return 'Após o teste, a cobrança continua na Google Play salvo se canceles com '
+        'pelo menos 24 horas de antecedência. Podes gerir ou cancelar na Play Store '
+        '→ Pagamentos e subscrições → Subscrições.';
+  }
+
+  /// Rótulo do botão de subscrição com teste.
+  static String freeTrialCtaForLocale(String locale) {
+    if (locale.startsWith('en')) return 'Start free trial';
+    if (locale.startsWith('es')) return 'Empezar prueba gratis';
+    return 'Começar teste grátis';
   }
 }

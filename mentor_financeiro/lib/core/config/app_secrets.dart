@@ -30,7 +30,7 @@ abstract final class AppSecrets {
     return adminEmails.contains(email.toLowerCase());
   }
 
-  /// Conta do desenvolvedor: mesmos atalhos que «Simular Premium (Admin)» nas Definições.
+  /// Conta do desenvolvedor: atalhos como simulador Premium e monitor de notificações.
   static bool isDeveloperUiAccount(String? email) {
     if (email == null || email.isEmpty) return false;
     return email.trim().toLowerCase() == 'george.guimares@gmail.com';
