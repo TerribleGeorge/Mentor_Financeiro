@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../content/content_repository.dart';
+import '../../content/investing_transition_strategy_content.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/investment_category_provider.dart';
 import 'tesouro_direto_completo_page.dart';
@@ -10,6 +11,7 @@ import 'cdb_detalhe_page.dart';
 import 'fiis_detalhe_page.dart';
 import 'fundos_detalhe_page.dart';
 import 'internacional_detalhe_page.dart';
+import 'investimento_sem_renda_fixa_page.dart';
 import 'cripto_detalhe_page.dart';
 import '../../widgets/mentor_menu_card.dart';
 
@@ -63,7 +65,26 @@ class InvestimentosMenu extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: items
+        children: [
+          if (isBrazil) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: MentorMenuCard(
+                icon: Icons.shield_moon_outlined,
+                title: InvestingTransitionStrategyContent.menuTitle,
+                subtitle: InvestingTransitionStrategyContent.menuSubtitle,
+                accent: const Color(0xFF38BDF8),
+                onTap: () {
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const InvestimentoSemRendaFixaPage(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+          ...items
             .map(
               (i) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -75,8 +96,8 @@ class InvestimentosMenu extends StatelessWidget {
                   onTap: () => _openPage(context, i.id),
                 ),
               ),
-            )
-            .toList(),
+            ),
+        ],
       ),
     );
   }
