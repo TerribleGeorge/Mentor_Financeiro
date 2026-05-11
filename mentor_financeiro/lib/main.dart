@@ -27,8 +27,6 @@ import 'services/regional_context_controller.dart';
 import 'services/subscription_provider.dart';
 import 'services/theme_controller.dart';
 import 'services/user_persona_service.dart';
-import 'tour/mentor_tour_coordinator.dart';
-import 'tour/mentor_tour_keys.dart';
 import 'widgets/mentor_app_backdrop.dart';
 import 'widgets/auth_subscription_sync.dart';
 

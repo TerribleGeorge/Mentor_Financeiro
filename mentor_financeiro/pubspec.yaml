@@ -19,7 +19,7 @@ description: "Mentor Financeiro - O melhor app de organização financeira do Br
 publish_to: 'none'
 
 # Versão do app no formato semântico: MAJOR.MINOR.PATCH+BUILD
-version: 1.0.2+18
+version: 1.0.2+19
 
 # ==============================================================================
 # AMBIENTE DE EXECUÇÃO

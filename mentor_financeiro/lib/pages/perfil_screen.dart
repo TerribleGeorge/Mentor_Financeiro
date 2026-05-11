@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
 import '../theme/classic_mode_style.dart';
 import '../theme/mentor_adaptive_visuals.dart';
 import '../services/firebase_service.dart';
@@ -273,20 +275,23 @@ class _PerfilScreenState extends State<PerfilScreen> {
     );
   }
 
-  void _showAjuda() {
+  Future<void> _showAjuda() async {
+    final info = await PackageInfo.fromPlatform();
+    if (!mounted) return;
+    final versionLine = 'Mentor Financeiro v${info.version}+${info.buildNumber}';
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1E293B),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => const Padding(
-        padding: EdgeInsets.all(20),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Ajuda',
               style: TextStyle(
                 color: Colors.white,
@@ -294,13 +299,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              'Mentor Financeiro v1.0.0',
-              style: TextStyle(color: Colors.white70),
+              versionLine,
+              style: const TextStyle(color: Colors.white70),
             ),
-            SizedBox(height: 8),
-            Text(
+            const SizedBox(height: 8),
+            const Text(
               'Precisa de pomoc? Entre em contato pelo email: soport@mentorfinanceiro.com',
               style: TextStyle(color: Colors.white54),
             ),
