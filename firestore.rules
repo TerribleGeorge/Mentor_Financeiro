@@ -1,0 +1,45 @@
+rules_version = '2';
+// Publicar: na raiz do repo, `firebase deploy --only firestore:rules`
+// Console: Firebase → Firestore → Regras → colar → Publicar.
+//
+// Modelo alinhado ao app:
+// - `usuarios/{uid}` e subcoleções (gastos, metas, transacoes, investimentos, app_state, …)
+// - `users/{uid}` e `users/{uid}/saved_simulations/{id}` (Mentor / calculadora)
+//
+// Segurança: cada utilizador só lê/escreve o próprio uid. Não há leitura em lista de outros users.
+//
+// NOTA (premium): o cliente ainda pode escrever `isPremium` / `premiumEndDate`; isso deve
+// passar a ser só via Cloud Function + Play Developer API — ver ROADMAP_INCREMENTAL.md.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    match /usuarios/{userId} {
+      allow read, create, update, delete: if isOwner(userId);
+
+      match /{collection}/{docId} {
+        allow read, create, update, delete: if isOwner(userId);
+      }
+    }
+
+    match /users/{userId} {
+      allow read, create, update, delete: if isOwner(userId);
+
+      match /saved_simulations/{simId} {
+        allow read, create, update, delete: if isOwner(userId);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

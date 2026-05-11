@@ -18,7 +18,7 @@ Objetivo: **nunca** ficar preso num único item gigante; cada caixa deve caber n
 
 ### Qualidade e segurança
 
-- [ ] Revisão rápida **Firestore rules** (leitura/escrita premium e dados do utilizador).
+- [x] Revisão rápida **Firestore rules** — ficheiro `firestore.rules` na raiz + `firebase.json`; **falta publicar** na consola ou `firebase deploy --only firestore:rules`. Próximo passo sério: `isPremium` só servidor.
 - [ ] **Crashlytics** / relatórios de erro: confirmar captura em release (sem bloquear arranque).
 - [ ] Passar **strings óbvias** (ex.: definições, erros comuns) para **l10n** em blocos pequenos.
 
@@ -42,4 +42,4 @@ Objetivo: **nunca** ficar preso num único item gigante; cada caixa deve caber n
 | `[ ]`    | Por fazer                              |
 | `[x]`    | Feito e verificado nesta sessão/repo |
 
-**Última actualização deste ficheiro:** 2026-05-08 (analyze, test, CI no repo; AAB só após próximo build).
+**Última actualização deste ficheiro:** 2026-05-11 (rules versionadas no repo; deploy manual; premium ainda no cliente).

@@ -2,6 +2,7 @@ import 'dart:developer' show log;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -79,11 +80,15 @@ class FirebaseDataService {
 
     if (firebaseCoreOk) {
       try {
-        await _db
-            .collection('users')
-            .limit(1)
-            .get(const GetOptions(source: Source.server));
-        firestoreOk = true;
+        // Leitura alinhada a firestore.rules: só o documento do utilizador autenticado.
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid != null && uid.isNotEmpty) {
+          await _db
+              .collection('users')
+              .doc(uid)
+              .get(const GetOptions(source: Source.server));
+          firestoreOk = true;
+        }
       } catch (e, st) {
         log(
           'Firestore server read check failed: $e',
