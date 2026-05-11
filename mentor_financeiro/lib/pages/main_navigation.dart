@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'home_screen.dart';
@@ -41,6 +42,9 @@ class _MainNavigationState extends State<MainNavigation> {
     WidgetsBinding.instance.addObserver(_lifecycle);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      if (FirebaseAuth.instance.currentUser != null) {
+        unawaited(_notificationListener.flushPendingTransactionsToFirestore());
+      }
       // Remove SnackBars pendentes (ex.: erro de foto antigo ao voltar das Definições).
       ScaffoldMessenger.of(context).clearSnackBars();
       _ensureNotificationListenerStarted();

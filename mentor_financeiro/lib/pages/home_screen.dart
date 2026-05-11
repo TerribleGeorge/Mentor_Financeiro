@@ -169,6 +169,61 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                         ],
                       ),
+                      StreamBuilder<User?>(
+                        stream: FirebaseAuth.instance.authStateChanges(),
+                        builder: (context, authSnap) {
+                          if (authSnap.data != null) {
+                            return const SizedBox.shrink();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: scheme.primary.withValues(alpha: 0.45),
+                                ),
+                                color: scheme.primary.withValues(alpha: 0.12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.cloud_off_outlined,
+                                      color: scheme.primary,
+                                      size: 26,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        'Sem sessão na nuvem. Inicie sessão para guardar o perfil e sincronizar entre dispositivos.',
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(alpha: 0.9),
+                                          fontSize: 13,
+                                          height: 1.35,
+                                          shadows: ClassicModeStyle.secondaryTextShadows(context),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    FilledButton.tonal(
+                                      onPressed: () => mentorPushNamed(
+                                        context,
+                                        AppRoutes.login,
+                                      ),
+                                      child: const Text('Entrar'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                       const SizedBox(height: 24),
                       if (_mentorAlert != null) ...[
                         Container(

@@ -368,6 +368,22 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
+          if (user == null) ...[
+            const SizedBox(height: 4),
+            ListTile(
+              leading: Icon(Icons.login_rounded, color: successColor),
+              title: Text(
+                'Iniciar sessão',
+                style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                'Ligue Google ou e-mail para sincronizar o perfil e dados na nuvem.',
+                style: TextStyle(color: mutedColor, fontSize: 12),
+              ),
+              trailing: _chevron,
+              onTap: () => mentorPushNamed(context, AppRoutes.login),
+            ),
+          ],
           Divider(height: 24, color: dividerColor),
           ListTile(
             leading: Icon(Icons.lock_outline_rounded, color: accentColor),

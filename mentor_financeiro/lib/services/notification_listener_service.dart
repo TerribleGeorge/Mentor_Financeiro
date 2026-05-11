@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert' show jsonDecode, jsonEncode;
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -296,9 +297,35 @@ class NotificationParserService {
     'débito',
     'cartao',
     'cartão',
-    'credito',
-    'crédito',
-    'saque',
+    'compra no crédito',
+    'compra no credito',
+    'compra no débito',
+    'compra no debito',
+    'crédito aprovado',
+    'credito aprovado',
+    'cartão de crédito',
+    'cartao de credito',
+    'débito automático',
+    'debito automatico',
+    'pagamento automático',
+    'pagamento automatico',
+    'cobrança',
+    'cobranca',
+    'encargo',
+    'tarifa',
+    'recarga',
+    'uso internacional',
+    'pré-autorização',
+    'pre-autorizacao',
+    'pré autorização',
+    'fatura paga',
+    'parcela',
+    'pago com sucesso',
+    'débito realizado',
+    'debito realizado',
+    'pagamento de conta',
+    'débito em conta',
+    'debito em conta',
     'transferencia enviada',
     'transferência enviada',
     'pix enviado',
@@ -310,6 +337,19 @@ class NotificationParserService {
     'pix: enviado',
     'pix enviado para',
     'pix realizado',
+    'você gastou',
+    'voce gastou',
+    'gastou',
+    'foi debitado',
+    'foi debitada',
+    'valor debitado',
+    'lançamento',
+    'lancamento',
+    'descontou',
+    'descontado',
+    'compra identificada',
+    'transação no cartão',
+    'transacao no cartao',
     // EN
     'card purchase',
     'purchase',
@@ -324,6 +364,19 @@ class NotificationParserService {
     'sent to',
     'money sent',
     'you sent',
+    'amount spent',
+    'charged to',
+    'paid with',
+    'paid at',
+    'card used',
+    'transaction at',
+    'merchant charge',
+    'bill paid',
+    'automatic payment',
+    'recurring payment',
+    'subscription renewed',
+    'atm withdrawal',
+    'wire sent',
     // ES
     'compra aprobada',
     'pago',
@@ -331,13 +384,16 @@ class NotificationParserService {
     'pago en',
     'débito',
     'debito',
-    'crédito',
-    'credito',
+    'crédito consumido',
+    'credito consumido',
+    'cargo en tarjeta',
     'retiro',
     'transferencia enviada',
     'transferencia realizada',
     'transferencia a',
     'enviado a',
+    'cargo realizado',
+    'cobro',
     // FR
     'paiement',
     'achat',
@@ -380,11 +436,15 @@ class NotificationParserService {
     'senha',
     'password',
     'login',
+    'novo acesso',
+    'new login',
+    'novo dispositivo',
+    'new device',
+    'tentativa de acesso',
+    'unrecognized',
   ];
 
-  /// Palavras-chave de entrada/estorno que não são gastos.
-  /// Evitar substrings genéricas como «received» — bloqueiam compras em inglês
-  /// («purchase received», etc.).
+  /// Entradas de dinheiro / estorno — manter frases **específicas** (evitar «received» sozinho).
   static const List<String> _incomingBlockKeywords = [
     'pix recebido',
     'pix received',
@@ -398,11 +458,138 @@ class NotificationParserService {
     'incoming payment',
     'deposit received',
     'credit received',
+    'compra recebida',
+    'crédito recebido',
+    'credito recebido',
     'refund',
     'estorno',
     'reembolso',
     'chargeback',
+    'ted recebida',
+    'ted recebido',
+    'doc recebido',
+    'depósito identificado',
+    'deposito identificado',
+    'saldo creditado',
+    'rendimento creditado',
+    'dividendos',
+    'cashback creditado',
+    'cashback recebido',
+    'você recebeu',
+    'voce recebeu',
+    'you were paid',
+    'was deposited',
+    'credited to your',
+    'acaba de receber',
+    'recebeu um pix',
+    'pix recebido de',
+    'transferência recebida de',
+    'transferencia recibida',
   ];
+
+  /// Padrões multilingues de **saída de dinheiro** (complementam palavras-chave).
+  static final List<RegExp> _spendPhraseRegexes = [
+    RegExp(
+      r'\b(?:compra|purchase)\b.{0,100}?(?:r\$|€|£|\$|usd|eur|gbp)\s*[\d.,]+',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'(?:r\$|€|£|\$|usd|eur|gbp)\s*[\d.,]{2,}.{0,100}?\b(?:compra|purchase|pagamento|payment)\b',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:pagamento|payment|pago|paid)\b.{0,100}?(?:r\$|€|£|\$)\s*[\d.,]+',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:débito|debito|debit)\b.{0,55}?(?:r\$|€|£|\$)\s*[\d.,]+',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'(?:r\$|€|£|\$)\s*[\d.,]{2,}.{0,75}?\b(?:débito|debito|debit)\b',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:saque|withdrawal)\b.{0,100}?(?:r\$|€|£|\$)\s*[\d.,]+',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:pix|ted|doc)\b.{0,28}?(?:enviad[oa]|sent|efetuad[oa]|realizad[oa])',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:transfer(?:ência|encia))\b.{0,32}?(?:enviad[oa]|efetuad[oa]|realizad[oa])\b',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:charged|debited|spent)\b.{0,100}?(?:r\$|€|£|\$)\s*[\d.,]+',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:authorized|authorised|autorizad[oa])\b.{0,110}?(?:r\$|€|£|\$)\s*[\d.,]+',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:boleto|payment\s+slip|bank\s+slip)\b.{0,70}?(?:pago|paid|liquidad)',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:tarifa|fee|service\s+charge|banking\s+charge)\b.{0,55}?(?:r\$|€|£|\$)\s*[\d.,]+',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:subscription|assinatura|renovação|renewal)\b.{0,90}?(?:r\$|€|£|\$)\s*[\d.,]+',
+      caseSensitive: false,
+    ),
+    RegExp(r'\b(?:parcela|installment|instalment)\s*\d+\s*/\s*\d+', caseSensitive: false),
+    RegExp(r'\bfinal\s*\*{0,4}\s*\d{4}\b', caseSensitive: false),
+    RegExp(
+      r'\b(?:nfc|contactless|tap\s+to\s+pay|google\s+pay|apple\s+pay|samsung\s+pay)\b',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:fatura|invoice)\b.{0,50}?(?:pago|paid|fechad[oa]|closed)',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'\b(?:lanç(?:amento)?|lanc(?:amento)?)\b.{0,28}?(?:cartão|cartao|card)\b',
+      caseSensitive: false,
+    ),
+  ];
+
+  /// Valor + preposição de destino (Wallet, vários bancos); exclui aviso **só** de saldo/limite.
+  static bool _universalMonetaryBridge(String t) {
+    final bridge = RegExp(
+      r'(?:r\$|€|£|\$)\s*[\d.,]{2,}\s+(?:com|con|em|na|no|para|por|to|at|from|von|chez)\s+\S{2,}',
+      caseSensitive: false,
+    );
+    if (!bridge.hasMatch(t)) return false;
+
+    final balanceNoticeOnly = RegExp(
+      r'\b(?:saldo|balance)\b.{0,45}?\b(?:disponível|disponivel|atual|current)\b',
+      caseSensitive: false,
+    );
+    if (balanceNoticeOnly.hasMatch(t) &&
+        !RegExp(
+          r'\b(?:compra|pagamento|débito|debito|purchase|payment|charge|pago|paid|autoriz|authorized|enviad|sent|saque|withdrawal)\b',
+          caseSensitive: false,
+        ).hasMatch(t)) {
+      return false;
+    }
+
+    if (RegExp(
+          r'\b(?:limite|limit)\b.{0,50}?\b(?:crédito|credito|credit)\b',
+          caseSensitive: false,
+        ).hasMatch(t) &&
+        !RegExp(
+          r'\b(?:compra|pagamento|débito|debito|purchase|payment|charge|autoriz)\b',
+          caseSensitive: false,
+        ).hasMatch(t)) {
+      return false;
+    }
+
+    return true;
+  }
 
   static String _sanitize(String texto) {
     var t = texto;
@@ -431,6 +618,11 @@ class NotificationParserService {
       r'\bvalor\b\s*[:\-]?\s*(?:R\$|€|£|\$)?\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)',
       caseSensitive: false,
     ),
+    // "no valor de R$ X" / "por R$ X" (PIX, faturas)
+    RegExp(
+      r'(?:no\s+valor\s+de|no valor de|por)\s+(?:R\$|€|£|\$)\s*(\d{1,3}(?:[.\s]\d{3})*(?:,\d{1,2})?|\d+(?:[.,]\d{1,2})?)',
+      caseSensitive: false,
+    ),
     // Símbolo antes (com separadores)
     RegExp(
       r'([€£¥₹$]|R\$)\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)',
@@ -444,6 +636,11 @@ class NotificationParserService {
     // Valor antes do código (ex.: 12.34 USD)
     RegExp(
       r'(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*\b(usd|eur|brl|gbp|jpy|inr|cad|aud|chf)\b',
+      caseSensitive: false,
+    ),
+    // "12,34 reais" / "100 BRL"
+    RegExp(
+      r'\b(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*(?:reais?|real|brl)\b',
       caseSensitive: false,
     ),
   ];
@@ -496,6 +693,118 @@ class NotificationParserService {
     ),
   ];
 
+  /// Pacote ou texto típico de app bancário BR — permite heurística mais branda.
+  static bool _looksLikeKnownBankApp(String t) {
+    const fragments = <String>[
+      'com.nu.',
+      'nubank',
+      'bancointer',
+      'br.com.inter',
+      'intermedium',
+      'br.com.itau',
+      'itau',
+      'itaú',
+      'bradesco',
+      'com.bb',
+      'br.com.bb',
+      'caixa',
+      'santander',
+      'c6bank',
+      'c6 bank',
+      'pagseguro',
+      'pagbank',
+      'picpay',
+      'mercadopago',
+      'mercado pago',
+      'google.android',
+      'wallet',
+      'gpay',
+      'sicredi',
+      'sicoob',
+      'neon',
+      'stone',
+      'getnet',
+      'revolut',
+      'wise',
+      'transferwise',
+      'paypal',
+      'venmo',
+      'zelle',
+      'cashapp',
+      'bancopan',
+      'banrisul',
+      'banestes',
+      'xp investimentos',
+      'btg',
+      'safra',
+      'willbank',
+      'digio',
+      'banco pan',
+    ];
+    final lower = t.toLowerCase();
+    return fragments.any(lower.contains);
+  }
+
+  /// Sinais fracos de saída de dinheiro (combinados com valor + app de banco).
+  static bool _hasWeakSpendSignal(String t) {
+    const signals = <String>[
+      'débito',
+      'debito',
+      'compra',
+      'pagamento',
+      'pago',
+      'pix',
+      'enviad',
+      'cartão',
+      'cartao',
+      'saque',
+      'gastou',
+      'gasto',
+      'spent',
+      'charged',
+      ' lanç',
+      ' lanc',
+      'aprovad',
+      'approved',
+      'debited',
+      'withdrawal',
+      'payment',
+      'purchase',
+      'transfer',
+    ];
+    return signals.any(t.contains);
+  }
+
+  /// Google Wallet / GPay no telemóvel: título = estabelecimento; texto = «R$ 25,00 com Nome».
+  static final RegExp _walletValorComTitular = RegExp(
+    r'r\$\s*\d{1,3}(?:[.\s]\d{3})*(?:,\d{2}|\.\d{2})\s+com\s+\S',
+    caseSensitive: false,
+  );
+
+  static bool _looksLikeGoogleWalletTapPay(String t) {
+    return _walletValorComTitular.hasMatch(t);
+  }
+
+  /// Texto antes do primeiro « R$…» (título do estabelecimento), removendo o pacote à frente.
+  static String? _comercianteAntesDoValor(String texto) {
+    final m = RegExp(
+      r'\s+r\$\s*[\d.,]+',
+      caseSensitive: false,
+    ).firstMatch(texto);
+    if (m == null || m.start <= 0) return null;
+    var before = texto.substring(0, m.start).trim();
+    if (before.isEmpty) return null;
+    final firstSpace = before.indexOf(' ');
+    if (firstSpace > 0) {
+      final tok = before.substring(0, firstSpace);
+      if (tok.contains('.') && !tok.contains(' ')) {
+        before = before.substring(firstSpace + 1).trim();
+      }
+    }
+    if (before.length < 2) return null;
+    return before;
+  }
+
   static bool isSpendingNotification(String texto) {
     final cleaned = _sanitize(texto);
     final t = cleaned.toLowerCase();
@@ -505,7 +814,12 @@ class NotificationParserService {
     final hasSpendKeyword = _spendKeywords.any((k) => t.contains(k));
     final hasMoney = extrairValor(cleaned) != null;
     if (!hasMoney) return false;
-    return hasSpendKeyword;
+    if (hasSpendKeyword) return true;
+    if (_spendPhraseRegexes.any((r) => r.hasMatch(t))) return true;
+    if (_looksLikeGoogleWalletTapPay(t)) return true;
+    if (_looksLikeKnownBankApp(t) && _hasWeakSpendSignal(t)) return true;
+    if (_universalMonetaryBridge(t)) return true;
+    return false;
   }
 
   static double? extrairValor(String texto) {
@@ -550,7 +864,8 @@ class NotificationParserService {
     final cleaned = _sanitize(texto);
     for (final r in _estabelecimentoStrongPatterns) {
       final m = r.firstMatch(cleaned);
-      final g = m?.group(1)?.trim();
+      if (m == null || m.groupCount < 1) continue;
+      final g = m.group(1)?.trim();
       if (g != null && g.isNotEmpty) return g;
     }
 
@@ -628,8 +943,10 @@ class NotificationParserService {
     final valor = extrairValor(cleaned);
     if (valor == null) return null;
 
+    final walletTitulo = _comercianteAntesDoValor(cleaned);
     final descricao =
         extrairEstabelecimento(cleaned) ??
+        walletTitulo ??
         (cleaned.toLowerCase().contains('boleto')
             ? 'Boleto pago'
             : 'Gasto identificado');
@@ -785,6 +1102,8 @@ class NotificationListenerService {
   static const _monitoringEnabledKey = 'notif_monitoring_enabled';
   static const _diagnosticsKey = 'notification_listener_diagnostics';
   static const _diagnosticsMax = 20;
+  static const _pendingTxKey = 'notification_pending_tx_v1';
+  static const _pendingTxMax = 40;
 
   static Future<List<String>> carregarDiagnosticos() async {
     final prefs = await SharedPreferences.getInstance();
@@ -854,12 +1173,6 @@ class NotificationListenerService {
       return true;
     }
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      debugPrint('Nenhum usuário logado. Serviço não iniciado.');
-      return false;
-    }
-
     final hasPermission = await verificarPermissao();
     if (!hasPermission) {
       debugPrint(
@@ -881,9 +1194,8 @@ class NotificationListenerService {
 
     await _drainPendingNotifications();
 
-    debugPrint(
-      'NotificationListenerService iniciado para usuário: ${user.uid}',
-    );
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'convidado';
+    debugPrint('NotificationListenerService iniciado (uid: $uid)');
     return true;
   }
 
@@ -1039,17 +1351,135 @@ class NotificationListenerService {
     await prefs.setStringList(_dedupeKey, ids);
   }
 
+  Future<bool> _enqueuePendingTransaction({
+    required String texto,
+    required String packageName,
+    required int timestamp,
+    required TransacaoData transacaoData,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = <Map<String, dynamic>>[];
+    final raw = prefs.getString(_pendingTxKey);
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          for (final e in decoded) {
+            if (e is Map) {
+              list.add(Map<String, dynamic>.from(e));
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    final dup = list.any(
+      (e) =>
+          e['packageName'] == packageName &&
+          e['timestamp'] == timestamp &&
+          e['texto'] == texto,
+    );
+    if (dup) return false;
+
+    list.add({
+      'valor': transacaoData.valor,
+      'descricao': transacaoData.descricao,
+      'dataMillis': transacaoData.data.millisecondsSinceEpoch,
+      'categoria': transacaoData.categoria,
+      'tipoPagamento': transacaoData.tipoPagamento == TipoPagamento.credito
+          ? 'credito'
+          : 'debito',
+      'limiteDisponivel': transacaoData.limiteDisponivel,
+      'banco': _inferirBanco(packageName, texto),
+      'packageName': packageName,
+      'timestamp': timestamp,
+      'texto': texto,
+    });
+    while (list.length > _pendingTxMax) {
+      list.removeAt(0);
+    }
+    try {
+      await prefs.setString(_pendingTxKey, jsonEncode(list));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Grava na Firestore transações detetadas sem sessão (fila em [SharedPreferences]).
+  Future<int> flushPendingTransactionsToFirestore() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return 0;
+
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_pendingTxKey);
+    if (raw == null || raw.isEmpty) return 0;
+
+    final List<Map<String, dynamic>> list;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return 0;
+      list = <Map<String, dynamic>>[];
+      for (final e in decoded) {
+        if (e is Map) list.add(Map<String, dynamic>.from(e));
+      }
+    } catch (_) {
+      return 0;
+    }
+    if (list.isEmpty) return 0;
+
+    final remaining = <Map<String, dynamic>>[];
+    var saved = 0;
+    for (final e in list) {
+      final valor = (e['valor'] as num?)?.toDouble();
+      final descricao = e['descricao'] as String? ?? 'Gasto';
+      final dataMillis = (e['dataMillis'] as num?)?.toInt();
+      if (valor == null || dataMillis == null) continue;
+
+      final t = TransacaoModel(
+        valor: valor,
+        descricao: descricao,
+        data: DateTime.fromMillisecondsSinceEpoch(dataMillis),
+        metodo: 'Notificação Bancária',
+        categoria: e['categoria'] as String?,
+        banco: e['banco'] as String?,
+        tipoPagamento: e['tipoPagamento'] == 'credito'
+            ? TipoPagamento.credito
+            : TipoPagamento.debito,
+        limiteDisponivel: (e['limiteDisponivel'] as num?)?.toDouble(),
+      );
+
+      final ok = await _repository.salvarTransacao(t);
+      if (ok) {
+        saved++;
+        final pkg = e['packageName']?.toString() ?? '';
+        final tx = e['texto']?.toString() ?? '';
+        final ts = (e['timestamp'] as num?)?.toInt() ?? 0;
+        await _marcarComoProcessada(
+          uid: user.uid,
+          packageName: pkg,
+          texto: tx,
+          timestamp: ts,
+        );
+      } else {
+        remaining.add(e);
+      }
+    }
+
+    if (remaining.isEmpty) {
+      await prefs.remove(_pendingTxKey);
+    } else {
+      await prefs.setString(_pendingTxKey, jsonEncode(remaining));
+    }
+    return saved;
+  }
+
   Future<void> _processarNotificacao(
     String texto, {
     required String packageName,
     required int timestamp,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      await _registrarDiagnostico('sem usuário logado', texto);
-      return;
-    }
-
     final prefs = await SharedPreferences.getInstance();
     final enabled = prefs.getBool(_monitoringEnabledKey) ?? true;
     if (!enabled) {
@@ -1066,13 +1496,41 @@ class NotificationListenerService {
       return;
     }
 
+    final dedupeUid = user?.uid ?? '_guest';
     if (await _isDuplicate(
-      uid: user.uid,
+      uid: dedupeUid,
       packageName: packageName,
       texto: texto,
       timestamp: timestamp,
     )) {
       await _registrarDiagnostico('duplicada', texto);
+      return;
+    }
+
+    if (user == null) {
+      final enqueued = await _enqueuePendingTransaction(
+        texto: texto,
+        packageName: packageName,
+        timestamp: timestamp,
+        transacaoData: transacaoData,
+      );
+      if (!enqueued) {
+        await _registrarDiagnostico('fila local duplicada ou erro', texto);
+        return;
+      }
+      await _marcarComoProcessada(
+        uid: dedupeUid,
+        packageName: packageName,
+        texto: texto,
+        timestamp: timestamp,
+      );
+      await _registrarDiagnostico(
+        'fila local (inicie sessão para sincronizar)',
+        '${transacaoData.descricao} - ${transacaoData.valor}',
+      );
+      debugPrint(
+        'Transação detetada sem sessão — fila local (${transacaoData.descricao})',
+      );
       return;
     }
 

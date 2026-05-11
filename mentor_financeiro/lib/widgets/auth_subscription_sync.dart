@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/investment_category_provider.dart';
+import '../services/notification_listener_service.dart';
 import '../services/subscription_provider.dart';
 
 /// Mantém [SubscriptionProvider] e país do catálogo alinhados ao login Firebase,
@@ -30,13 +31,19 @@ class _AuthSubscriptionSyncState extends State<AuthSubscriptionSync> {
         context.read<InvestmentCategoryProvider>().syncStorefrontFromDeviceLocale(),
       );
       unawaited(context.read<SubscriptionProvider>().refreshStatus());
-      _authSub = FirebaseAuth.instance.authStateChanges().listen((_) async {
+      _authSub = FirebaseAuth.instance.authStateChanges().listen((User? user) async {
         if (!mounted) return;
         await context
             .read<InvestmentCategoryProvider>()
             .syncStorefrontFromDeviceLocale();
         if (!mounted) return;
         await context.read<SubscriptionProvider>().refreshStatus();
+        if (!mounted) return;
+        if (user != null) {
+          unawaited(
+            NotificationListenerService().flushPendingTransactionsToFirestore(),
+          );
+        }
       });
     });
   }
