@@ -214,6 +214,23 @@
   "homeShowcaseMentorHubTitle": "Mentor: Quizzes & Strategies",
   "homeShowcaseMentorHubSubtitle": "Quick access to the risk profile quiz and recommended strategies.",
 
+  "homeTourStepClassicTitle": "Classic mode",
+  "homeTourStepClassicBody": "Opens the original app panel: transactions, goals, investments and settings in the familiar layout.",
+  "homeTourStepVitrineTitle": "Showcase area",
+  "homeTourStepVitrineBody": "Shortcuts to learn and practice: investor profile, strategies and the Mentor hub.",
+  "homeTourStepProfileTitle": "Profile quiz",
+  "homeTourStepProfileBody": "Answer the questionnaire to discover your risk profile and see aligned suggestions.",
+  "homeTourStepStrategiesTitle": "Strategies",
+  "homeTourStepStrategiesBody": "Content to organize finances, invest with discipline and avoid common pitfalls.",
+  "homeTourStepHubTitle": "Mentor hub",
+  "homeTourStepHubBody": "Quick menu to the profile quiz and recommended strategies.",
+  "homeTourStepPremiumTitle": "Premium features",
+  "homeTourStepPremiumBody": "Auto mentoring, advanced charts and monthly reports — available with a Premium subscription.",
+  "homeTourStepMarketTitle": "Market snapshot",
+  "homeTourStepMarketBody": "Market context (Brazil or global) based on your region plus converted net worth.",
+  "homeTourStepCalculatorTitle": "Mentor calculator",
+  "homeTourStepCalculatorBody": "Simulate compound interest, inflation and see the wealth chart; next we open this tool.",
+
   "quizProfile_title": "Risk profile quiz",
   "quizProfile_progress": "Question {current} of {total}",
   "@quizProfile_progress": {

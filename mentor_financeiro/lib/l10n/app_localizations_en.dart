@@ -599,6 +599,62 @@ class AppLocalizationsEn extends AppLocalizations {
       'Quick access to the risk profile quiz and recommended strategies.';
 
   @override
+  String get homeTourStepClassicTitle => 'Classic mode';
+
+  @override
+  String get homeTourStepClassicBody =>
+      'Opens the original app panel: transactions, goals, investments and settings in the familiar layout.';
+
+  @override
+  String get homeTourStepVitrineTitle => 'Showcase area';
+
+  @override
+  String get homeTourStepVitrineBody =>
+      'Shortcuts to learn and practice: investor profile, strategies and the Mentor hub.';
+
+  @override
+  String get homeTourStepProfileTitle => 'Profile quiz';
+
+  @override
+  String get homeTourStepProfileBody =>
+      'Answer the questionnaire to discover your risk profile and see aligned suggestions.';
+
+  @override
+  String get homeTourStepStrategiesTitle => 'Strategies';
+
+  @override
+  String get homeTourStepStrategiesBody =>
+      'Content to organize finances, invest with discipline and avoid common pitfalls.';
+
+  @override
+  String get homeTourStepHubTitle => 'Mentor hub';
+
+  @override
+  String get homeTourStepHubBody =>
+      'Quick menu to the profile quiz and recommended strategies.';
+
+  @override
+  String get homeTourStepPremiumTitle => 'Premium features';
+
+  @override
+  String get homeTourStepPremiumBody =>
+      'Auto mentoring, advanced charts and monthly reports — available with a Premium subscription.';
+
+  @override
+  String get homeTourStepMarketTitle => 'Market snapshot';
+
+  @override
+  String get homeTourStepMarketBody =>
+      'Market context (Brazil or global) based on your region plus converted net worth.';
+
+  @override
+  String get homeTourStepCalculatorTitle => 'Mentor calculator';
+
+  @override
+  String get homeTourStepCalculatorBody =>
+      'Simulate compound interest, inflation and see the wealth chart; next we open this tool.';
+
+  @override
   String get quizProfile_title => 'Risk profile quiz';
 
   @override

@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import '../../core/constants/app_routes.dart';
 import '../../core/navigation/mentor_navigation.dart';
 import '../../core/widgets/mentor_insight_card.dart';
-import '../../l10n/app_localizations.dart';
 import '../../domain/entities/financial_market_region.dart';
 import '../../domain/entities/risk_profile.dart';
-import '../../services/investment_category_provider.dart';
-import '../../services/user_persona_service.dart';
-import '../../services/subscription_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../pages/paywall_screen.dart';
-import '../../widgets/patrimonio_convertido_card.dart';
+import '../../services/investment_category_provider.dart';
+import '../../services/subscription_provider.dart';
+import '../../services/user_persona_service.dart';
 import '../../theme/mentor_adaptive_visuals.dart';
 import '../../tour/mentor_showcase_style.dart';
 import '../../tour/mentor_tour_keys.dart';
 import '../../widgets/mentor_readable_layer.dart';
-import 'package:showcaseview/showcaseview.dart';
+import '../../widgets/patrimonio_convertido_card.dart';
 
 /// Painel principal: resumo de mercado + atalhos.
 class MentorHomeScreen extends StatefulWidget {
@@ -41,9 +41,10 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
     if (_homeTourKickoffDone || !mounted) return;
     if (!context.read<UserPersonaService>().shouldShowTour) return;
     _homeTourKickoffDone = true;
-    ShowcaseView.get().startShowCase(<GlobalKey>[
-      MentorTourKeys.homeCalculadora,
-    ]);
+    ShowcaseView.get().startShowCase(
+      MentorTourKeys.homeTourSequence,
+      delay: const Duration(milliseconds: 450),
+    );
   }
 
   @override
@@ -148,6 +149,72 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
       onTap: () => mentorPushNamed(context, AppRoutes.calculadoraMentora),
     );
 
+    final premiumBlock = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Premium',
+          style: TextStyle(
+            color: v.textColor,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 12),
+        vitrineCard(
+          icon: Icons.psychology_alt,
+          accent: const Color(0xFFFF4D4D),
+          title: 'Insights automáticos',
+          subtitle: 'Dicas geradas a partir dos seus registros',
+          locked: !subscription.isPremium,
+          onTap: () => mentorPushNamed(context, AppRoutes.mentoria),
+        ),
+        const SizedBox(height: 12),
+        vitrineCard(
+          icon: Icons.query_stats,
+          accent: const Color(0xFF00D9FF),
+          title: 'Gráficos avançados',
+          subtitle: 'Dashboards por categoria e forma de pagamento',
+          locked: !subscription.isPremium,
+          onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
+        ),
+        const SizedBox(height: 12),
+        vitrineCard(
+          icon: Icons.picture_as_pdf,
+          accent: const Color(0xFFE5B100),
+          title: 'Relatórios mensais detalhados',
+          subtitle: 'Visão organizada do mês e exportação',
+          locked: !subscription.isPremium,
+          onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
+        ),
+      ],
+    );
+
+    final marketBlock = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Resumo do mercado',
+          style: TextStyle(
+            color: v.textColor,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          region == FinancialMarketRegion.brazil
+              ? 'Mercado: Brasil (${cat.effectiveCountryCode}) · B3 / BRL'
+              : 'Mercado: internacional (${cat.effectiveCountryCode}) · cotações globais',
+          style: TextStyle(color: v.secondaryTextColor, fontSize: 13),
+        ),
+        const SizedBox(height: 12),
+        MentorInsightCard(region: region, profile: RiskProfile.moderate),
+        const SizedBox(height: 16),
+        const PatrimonioConvertidoCard(),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -156,11 +223,16 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          TextButton(
-            onPressed: () => mentorPushNamed(context, AppRoutes.principal),
-            child: const Text(
-              'Modo clássico',
-              style: TextStyle(color: Color(0xFF00D9FF)),
+          MentorShowcaseStyle.wrap(
+            showcaseKey: MentorTourKeys.homeTourClassicMode,
+            title: l10n.homeTourStepClassicTitle,
+            description: l10n.homeTourStepClassicBody,
+            child: TextButton(
+              onPressed: () => mentorPushNamed(context, AppRoutes.principal),
+              child: const Text(
+                'Modo clássico',
+                style: TextStyle(color: Color(0xFF00D9FF)),
+              ),
             ),
           ),
         ],
@@ -169,152 +241,134 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text(
-              l10n.homeShowcaseTitle,
-              style: TextStyle(
-                color: v.textColor,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            MentorShowcaseStyle.wrap(
+              showcaseKey: MentorTourKeys.homeTourVitrineHeader,
+              title: l10n.homeTourStepVitrineTitle,
+              description: l10n.homeTourStepVitrineBody,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  l10n.homeShowcaseTitle,
+                  style: TextStyle(
+                    color: v.textColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 12),
-            vitrineCard(
-              icon: Icons.psychology,
-              accent: const Color(0xFF00D9FF),
-              title: l10n.homeShowcaseProfileSimTitle,
-              subtitle: l10n.homeShowcaseProfileSimSubtitle,
-              onTap: () => mentorPushNamed(context, AppRoutes.simulado),
+            MentorShowcaseStyle.wrap(
+              showcaseKey: MentorTourKeys.homeTourProfileSim,
+              title: l10n.homeTourStepProfileTitle,
+              description: l10n.homeTourStepProfileBody,
+              child: vitrineCard(
+                icon: Icons.psychology,
+                accent: const Color(0xFF00D9FF),
+                title: l10n.homeShowcaseProfileSimTitle,
+                subtitle: l10n.homeShowcaseProfileSimSubtitle,
+                onTap: () => mentorPushNamed(context, AppRoutes.simulado),
+              ),
             ),
             const SizedBox(height: 12),
-            vitrineCard(
-              icon: Icons.auto_graph,
-              accent: const Color(0xFF6366F1),
-              title: l10n.homeShowcaseStrategiesTitle,
-              subtitle: l10n.homeShowcaseStrategiesSubtitle,
-              onTap: () =>
-                  mentorPushNamed(context, AppRoutes.conhecimentoEstrategias),
+            MentorShowcaseStyle.wrap(
+              showcaseKey: MentorTourKeys.homeTourStrategies,
+              title: l10n.homeTourStepStrategiesTitle,
+              description: l10n.homeTourStepStrategiesBody,
+              child: vitrineCard(
+                icon: Icons.auto_graph,
+                accent: const Color(0xFF6366F1),
+                title: l10n.homeShowcaseStrategiesTitle,
+                subtitle: l10n.homeShowcaseStrategiesSubtitle,
+                onTap: () =>
+                    mentorPushNamed(context, AppRoutes.conhecimentoEstrategias),
+              ),
             ),
             const SizedBox(height: 12),
-            vitrineCard(
-              icon: Icons.hub,
-              accent: const Color(0xFFE5E7EB),
-              title: l10n.homeShowcaseMentorHubTitle,
-              subtitle: l10n.homeShowcaseMentorHubSubtitle,
-              onTap: () => showModalBottomSheet<void>(
-                context: context,
-                backgroundColor: tileFill,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-                ),
-                builder: (ctx) {
-                  return SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(
-                            leading: const Icon(
-                              Icons.psychology,
-                              color: Color(0xFF00D9FF),
+            MentorShowcaseStyle.wrap(
+              showcaseKey: MentorTourKeys.homeTourMentorHub,
+              title: l10n.homeTourStepHubTitle,
+              description: l10n.homeTourStepHubBody,
+              child: vitrineCard(
+                icon: Icons.hub,
+                accent: const Color(0xFFE5E7EB),
+                title: l10n.homeShowcaseMentorHubTitle,
+                subtitle: l10n.homeShowcaseMentorHubSubtitle,
+                onTap: () => showModalBottomSheet<void>(
+                  context: context,
+                  backgroundColor: tileFill,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(18)),
+                  ),
+                  builder: (ctx) {
+                    return SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(
+                                Icons.psychology,
+                                color: Color(0xFF00D9FF),
+                              ),
+                              title: Text(
+                                l10n.homeShowcaseProfileSimTitle,
+                                style: TextStyle(color: v.textColor),
+                              ),
+                              trailing: Icon(
+                                Icons.chevron_right,
+                                color: v.secondaryTextColor,
+                              ),
+                              onTap: () {
+                                Navigator.of(ctx).pop();
+                                mentorPushNamed(context, AppRoutes.simulado);
+                              },
                             ),
-                            title: Text(
-                              l10n.homeShowcaseProfileSimTitle,
-                              style: TextStyle(color: v.textColor),
+                            ListTile(
+                              leading: const Icon(
+                                Icons.auto_graph,
+                                color: Color(0xFF6366F1),
+                              ),
+                              title: Text(
+                                l10n.homeShowcaseStrategiesTitle,
+                                style: TextStyle(color: v.textColor),
+                              ),
+                              trailing: Icon(
+                                Icons.chevron_right,
+                                color: v.secondaryTextColor,
+                              ),
+                              onTap: () {
+                                Navigator.of(ctx).pop();
+                                mentorPushNamed(
+                                  context,
+                                  AppRoutes.conhecimentoEstrategias,
+                                );
+                              },
                             ),
-                            trailing: Icon(
-                              Icons.chevron_right,
-                              color: v.secondaryTextColor,
-                            ),
-                            onTap: () {
-                              Navigator.of(ctx).pop();
-                              mentorPushNamed(context, AppRoutes.simulado);
-                            },
-                          ),
-                          ListTile(
-                            leading: const Icon(
-                              Icons.auto_graph,
-                              color: Color(0xFF6366F1),
-                            ),
-                            title: Text(
-                              l10n.homeShowcaseStrategiesTitle,
-                              style: TextStyle(color: v.textColor),
-                            ),
-                            trailing: Icon(
-                              Icons.chevron_right,
-                              color: v.secondaryTextColor,
-                            ),
-                            onTap: () {
-                              Navigator.of(ctx).pop();
-                              mentorPushNamed(
-                                context,
-                                AppRoutes.conhecimentoEstrategias,
-                              );
-                            },
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 18),
-            Text(
-              'Premium',
-              style: TextStyle(
-                color: v.textColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 12),
-            vitrineCard(
-              icon: Icons.psychology_alt,
-              accent: const Color(0xFFFF4D4D),
-              title: 'Insights automáticos',
-              subtitle: 'Dicas geradas a partir dos seus registros',
-              locked: !subscription.isPremium,
-              onTap: () => mentorPushNamed(context, AppRoutes.mentoria),
-            ),
-            const SizedBox(height: 12),
-            vitrineCard(
-              icon: Icons.query_stats,
-              accent: const Color(0xFF00D9FF),
-              title: 'Gráficos avançados',
-              subtitle: 'Dashboards por categoria e forma de pagamento',
-              locked: !subscription.isPremium,
-              onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
-            ),
-            const SizedBox(height: 12),
-            vitrineCard(
-              icon: Icons.picture_as_pdf,
-              accent: const Color(0xFFE5B100),
-              title: 'Relatórios mensais detalhados',
-              subtitle: 'Visão organizada do mês e exportação',
-              locked: !subscription.isPremium,
-              onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
+            MentorShowcaseStyle.wrap(
+              showcaseKey: MentorTourKeys.homeTourPremium,
+              title: l10n.homeTourStepPremiumTitle,
+              description: l10n.homeTourStepPremiumBody,
+              child: premiumBlock,
             ),
             const SizedBox(height: 24),
-            Text(
-              'Resumo do mercado',
-              style: TextStyle(
-                color: v.textColor,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            MentorShowcaseStyle.wrap(
+              showcaseKey: MentorTourKeys.homeTourMarket,
+              title: l10n.homeTourStepMarketTitle,
+              description: l10n.homeTourStepMarketBody,
+              child: marketBlock,
             ),
-            const SizedBox(height: 4),
-            Text(
-              region == FinancialMarketRegion.brazil
-                  ? 'Mercado: Brasil (${cat.effectiveCountryCode}) · B3 / BRL'
-                  : 'Mercado: internacional (${cat.effectiveCountryCode}) · cotações globais',
-              style: TextStyle(color: v.secondaryTextColor, fontSize: 13),
-            ),
-            const SizedBox(height: 12),
-            MentorInsightCard(region: region, profile: RiskProfile.moderate),
-            const SizedBox(height: 16),
-            const PatrimonioConvertidoCard(),
             const SizedBox(height: 28),
             Text(
               'Ferramentas',
@@ -327,9 +381,8 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
             const SizedBox(height: 12),
             MentorShowcaseStyle.wrap(
               showcaseKey: MentorTourKeys.homeCalculadora,
-              title: 'Tour Mentor',
-              description:
-                  'Abra a Calculadora Mentora para ver o gráfico de riqueza, gravar a simulação e personalizar o tom do Mentor.',
+              title: l10n.homeTourStepCalculatorTitle,
+              description: l10n.homeTourStepCalculatorBody,
               child: calculadoraTile,
             ),
           ],

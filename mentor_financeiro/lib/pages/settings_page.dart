@@ -9,8 +9,11 @@ import '../services/theme_controller.dart';
 import '../services/currency_preference_controller.dart';
 import '../services/firebase_service.dart';
 import '../services/locale_controller.dart';
+import '../core/constants/app_routes.dart';
+import '../core/navigation/mentor_navigation.dart';
 import '../core/navigation/subscription_paywall_flow.dart';
 import '../services/subscription_provider.dart';
+import '../services/user_persona_service.dart';
 import 'currency_settings_page.dart';
 import 'language_settings_page.dart';
 import 'tela_login.dart';
@@ -637,6 +640,30 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             trailing: subscription.isPremium ? _chevron : null,
             onTap: subscription.isPremium ? null : _abrirPaywall,
+          ),
+          ListTile(
+            leading: Icon(Icons.explore_outlined, color: accentColor),
+            title: Text(
+              'Ver tour novamente',
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              'O guia da home Mentor volta a iniciar na próxima vez que abrir esse painel.',
+              style: TextStyle(color: mutedColor, fontSize: 13),
+            ),
+            trailing: _chevron,
+            onTap: () async {
+              await UserPersonaService.instance.resetGuidedTourForReplay();
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Tour reactivado. Abrimos a home Mentor — use Seguinte ou Saltar no guia.',
+                  ),
+                ),
+              );
+              mentorPushNamed(context, AppRoutes.home);
+            },
           ),
           const SizedBox(height: 24),
           ListTile(

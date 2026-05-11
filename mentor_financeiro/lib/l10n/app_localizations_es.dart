@@ -602,6 +602,62 @@ class AppLocalizationsEs extends AppLocalizations {
       'Acceso rápido al simulado de perfil y a las estrategias recomendadas.';
 
   @override
+  String get homeTourStepClassicTitle => 'Modo clásico';
+
+  @override
+  String get homeTourStepClassicBody =>
+      'Abre el panel original: transacciones, metas, inversiones y ajustes con el diseño habitual.';
+
+  @override
+  String get homeTourStepVitrineTitle => 'Zona escaparate';
+
+  @override
+  String get homeTourStepVitrineBody =>
+      'Atajos para aprender y practicar: perfil de inversor, estrategias y el hub Mentor.';
+
+  @override
+  String get homeTourStepProfileTitle => 'Simulado de perfil';
+
+  @override
+  String get homeTourStepProfileBody =>
+      'Responde al cuestionario para conocer tu perfil de riesgo y ver sugerencias alineadas.';
+
+  @override
+  String get homeTourStepStrategiesTitle => 'Estrategias';
+
+  @override
+  String get homeTourStepStrategiesBody =>
+      'Contenidos para organizar finanzas, invertir con disciplina y evitar trampas frecuentes.';
+
+  @override
+  String get homeTourStepHubTitle => 'Hub Mentor';
+
+  @override
+  String get homeTourStepHubBody =>
+      'Menú rápido al simulado de perfil y a las estrategias recomendadas.';
+
+  @override
+  String get homeTourStepPremiumTitle => 'Funciones Premium';
+
+  @override
+  String get homeTourStepPremiumBody =>
+      'Mentoría automática, gráficos avanzados e informes mensuales — con suscripción Premium.';
+
+  @override
+  String get homeTourStepMarketTitle => 'Resumen de mercado';
+
+  @override
+  String get homeTourStepMarketBody =>
+      'Contexto de mercado (Brasil o internacional) según tu región y patrimonio convertido.';
+
+  @override
+  String get homeTourStepCalculatorTitle => 'Calculadora Mentora';
+
+  @override
+  String get homeTourStepCalculatorBody =>
+      'Simula interés compuesto, inflación y ve el gráfico de patrimonio; a continuación abrimos la herramienta.';
+
+  @override
   String get quizProfile_title => 'Simulado de perfil';
 
   @override

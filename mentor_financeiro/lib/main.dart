@@ -27,6 +27,8 @@ import 'services/regional_context_controller.dart';
 import 'services/subscription_provider.dart';
 import 'services/theme_controller.dart';
 import 'services/user_persona_service.dart';
+import 'tour/mentor_tour_coordinator.dart';
+import 'tour/mentor_tour_keys.dart';
 import 'widgets/mentor_app_backdrop.dart';
 import 'widgets/auth_subscription_sync.dart';
 
@@ -113,7 +115,30 @@ class MentorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // ignore: deprecated_member_use
-    return ShowCaseWidget(builder: (context) => const MentorAppContent());
+    return ShowCaseWidget(
+      enableAutoScroll: true,
+      scrollDuration: const Duration(milliseconds: 450),
+      onComplete: (int? index, GlobalKey key) {
+        MentorTourCoordinator.onShowcaseStepCompleted(key, mentorNavigatorKey);
+      },
+      onDismiss: (GlobalKey? dismissedAt) {
+        MentorTourCoordinator.onTourDismissed();
+      },
+      globalTooltipActionConfig: const TooltipActionConfig(
+        position: TooltipActionPosition.inside,
+        alignment: MainAxisAlignment.end,
+        actionGap: 10,
+      ),
+      globalTooltipActions: [
+        TooltipActionButton(
+          type: TooltipDefaultActionType.previous,
+          hideActionWidgetForShowcase: [MentorTourKeys.homeTourClassicMode],
+        ),
+        TooltipActionButton(type: TooltipDefaultActionType.next),
+        TooltipActionButton(type: TooltipDefaultActionType.skip),
+      ],
+      builder: (context) => const MentorAppContent(),
+    );
   }
 }
 

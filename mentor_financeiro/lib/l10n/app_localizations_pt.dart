@@ -603,6 +603,62 @@ class AppLocalizationsPt extends AppLocalizations {
       'Acesso rápido ao Simulado de Perfil e às Estratégias recomendadas.';
 
   @override
+  String get homeTourStepClassicTitle => 'Modo clássico';
+
+  @override
+  String get homeTourStepClassicBody =>
+      'Abre o painel original do app: transações, metas, investimentos e definições no estilo que já conhece.';
+
+  @override
+  String get homeTourStepVitrineTitle => 'Área Vitrine';
+
+  @override
+  String get homeTourStepVitrineBody =>
+      'Atalhos para aprender e praticar: perfil de investidor, estratégias e o hub Mentor.';
+
+  @override
+  String get homeTourStepProfileTitle => 'Simulado de perfil';
+
+  @override
+  String get homeTourStepProfileBody =>
+      'Responda ao questionário para descobrir o seu perfil de risco e ver sugestões alinhadas.';
+
+  @override
+  String get homeTourStepStrategiesTitle => 'Estratégias';
+
+  @override
+  String get homeTourStepStrategiesBody =>
+      'Conteúdos para organizar finanças, investir com disciplina e evitar armadilhas comuns.';
+
+  @override
+  String get homeTourStepHubTitle => 'Hub Mentor';
+
+  @override
+  String get homeTourStepHubBody =>
+      'Menu rápido com acesso ao simulado de perfil e às estratégias recomendadas.';
+
+  @override
+  String get homeTourStepPremiumTitle => 'Recursos Premium';
+
+  @override
+  String get homeTourStepPremiumBody =>
+      'Mentoria automática, gráficos avançados e relatórios mensais — disponíveis com assinatura Premium.';
+
+  @override
+  String get homeTourStepMarketTitle => 'Resumo de mercado';
+
+  @override
+  String get homeTourStepMarketBody =>
+      'Contexto do mercado (Brasil ou internacional) conforme a sua região e património convertido.';
+
+  @override
+  String get homeTourStepCalculatorTitle => 'Calculadora Mentora';
+
+  @override
+  String get homeTourStepCalculatorBody =>
+      'Simule juros compostos, inflação e veja o gráfico de riqueza; a seguir abrimos esta ferramenta.';
+
+  @override
   String get quizProfile_title => 'Simulado de Perfil';
 
   @override

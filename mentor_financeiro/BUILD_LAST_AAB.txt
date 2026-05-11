@@ -1,0 +1,11 @@
+Último bundle Android release assinado conhecido neste repo
+============================================================
+Actualizar este ficheiro sempre que correr: flutter build appbundle --release
+
+Versão (pubspec.yaml):     1.0.2+18
+Ficheiro gerado:           build/app/outputs/bundle/release/app-release.aab
+Última actualização:       2026-05-11
+
+Notas:
+- Assinatura: android/key.properties + android/app/upload-keystore.jks (não versionar segredos).
+- O nome do ficheiro na pasta release é sempre app-release.aab; a versão está no manifesto dentro do AAB.

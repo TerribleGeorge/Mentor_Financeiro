@@ -6,7 +6,7 @@ import '../core/navigation/mentor_navigation.dart';
 import '../services/user_persona_service.dart';
 import 'mentor_tour_keys.dart';
 
-/// Liga os passos Home → Calculadora e finaliza o tour no último showcase.
+/// Liga os passos da home → Calculadora Mentora e finaliza o tour no último showcase.
 class MentorTourCoordinator {
   MentorTourCoordinator._();
 
@@ -29,6 +29,11 @@ class MentorTourCoordinator {
     if (key == MentorTourKeys.wealthChart) {
       UserPersonaService.instance.completeGuidedTour();
     }
+  }
+
+  /// Utilizador fechou o overlay (Skip no tooltip ou dismiss) — não voltar a forçar o tour.
+  static void onTourDismissed() {
+    UserPersonaService.instance.completeGuidedTour();
   }
 
   static void skipTour() {

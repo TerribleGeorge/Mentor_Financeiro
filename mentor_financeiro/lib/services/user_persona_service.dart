@@ -185,6 +185,15 @@ class UserPersonaService extends ChangeNotifier {
     );
   }
 
+  /// Volta a mostrar o tour na próxima abertura da [MentorHomeScreen] (Definições → «Ver tour novamente»).
+  Future<void> resetGuidedTourForReplay() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(AppPrefs.mentorTourCompleted, false);
+    _mentorTourCompleted = false;
+    notifyListeners();
+    await _syncMentorDocumentToCloud();
+  }
+
   MentorLlmContext compoundLlmContext({
     required CompoundInterestResult result,
     required List<String> heuristicAdvice,

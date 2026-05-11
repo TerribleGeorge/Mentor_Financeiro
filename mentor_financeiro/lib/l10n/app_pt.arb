@@ -516,6 +516,23 @@
   "homeShowcaseMentorHubTitle": "Mentor: Simulados e Estratégias",
   "homeShowcaseMentorHubSubtitle": "Acesso rápido ao Simulado de Perfil e às Estratégias recomendadas.",
 
+  "homeTourStepClassicTitle": "Modo clássico",
+  "homeTourStepClassicBody": "Abre o painel original do app: transações, metas, investimentos e definições no estilo que já conhece.",
+  "homeTourStepVitrineTitle": "Área Vitrine",
+  "homeTourStepVitrineBody": "Atalhos para aprender e praticar: perfil de investidor, estratégias e o hub Mentor.",
+  "homeTourStepProfileTitle": "Simulado de perfil",
+  "homeTourStepProfileBody": "Responda ao questionário para descobrir o seu perfil de risco e ver sugestões alinhadas.",
+  "homeTourStepStrategiesTitle": "Estratégias",
+  "homeTourStepStrategiesBody": "Conteúdos para organizar finanças, investir com disciplina e evitar armadilhas comuns.",
+  "homeTourStepHubTitle": "Hub Mentor",
+  "homeTourStepHubBody": "Menu rápido com acesso ao simulado de perfil e às estratégias recomendadas.",
+  "homeTourStepPremiumTitle": "Recursos Premium",
+  "homeTourStepPremiumBody": "Mentoria automática, gráficos avançados e relatórios mensais — disponíveis com assinatura Premium.",
+  "homeTourStepMarketTitle": "Resumo de mercado",
+  "homeTourStepMarketBody": "Contexto do mercado (Brasil ou internacional) conforme a sua região e património convertido.",
+  "homeTourStepCalculatorTitle": "Calculadora Mentora",
+  "homeTourStepCalculatorBody": "Simule juros compostos, inflação e veja o gráfico de riqueza; a seguir abrimos esta ferramenta.",
+
   "quizProfile_title": "Simulado de Perfil",
   "quizProfile_progress": "Pergunta {current} de {total}",
   "@quizProfile_progress": {

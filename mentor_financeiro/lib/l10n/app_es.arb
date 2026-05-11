@@ -229,6 +229,23 @@
   "homeShowcaseMentorHubTitle": "Mentor: Simulados y Estrategias",
   "homeShowcaseMentorHubSubtitle": "Acceso rápido al simulado de perfil y a las estrategias recomendadas.",
 
+  "homeTourStepClassicTitle": "Modo clásico",
+  "homeTourStepClassicBody": "Abre el panel original: transacciones, metas, inversiones y ajustes con el diseño habitual.",
+  "homeTourStepVitrineTitle": "Zona escaparate",
+  "homeTourStepVitrineBody": "Atajos para aprender y practicar: perfil de inversor, estrategias y el hub Mentor.",
+  "homeTourStepProfileTitle": "Simulado de perfil",
+  "homeTourStepProfileBody": "Responde al cuestionario para conocer tu perfil de riesgo y ver sugerencias alineadas.",
+  "homeTourStepStrategiesTitle": "Estrategias",
+  "homeTourStepStrategiesBody": "Contenidos para organizar finanzas, invertir con disciplina y evitar trampas frecuentes.",
+  "homeTourStepHubTitle": "Hub Mentor",
+  "homeTourStepHubBody": "Menú rápido al simulado de perfil y a las estrategias recomendadas.",
+  "homeTourStepPremiumTitle": "Funciones Premium",
+  "homeTourStepPremiumBody": "Mentoría automática, gráficos avanzados e informes mensuales — con suscripción Premium.",
+  "homeTourStepMarketTitle": "Resumen de mercado",
+  "homeTourStepMarketBody": "Contexto de mercado (Brasil o internacional) según tu región y patrimonio convertido.",
+  "homeTourStepCalculatorTitle": "Calculadora Mentora",
+  "homeTourStepCalculatorBody": "Simula interés compuesto, inflación y ve el gráfico de patrimonio; a continuación abrimos la herramienta.",
+
   "quizProfile_title": "Simulado de perfil",
   "quizProfile_progress": "Pregunta {current} de {total}",
   "@quizProfile_progress": {

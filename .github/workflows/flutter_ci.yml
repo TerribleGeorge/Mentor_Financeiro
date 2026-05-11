@@ -1,0 +1,30 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "mentor_financeiro/**"
+      - ".github/workflows/flutter_ci.yml"
+  pull_request:
+    paths:
+      - "mentor_financeiro/**"
+      - ".github/workflows/flutter_ci.yml"
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mentor_financeiro
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: dart analyze lib
+      - run: flutter test

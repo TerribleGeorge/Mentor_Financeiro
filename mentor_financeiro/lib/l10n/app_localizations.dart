@@ -1186,6 +1186,102 @@ abstract class AppLocalizations {
   /// **'Acesso rápido ao Simulado de Perfil e às Estratégias recomendadas.'**
   String get homeShowcaseMentorHubSubtitle;
 
+  /// No description provided for @homeTourStepClassicTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Modo clássico'**
+  String get homeTourStepClassicTitle;
+
+  /// No description provided for @homeTourStepClassicBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abre o painel original do app: transações, metas, investimentos e definições no estilo que já conhece.'**
+  String get homeTourStepClassicBody;
+
+  /// No description provided for @homeTourStepVitrineTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Área Vitrine'**
+  String get homeTourStepVitrineTitle;
+
+  /// No description provided for @homeTourStepVitrineBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atalhos para aprender e praticar: perfil de investidor, estratégias e o hub Mentor.'**
+  String get homeTourStepVitrineBody;
+
+  /// No description provided for @homeTourStepProfileTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Simulado de perfil'**
+  String get homeTourStepProfileTitle;
+
+  /// No description provided for @homeTourStepProfileBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Responda ao questionário para descobrir o seu perfil de risco e ver sugestões alinhadas.'**
+  String get homeTourStepProfileBody;
+
+  /// No description provided for @homeTourStepStrategiesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estratégias'**
+  String get homeTourStepStrategiesTitle;
+
+  /// No description provided for @homeTourStepStrategiesBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conteúdos para organizar finanças, investir com disciplina e evitar armadilhas comuns.'**
+  String get homeTourStepStrategiesBody;
+
+  /// No description provided for @homeTourStepHubTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hub Mentor'**
+  String get homeTourStepHubTitle;
+
+  /// No description provided for @homeTourStepHubBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menu rápido com acesso ao simulado de perfil e às estratégias recomendadas.'**
+  String get homeTourStepHubBody;
+
+  /// No description provided for @homeTourStepPremiumTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recursos Premium'**
+  String get homeTourStepPremiumTitle;
+
+  /// No description provided for @homeTourStepPremiumBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mentoria automática, gráficos avançados e relatórios mensais — disponíveis com assinatura Premium.'**
+  String get homeTourStepPremiumBody;
+
+  /// No description provided for @homeTourStepMarketTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo de mercado'**
+  String get homeTourStepMarketTitle;
+
+  /// No description provided for @homeTourStepMarketBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contexto do mercado (Brasil ou internacional) conforme a sua região e património convertido.'**
+  String get homeTourStepMarketBody;
+
+  /// No description provided for @homeTourStepCalculatorTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Calculadora Mentora'**
+  String get homeTourStepCalculatorTitle;
+
+  /// No description provided for @homeTourStepCalculatorBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Simule juros compostos, inflação e veja o gráfico de riqueza; a seguir abrimos esta ferramenta.'**
+  String get homeTourStepCalculatorBody;
+
   /// No description provided for @quizProfile_title.
   ///
   /// In pt, this message translates to:
