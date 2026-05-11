@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../content/investing_transition_strategy_content.dart';
@@ -11,6 +13,15 @@ class InvestimentoSemRendaFixaPage extends StatelessWidget {
   static const Color _accent = Color(0xFF00D9FF);
   static const Color _warn = Color(0xFFFECA57);
   static const Color _danger = Color(0xFFFF6B6B);
+
+  /// Deve coincidir com `ListView.padding` horizontal (16 + 16).
+  static const double _listHorizontalInset = 32;
+
+  /// Deve coincidir com o padding horizontal do card do comparativo (12 + 12).
+  static const double _comparisonCardHorizontalInset = 24;
+
+  /// Largura mínima da tabela para caber nas 4 colunas sem layout inválido.
+  static const double _comparisonTableMinWidth = 520;
 
   @override
   Widget build(BuildContext context) {
@@ -264,76 +275,62 @@ class InvestimentoSemRendaFixaPage extends StatelessWidget {
             const SizedBox(height: 12),
             LayoutBuilder(
               builder: (context, constraints) {
+                // Largura real do card (evita MediaQuery ≠ largura útil). DataTable
+                // falhava aqui; Table + SizedBox com largura finita é estável.
+                var inner = constraints.maxWidth;
+                if (!inner.isFinite || inner <= 0) {
+                  inner = MediaQuery.sizeOf(context).width -
+                      _listHorizontalInset -
+                      _comparisonCardHorizontalInset;
+                }
+                if (!inner.isFinite || inner <= 0) {
+                  inner = _comparisonTableMinWidth;
+                }
+                final tableWidth = math.max(inner, _comparisonTableMinWidth);
                 return Scrollbar(
                   thumbVisibility: true,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                      child: DataTable(
-                        headingRowColor: WidgetStateProperty.all(
-                          const Color(0xFF0D1320),
-                        ),
-                        dataRowMinHeight: 52,
-                        horizontalMargin: 12,
-                        columnSpacing: 18,
-                        border: TableBorder.all(
-                          color: Colors.white.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        columns: const [
-                          DataColumn(
-                            label: Text(
-                              'Ativo',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                              ),
-                            ),
+                    clipBehavior: Clip.hardEdge,
+                    child: SizedBox(
+                      width: tableWidth,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Table(
+                          columnWidths: const <int, TableColumnWidth>{
+                            0: FlexColumnWidth(1.05),
+                            1: FlexColumnWidth(1),
+                            2: FlexColumnWidth(1),
+                            3: FlexColumnWidth(1.1),
+                          },
+                          defaultVerticalAlignment:
+                              TableCellVerticalAlignment.middle,
+                          border: TableBorder.all(
+                            color: Colors.white.withValues(alpha: 0.12),
                           ),
-                          DataColumn(
-                            label: Text(
-                              'Segurança',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
+                          children: <TableRow>[
+                            TableRow(
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF0D1320),
                               ),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Liquidez',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Recomendação',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
-                        rows: [
-                          for (final r in rows)
-                            DataRow(
-                              cells: [
-                                DataCell(_tableCell(r.ativo, bold: true)),
-                                DataCell(_tableCell(r.seguranca)),
-                                DataCell(_tableCell(r.liquidez)),
-                                DataCell(_tableCell(r.recomendacao)),
+                              children: <Widget>[
+                                _comparisonHeaderCell('Ativo'),
+                                _comparisonHeaderCell('Segurança'),
+                                _comparisonHeaderCell('Liquidez'),
+                                _comparisonHeaderCell('Recomendação'),
                               ],
                             ),
-                        ],
+                            for (final r in rows)
+                              TableRow(
+                                children: <Widget>[
+                                  _comparisonBodyCell(r.ativo, bold: true),
+                                  _comparisonBodyCell(r.seguranca),
+                                  _comparisonBodyCell(r.liquidez),
+                                  _comparisonBodyCell(r.recomendacao),
+                                ],
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -355,14 +352,37 @@ class InvestimentoSemRendaFixaPage extends StatelessWidget {
     );
   }
 
-  static Widget _tableCell(String text, {bool bold = false}) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: bold ? Colors.white : Colors.white.withValues(alpha: 0.85),
-        fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
-        fontSize: 11.5,
-        height: 1.35,
+  static Widget _comparisonHeaderCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget _comparisonBodyCell(String text, {bool bold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          style: TextStyle(
+            color: bold ? Colors.white : Colors.white.withValues(alpha: 0.85),
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+            fontSize: 11.5,
+            height: 1.35,
+          ),
+        ),
       ),
     );
   }

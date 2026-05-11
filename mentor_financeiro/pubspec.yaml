@@ -173,8 +173,7 @@ flutter:
   # Importance: Imagens, fontes, arquivos que müssen estar no bundle
   # Impacto: Recursos disponíveis offline sem necessidade de download
   assets:
-    - .env
-    - assets/.env
+    - assets/dotenv.defaults
     - assets/icons/icone.png
     - assets/images/DevVoid_logo.png
     - assets/images/DevVoid_standard.png

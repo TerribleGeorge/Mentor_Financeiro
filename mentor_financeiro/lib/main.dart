@@ -37,19 +37,17 @@ final RegionalContextController regionalContextController =
 final InvestmentCategoryProvider investmentCategoryProvider =
     InvestmentCategoryProvider(regionalContextController);
 
-/// Carrega variáveis opcionais (.env) antes do arranque.
+/// Carrega variáveis opcionais (dotenv) antes do arranque.
+///
+/// O ficheiro versionado `assets/dotenv.defaults` existe sempre no bundle (CI/testes).
+/// Ficheiros `.env` / `assets/.env` locais não são assets obrigatórios — evita falha
+/// de build quando não estão presentes.
 Future<void> _loadDotEnv() async {
   try {
-    await dotenv.load(fileName: '.env');
-    return;
-  } catch (e, st) {
-    log('.env raiz: $e', name: 'mentor.bootstrap', error: e, stackTrace: st);
-  }
-  try {
-    await dotenv.load(fileName: 'assets/.env');
+    await dotenv.load(fileName: 'assets/dotenv.defaults');
   } catch (e, st) {
     log(
-      'assets/.env: $e — chaves .env opcionais indisponíveis até existir ficheiro.',
+      'assets/dotenv.defaults: $e',
       name: 'mentor.bootstrap',
       error: e,
       stackTrace: st,
@@ -115,30 +113,7 @@ class MentorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // ignore: deprecated_member_use
-    return ShowCaseWidget(
-      enableAutoScroll: true,
-      scrollDuration: const Duration(milliseconds: 450),
-      onComplete: (int? index, GlobalKey key) {
-        MentorTourCoordinator.onShowcaseStepCompleted(key, mentorNavigatorKey);
-      },
-      onDismiss: (GlobalKey? dismissedAt) {
-        MentorTourCoordinator.onTourDismissed();
-      },
-      globalTooltipActionConfig: const TooltipActionConfig(
-        position: TooltipActionPosition.inside,
-        alignment: MainAxisAlignment.end,
-        actionGap: 10,
-      ),
-      globalTooltipActions: [
-        TooltipActionButton(
-          type: TooltipDefaultActionType.previous,
-          hideActionWidgetForShowcase: [MentorTourKeys.homeTourClassicMode],
-        ),
-        TooltipActionButton(type: TooltipDefaultActionType.next),
-        TooltipActionButton(type: TooltipDefaultActionType.skip),
-      ],
-      builder: (context) => const MentorAppContent(),
-    );
+    return ShowCaseWidget(builder: (context) => const MentorAppContent());
   }
 }
 
