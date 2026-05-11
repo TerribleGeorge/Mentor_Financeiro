@@ -4,6 +4,7 @@ import android.app.Notification
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -72,6 +73,24 @@ object NotificationChannels {
                         result.success(drainPendingNotifications(appContext))
                     } catch (e: Exception) {
                         result.success(emptyList<Map<String, Any>>())
+                    }
+                }
+                "openAppBatterySettings" -> {
+                    try {
+                        val ctx = try {
+                            MainActivity.instance
+                        } catch (_: Exception) {
+                            appContext
+                        }
+                        val intent = Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.parse("package:${ctx.packageName}"),
+                        )
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        ctx.startActivity(intent)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
                     }
                 }
                 else -> result.notImplemented()

@@ -383,11 +383,20 @@ class NotificationParserService {
   ];
 
   /// Palavras-chave de entrada/estorno que não são gastos.
+  /// Evitar substrings genéricas como «received» — bloqueiam compras em inglês
+  /// («purchase received», etc.).
   static const List<String> _incomingBlockKeywords = [
     'pix recebido',
+    'pix received',
     'transferência recebida',
     'transferencia recebida',
-    'received',
+    'transfer received',
+    'money received',
+    'funds received',
+    'payment received into',
+    'you received a payment',
+    'incoming payment',
+    'deposit received',
     'credit received',
     'refund',
     'estorno',
@@ -523,7 +532,7 @@ class NotificationParserService {
         final sep = cleaned.contains(',') ? ',' : '.';
         final parts = cleaned.split(sep);
         if (parts.length == 2 && parts[1].length <= 2) {
-          normalized = '${parts[0].replaceAll(RegExp(r"\\D"), '')}.${parts[1]}';
+          normalized = '${parts[0].replaceAll(RegExp(r'\D'), '')}.${parts[1]}';
         } else {
           normalized = cleaned.replaceAll(RegExp(r'[.,]'), '');
         }
@@ -807,6 +816,17 @@ class NotificationListenerService {
     }
   }
 
+  /// Abre os detalhes da app no Android (utilizador pode ajustar bateria / segundo plano).
+  Future<bool> abrirDefinicoesBateriaApp() async {
+    try {
+      final result = await _channel.invokeMethod<bool>('openAppBatterySettings');
+      return result ?? false;
+    } on PlatformException catch (e) {
+      debugPrint('Erro ao abrir definições de bateria: ${e.message}');
+      return false;
+    }
+  }
+
   Future<void> _registrarDiagnostico(String status, String texto) async {
     final prefs = await SharedPreferences.getInstance();
     final cleaned = texto.replaceAll(RegExp(r'\s+'), ' ').trim();
@@ -971,22 +991,52 @@ class NotificationListenerService {
     return null;
   }
 
-  Future<bool> _jaProcessada({
+  String _dedupeId({
+    required String uid,
+    required String packageName,
+    required String texto,
+    required int timestamp,
+  }) {
+    return '$uid|$timestamp|$packageName|$texto';
+  }
+
+  Future<bool> _isDuplicate({
     required String uid,
     required String packageName,
     required String texto,
     required int timestamp,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final id = '$uid|$timestamp|$packageName|$texto';
+    final id = _dedupeId(
+      uid: uid,
+      packageName: packageName,
+      texto: texto,
+      timestamp: timestamp,
+    );
     final ids = prefs.getStringList(_dedupeKey) ?? <String>[];
-    if (ids.contains(id)) return true;
+    return ids.contains(id);
+  }
+
+  Future<void> _marcarComoProcessada({
+    required String uid,
+    required String packageName,
+    required String texto,
+    required int timestamp,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = _dedupeId(
+      uid: uid,
+      packageName: packageName,
+      texto: texto,
+      timestamp: timestamp,
+    );
+    final ids = prefs.getStringList(_dedupeKey) ?? <String>[];
+    if (ids.contains(id)) return;
     ids.add(id);
     if (ids.length > _dedupeMax) {
       ids.removeRange(0, ids.length - _dedupeMax);
     }
     await prefs.setStringList(_dedupeKey, ids);
-    return false;
   }
 
   Future<void> _processarNotificacao(
@@ -1016,7 +1066,7 @@ class NotificationListenerService {
       return;
     }
 
-    if (await _jaProcessada(
+    if (await _isDuplicate(
       uid: user.uid,
       packageName: packageName,
       texto: texto,
@@ -1039,6 +1089,12 @@ class NotificationListenerService {
 
     final sucesso = await _repository.salvarTransacao(transacao);
     if (sucesso) {
+      await _marcarComoProcessada(
+        uid: user.uid,
+        packageName: packageName,
+        texto: texto,
+        timestamp: timestamp,
+      );
       await _registrarDiagnostico(
         'salva no histórico',
         '${transacaoData.descricao} - ${transacaoData.valor}',

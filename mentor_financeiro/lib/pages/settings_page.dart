@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -380,7 +381,7 @@ class _SettingsPageState extends State<SettingsPage> {
             trailing: _chevron,
             onTap: _mostrarAlterarSenha,
           ),
-          if (_isDeveloperAccount) ...[
+          if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) ...[
             Divider(height: 1, color: dividerColor),
             ListTile(
               leading: Icon(
@@ -395,7 +396,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
               subtitle: Text(
-                'Ferramenta de desenvolvimento · leitura de notificações',
+                'Permissões, diagnóstico de leitura e bateria',
                 style: TextStyle(color: mutedColor, fontSize: 12),
               ),
               trailing: _chevron,

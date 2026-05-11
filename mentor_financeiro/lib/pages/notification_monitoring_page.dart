@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../core/config/app_secrets.dart';
 import '../services/notification_listener_service.dart';
 import '../services/user_data_retention_service.dart';
 
@@ -33,12 +31,6 @@ class _NotificationMonitoringPageState
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (!AppSecrets.isDeveloperUiAccount(
-        FirebaseAuth.instance.currentUser?.email,
-      )) {
-        Navigator.of(context).pop();
-        return;
-      }
       unawaited(_syncAndLoad());
     });
   }
@@ -51,10 +43,7 @@ class _NotificationMonitoringPageState
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed &&
-        AppSecrets.isDeveloperUiAccount(
-          FirebaseAuth.instance.currentUser?.email,
-        )) {
+    if (state == AppLifecycleState.resumed) {
       unawaited(_syncAndLoad());
     }
   }
@@ -104,6 +93,10 @@ class _NotificationMonitoringPageState
     await _listener.solicitarPermissao();
     await Future<void>.delayed(const Duration(milliseconds: 350));
     await _syncAndLoad();
+  }
+
+  Future<void> _openBatterySettings() async {
+    await _listener.abrirDefinicoesBateriaApp();
   }
 
   Future<void> _clearDiagnostics() async {
@@ -254,6 +247,60 @@ class _NotificationMonitoringPageState
                   TextButton(
                     onPressed: _openAndroidPermission,
                     child: const Text('Abrir'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: scheme.surface.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: scheme.onSurface.withValues(alpha: 0.08),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.battery_charging_full_rounded,
+                        color: scheme.primary,
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Text(
+                          'Bateria e segundo plano',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Em alguns telemóveis, a optimização de bateria atrasa ou impede o '
+                    'serviço de leitura de notificações até abrir o app. Abra as definições '
+                    'da app e defina bateria sem restrições, se disponível.',
+                    style: TextStyle(
+                      color: scheme.onSurface.withValues(alpha: 0.75),
+                      height: 1.35,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FilledButton.tonalIcon(
+                      onPressed: _openBatterySettings,
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      label: const Text('Abrir definições da app'),
+                    ),
                   ),
                 ],
               ),
