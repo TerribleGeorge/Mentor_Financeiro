@@ -19,35 +19,69 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
   static const List<String> _perfis = ["Conservador", "Moderado", "Arrojado"];
 
   Future<void> _salvar() async {
-    if (_profissao.isEmpty) {
+    if (_profissao.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Preencha sua profissão")));
       return;
     }
-
-    setState(() => _salvando = true);
-
-    final prefs = await SharedPreferences.getInstance();
-    final uid = prefs.getString('uid');
-
-    if (uid != null) {
-      await FirebaseService.salvarPerfilCompleto(
-        uid: uid,
-        profissao: _profissao,
-        perfilInvestidor: _perfilInvestidor.toLowerCase(),
-        objetivos: _objetivos,
+    if (_perfilInvestidor.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecione um perfil de investidor (Conservador, Moderado ou Arrojado).'),
+        ),
       );
-      await FirebaseService.completarOnboarding(uid);
-      await prefs.setBool('onboarding_completo', true);
-      await prefs.setString(
-        'perfil_investidor',
-        _perfilInvestidor.toLowerCase(),
-      );
-      await FirebaseService.inscricaoTopico(_perfilInvestidor.toLowerCase());
+      return;
     }
 
-    if (mounted) {
+    setState(() => _salvando = true);
+    var ok = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final uid = prefs.getString('uid');
+
+      if (uid != null) {
+        await FirebaseService.salvarPerfilCompleto(
+          uid: uid,
+          profissao: _profissao.trim(),
+          perfilInvestidor: _perfilInvestidor.toLowerCase(),
+          objetivos: _objetivos.trim(),
+        );
+        await FirebaseService.completarOnboarding(uid);
+        await prefs.setBool('onboarding_completo', true);
+        await prefs.setString(
+          'perfil_investidor',
+          _perfilInvestidor.toLowerCase(),
+        );
+        try {
+          await FirebaseService.inscricaoTopico(_perfilInvestidor.toLowerCase());
+        } catch (_) {
+          // FCM / tópico é opcional; não bloquear entrada na app.
+        }
+        ok = true;
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sessão inválida. Volte a iniciar sessão e tente novamente.'),
+          ),
+        );
+      }
+    } catch (e, st) {
+      debugPrint('QuestionarioPage._salvar: $e\n$st');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Não foi possível guardar o perfil. Verifique a ligação à internet e tente novamente.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _salvando = false);
+    }
+
+    if (mounted && ok) {
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => const TelaHome()));

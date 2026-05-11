@@ -454,20 +454,26 @@ class FirebaseService {
   static Future<void> salvarPerfilInvestidor(String uid, String perfil) async {
     final email = (await buscarDadosUsuario(uid))?['email'];
     final isAdmin = verificarAdmin(email);
-    await _firestore.collection('usuarios').doc(uid).update({
-      'perfilInvestidor': perfil.toLowerCase(),
-      'isPremium': isAdmin ? true : FieldValue.delete(),
-    });
+    await _firestore.collection('usuarios').doc(uid).set(
+      {
+        'perfilInvestidor': perfil.toLowerCase(),
+        'isPremium': isAdmin ? true : FieldValue.delete(),
+      },
+      SetOptions(merge: true),
+    );
   }
 
   // Completa onboarding no Firestore
   static Future<void> completarOnboarding(String uid) async {
     final email = (await buscarDadosUsuario(uid))?['email'];
     final isAdmin = verificarAdmin(email);
-    await _firestore.collection('usuarios').doc(uid).update({
-      'onboardingCompleto': true,
-      'isPremium': isAdmin ? true : FieldValue.delete(),
-    });
+    await _firestore.collection('usuarios').doc(uid).set(
+      {
+        'onboardingCompleto': true,
+        'isPremium': isAdmin ? true : FieldValue.delete(),
+      },
+      SetOptions(merge: true),
+    );
   }
 
   // Atualiza dados do usuário (sync)
@@ -505,7 +511,10 @@ class FirebaseService {
     if (objetivos != null) updates['objetivos'] = objetivos;
     if (isAdmin) updates['isPremium'] = true;
     updates['perfilCompleto'] = true;
-    await _firestore.collection('usuarios').doc(uid).update(updates);
+    await _firestore.collection('usuarios').doc(uid).set(
+          updates,
+          SetOptions(merge: true),
+        );
   }
 
   // Getter público para Firestore
