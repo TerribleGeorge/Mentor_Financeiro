@@ -14,6 +14,7 @@ import '../core/navigation/mentor_navigation.dart';
 import '../core/navigation/subscription_paywall_flow.dart';
 import '../services/subscription_provider.dart';
 import '../services/user_persona_service.dart';
+import '../presentation/intro/intro_tour_screen.dart';
 import 'currency_settings_page.dart';
 import 'language_settings_page.dart';
 import 'tela_login.dart';
@@ -680,6 +681,26 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               );
               mentorPushNamed(context, AppRoutes.home);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.waving_hand_outlined, color: accentColor),
+            title: Text(
+              'Introdução ao app',
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              'Mensagem do Mentor: apoio, calma, regra das 3 perguntas e por que preencher os dados.',
+              style: TextStyle(color: mutedColor, fontSize: 13),
+            ),
+            trailing: _chevron,
+            onTap: () {
+              Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  fullscreenDialog: true,
+                  builder: (_) => const IntroTourScreen(fromSettings: true),
+                ),
+              );
             },
           ),
           const SizedBox(height: 24),

@@ -18,14 +18,15 @@ class LocalTransactionStore {
     return '$uid|$packageName|$timestamp|${normalized.hashCode}';
   }
 
-  static Future<void> save(
+  /// Devolve `true` se inseriu uma entrada nova; `false` se [sourceId] já existia.
+  static Future<bool> save(
     TransacaoModel transacao, {
     required String sourceId,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final items = await _readRaw(prefs);
     final exists = items.any((e) => e['sourceId'] == sourceId);
-    if (exists) return;
+    if (exists) return false;
 
     items.insert(0, {
       'sourceId': sourceId,
@@ -45,6 +46,7 @@ class LocalTransactionStore {
       items.removeRange(_maxItems, items.length);
     }
     await prefs.setString(_key, jsonEncode(items));
+    return true;
   }
 
   static Future<void> removeBySourceId(String sourceId) async {

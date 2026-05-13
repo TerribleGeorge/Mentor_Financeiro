@@ -3,6 +3,7 @@ abstract final class AppRoutes {
   static const String splash = '/';
   static const String questionario = '/questionario';
   static const String login = '/login';
+  static const String introTour = '/intro-tour';
   static const String onboardingMentor = '/onboarding-mentor';
   static const String personaSetup = '/persona-setup';
   static const String home = '/home';

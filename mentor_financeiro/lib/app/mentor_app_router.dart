@@ -32,6 +32,7 @@ import '../pages/mentoria/mentoria_screen.dart';
 import '../pages/mentoria/mentoria_lesson_screen.dart';
 import '../presentation/calculator/calculadora_mentora_screen.dart';
 import '../presentation/insight/insight_detail_screen.dart';
+import '../presentation/intro/intro_tour_screen.dart';
 import '../presentation/onboarding/onboarding_flow_screen.dart';
 import '../presentation/persona/persona_setup_screen.dart';
 import '../presentation/splash/splash_screen.dart';
@@ -54,6 +55,11 @@ class MentorAppRouter {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const TelaLogin(),
+        );
+      case AppRoutes.introTour:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const IntroTourScreen(),
         );
       case AppRoutes.onboardingMentor:
         return MaterialPageRoute<void>(

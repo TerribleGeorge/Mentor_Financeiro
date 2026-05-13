@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_routes.dart';
 import '../../core/navigation/mentor_navigator.dart';
+import '../../presentation/intro/intro_tour_screen.dart';
 import '../../services/app_theme_controller.dart';
 import '../../services/currency_preference_controller.dart';
 import '../../services/firebase_service.dart';
@@ -153,6 +154,8 @@ class _SplashScreenState extends State<SplashScreen>
           prefs.getString('perfil_investidor')?.isNotEmpty == true;
       final localOnboardingComplete =
           prefs.getBool('onboarding_completo') == true;
+      final introTourDone =
+          prefs.getBool(kIntroMentorTourCompletedKey) == true;
 
       if (dados != null && !localProfileComplete) {
         if (!(dados['perfilCompleto'] ?? false)) {
@@ -164,6 +167,10 @@ class _SplashScreenState extends State<SplashScreen>
           _pushReplacementNamed(AppRoutes.onboardingMentor);
           return;
         }
+      }
+      if (!introTourDone) {
+        _pushReplacementNamed(AppRoutes.introTour);
+        return;
       }
       _pushReplacementNamed(AppRoutes.home);
     });

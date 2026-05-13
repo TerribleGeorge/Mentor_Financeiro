@@ -7,6 +7,7 @@ import '../models/transacao_model.dart';
 import '../services/local_transaction_store.dart';
 import '../services/localization_service.dart';
 import '../services/mentoria_service.dart';
+import '../services/transaction_refresh_signal.dart';
 import '../services/exchange_rate_service.dart';
 import 'adicionar_transacao_page.dart';
 import '../theme/classic_mode_style.dart';
@@ -39,6 +40,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// Evita recalcular mentoria a cada frame quando os dados não mudaram.
   String? _mentoriaCacheKey;
+
+  void _onTransacoesChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    TransactionRefreshSignal.addListener(_onTransacoesChanged);
+  }
+
+  @override
+  void dispose() {
+    TransactionRefreshSignal.removeListener(_onTransacoesChanged);
+    super.dispose();
+  }
 
   String _formatarMoeda(double valor) {
     return LocalizationService.formatCurrency(valor);

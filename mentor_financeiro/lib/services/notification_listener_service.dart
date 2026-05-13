@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'daily_spend_limit_notifier.dart';
+import 'transaction_refresh_signal.dart';
 import '../models/transacao_model.dart';
 import 'local_transaction_store.dart';
 
@@ -2578,6 +2579,9 @@ class NotificationListenerService {
     } else {
       await prefs.setString(_pendingTxKey, jsonEncode(remaining));
     }
+    if (saved > 0) {
+      TransactionRefreshSignal.notify();
+    }
     return saved;
   }
 
@@ -2767,6 +2771,7 @@ class NotificationListenerService {
       debugPrint(
         'Transação detetada sem sessão — fila local (${transacaoData.descricao})',
       );
+      TransactionRefreshSignal.notify();
       return;
     }
 
@@ -2781,7 +2786,21 @@ class NotificationListenerService {
       limiteDisponivel: transacaoData.limiteDisponivel,
     );
 
-    await LocalTransactionStore.save(transacao, sourceId: sourceId);
+    final inserted = await LocalTransactionStore.save(
+      transacao,
+      sourceId: sourceId,
+    );
+    if (!inserted) {
+      await _marcarComoProcessada(
+        uid: user.uid,
+        packageName: packageName,
+        texto: texto,
+        timestamp: timestamp,
+      );
+      TransactionRefreshSignal.notify();
+      return;
+    }
+
     await _atualizarCacheLocalDeGastos(transacao);
 
     final sucesso = await _repository.salvarTransacao(transacao);
@@ -2819,6 +2838,7 @@ class NotificationListenerService {
         '${transacaoData.descricao} - ${transacaoData.valor}',
       );
     }
+    TransactionRefreshSignal.notify();
   }
 
   void _onError(Object error) {

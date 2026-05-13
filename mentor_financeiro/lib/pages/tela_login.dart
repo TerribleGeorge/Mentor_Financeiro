@@ -21,6 +21,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 // Serviço Firebase
 import '../services/firebase_service.dart';
 // Notification listener é iniciado em `MainNavigation` (Android).
+import '../presentation/intro/intro_tour_screen.dart';
 import 'main_navigation.dart';
 import 'tela_upgrade.dart';
 
@@ -837,10 +838,14 @@ class _TelaLoginState extends State<TelaLogin> {
         await prefs.setString('email_usuario', _usuarioFirebase!.email ?? '');
       }
 
-      // Próxima etapa: Dashboard/Home (limpa a pilha para o "voltar" não quebrar).
+      // Próxima etapa: introdução (primeira vez) ou Home.
       if (mounted) {
+        final introDone = prefs.getBool(kIntroMentorTourCompletedKey) == true;
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute<void>(builder: (_) => const MainNavigation()),
+          MaterialPageRoute<void>(
+            builder: (_) =>
+                introDone ? const MainNavigation() : const IntroTourScreen(),
+          ),
           (route) => false,
         );
       }

@@ -8,6 +8,7 @@ import '../models/transacao_model.dart';
 import '../services/local_transaction_store.dart';
 import '../services/localization_service.dart';
 import '../services/subscription_provider.dart';
+import '../services/transaction_refresh_signal.dart';
 import '../theme/classic_mode_style.dart';
 import '../widgets/ads/adaptive_banner_ad.dart';
 
@@ -19,12 +20,27 @@ class HistoricoScreen extends StatefulWidget {
 }
 
 class _HistoricoScreenState extends State<HistoricoScreen> {
-  User? user = FirebaseAuth.instance.currentUser;
+  void _onTransacoesChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    TransactionRefreshSignal.addListener(_onTransacoesChanged);
+  }
+
+  @override
+  void dispose() {
+    TransactionRefreshSignal.removeListener(_onTransacoesChanged);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final premium = context.watch<SubscriptionProvider>().isPremium;
+    final user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: Colors.transparent,
       bottomNavigationBar: premium ? null : const AdaptiveBannerAd(),
@@ -55,7 +71,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                   : StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
                           .collection('usuarios')
-                          .doc(user!.uid)
+                          .doc(user.uid)
                           .collection('transacoes')
                           .orderBy('data', descending: true)
                           .limit(50)
@@ -66,6 +82,19 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                           return const Center(
                             child: CircularProgressIndicator(
                               color: Color(0xFF00D9FF),
+                            ),
+                          );
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(
+                                'Erro ao carregar: ${snapshot.error}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.white54),
+                              ),
                             ),
                           );
                         }

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/finance/daily_limit_calculator.dart';
 import '../services/finance_config_signals.dart';
+import '../services/transaction_refresh_signal.dart';
 import '../theme/classic_mode_style.dart';
 
 /// Limite diário de gastos (com base em prefs / [FinanceConfigurationPage]).
@@ -23,16 +24,20 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
 
   void _onFinanceConfigSaved() => _carregarDados();
 
+  void _onTransacoesChanged() => _carregarDados();
+
   @override
   void initState() {
     super.initState();
     FinanceConfigSignals.addListener(_onFinanceConfigSaved);
+    TransactionRefreshSignal.addListener(_onTransacoesChanged);
     _carregarDados();
   }
 
   @override
   void dispose() {
     FinanceConfigSignals.removeListener(_onFinanceConfigSaved);
+    TransactionRefreshSignal.removeListener(_onTransacoesChanged);
     super.dispose();
   }
 

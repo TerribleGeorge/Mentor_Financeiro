@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/transacao_model.dart';
 import '../services/ad_manager_service.dart';
 import '../services/subscription_provider.dart';
+import '../services/transaction_refresh_signal.dart';
 
 class AdicionarTransacaoPage extends StatefulWidget {
   const AdicionarTransacaoPage({super.key});
@@ -111,6 +112,8 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
           .doc(user.uid)
           .collection('transacoes')
           .add(transacao.toMap());
+
+      TransactionRefreshSignal.notify();
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

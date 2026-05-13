@@ -6,6 +6,7 @@ import '../domain/finance/daily_limit_calculator.dart';
 import '../theme/classic_mode_style.dart';
 import '../theme/mentor_adaptive_visuals.dart';
 import '../services/finance_config_signals.dart';
+import '../services/transaction_refresh_signal.dart';
 
 class TelaHome extends StatefulWidget {
   const TelaHome({super.key});
@@ -26,16 +27,20 @@ class _TelaHomeState extends State<TelaHome> {
 
   void _onFinanceConfigSaved() => _carregarDados();
 
+  void _onTransacoesChanged() => _carregarDados();
+
   @override
   void initState() {
     super.initState();
     FinanceConfigSignals.addListener(_onFinanceConfigSaved);
+    TransactionRefreshSignal.addListener(_onTransacoesChanged);
     _carregarDados();
   }
 
   @override
   void dispose() {
     FinanceConfigSignals.removeListener(_onFinanceConfigSaved);
+    TransactionRefreshSignal.removeListener(_onTransacoesChanged);
     _scrollController.dispose();
     super.dispose();
   }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_routes.dart';
 import '../../domain/entities/user_persona.dart';
+import '../intro/intro_tour_screen.dart';
 import '../../services/user_persona_service.dart';
 import '../../theme/mentor_adaptive_visuals.dart';
 import '../../widgets/mentor_readable_layer.dart';
@@ -22,7 +24,12 @@ class _PersonaSetupScreenState extends State<PersonaSetupScreen> {
     await UserPersonaService.instance.setMentorPersonaSetupComplete();
     await UserPersonaService.instance.flushMentorProfileToCloud();
     if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+    final prefs = await SharedPreferences.getInstance();
+    final introDone = prefs.getBool(kIntroMentorTourCompletedKey) == true;
+    if (!mounted) return;
+    Navigator.of(context).pushReplacementNamed(
+      introDone ? AppRoutes.home : AppRoutes.introTour,
+    );
   }
 
   @override
