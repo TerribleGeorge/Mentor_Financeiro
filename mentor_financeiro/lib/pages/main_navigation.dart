@@ -12,6 +12,7 @@ import 'historico_screen.dart';
 import 'perfil_screen.dart';
 import '../services/notification_listener_service.dart';
 import '../services/user_data_retention_service.dart';
+import '../services/daily_spend_limit_notifier.dart';
 import '../services/market_alert_service.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -286,6 +287,7 @@ class _Lifecycle extends WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       owner._ensureNotificationListenerStarted();
       unawaited(MarketAlertService.instance.checkNow());
+      unawaited(DailySpendLimitNotifier.evaluateFromPrefsToday());
     }
   }
 }

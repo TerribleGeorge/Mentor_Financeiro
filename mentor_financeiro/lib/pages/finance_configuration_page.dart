@@ -20,6 +20,7 @@ import '../core/constants/app_routes.dart';
 import '../theme/classic_mode_style.dart';
 
 // Serviço Firebase (para backup na nuvem)
+import '../services/daily_spend_limit_notifier.dart';
 import '../services/firebase_service.dart';
 import '../services/finance_config_signals.dart';
 import '../services/user_data_retention_service.dart';
@@ -55,9 +56,11 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
   // Estado de salvamento
   bool _salvando = false;
 
-  /// Teto opcional do "limite hoje" (vazio = padrão R\$ 800; "0" = sem teto).
+  /// Teto opcional do "limite hoje" (vazio = padrão R\$ 50; "0" = sem teto).
   final TextEditingController _tetoLimiteDiarioController =
       TextEditingController();
+
+  List<DailySpendCapSuggestion> _tetoSugestoes = [];
 
   // ==============================================================================
   // DEFINIÇÃO DOS CAMPOS
@@ -250,6 +253,7 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
         _tetoLimiteDiarioController.text =
             cap == cap.roundToDouble() ? '${cap.round()}' : '$cap';
       }
+      _tetoSugestoes = DailyLimitCalculator.suggestDailySpendCaps(prefs);
     });
   }
 
@@ -297,6 +301,9 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
       final tetoVal = DailyLimitCalculator.parseMoney(tetoTxt);
       await prefs.setDouble(kDailySpendCapPrefKey, tetoVal);
     }
+
+    final hoje = DateTime.now().toIso8601String().split('T')[0];
+    await DailySpendLimitNotifier.clearPhaseForDate(prefs, hoje);
 
     FinanceConfigSignals.notifySaved();
 
@@ -569,10 +576,11 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          'A fórmula usa o saldo na conta; saldos altos geram um “limite por dia” enorme. '
-          'O teto corta só o valor **exibido** na barra “Limite hoje” (histórico e relatórios usam os gastos reais).\n'
+          'A fórmula usa renda, gastos fixos, saldo e dias no mês. O **teto** limita o guia '
+          '“Limite hoje”; o histórico e relatórios usam os gastos reais.\n'
           '• Vazio = teto padrão R\$ ${kDefaultDailySpendCapBrl.round()}\n'
-          '• 0 = sem teto (mostra a fórmula inteira)',
+          '• 0 = sem teto (mostra a fórmula inteira)\n'
+          'Sugestões abaixo usam os valores **já guardados** (salva as finanças e reabre esta página para atualizar).',
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.72),
             fontSize: 12,
@@ -580,12 +588,59 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
           ),
         ),
         const SizedBox(height: 12),
+        Text(
+          'Sugestões de teto',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.85),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _tetoSugestoes.map((s) {
+            return Tooltip(
+              message: s.rationale,
+              child: ActionChip(
+                label: Text(
+                  s.label,
+                  style: const TextStyle(fontSize: 12, color: Colors.white),
+                ),
+                backgroundColor: const Color(0xFF1E293B),
+                side: BorderSide(color: Colors.amber.shade200.withValues(alpha: 0.5)),
+                onPressed: () {
+                  setState(() {
+                    if (s.usesFormulaWithoutCap) {
+                      _tetoLimiteDiarioController.text = '0';
+                    } else {
+                      final v = s.valueBrl;
+                      _tetoLimiteDiarioController.text =
+                          v == v.roundToDouble() ? '${v.round()}' : v.toStringAsFixed(0);
+                    }
+                  });
+                },
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Valor do teto (manual)',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.85),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
         TextFormField(
           controller: _tetoLimiteDiarioController,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           style: const TextStyle(color: Colors.white, fontSize: 16),
           decoration: InputDecoration(
-            hintText: 'Ex.: 600 ou deixe vazio',
+            hintText: 'Ex.: 80 ou deixe vazio para o padrão',
             hintStyle: const TextStyle(color: Colors.white24),
             filled: true,
             fillColor: const Color(0xFF0F172A),

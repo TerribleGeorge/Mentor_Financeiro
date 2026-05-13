@@ -63,4 +63,19 @@ void main() {
       expect(r.limitWasCapped, isTrue);
     });
   });
+
+  group('DailyLimitCalculator.suggestDailySpendCaps', () {
+    test('includes fixed 50, tiers from positive raw, and formula option', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences.setMockInitialValues({
+        'valor_Saldo Atual': '50000',
+        'ativo_Saldo Atual': true,
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final s = DailyLimitCalculator.suggestDailySpendCaps(prefs);
+      expect(s.any((e) => e.id == 'cap50' && e.valueBrl == 50), isTrue);
+      expect(s.any((e) => e.usesFormulaWithoutCap), isTrue);
+      expect(s.any((e) => e.id == 'tight'), isTrue);
+    });
+  });
 }

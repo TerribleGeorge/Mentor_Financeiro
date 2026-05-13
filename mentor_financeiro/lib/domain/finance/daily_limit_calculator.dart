@@ -37,8 +37,29 @@ const String kSaldoAtualPrefFieldName = 'Saldo Atual';
 /// (gastos variáveis por dia). `0` = sem teto (usa só a fórmula). Ausente = [kDefaultDailySpendCapBrl].
 const String kDailySpendCapPrefKey = 'limite_diario_teto_brl';
 
-/// Teto padrão quando o saldo na conta faz a fórmula explodir (ex.: R\$ 11.500 → centenas/dia).
-const double kDefaultDailySpendCapBrl = 800;
+/// Teto padrão quando o saldo na conta faz a fórmula explodir (guia “limite hoje”).
+const double kDefaultDailySpendCapBrl = 50;
+
+/// Sugestão de teto diário com base na configuração financeira guardada.
+class DailySpendCapSuggestion {
+  const DailySpendCapSuggestion({
+    required this.id,
+    required this.label,
+    required this.rationale,
+    required this.valueBrl,
+    this.usesFormulaWithoutCap = false,
+  });
+
+  final String id;
+  final String label;
+  final String rationale;
+
+  /// Valor a gravar em [kDailySpendCapPrefKey] (ignorado se [usesFormulaWithoutCap]).
+  final double valueBrl;
+
+  /// Se verdadeiro: o utilizador escolhe “sem teto” → gravar `0` na pref.
+  final bool usesFormulaWithoutCap;
+}
 
 class DailyLimitResult {
   const DailyLimitResult({
@@ -226,5 +247,102 @@ class DailyLimitCalculator {
       limitWasCapped: capped,
       infoMessage: info,
     );
+  }
+
+  /// Sugestões de teto com base em renda, gastos fixos, saldo e dias restantes no mês.
+  /// O utilizador escolhe uma opção em [FinanceConfigurationPage]; vazio na pref
+  /// continua a usar [kDefaultDailySpendCapBrl] até gravar um valor.
+  static List<DailySpendCapSuggestion> suggestDailySpendCaps(
+    SharedPreferences prefs,
+  ) {
+    final hoje = DateTime.now();
+    final diasNoMes = DateTime(hoje.year, hoje.month + 1, 0).day;
+    final diasRestantes = (diasNoMes - hoje.day + 1).clamp(1, 366);
+    final rendaMensal = _sumIncome(prefs);
+    final gastosFixosMensal = _sumExpenses(prefs);
+    final saldoAtual = _readSaldoAtual(prefs);
+    final raw =
+        (rendaMensal - gastosFixosMensal + saldoAtual) / diasRestantes.toDouble();
+
+    double roundCap(double v) {
+      if (v.isNaN || v <= 0) return 0;
+      if (v < 10) return v.ceilToDouble();
+      return (v / 5.0).round() * 5.0;
+    }
+
+    final out = <DailySpendCapSuggestion>[];
+
+    bool hasValue(double v) => out.any(
+          (e) =>
+              !e.usesFormulaWithoutCap && (e.valueBrl - v).abs() < 0.01,
+        );
+
+    void add(DailySpendCapSuggestion s) {
+      if (s.usesFormulaWithoutCap) {
+        if (!out.any((e) => e.usesFormulaWithoutCap)) out.add(s);
+        return;
+      }
+      if (s.valueBrl <= 0) return;
+      if (hasValue(s.valueBrl)) return;
+      out.add(s);
+    }
+
+    add(
+      const DailySpendCapSuggestion(
+        id: 'cap50',
+        label: 'R\$ 50',
+        rationale:
+            'Controle forte no dia a dia — é o teto padrão do app se não escolheres outro.',
+        valueBrl: 50,
+      ),
+    );
+
+    if (raw > 0) {
+      add(
+        DailySpendCapSuggestion(
+          id: 'tight',
+          label: 'Contido',
+          rationale:
+              'Cerca de 30 % do guia diário calculado com os teus dados — favorece poupança.',
+          valueBrl: roundCap(math.min(raw * 0.30, 200)),
+        ),
+      );
+      add(
+        DailySpendCapSuggestion(
+          id: 'mid',
+          label: 'Equilibrado',
+          rationale:
+              'Cerca de 50 % do guia — ritmo moderado conforme a tua configuração.',
+          valueBrl: roundCap(math.min(raw * 0.50, 350)),
+        ),
+      );
+      add(
+        DailySpendCapSuggestion(
+          id: 'loose',
+          label: 'Com folga',
+          rationale:
+              'Cerca de 70 % do guia — mais espaço para imprevistos do dia.',
+          valueBrl: roundCap(math.min(raw * 0.70, 600)),
+        ),
+      );
+    }
+
+    add(
+      const DailySpendCapSuggestion(
+        id: 'formula',
+        label: 'Só a fórmula',
+        rationale:
+            'Sem teto manual: o ecrã usa o valor integral da fórmula (pode ser alto com saldo grande na conta).',
+        valueBrl: 0,
+        usesFormulaWithoutCap: true,
+      ),
+    );
+
+    out.sort((a, b) {
+      if (a.usesFormulaWithoutCap) return 1;
+      if (b.usesFormulaWithoutCap) return -1;
+      return a.valueBrl.compareTo(b.valueBrl);
+    });
+    return out;
   }
 }

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'daily_spend_limit_notifier.dart';
 import '../models/transacao_model.dart';
 import 'local_transaction_store.dart';
 
@@ -2499,6 +2500,11 @@ class NotificationListenerService {
         'gastos_${transacao.data.year}-${transacao.data.month.toString().padLeft(2, '0')}-${transacao.data.day.toString().padLeft(2, '0')}';
     final atual = prefs.getDouble(key) ?? 0.0;
     await prefs.setDouble(key, atual + transacao.valor);
+    await DailySpendLimitNotifier.onSpendUpdated(
+      prefs: prefs,
+      gastosDayKey: key,
+      newTotal: atual + transacao.valor,
+    );
   }
 
   /// Grava na Firestore transações detetadas sem sessão (fila em [SharedPreferences]).

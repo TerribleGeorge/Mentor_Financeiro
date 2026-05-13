@@ -55,6 +55,7 @@ object NotificationChannels {
     /** Limite da fila: notificações mais antigas são descartadas quando cheia (FIFO). */
     private const val MAX_PENDING_EVENTS = 300
     private const val ALERT_CHANNEL_ID = "mentor_financeiro_market_alerts"
+    private const val DAILY_BUDGET_CHANNEL_ID = "mentor_financeiro_daily_budget"
     private const val ALERT_NOTIFICATION_ID = 4207
 
     private var eventSink: EventChannel.EventSink? = null
@@ -150,7 +151,18 @@ object NotificationChannels {
                     try {
                         val title = call.argument<String>("title") ?: "Mentor Financeiro"
                         val body = call.argument<String>("body") ?: ""
-                        result.success(showMentorNotification(appContext, title, body))
+                        val nid = call.argument<Int>("notificationId") ?: ALERT_NOTIFICATION_ID
+                        result.success(showMentorNotification(appContext, title, body, nid))
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
+                "showDailyBudgetNotification" -> {
+                    try {
+                        val title = call.argument<String>("title") ?: "Limite diário"
+                        val body = call.argument<String>("body") ?: ""
+                        val nid = call.argument<Int>("notificationId") ?: 4210
+                        result.success(showDailyBudgetNotification(appContext, title, body, nid))
                     } catch (e: Exception) {
                         result.success(false)
                     }
@@ -294,7 +306,12 @@ object NotificationChannels {
         prefs.edit().remove(PENDING_EVENTS_KEY).apply()
     }
 
-    private fun showMentorNotification(context: Context, title: String, body: String): Boolean {
+    private fun showMentorNotification(
+        context: Context,
+        title: String,
+        body: String,
+        notificationId: Int = ALERT_NOTIFICATION_ID,
+    ): Boolean {
         if (body.trim().isEmpty()) return false
         val appContext = context.applicationContext
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -310,7 +327,7 @@ object NotificationChannels {
                 "Alertas do Mentor",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            channel.description = "Alertas organizados sobre moedas e investimentos."
+            channel.description = "Alertas sobre mercado, investimentos e moedas."
             manager.createNotificationChannel(channel)
         }
 
@@ -319,7 +336,7 @@ object NotificationChannels {
         }
         val pendingIntent = PendingIntent.getActivity(
             appContext,
-            0,
+            notificationId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -341,7 +358,65 @@ object NotificationChannels {
             .setShowWhen(true)
             .build()
 
-        manager.notify(ALERT_NOTIFICATION_ID, notification)
+        manager.notify(notificationId, notification)
+        return true
+    }
+
+    /** Avisos de proximidade / estouro do guia “limite hoje” (canal à parte dos alertas de mercado). */
+    private fun showDailyBudgetNotification(
+        context: Context,
+        title: String,
+        body: String,
+        notificationId: Int,
+    ): Boolean {
+        if (body.trim().isEmpty()) return false
+        val appContext = context.applicationContext
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            appContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return false
+        }
+
+        val manager = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                DAILY_BUDGET_CHANNEL_ID,
+                "Limite de gastos do dia",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            channel.description =
+                "Avisos quando estiver perto ou acima do teto de gastos diário que configuraste."
+            manager.createNotificationChannel(channel)
+        }
+
+        val intent = Intent(appContext, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            appContext,
+            notificationId + 10000,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val smallIcon = appContext.applicationInfo.icon
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(appContext, DAILY_BUDGET_CHANNEL_ID)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(appContext)
+        }
+
+        val notification = builder
+            .setSmallIcon(smallIcon)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(Notification.BigTextStyle().bigText(body))
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setShowWhen(true)
+            .build()
+
+        manager.notify(notificationId, notification)
         return true
     }
 }
