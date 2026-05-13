@@ -1,5 +1,13 @@
 package com.georgeguimares.mentorfinanceiro
 
+/**
+ * Ponte entre o Flutter e o [CustomNotificationListener].
+ *
+ * - [NotificationChannels]: MethodChannel + EventChannel + fila em SharedPreferences
+ *   (notificações chegam ao Kotlin mesmo com o Dart em pausa; o Dart drena e confirma por id).
+ * - [CustomNotificationListener]: serviço Android que o utilizador tem de ativar em
+ *   Definições > Acesso a notificações (não confundir com POST_NOTIFICATIONS).
+ */
 import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
@@ -41,8 +49,10 @@ class MainActivity : FlutterFragmentActivity() {
 object NotificationChannels {
     private const val METHOD_CHANNEL = "mentor_financeiro/notifications"
     private const val EVENT_CHANNEL = "mentor_financeiro/notifications/stream"
+    /** Preferências onde a fila nativa persiste eventos até o Dart processar e fazer ack. */
     private const val PENDING_PREFS = "mentor_notification_listener"
     private const val PENDING_EVENTS_KEY = "pending_events"
+    /** Limite da fila: notificações mais antigas são descartadas quando cheia (FIFO). */
     private const val MAX_PENDING_EVENTS = 300
     private const val ALERT_CHANNEL_ID = "mentor_financeiro_market_alerts"
     private const val ALERT_NOTIFICATION_ID = 4207
@@ -53,6 +63,8 @@ object NotificationChannels {
 
     fun register(appContext: Context, messenger: io.flutter.plugin.common.BinaryMessenger) {
         this.appContext = appContext.applicationContext
+        // Garante contexto para [isNotificationListenerEnabled] antes do serviço ligar.
+        CustomNotificationListener.ensurePermissionCheckContext(this.appContext)
         MethodChannel(messenger, METHOD_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "checkPermission" -> {
@@ -174,8 +186,8 @@ object NotificationChannels {
             "nativeKey" to nativeKey,
             "receivedAt" to System.currentTimeMillis()
         )
-        // Keep a native copy even when Dart is listening. If Flutter is paused,
-        // killed, or crashes while processing, the next app resume can drain it.
+        // Sempre persiste: se o EventChannel tiver listener, o Dart recebe ao vivo *e*
+        // fica cópia na fila até ack. Sem listener (app fechada / engine morto), só a fila.
         persistPendingNotification(context, data)
         val sink = eventSink
         if (sink != null) {
@@ -251,6 +263,10 @@ object NotificationChannels {
         return out
     }
 
+    /**
+     * Remove da fila nativa apenas os [nativeKey] confirmados pelo Dart.
+     * Evita apagar tudo ao processar: notificações novas que chegaram a meio mantêm-se.
+     */
     private fun ackPendingNotifications(context: Context, ids: List<String>): Int {
         if (ids.isEmpty()) return 0
         val idSet = ids.toSet()
@@ -340,8 +356,14 @@ class CustomNotificationListener : NotificationListenerService() {
         @Volatile
         private var permissionCheckContext: Context? = null
 
+        /** Chamado ao registar o canal Flutter; evita null antes de [onCreate] do serviço. */
+        fun ensurePermissionCheckContext(context: Context) {
+            permissionCheckContext = context.applicationContext
+        }
+
         fun isServiceRunning(): Boolean = isRunning
 
+        /** `true` quando o sistema ligou esta instância (bandeja ativa). */
         fun isListenerConnected(): Boolean = isRunning && activeInstance != null
 
         private fun contextForPermissionCheck(): Context? {
@@ -364,7 +386,10 @@ class CustomNotificationListener : NotificationListenerService() {
                 ) ?: return false
 
                 val component = ComponentName(context, CustomNotificationListener::class.java)
-                enabled.split(":").any { it.equals(component.flattenToString(), ignoreCase = true) }
+                val flat = component.flattenToString()
+                // Android usa ':'; alguns OEMs usam ';' ou misturam — comparar por segmentos limpos.
+                Regex("[:;]+").split(enabled).map { it.trim() }.filter { it.isNotEmpty() }
+                    .any { seg -> seg.equals(flat, ignoreCase = true) }
             } catch (e: Exception) {
                 false
             }
@@ -458,6 +483,7 @@ class CustomNotificationListener : NotificationListenerService() {
         isRunning = true
         activeInstance = this
         permissionCheckContext = applicationContext
+        // Reprocessa o que ainda está na barra (ex.: após reboot ou reconexão do serviço).
         activeNotifications?.forEach { sbn ->
             val data = toNotificationData(sbn) ?: return@forEach
             NotificationChannels.sendNotification(
@@ -497,6 +523,7 @@ class CustomNotificationListener : NotificationListenerService() {
         val extras = notification.extras ?: return null
 
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
+        // Junta vários extras: alguns bancos só preenchem BIG_TEXT ou linhas empilhadas.
         val text = listOf(
             extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: "",
             extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString() ?: "",

@@ -71,6 +71,8 @@ class _MainNavigationState extends State<MainNavigation> {
     super.dispose();
   }
 
+  /// Garante o [NotificationListenerService] no Android: permissão de **leitor de notificações**,
+  /// stream ativo, dreno da fila nativa e verificação periódica de saúde.
   Future<void> _ensureNotificationListenerStarted() async {
     if (!Platform.isAndroid) return;
     if (FirebaseAuth.instance.currentUser != null) {

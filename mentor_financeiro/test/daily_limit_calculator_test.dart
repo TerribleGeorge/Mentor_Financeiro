@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:mentor_financeiro/domain/finance/daily_limit_calculator.dart';
 
 void main() {
@@ -18,6 +20,47 @@ void main() {
     test('keeps thousand-only separators as whole values', () {
       expect(DailyLimitCalculator.parseMoney('1.500'), 1500);
       expect(DailyLimitCalculator.parseMoney('1,500'), 1500);
+    });
+  });
+
+  group('DailyLimitCalculator.computeFromPrefs', () {
+    test('applies default cap when formula raw exceeds default ceiling', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences.setMockInitialValues({
+        'valor_Saldo Atual': '100000',
+        'ativo_Saldo Atual': true,
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final r = DailyLimitCalculator.computeFromPrefs(prefs);
+      expect(r.rawLimit, greaterThan(kDefaultDailySpendCapBrl));
+      expect(r.displayLimit, kDefaultDailySpendCapBrl);
+      expect(r.limitWasCapped, isTrue);
+      expect(r.infoMessage, isNotNull);
+    });
+
+    test('cap 0 disables ceiling (display equals raw when positive)', () async {
+      SharedPreferences.setMockInitialValues({
+        'valor_Saldo Atual': '100000',
+        'ativo_Saldo Atual': true,
+        kDailySpendCapPrefKey: 0.0,
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final r = DailyLimitCalculator.computeFromPrefs(prefs);
+      expect(r.limitWasCapped, isFalse);
+      expect(r.displayLimit, r.rawLimit);
+      expect(r.infoMessage, isNull);
+    });
+
+    test('custom cap is applied when lower than raw', () async {
+      SharedPreferences.setMockInitialValues({
+        'valor_Saldo Atual': '100000',
+        'ativo_Saldo Atual': true,
+        kDailySpendCapPrefKey: 400.0,
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final r = DailyLimitCalculator.computeFromPrefs(prefs);
+      expect(r.displayLimit, 400);
+      expect(r.limitWasCapped, isTrue);
     });
   });
 }

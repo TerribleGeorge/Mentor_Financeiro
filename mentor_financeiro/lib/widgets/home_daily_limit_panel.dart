@@ -18,6 +18,7 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
   double _gastosHoje = 0;
   double _porcentagem = 0;
   String? _alertaLimiteDiario;
+  String? _infoLimiteDiario;
   bool _loading = true;
 
   void _onFinanceConfigSaved() => _carregarDados();
@@ -41,6 +42,7 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
     final limite = DailyLimitCalculator.computeFromPrefs(prefs);
     _limiteDiario = limite.displayLimit;
     _alertaLimiteDiario = limite.alertMessage;
+    _infoLimiteDiario = limite.infoMessage;
 
     final dataHoje = DateTime.now().toIso8601String().split('T')[0];
     _gastosHoje = prefs.getDouble('gastos_$dataHoje') ?? 0;
@@ -154,6 +156,18 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
                 fontSize: 11,
                 height: 1.35,
                 fontWeight: FontWeight.w700,
+                shadows: ClassicModeStyle.secondaryTextShadows(context),
+              ),
+            ),
+          ],
+          if (_infoLimiteDiario != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              _infoLimiteDiario!,
+              style: TextStyle(
+                color: Colors.cyanAccent.withValues(alpha: 0.85),
+                fontSize: 11,
+                height: 1.35,
                 shadows: ClassicModeStyle.secondaryTextShadows(context),
               ),
             ),

@@ -55,6 +55,10 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
   // Estado de salvamento
   bool _salvando = false;
 
+  /// Teto opcional do "limite hoje" (vazio = padrão R\$ 800; "0" = sem teto).
+  final TextEditingController _tetoLimiteDiarioController =
+      TextEditingController();
+
   // ==============================================================================
   // DEFINIÇÃO DOS CAMPOS
   // ==============================================================================
@@ -237,6 +241,15 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
             prefs.getBool('ativo_${campo.nome}') ??
             (campo.ehSaldoConta ? true : campo.obrigatorio);
       }
+      final cap = DailyLimitCalculator.readDailySpendCapOrNull(prefs);
+      if (cap == null) {
+        _tetoLimiteDiarioController.text = '';
+      } else if (cap == 0) {
+        _tetoLimiteDiarioController.text = '0';
+      } else {
+        _tetoLimiteDiarioController.text =
+            cap == cap.roundToDouble() ? '${cap.round()}' : '$cap';
+      }
     });
   }
 
@@ -276,6 +289,14 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
 
     // Marca como configurado
     await prefs.setBool('configurado', true);
+
+    final tetoTxt = _tetoLimiteDiarioController.text.trim();
+    if (tetoTxt.isEmpty) {
+      await prefs.remove(kDailySpendCapPrefKey);
+    } else {
+      final tetoVal = DailyLimitCalculator.parseMoney(tetoTxt);
+      await prefs.setDouble(kDailySpendCapPrefKey, tetoVal);
+    }
 
     FinanceConfigSignals.notifySaved();
 
@@ -347,6 +368,9 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
               Colors.redAccent,
               _campos.where((c) => !c.ehRenda && !c.ehSaldoConta).toList(),
             ),
+            const SizedBox(height: 30),
+
+            _tetoLimiteDiarioSection(),
             const SizedBox(height: 30),
 
             // Resumo financeiro
@@ -528,6 +552,70 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
   }
 
   // ==============================================================================
+  // TETO DO LIMITE DIÁRIO (GUIA "LIMITE HOJE")
+  // ==============================================================================
+  Widget _tetoLimiteDiarioSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '📈 TETO DO LIMITE DIÁRIO (GASTOS VARIÁVEIS)',
+          style: TextStyle(
+            color: Colors.amber.shade200,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'A fórmula usa o saldo na conta; saldos altos geram um “limite por dia” enorme. '
+          'O teto corta só o valor **exibido** na barra “Limite hoje” (histórico e relatórios usam os gastos reais).\n'
+          '• Vazio = teto padrão R\$ ${kDefaultDailySpendCapBrl.round()}\n'
+          '• 0 = sem teto (mostra a fórmula inteira)',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.72),
+            fontSize: 12,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: _tetoLimiteDiarioController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+          decoration: InputDecoration(
+            hintText: 'Ex.: 600 ou deixe vazio',
+            hintStyle: const TextStyle(color: Colors.white24),
+            filled: true,
+            fillColor: const Color(0xFF0F172A),
+            prefixText: 'R\$ ',
+            prefixStyle: TextStyle(color: Colors.amber.shade200),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.amber.shade200),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 15,
+              vertical: 12,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ==============================================================================
   // RESUMO FINANCEIRO
   // ==============================================================================
   // Calcula e exibe resumo: renda total, gastos total, sobra/déficit
@@ -650,6 +738,7 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
     for (var controller in _controllers.values) {
       controller.dispose();
     }
+    _tetoLimiteDiarioController.dispose();
     super.dispose();
   }
 }

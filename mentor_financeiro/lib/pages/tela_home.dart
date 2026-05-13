@@ -20,6 +20,7 @@ class _TelaHomeState extends State<TelaHome> {
   double _ganhosHoje = 0;
   double _porcentagem = 0;
   String? _alertaLimiteDiario;
+  String? _infoLimiteDiario;
   String _nomeUsuario = 'Usuário';
   final ScrollController _scrollController = ScrollController();
 
@@ -50,6 +51,7 @@ class _TelaHomeState extends State<TelaHome> {
     final limite = DailyLimitCalculator.computeFromPrefs(prefs);
     _limiteDiario = limite.displayLimit;
     _alertaLimiteDiario = limite.alertMessage;
+    _infoLimiteDiario = limite.infoMessage;
 
     final dataHoje = DateTime.now().toIso8601String().split('T')[0];
     _gastosHoje = prefs.getDouble('gastos_$dataHoje') ?? 0;
@@ -212,6 +214,17 @@ class _TelaHomeState extends State<TelaHome> {
                           style: TextStyle(
                             color: Colors.amber.shade200,
                             fontSize: 12,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                      if (_infoLimiteDiario != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _infoLimiteDiario!,
+                          style: TextStyle(
+                            color: Colors.cyanAccent.withValues(alpha: 0.9),
+                            fontSize: 11,
                             height: 1.35,
                           ),
                         ),

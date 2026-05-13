@@ -1121,6 +1121,34 @@ class NotificationParserService {
         p.contains('wallet');
   }
 
+  /// Só trata como “confirmação Google Wallet / Pay” o que parece pagamento por aproximação.
+  /// Evita registar ruído do [com.google.android.gms] (Play Services, etc.) como se fosse Wallet.
+  static bool shouldTreatNotificationAsGoogleWalletOrPayTap({
+    required String packageName,
+    required String texto,
+  }) {
+    if (!isGooglePayPackage(packageName)) return false;
+    final p = packageName.toLowerCase();
+    final t = _sanitize(texto).toLowerCase();
+    if (p.contains('walletnfcrel')) return true;
+    if (p.contains('google.android.apps.wallet')) return true;
+    if (p.contains('nbu.paisa')) return true;
+    if (p.contains('gpay') && p.contains('google')) return true;
+    if (p.contains('google.android.gms')) {
+      return _looksLikeGoogleWalletTapPay(t) ||
+          t.contains('google pay') ||
+          t.contains('google wallet') ||
+          t.contains('gpay') ||
+          _walletValorComTitular.hasMatch(t);
+    }
+    if (p.contains('wallet')) {
+      return _looksLikeGoogleWalletTapPay(t) ||
+          t.contains('google pay') ||
+          t.contains('google wallet');
+    }
+    return true;
+  }
+
   static bool isTrustedBankPackage(String packageName) {
     final p = packageName.toLowerCase();
     const trustedFragments = <String>[
@@ -1574,6 +1602,18 @@ class ResultadoValidacao {
   });
 }
 
+/// Serviço Dart do **monitor de gastos por notificação** (Android).
+///
+/// **Não é** a permissão “Mostrar notificações” (POST_NOTIFICATIONS): o utilizador
+/// tem de ativar **Acesso a notificações** para esta app nas definições do sistema.
+///
+/// Fluxo resumido:
+/// 1. Kotlin ([CustomNotificationListener]) recebe eventos da barra → [sendNotification]
+///    persiste sempre na fila nativa e envia cópia ao [EventChannel] se o Dart estiver a ouvir.
+/// 2. [iniciar] subscreve o stream, chama [_drainPendingNotifications] (reprocessa fila) e
+///    [sincronizarRecentes] (re-lê notificações ainda visíveis).
+/// 3. [_processarNotificacao] aplica regras de confiança, parser e dedupe; só grava transação
+///    quando o texto parece gasto e a origem é aceitável (ver diagnósticos se “nada acontece”).
 class NotificationListenerService {
   NotificationListenerService._();
   static final NotificationListenerService _instance =
@@ -1589,9 +1629,11 @@ class NotificationListenerService {
 
   StreamSubscription? _subscription;
   final TransacaoRepository _repository = TransacaoRepository();
+  /// Histórico curto de ids para não contar a mesma notificação duas vezes (tamanho [_dedupeMax]).
   static const _dedupeKey = 'notification_dedupe_ids';
   static const _dedupeMax = 300;
   static const _monitoringEnabledKey = 'notif_monitoring_enabled';
+  /// Últimos eventos para ecrã de diagnóstico / suporte (não é fonte de verdade financeira).
   static const _diagnosticsKey = 'notification_listener_diagnostics';
   static const _diagnosticsMax = 60;
   static const _pendingTxKey = 'notification_pending_tx_v1';
@@ -1600,10 +1642,14 @@ class NotificationListenerService {
   static const _pendingBankCandidatesKey =
       'notification_pending_bank_candidates_v1';
   static const _suspiciousNotificationsKey = 'notification_suspicious_items_v1';
-  static const _securityWindowMillis = 5 * 60 * 1000;
+  /// Só para emparelhar **mesmo valor** banco ↔ Google Wallet (a 2.ª notificação pode atrasar no POS).
+  static const _walletPairWindowMillis = 25 * 60 * 1000;
   static const _securityRetentionMillis = 12 * 60 * 60 * 1000;
   static const _securityMaxItems = 30;
   static const _suspiciousMaxItems = 40;
+  /// Migração única: volta a ligar a monitorização para o fluxo compra aprovada + Wallet.
+  static const _monitoringWalletMigrateKey =
+      'notif_monitoring_migrate_v5_wallet_correlation';
 
   static Future<List<String>> carregarDiagnosticos() async {
     final prefs = await SharedPreferences.getInstance();
@@ -1617,6 +1663,7 @@ class NotificationListenerService {
 
   Future<bool> verificarPermissao() async {
     try {
+      // Android: leitor de notificações (definições especiais), não só POST_NOTIFICATIONS.
       final bool result = await _channel.invokeMethod('checkPermission');
       return result;
     } on PlatformException catch (e) {
@@ -1683,6 +1730,7 @@ class NotificationListenerService {
   Future<bool> _garantirListenerConectado() async {
     if (await listenerConectado()) return true;
 
+    // Pedidos de rebind ajudam quando o SO matou o serviço mas a permissão continua concedida.
     await solicitarRebindDoListener();
     await Future<void>.delayed(const Duration(milliseconds: 700));
     if (await listenerConectado()) return true;
@@ -1783,9 +1831,9 @@ class NotificationListenerService {
 
   bool _amountMatches(double a, double b) => (a - b).abs() < 0.01;
 
-  bool _timeMatches(int a, int b) {
+  bool _timeMatchesForWalletBankPair(int a, int b) {
     if (a <= 0 || b <= 0) return true;
-    return (a - b).abs() <= _securityWindowMillis;
+    return (a - b).abs() <= _walletPairWindowMillis;
   }
 
   Future<void> _registrarConfirmacaoGooglePay({
@@ -1821,10 +1869,26 @@ class NotificationListenerService {
       final otherTs = (e['timestamp'] as num?)?.toInt() ?? 0;
       return otherValor != null &&
           _amountMatches(otherValor, valor) &&
-          _timeMatches(otherTs, timestamp);
+          _timeMatchesForWalletBankPair(otherTs, timestamp);
     });
     await _writeJsonList(_walletConfirmationsKey, list);
     return found;
+  }
+
+  /// Remove uma confirmação Wallet já usada para fechar um par com o banco (evita duplicar).
+  Future<void> _removerConfirmacaoGooglePayUsada(
+    double valor,
+    int timestamp,
+  ) async {
+    final list = await _readJsonList(_walletConfirmationsKey);
+    list.removeWhere((e) {
+      final v = (e['valor'] as num?)?.toDouble();
+      final ts = (e['timestamp'] as num?)?.toInt() ?? 0;
+      return v != null &&
+          _amountMatches(v, valor) &&
+          _timeMatchesForWalletBankPair(ts, timestamp);
+    });
+    await _writeJsonList(_walletConfirmationsKey, list);
   }
 
   Future<void> _guardarBancoAguardandoGooglePay({
@@ -1926,6 +1990,28 @@ class NotificationListenerService {
     }
   }
 
+  /// Quando o Google Wallet já gravou confirmação e o banco ficou pendente na fila local.
+  Future<void> _reprocessarPendentesComConfirmacoesWalletExistentes() async {
+    final wallets = await _readJsonList(_walletConfirmationsKey);
+    if (wallets.isEmpty) return;
+    for (final w in wallets) {
+      final valor = (w['valor'] as num?)?.toDouble() ?? 0.0;
+      final ts = (w['timestamp'] as num?)?.toInt() ?? 0;
+      if (valor <= 0) continue;
+      final transacaoData = TransacaoData(
+        valor: valor,
+        descricao: w['descricao'] as String? ?? 'Google Wallet',
+        data: DateTime.fromMillisecondsSinceEpoch(
+          ts > 0 ? ts : DateTime.now().millisecondsSinceEpoch,
+        ),
+        categoria: null,
+        tipoPagamento: TipoPagamento.debito,
+        limiteDisponivel: null,
+      );
+      await _processarBancosPendentesComGooglePay(transacaoData, ts);
+    }
+  }
+
   /// Inicia o stream **sem** disparar pedido de permissão automaticamente.
   /// Retorna `false` se a permissão ainda não foi concedida.
   Future<bool> iniciar() async {
@@ -1936,9 +2022,16 @@ class NotificationListenerService {
     final hasPermission = await verificarPermissao();
     if (!hasPermission) {
       debugPrint(
-        'Permissão de notificações não concedida. Não iniciar automaticamente.',
+        'Acesso ao leitor de notificações: OFF. Definições Android > '
+        'Acesso especial à aplicação > Acesso a notificações > ative Mentor Financeiro.',
       );
       return false;
+    }
+
+    final prefsMigrate = await SharedPreferences.getInstance();
+    if (prefsMigrate.getBool(_monitoringWalletMigrateKey) != true) {
+      await prefsMigrate.setBool(_monitoringEnabledKey, true);
+      await prefsMigrate.setBool(_monitoringWalletMigrateKey, true);
     }
 
     await _garantirListenerConectado();
@@ -1956,6 +2049,7 @@ class NotificationListenerService {
 
     await _drainPendingNotifications();
     await sincronizarRecentes();
+    await _reprocessarPendentesComConfirmacoesWalletExistentes();
 
     final uid = FirebaseAuth.instance.currentUser?.uid ?? 'convidado';
     debugPrint('NotificationListenerService iniciado (uid: $uid)');
@@ -1974,6 +2068,7 @@ class NotificationListenerService {
 
   Future<void> _drainPendingNotifications() async {
     try {
+      // Lê a fila JSON nativa sem a apagar; só remove entradas após processar cada uma (ack por id).
       final raw = await _channel.invokeMethod<dynamic>(
         'drainPendingNotifications',
       );
@@ -2086,7 +2181,10 @@ class NotificationListenerService {
   bool _temComprovanteBancarioForte(String texto) {
     final t = texto.toLowerCase();
     final strongPatterns = <RegExp>[
-      RegExp(r'\bcompra\b.{0,60}\baprovad[ao]\b', caseSensitive: false),
+      RegExp(r'\bcompra\b.{0,120}\baprovad[ao]\b', caseSensitive: false),
+      RegExp(r'\baprovad[ao]\b.{0,100}\bcompra\b', caseSensitive: false),
+      RegExp(r'\bsua\s+compra\b.{0,120}\baprovad', caseSensitive: false),
+      RegExp(r'\bcompra\s+no\s+(?:d[eé]bito|cr[eé]dito)\b.{0,120}\baprovad', caseSensitive: false),
       RegExp(r'\bcompra\s+de\s+r\$\s*[\d.,]+\s+em\b', caseSensitive: false),
       RegExp(r'\bd[eé]bito\b.{0,60}\baprovad[ao]\b', caseSensitive: false),
       RegExp(r'\bcr[eé]dito\b.{0,60}\baprovad[ao]\b', caseSensitive: false),
@@ -2169,6 +2267,27 @@ class NotificationListenerService {
     return walletSignals.any(t.contains);
   }
 
+  /// Sinais de que o banco fala em contactless / Google — pedimos o par com a notificação Wallet.
+  bool _textoPedeCorrelacaoComGoogleWallet(String texto) {
+    final t = texto.toLowerCase();
+    const keys = [
+      'google pay',
+      'google wallet',
+      'gpay',
+      'contactless',
+      'nfc',
+      'aproximação',
+      'aproximacao',
+      'tap to pay',
+      'tap and pay',
+      'near field',
+      'sem contato',
+      'sem contacto',
+      'pagamento por aproximação',
+    ];
+    return keys.any(t.contains);
+  }
+
   Future<NotificationTrustDecision> _avaliarConfianca({
     required String texto,
     required String packageName,
@@ -2195,23 +2314,33 @@ class NotificationListenerService {
       );
     }
 
-    if (_temComprovanteBancarioForte(texto)) {
+    final temCorrelacaoWallet = await _temConfirmacaoGooglePay(
+      valor: transacaoData.valor,
+      timestamp: timestamp,
+    );
+    if (temCorrelacaoWallet) {
+      return const NotificationTrustDecision(
+        NotificationTrustStatus.confirmed,
+        'correlacionado com Google Wallet / Pay',
+      );
+    }
+
+    final comprovanteForte = _temComprovanteBancarioForte(texto);
+    final exigeSegundoFactorWallet = _textoPedeCorrelacaoComGoogleWallet(texto);
+
+    if (comprovanteForte && exigeSegundoFactorWallet) {
+      return const NotificationTrustDecision(
+        NotificationTrustStatus.pendingSecondFactor,
+        'compra aprovada/contactless: aguarde notificação do Google Wallet',
+      );
+    }
+
+    if (comprovanteForte) {
       return NotificationTrustDecision(
         NotificationTrustStatus.confirmed,
         pacoteConfiavel
             ? 'banco confiável com comprovante forte'
             : 'app financeiro com comprovante forte',
-      );
-    }
-
-    final temGooglePay = await _temConfirmacaoGooglePay(
-      valor: transacaoData.valor,
-      timestamp: timestamp,
-    );
-    if (temGooglePay) {
-      return const NotificationTrustDecision(
-        NotificationTrustStatus.confirmed,
-        'app financeiro + Google Pay',
       );
     }
 
@@ -2365,6 +2494,7 @@ class NotificationListenerService {
 
   Future<void> _atualizarCacheLocalDeGastos(TransacaoModel transacao) async {
     final prefs = await SharedPreferences.getInstance();
+    // Mesma chave que [HomeDailyLimitPanel] / [TelaHome]: acumula débito do dia para a barra "Limite hoje".
     final key =
         'gastos_${transacao.data.year}-${transacao.data.month.toString().padLeft(2, '0')}-${transacao.data.day.toString().padLeft(2, '0')}';
     final atual = prefs.getDouble(key) ?? 0.0;
@@ -2452,6 +2582,7 @@ class NotificationListenerService {
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     final prefs = await SharedPreferences.getInstance();
+    // Toggle na página de monitorização; quando false, só regista diagnóstico.
     final enabled = prefs.getBool(_monitoringEnabledKey) ?? true;
     if (!enabled) {
       await _registrarDiagnostico('monitoramento pausado', texto);
@@ -2479,6 +2610,16 @@ class NotificationListenerService {
     }
 
     if (NotificationParserService.isGooglePayPackage(packageName)) {
+      if (!NotificationParserService.shouldTreatNotificationAsGoogleWalletOrPayTap(
+        packageName: packageName,
+        texto: texto,
+      )) {
+        await _registrarDiagnostico(
+          'Google ignorado (não é confirmação Wallet/Pay)',
+          texto,
+        );
+        return;
+      }
       await _registrarConfirmacaoGooglePay(
         texto: texto,
         packageName: packageName,
@@ -2554,7 +2695,7 @@ class NotificationListenerService {
       if (pendingData == null) continue;
 
       if (_amountMatches(pendingData.valor, googlePayData.valor) &&
-          _timeMatches(pendingTs, googlePayTimestamp)) {
+          _timeMatchesForWalletBankPair(pendingTs, googlePayTimestamp)) {
         final pkg = e['packageName']?.toString() ?? '';
         final tx = e['texto']?.toString() ?? '';
         final user = FirebaseAuth.instance.currentUser;
@@ -2566,6 +2707,10 @@ class NotificationListenerService {
           dedupeUid: user?.uid ?? '_guest',
           user: user,
           motivoConfirmacao: 'banco confiável + Google Pay',
+        );
+        await _removerConfirmacaoGooglePayUsada(
+          googlePayData.valor,
+          googlePayTimestamp,
         );
       } else {
         remaining.add(e);

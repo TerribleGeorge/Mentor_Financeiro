@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,6 +33,13 @@ const List<String> kFinanceIncomePrefFieldNames = ['Renda Fixa', 'Renda Extra'];
 
 const String kSaldoAtualPrefFieldName = 'Saldo Atual';
 
+/// Chave opcional em [SharedPreferences]: teto máximo para o **limite diário exibido**
+/// (gastos variáveis por dia). `0` = sem teto (usa só a fórmula). Ausente = [kDefaultDailySpendCapBrl].
+const String kDailySpendCapPrefKey = 'limite_diario_teto_brl';
+
+/// Teto padrão quando o saldo na conta faz a fórmula explodir (ex.: R\$ 11.500 → centenas/dia).
+const double kDefaultDailySpendCapBrl = 800;
+
 class DailyLimitResult {
   const DailyLimitResult({
     required this.displayLimit,
@@ -41,12 +50,14 @@ class DailyLimitResult {
     required this.saldoAtual,
     required this.rendaMensal,
     required this.gastosFixosMensal,
+    this.limitWasCapped = false,
+    this.infoMessage,
   });
 
-  /// Limite exibido (nunca negativo).
+  /// Limite exibido (nunca negativo). Pode ser o bruto da fórmula ou o [teto], o que for menor.
   final double displayLimit;
 
-  /// Valor bruto antes de truncar em zero para exibição.
+  /// Valor bruto da fórmula antes do teto e antes de truncar em zero para exibição.
   final double rawLimit;
 
   final bool showNonPositiveAlert;
@@ -55,6 +66,12 @@ class DailyLimitResult {
   final double saldoAtual;
   final double rendaMensal;
   final double gastosFixosMensal;
+
+  /// `true` quando [displayLimit] foi limitado pelo teto (não é a fórmula completa).
+  final bool limitWasCapped;
+
+  /// Mensagem neutra (ex.: explicar o teto), para não confundir com [alertMessage] de alerta.
+  final String? infoMessage;
 }
 
 class DailyLimitCalculator {
@@ -145,7 +162,19 @@ class DailyLimitCalculator {
     return parseMoney(prefs.getString('valor_$kSaldoAtualPrefFieldName'));
   }
 
+  /// Teto do limite diário exibido: [kDailySpendCapPrefKey] em prefs; `0` desliga o teto.
+  static double? readDailySpendCapOrNull(SharedPreferences prefs) {
+    if (!prefs.containsKey(kDailySpendCapPrefKey)) return null;
+    final v = prefs.getDouble(kDailySpendCapPrefKey);
+    if (v == null) return null;
+    if (v <= 0) return 0;
+    return v;
+  }
+
   /// (Renda mensal − Gastos fixos + Saldo atual) / dias restantes no mês.
+  /// O resultado é limitado por um **teto** (padrão [kDefaultDailySpendCapBrl]) para o caso
+  /// de saldo alto inflar o “gasto por dia” de forma irrealista; o histórico continua a usar
+  /// valores reais das transações — isto só afeta o **guia** “limite hoje”.
   static DailyLimitResult computeFromPrefs(SharedPreferences prefs) {
     final hoje = DateTime.now();
     final diasNoMes = DateTime(hoje.year, hoje.month + 1, 0).day;
@@ -169,11 +198,24 @@ class DailyLimitCalculator {
         saldoAtual: saldoAtual,
         rendaMensal: rendaMensal,
         gastosFixosMensal: gastosFixosMensal,
+        limitWasCapped: false,
+        infoMessage: null,
       );
     }
 
+    final capPref = readDailySpendCapOrNull(prefs);
+    final double? effectiveCap =
+        capPref == null ? kDefaultDailySpendCapBrl : (capPref == 0 ? null : capPref);
+
+    final capped = effectiveCap != null && raw > effectiveCap;
+    final display = math.min(raw, effectiveCap ?? raw);
+
+    final info = capped
+        ? 'O limite calculado (${_formatBrl(raw)}) foi mostrado no teto de ${_formatBrl(display)} por dia (ajustável em Configurar finanças).'
+        : null;
+
     return DailyLimitResult(
-      displayLimit: raw,
+      displayLimit: display,
       rawLimit: raw,
       showNonPositiveAlert: false,
       alertMessage: null,
@@ -181,6 +223,8 @@ class DailyLimitCalculator {
       saldoAtual: saldoAtual,
       rendaMensal: rendaMensal,
       gastosFixosMensal: gastosFixosMensal,
+      limitWasCapped: capped,
+      infoMessage: info,
     );
   }
 }
