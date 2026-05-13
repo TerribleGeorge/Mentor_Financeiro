@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/navigation/post_login_navigation.dart';
 import '../services/firebase_service.dart';
-import 'tela_home.dart';
 
 class QuestionarioPage extends StatefulWidget {
   const QuestionarioPage({super.key});
@@ -99,9 +99,7 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
     }
 
     if (mounted && ok) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const TelaHome()));
+      await mentorReplaceWithIntroOrMain(context);
     }
   }
 

@@ -471,7 +471,7 @@ class _NotificationMonitoringPageState
             const SizedBox(height: 4),
             Text(
               text,
-              maxLines: 3,
+              maxLines: 8,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: scheme.onSurface.withValues(alpha: 0.72),

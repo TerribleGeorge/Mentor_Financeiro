@@ -79,7 +79,10 @@ class GolpesPage extends StatelessWidget {
                 'Se não foi você, ligue para a nossa central: 0800-XXX-XXXX.',
             why:
                 'O número pode parecer oficial, mas pertence aos golpistas. '
-                'Ao ligar, o “atendente” pode pedir PIX/transferência para uma “conta segura”.',
+                'Golpistas trocam números com frequência (como telemarketing) — por isso não '
+                'indicamos aqui um “0800 certo”: o seguro é sempre o contacto no verso do cartão '
+                'ou no app/site oficial do seu banco. '
+                'Ao ligar para o número da mensagem, o “atendente” pode pedir PIX ou “conta segura”.',
             whatToDo:
                 'Desligue e procure o contato oficial no verso do cartão ou no site/app oficial. '
                 'Nunca faça transferências “para validar”, “testar” ou “proteger”.',

@@ -3,6 +3,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import '../core/constants/app_routes.dart';
+import '../core/navigation/mentor_navigation.dart';
 import '../models/transacao_model.dart';
 import '../services/local_transaction_store.dart';
 import '../services/localization_service.dart';
@@ -146,7 +148,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Icons.settings,
               color: scheme.onSurface.withValues(alpha: 0.72),
             ),
-            onPressed: () {},
+            onPressed: () => mentorPushNamed(context, AppRoutes.settings),
           ),
         ],
       ),
@@ -1222,7 +1224,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () =>
+                  mentorPushNamed(context, AppRoutes.principal, arguments: 2),
               child: const Text(
                 'Ver todas',
                 style: TextStyle(color: Color(0xFF00D9FF), fontSize: 12),

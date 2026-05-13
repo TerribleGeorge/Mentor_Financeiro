@@ -19,6 +19,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -595,11 +596,13 @@ class CustomNotificationListener : NotificationListenerService() {
         val packageName = sbn.packageName ?: return null
 
         val notification = sbn.notification ?: return null
-        val extras = notification.extras ?: return null
+        // Vários OEMs devolvem extras == null; antes descartávamos a notificação por completo
+        // (o Dart nunca via "recebida" nem "ignorada pelo parser" para esse gasto).
+        val extras = notification.extras ?: Bundle()
 
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
         // Junta vários extras: alguns bancos só preenchem BIG_TEXT ou linhas empilhadas.
-        val text = listOf(
+        var text = listOf(
             extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: "",
             extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString() ?: "",
             extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString() ?: "",
@@ -612,6 +615,30 @@ class CustomNotificationListener : NotificationListenerService() {
             .filter { it.isNotEmpty() }
             .distinct()
             .joinToString(" ")
+
+        if (text.isBlank() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val st = notification.settingsText?.toString()?.trim().orEmpty()
+            if (st.isNotEmpty()) text = st
+        }
+
+        // Notificação "sensível": o conteúdo real pode estar só na versão pública (API 24+).
+        if (text.isBlank() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val pv = notification.publicVersion
+            val pvex = pv?.extras ?: Bundle()
+            val pubMerged = listOf(
+                pvex.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: "",
+                pvex.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: "",
+                pvex.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString() ?: "",
+                pvex.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString() ?: "",
+                pvex.getCharSequence(Notification.EXTRA_SUMMARY_TEXT)?.toString() ?: "",
+            )
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .distinct()
+                .joinToString(" ")
+            if (pubMerged.isNotEmpty()) text = pubMerged
+        }
+
         val timestamp = sbn.postTime
 
         return mapOf(

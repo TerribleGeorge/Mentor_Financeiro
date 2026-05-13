@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,10 +11,12 @@ import 'home_screen.dart';
 import 'graficos_screen.dart';
 import 'historico_screen.dart';
 import 'perfil_screen.dart';
-import '../services/notification_listener_service.dart';
-import '../services/user_data_retention_service.dart';
 import '../services/daily_spend_limit_notifier.dart';
 import '../services/market_alert_service.dart';
+import '../services/notification_listener_service.dart';
+import '../services/transaction_refresh_signal.dart';
+import '../services/pending_renda_extra_confirmation_service.dart';
+import '../services/user_data_retention_service.dart';
 
 class MainNavigation extends StatefulWidget {
   final int initialIndex;
@@ -30,6 +33,8 @@ class _MainNavigationState extends State<MainNavigation> {
   bool _listenerStarted = false;
   late final _Lifecycle _lifecycle = _Lifecycle(this);
   Timer? _listenerHealthTimer;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
+  bool _syncSpendPipelineInFlight = false;
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -50,7 +55,11 @@ class _MainNavigationState extends State<MainNavigation> {
       }
       // Remove SnackBars pendentes (ex.: erro de foto antigo ao voltar das Definições).
       ScaffoldMessenger.of(context).clearSnackBars();
-      _ensureNotificationListenerStarted();
+      unawaited(
+        _ensureNotificationListenerStarted().whenComplete(() {
+          if (mounted) unawaited(_tryPromptPendingRendaExtra());
+        }),
+      );
       MarketAlertService.instance.start();
       unawaited(
         UserDataRetentionService.instance.backupNow(reason: 'main_navigation'),
@@ -61,15 +70,55 @@ class _MainNavigationState extends State<MainNavigation> {
       unawaited(_ensureNotificationListenerStarted());
       unawaited(_notificationListener.sincronizarRecentes());
     });
+
+    // Assim que a rede voltar (sem fechar o app), drena fila → Firestore e relê notificações.
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
+      if (!mounted) return;
+      final online = results.isNotEmpty &&
+          !results.every((r) => r == ConnectivityResult.none);
+      if (!online) return;
+      unawaited(_syncSpendPipelineAfterNetworkBack());
+    });
   }
 
   @override
   void dispose() {
+    _connectivitySub?.cancel();
     _listenerHealthTimer?.cancel();
     MarketAlertService.instance.stop();
     _notificationListener.parar();
     WidgetsBinding.instance.removeObserver(_lifecycle);
     super.dispose();
+  }
+
+  /// Fila Dart (`_pendingTxKey`) + notificações nativas em fila / bandeja, depois atualiza UI.
+  Future<void> _syncSpendPipelineAfterNetworkBack() async {
+    if (!Platform.isAndroid) return;
+    if (FirebaseAuth.instance.currentUser == null) return;
+    if (_syncSpendPipelineInFlight) return;
+    _syncSpendPipelineInFlight = true;
+    try {
+      final saved =
+          await _notificationListener.flushPendingTransactionsToFirestore();
+      await _ensureNotificationListenerStarted();
+      if (saved == 0) {
+        // Streams Firestore podem já ter dados; prefs/locais já foram tratados no flush.
+        TransactionRefreshSignal.notify();
+      }
+      await DailySpendLimitNotifier.evaluateFromPrefsToday();
+    } finally {
+      _syncSpendPipelineInFlight = false;
+    }
+    if (mounted) {
+      unawaited(_tryPromptPendingRendaExtra());
+    }
+  }
+
+  /// Diálogo de confirmação para entradas (PIX recebido, etc.) → **Renda extra**.
+  Future<void> _tryPromptPendingRendaExtra() async {
+    if (!mounted) return;
+    if (FirebaseAuth.instance.currentUser == null) return;
+    await PendingRendaExtraConfirmationService.tryShowNext(context);
   }
 
   /// Garante o [NotificationListenerService] no Android: permissão de **leitor de notificações**,
@@ -285,9 +334,8 @@ class _Lifecycle extends WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      owner._ensureNotificationListenerStarted();
+      unawaited(owner._syncSpendPipelineAfterNetworkBack());
       unawaited(MarketAlertService.instance.checkNow());
-      unawaited(DailySpendLimitNotifier.evaluateFromPrefsToday());
     }
   }
 }

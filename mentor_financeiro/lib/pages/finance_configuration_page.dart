@@ -77,7 +77,7 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
     ),
     const _CampoConfig(
       'Renda Extra',
-      'Freelances, gorjetas,etc',
+      'Freelances, gorjetas; entradas (ex.: PIX recebido) podem somar aqui pelo monitor de notificações.',
       true,
       ehRenda: true,
       cor: Colors.tealAccent,

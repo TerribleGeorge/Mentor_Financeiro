@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/transacao_model.dart';
 import '../services/ad_manager_service.dart';
+import '../services/daily_spend_limit_notifier.dart';
 import '../services/subscription_provider.dart';
 import '../services/transaction_refresh_signal.dart';
 
@@ -112,6 +114,20 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
           .doc(user.uid)
           .collection('transacoes')
           .add(transacao.toMap());
+
+      if (_tipoPagamento == TipoPagamento.debito) {
+        final prefs = await SharedPreferences.getInstance();
+        final key =
+            'gastos_${transacao.data.year}-${transacao.data.month.toString().padLeft(2, '0')}-${transacao.data.day.toString().padLeft(2, '0')}';
+        final atual = prefs.getDouble(key) ?? 0.0;
+        final novo = atual + valor;
+        await prefs.setDouble(key, novo);
+        await DailySpendLimitNotifier.onSpendUpdated(
+          prefs: prefs,
+          gastosDayKey: key,
+          newTotal: novo,
+        );
+      }
 
       TransactionRefreshSignal.notify();
 

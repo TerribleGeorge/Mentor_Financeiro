@@ -4,9 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'daily_spend_limit_notifier.dart';
+import 'pending_renda_extra_confirmation_service.dart';
+import 'renda_extra_background_nudge.dart';
 import 'transaction_refresh_signal.dart';
+import '../domain/finance/daily_limit_calculator.dart';
 import '../models/transacao_model.dart';
 import 'local_transaction_store.dart';
 
@@ -588,7 +592,9 @@ class NotificationParserService {
     'annullat',
   ];
 
-  /// Entradas de dinheiro / estorno — manter frases **específicas** (evitar «received» sozinho).
+  /// Entradas de dinheiro / estorno — texto que **não** vira despesa; com valor reconhecido
+  /// soma em **Renda Extra** (prefs) e entra em [DailyLimitCalculator._sumIncome].
+  /// Manter frases **específicas** (evitar «received» sozinho).
   static const List<String> _incomingBlockKeywords = [
     'pix recebido',
     'pix received',
@@ -1362,6 +1368,25 @@ class NotificationParserService {
       if (v != null && v > 0) return v;
     }
     return null;
+  }
+
+  /// PIX/TED recebido, estorno, dividendos, etc. — não é despesa; o valor vai para **Renda Extra**.
+  static bool isIncomingIncomeNotification(String texto) {
+    final cleaned = _sanitize(texto);
+    final t = cleaned.toLowerCase();
+    if (_securityBlockKeywords.any((k) => t.contains(k))) return false;
+    final v = extrairValor(cleaned);
+    if (v == null || v <= 0) return false;
+    return _incomingBlockKeywords.any((k) => t.contains(k));
+  }
+
+  static double? extrairValorEntradaNotificacao(String texto) {
+    return extrairValor(_sanitize(texto));
+  }
+
+  static String formatarValorPrefsPtBr(double valor) {
+    if (valor.abs() < 1e-9) return '';
+    return NumberFormat('#,##0.00', 'pt_BR').format(valor);
   }
 
   static String? extrairEstabelecimento(String texto) {
@@ -2138,7 +2163,7 @@ class NotificationListenerService {
     if (kDebugMode) {
       debugPrint('Notificação recebida [$packageName]: $title | $text');
     }
-    unawaited(_registrarDiagnostico('recebida', notificationText));
+    await _registrarDiagnostico('recebida', notificationText);
 
     if (notificationText.trim().isEmpty) {
       return;
@@ -2597,6 +2622,55 @@ class NotificationListenerService {
     if (!enabled) {
       await _registrarDiagnostico('monitoramento pausado', texto);
       return;
+    }
+
+    // Entradas (PIX/TED recebido, estorno, etc.) → soma em **Renda Extra** (renda mensal no limite diário).
+    if (user != null &&
+        !NotificationParserService.isSmsPackage(packageName) &&
+        !NotificationParserService.isGooglePayPackage(packageName)) {
+      final pacoteConfiavel =
+          NotificationParserService.isTrustedBankPackage(packageName) ||
+              NotificationParserService.isLikelyFinancialPackage(packageName);
+      if (pacoteConfiavel &&
+          NotificationParserService.isIncomingIncomeNotification(texto)) {
+        final dedupeUid = user.uid;
+        if (await _isDuplicate(
+          uid: dedupeUid,
+          packageName: packageName,
+          texto: texto,
+          timestamp: timestamp,
+        )) {
+          await _registrarDiagnostico('duplicada', texto);
+          return;
+        }
+        final vInc =
+            NotificationParserService.extrairValorEntradaNotificacao(texto);
+        if (vInc != null && vInc > 0) {
+          final enqueued = await PendingRendaExtraConfirmationService.enqueueIfNew(
+            uid: user.uid,
+            packageName: packageName,
+            timestamp: timestamp,
+            valor: vInc,
+            resumo: texto,
+          );
+          if (enqueued) {
+            unawaited(RendaExtraBackgroundNudge.tryNotifyIfBackground(valor: vInc));
+          }
+          await _marcarComoProcessada(
+            uid: dedupeUid,
+            packageName: packageName,
+            texto: texto,
+            timestamp: timestamp,
+          );
+          await _registrarDiagnostico(
+            'renda extra (aguarda confirmação)',
+            texto,
+          );
+          return;
+        }
+        await _registrarDiagnostico('entrada sem valor reconhecido', texto);
+        return;
+      }
     }
 
     final transacaoData = NotificationParserService.parse(texto);

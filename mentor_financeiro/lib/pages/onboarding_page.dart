@@ -6,8 +6,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/navigation/post_login_navigation.dart';
 import '../services/firebase_service.dart';
-import 'tela_home.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -63,9 +63,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
 
     if (mounted) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const TelaHome()));
+      await mentorReplaceWithIntroOrMain(context);
     }
   }
 

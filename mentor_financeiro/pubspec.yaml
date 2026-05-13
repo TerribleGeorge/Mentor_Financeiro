@@ -93,6 +93,8 @@ dependencies:
   # Mantém o SDK legado de login Google no Android; o fluxo 7.x/Credential
   # Manager retornou cancelado em teste interno da Play neste app.
   google_sign_in: 6.3.0
+  sign_in_with_apple: ^6.1.4
+  crypto: ^3.0.6
   fl_chart: ^1.0.0
   intl: ^0.20.2
   flutter_localizations:
