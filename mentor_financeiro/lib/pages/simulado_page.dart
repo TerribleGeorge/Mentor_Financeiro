@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/suitability_engine.dart';
 import '../l10n/app_localizations.dart';
 import '../services/ad_manager_service.dart';
+import '../services/firebase_service.dart';
 import '../services/investment_category_provider.dart';
 import '../services/subscription_provider.dart';
 
@@ -33,15 +38,37 @@ class _SimuladoPageState extends State<SimuladoPage> {
           curve: Curves.easeInOut,
         );
       } else {
-        _showResult();
+        unawaited(_showResult());
       }
     });
   }
 
-  void _showResult() {
+  Future<void> _showResult() async {
     final totalScore = _answers.fold<int>(0, (sum, value) => sum + value);
     final profile = SuitabilityEngine.calculateProfile(totalScore);
+    final profileKey = profile.name.toLowerCase();
 
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('perfil_investidor', profileKey);
+    await prefs.setInt('perfil_investidor_score', totalScore);
+    await prefs.setString(
+      'perfil_investidor_atualizado_em',
+      DateTime.now().toIso8601String(),
+    );
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      unawaited(
+        FirebaseService.salvarPerfilInvestidor(uid, profileKey).catchError((
+          Object e,
+          StackTrace st,
+        ) {
+          debugPrint('SimuladoPage perfil sync: $e\n$st');
+        }),
+      );
+    }
+
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => _ResultPage(profile: profile)),
@@ -425,9 +452,9 @@ class _ResultPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                child: Text(
-                  l10n.quizProfile_exploreInvestmentsCta,
-                  style: const TextStyle(
+                  child: Text(
+                    l10n.quizProfile_exploreInvestmentsCta,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                       letterSpacing: 1,
@@ -456,9 +483,9 @@ class _ResultPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                child: Text(
-                  l10n.quizProfile_exit,
-                  style: const TextStyle(
+                  child: Text(
+                    l10n.quizProfile_exit,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                       letterSpacing: 1,
@@ -507,7 +534,9 @@ class _ResultPage extends StatelessWidget {
             ? ['FIIs', 'LCIs', 'Multimercado']
             : ['S&P 500 ETF', 'Dividend growth', 'REITs'];
       case Profile.arrojado:
-        return isBrazil ? ['Ações', 'ETFs', 'Cripto'] : ['Stocks', 'ETFs', 'Crypto'];
+        return isBrazil
+            ? ['Ações', 'ETFs', 'Cripto']
+            : ['Stocks', 'ETFs', 'Crypto'];
     }
   }
 }

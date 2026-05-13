@@ -194,4 +194,85 @@ class LocalizationService {
     }
     return normalized;
   }
+
+  static String currencySymbolForCode(String code) {
+    final normalized = code.trim().toUpperCase();
+    for (final option in currencyOptions) {
+      if (option.code == normalized) return option.symbol;
+    }
+    return normalized;
+  }
+
+  static String currencyNameForCode(String code) {
+    final normalized = code.trim().toUpperCase();
+    for (final option in currencyOptions) {
+      if (option.code == normalized) return option.label;
+    }
+    return normalized;
+  }
+
+  static String currencyCodeForCountry(String? countryCode) {
+    final cc = (countryCode ?? '').trim().toUpperCase();
+    const map = <String, String>{
+      'BR': 'BRL',
+      'US': 'USD',
+      'CA': 'CAD',
+      'GB': 'GBP',
+      'AU': 'AUD',
+      'NZ': 'NZD',
+      'CH': 'CHF',
+      'JP': 'JPY',
+      'CN': 'CNY',
+      'HK': 'HKD',
+      'SG': 'SGD',
+      'IN': 'INR',
+      'KR': 'KRW',
+      'MX': 'MXN',
+      'AR': 'ARS',
+      'CL': 'CLP',
+      'CO': 'COP',
+      'PE': 'PEN',
+      'UY': 'UYU',
+      'SE': 'SEK',
+      'NO': 'NOK',
+      'DK': 'DKK',
+      'PL': 'PLN',
+      'CZ': 'CZK',
+      'HU': 'HUF',
+      'RO': 'RON',
+      'TR': 'TRY',
+      'ZA': 'ZAR',
+      'AE': 'AED',
+      'SA': 'SAR',
+      'IL': 'ILS',
+      'TH': 'THB',
+      'ID': 'IDR',
+      'MY': 'MYR',
+      'PH': 'PHP',
+    };
+    const euroCountries = {
+      'AT',
+      'BE',
+      'CY',
+      'DE',
+      'EE',
+      'ES',
+      'FI',
+      'FR',
+      'GR',
+      'HR',
+      'IE',
+      'IT',
+      'LT',
+      'LU',
+      'LV',
+      'MT',
+      'NL',
+      'PT',
+      'SI',
+      'SK',
+    };
+    if (euroCountries.contains(cc)) return 'EUR';
+    return map[cc] ?? currencyCode;
+  }
 }

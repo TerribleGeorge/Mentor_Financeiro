@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../models/transacao_model.dart';
+import '../services/local_transaction_store.dart';
 import '../services/localization_service.dart';
 import '../services/mentoria_service.dart';
 import '../services/exchange_rate_service.dart';
@@ -35,6 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? _filtroTipoPagamento;
   List<DicaFinanceira> _dicas = [];
   NotaSaudeFinanceira? _notaSaude;
+
   /// Evita recalcular mentoria a cada frame quando os dados não mudaram.
   String? _mentoriaCacheKey;
 
@@ -74,6 +76,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       default:
         return Icons.receipt;
     }
+  }
+
+  String _mensagemErroRelatorios(Object? error) {
+    if (error is FirebaseException && error.code == 'permission-denied') {
+      return 'Não consegui acessar seus dados na nuvem agora. Verifique se você está logado na conta correta e tente novamente.';
+    }
+    return 'Não foi possível carregar os relatórios neste momento. Tente novamente em instantes.';
   }
 
   @override
@@ -116,7 +125,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             : null,
         actions: [
           IconButton(
-            icon: Icon(Icons.settings, color: scheme.onSurface.withValues(alpha: 0.72)),
+            icon: Icon(
+              Icons.settings,
+              color: scheme.onSurface.withValues(alpha: 0.72),
+            ),
             onPressed: () {},
           ),
         ],
@@ -158,7 +170,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.cloud_off, color: Colors.white54, size: 48),
+                    const Icon(
+                      Icons.cloud_off,
+                      color: Colors.white54,
+                      size: 48,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Não foi possível carregar os relatórios.',
@@ -168,13 +184,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 8),
                     Text(
-                      '${snapshot.error}',
+                      _mensagemErroRelatorios(snapshot.error),
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.45),
-                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 13,
+                        height: 1.35,
                       ),
                     ),
                   ],
@@ -183,113 +199,131 @@ class _DashboardScreenState extends State<DashboardScreen> {
             );
           }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return _buildEmptyState();
-          }
+          final cloud = snapshot.hasData
+              ? snapshot.data!.docs
+                    .map(
+                      (doc) => TransacaoModel.fromMap(
+                        doc.data() as Map<String, dynamic>,
+                      ),
+                    )
+                    .toList()
+              : <TransacaoModel>[];
 
-          final transacoesAll = snapshot.data!.docs
-              .map(
-                (doc) =>
-                    TransacaoModel.fromMap(doc.data() as Map<String, dynamic>),
-              )
-              .toList();
-
-          var transacoes = transacoesAll;
-          if (_filtroTipoPagamento != null) {
-            transacoes = transacoesAll.where((t) {
-              if (_filtroTipoPagamento == 'debito') {
-                return t.tipoPagamento == TipoPagamento.debito;
-              } else if (_filtroTipoPagamento == 'credito') {
-                return t.tipoPagamento == TipoPagamento.credito;
-              }
-              return true;
-            }).toList();
-          }
-
-          final checksum = transacoesAll.fold<double>(
-            0,
-            (running, t) =>
-                running + t.valor + (t.data.millisecondsSinceEpoch % 10009),
-          );
-          final mentoriaKey =
-              '${user.uid}|${startOfMonth.millisecondsSinceEpoch}|${transacoesAll.length}|$checksum';
-          if (_mentoriaCacheKey != mentoriaKey) {
-            _mentoriaCacheKey = mentoriaKey;
-            // Evita setState durante build; só agenda quando o snapshot mudou de fato.
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (!mounted) return;
-              MentoriaService.gerarDicas(
-                uid: user.uid,
-                transacoes: transacoesAll,
-              ).then((dicas) {
-                if (!mounted) return;
-                setState(() => _dicas = dicas);
-              });
-              MentoriaService.calcularNotaSaude(
-                uid: user.uid,
-                transacoes: transacoesAll,
-              ).then((nota) {
-                if (!mounted) return;
-                setState(() => _notaSaude = nota);
-              });
-            });
-          }
-
-          final bottomInset =
-              MediaQuery.paddingOf(context).bottom + kFloatingActionButtonMargin + 56;
-          return SingleChildScrollView(
-            // Evita competição de gestos com fl_chart: scroll vertical estável.
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (!widget.chartsOnly) ...[
-                  if (_notaSaude != null) ...[
-                    PremiumWrapper(
-                      feature: 'Nota de Saúde Financeira',
-                      child: NotaSaudeCard(notaSaude: _notaSaude!),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                  if (_dicas.isNotEmpty) ...[
-                    PremiumWrapper(
-                      feature: 'Mentoria (dicas personalizadas)',
-                      child: DicaCarousel(dicas: _dicas),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ],
-                _buildMonthSelector(),
-                const SizedBox(height: 16),
-                _buildTipoPagamentoFilter(),
-                if (widget.chartsOnly) ...[
-                  const SizedBox(height: 16),
-                  _buildExchangeRatesCard(),
-                  const SizedBox(height: 24),
-                  _buildMoneyUsedLineChart(transacoes),
-                ],
-                if (transacoes.isEmpty && transacoesAll.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  _buildFiltroVazioBanner(),
-                ],
-                const SizedBox(height: 20),
-                _buildTotalCard(transacoes),
-                const SizedBox(height: 24),
-                _buildPieChart(transacoes),
-                const SizedBox(height: 24),
-                _buildCardUsageChart(transacoes),
-                const SizedBox(height: 24),
-                PremiumWrapper(
-                  feature: 'Análise avançada (últimos 7 dias)',
-                  child: _buildCandleStickChart(transacoes),
-                ),
-                if (!widget.chartsOnly) ...[
-                  const SizedBox(height: 24),
-                  _buildRecentTransactions(transacoes.take(5).toList()),
-                ],
-              ],
+          return FutureBuilder<List<TransacaoModel>>(
+            future: LocalTransactionStore.load(
+              start: startOfMonth,
+              end: endOfMonth,
             ),
+            builder: (context, localSnapshot) {
+              final transacoesAll = LocalTransactionStore.merge(
+                cloud,
+                localSnapshot.data ?? const <TransacaoModel>[],
+              );
+
+              if (transacoesAll.isEmpty) {
+                return _buildEmptyState();
+              }
+
+              var transacoes = transacoesAll;
+              if (_filtroTipoPagamento != null) {
+                transacoes = transacoesAll.where((t) {
+                  if (_filtroTipoPagamento == 'debito') {
+                    return t.tipoPagamento == TipoPagamento.debito;
+                  } else if (_filtroTipoPagamento == 'credito') {
+                    return t.tipoPagamento == TipoPagamento.credito;
+                  }
+                  return true;
+                }).toList();
+              }
+
+              final checksum = transacoesAll.fold<double>(
+                0,
+                (running, t) =>
+                    running + t.valor + (t.data.millisecondsSinceEpoch % 10009),
+              );
+              final mentoriaKey =
+                  '${user.uid}|${startOfMonth.millisecondsSinceEpoch}|${transacoesAll.length}|$checksum';
+              if (_mentoriaCacheKey != mentoriaKey) {
+                _mentoriaCacheKey = mentoriaKey;
+                // Evita setState durante build; só agenda quando o snapshot mudou de fato.
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  MentoriaService.gerarDicas(
+                    uid: user.uid,
+                    transacoes: transacoesAll,
+                  ).then((dicas) {
+                    if (!mounted) return;
+                    setState(() => _dicas = dicas);
+                  });
+                  MentoriaService.calcularNotaSaude(
+                    uid: user.uid,
+                    transacoes: transacoesAll,
+                  ).then((nota) {
+                    if (!mounted) return;
+                    setState(() => _notaSaude = nota);
+                  });
+                });
+              }
+
+              final bottomInset =
+                  MediaQuery.paddingOf(context).bottom +
+                  kFloatingActionButtonMargin +
+                  56;
+              return SingleChildScrollView(
+                // Evita competição de gestos com fl_chart: scroll vertical estável.
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!widget.chartsOnly) ...[
+                      if (_notaSaude != null) ...[
+                        PremiumWrapper(
+                          feature: 'Nota de Saúde Financeira',
+                          child: NotaSaudeCard(notaSaude: _notaSaude!),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                      if (_dicas.isNotEmpty) ...[
+                        PremiumWrapper(
+                          feature: 'Mentoria (dicas personalizadas)',
+                          child: DicaCarousel(dicas: _dicas),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ],
+                    _buildMonthSelector(),
+                    const SizedBox(height: 16),
+                    _buildTipoPagamentoFilter(),
+                    if (widget.chartsOnly) ...[
+                      const SizedBox(height: 16),
+                      _buildExchangeRatesCard(),
+                      const SizedBox(height: 24),
+                      _buildMoneyUsedLineChart(transacoes),
+                    ],
+                    if (transacoes.isEmpty && transacoesAll.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      _buildFiltroVazioBanner(),
+                    ],
+                    const SizedBox(height: 20),
+                    _buildTotalCard(transacoes),
+                    const SizedBox(height: 24),
+                    _buildPieChart(transacoes),
+                    const SizedBox(height: 24),
+                    _buildCardUsageChart(transacoes),
+                    const SizedBox(height: 24),
+                    PremiumWrapper(
+                      feature: 'Análise avançada (últimos 7 dias)',
+                      child: _buildCandleStickChart(transacoes),
+                    ),
+                    if (!widget.chartsOnly) ...[
+                      const SizedBox(height: 24),
+                      _buildRecentTransactions(transacoes.take(5).toList()),
+                    ],
+                  ],
+                ),
+              );
+            },
           );
         },
       ),
@@ -317,7 +351,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.currency_exchange, color: Colors.white70, size: 20),
+                  const Icon(
+                    Icons.currency_exchange,
+                    color: Colors.white70,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
@@ -345,18 +383,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
               else if (data == null || usdBrl == null)
                 Text(
                   'Sem dados (offline). Abra “Ver todas” quando estiver com internet.',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 12,
+                  ),
                 )
               else
                 Wrap(
                   spacing: 10,
                   runSpacing: 10,
                   children: [
-                    _buildStatChip('USD→BRL: ${usdBrl.toStringAsFixed(2)}', Icons.attach_money),
+                    _buildStatChip(
+                      'USD→BRL: ${usdBrl.toStringAsFixed(2)}',
+                      Icons.attach_money,
+                    ),
                     if (usdEur != null)
-                      _buildStatChip('USD→EUR: ${usdEur.toStringAsFixed(4)}', Icons.euro),
+                      _buildStatChip(
+                        'USD→EUR: ${usdEur.toStringAsFixed(4)}',
+                        Icons.euro,
+                      ),
                     if (usdGbp != null)
-                      _buildStatChip('USD→GBP: ${usdGbp.toStringAsFixed(4)}', Icons.currency_pound),
+                      _buildStatChip(
+                        'USD→GBP: ${usdGbp.toStringAsFixed(4)}',
+                        Icons.currency_pound,
+                      ),
                   ],
                 ),
             ],
@@ -367,11 +417,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildMoneyUsedLineChart(List<TransacaoModel> transacoes) {
-    final daysInMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0).day;
+    final daysInMonth = DateTime(
+      _selectedMonth.year,
+      _selectedMonth.month + 1,
+      0,
+    ).day;
     final daily = List<double>.filled(daysInMonth, 0);
 
     for (final t in transacoes) {
-      if (t.data.year != _selectedMonth.year || t.data.month != _selectedMonth.month) continue;
+      if (t.data.year != _selectedMonth.year ||
+          t.data.month != _selectedMonth.month) {
+        continue;
+      }
       final idx = t.data.day - 1;
       if (idx >= 0 && idx < daily.length) daily[idx] += t.valor;
     }
@@ -442,8 +499,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 titlesData: FlTitlesData(
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -467,7 +528,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       interval: (daily.length / 6).clamp(1, 10).toDouble(),
                       getTitlesWidget: (value, meta) {
                         final v = value.toInt();
-                        if (v < 1 || v > daily.length) return const SizedBox.shrink();
+                        if (v < 1 || v > daily.length) {
+                          return const SizedBox.shrink();
+                        }
                         return Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
@@ -515,7 +578,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.filter_alt_off, color: Colors.amber.withValues(alpha: 0.9)),
+          Icon(
+            Icons.filter_alt_off,
+            color: Colors.amber.withValues(alpha: 0.9),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -730,8 +796,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(width: 6),
           Text(
             text,
-            style: const TextStyle(color: Colors.white70, fontSize: 12)
-                .withFinancialShadows(context),
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+            ).withFinancialShadows(context),
           ),
         ],
       ),
@@ -813,8 +881,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(width: 4),
                 Text(
                   _formatarMoeda(entry.value),
-                  style: const TextStyle(color: Colors.white54, fontSize: 11)
-                      .withFinancialShadows(context),
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 11,
+                  ).withFinancialShadows(context),
                 ),
               ],
             );

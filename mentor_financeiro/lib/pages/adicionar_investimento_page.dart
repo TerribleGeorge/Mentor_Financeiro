@@ -93,7 +93,9 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
     if (user == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Faça login para guardar o investimento.')),
+        const SnackBar(
+          content: Text('Faça login para guardar o investimento.'),
+        ),
       );
       return;
     }
@@ -150,7 +152,9 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao guardar: $e')),
+        const SnackBar(
+          content: Text('Não foi possível guardar agora. Tente novamente.'),
+        ),
       );
     } finally {
       if (mounted) setState(() => _salvando = false);
@@ -169,7 +173,9 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
         body: const Center(
           child: Padding(
             padding: EdgeInsets.all(24),
-            child: Text('Nenhum tipo de investimento disponível para esta região.'),
+            child: Text(
+              'Nenhum tipo de investimento disponível para esta região.',
+            ),
           ),
         ),
       );
@@ -194,7 +200,9 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
               Text(
                 'Região da loja/conta: ${cat.effectiveCountryCode} · '
                 '${cat.isBrazilMarket ? "catálogo Brasil" : "catálogo global"}',
-                style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.75)),
+                style: TextStyle(
+                  color: scheme.onSurface.withValues(alpha: 0.75),
+                ),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
@@ -205,10 +213,8 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
                 ),
                 items: opcoes
                     .map(
-                      (o) => DropdownMenuItem(
-                        value: o.id,
-                        child: Text(o.title),
-                      ),
+                      (o) =>
+                          DropdownMenuItem(value: o.id, child: Text(o.title)),
                     )
                     .toList(),
                 onChanged: (v) {
@@ -271,7 +277,9 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _valorController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: const InputDecoration(
                   labelText: 'Valor (BRL)',
                   hintText: '0,00',

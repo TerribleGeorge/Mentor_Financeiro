@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../pages/paywall_screen.dart';
 import '../services/subscription_provider.dart';
 
-/// Modal para o tema Cyber: atalho para paywall / Play Store.
+/// Modal para o tema Cyber: atalho para paywall / Google Play Billing.
 abstract final class PremiumCyberPaywallDialog {
   static Future<void> show(BuildContext context) async {
     context.read<SubscriptionProvider>().clearErrorMessage();
@@ -25,8 +25,7 @@ abstract final class PremiumCyberPaywallDialog {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'O tema Cyber faz parte da assinatura Premium. A subscrição é feita na '
-                      'Google Play; depois o estado Premium deve estar reflectido no teu perfil.',
+                      'O tema Cyber faz parte da assinatura Premium. A subscrição é feita pela Google Play dentro do app.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     if (sub.isLoading) ...[
@@ -46,7 +45,7 @@ abstract final class PremiumCyberPaywallDialog {
                       onPressed: sub.isLoading
                           ? null
                           : () async {
-                              final ok = await sub.openPlayStoreListing();
+                              final ok = await sub.purchaseMonthly();
                               if (!dialogContext.mounted) return;
                               Navigator.of(dialogContext).pop();
                               if (!context.mounted) return;
@@ -54,14 +53,14 @@ abstract final class PremiumCyberPaywallDialog {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
-                                      'Na Play Store, subscreve o Premium. Depois actualiza o perfil ou reinicia o app.',
+                                      'A compra foi enviada para a Google Play.',
                                     ),
                                   ),
                                 );
                               }
                             },
-                      icon: const Icon(Icons.storefront_outlined),
-                      label: const Text('Abrir Play Store'),
+                      icon: const Icon(Icons.workspace_premium_outlined),
+                      label: const Text('Assinar mensal'),
                     ),
                     const SizedBox(height: 8),
                     TextButton(

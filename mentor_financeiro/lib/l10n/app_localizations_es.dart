@@ -490,7 +490,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String investRegionHintGlobal(String country) {
-    return 'País efectivo: $country · catálogo global (ETFs, NYSE/NASDAQ…). Prioridad: país del dispositivo · fallback locale/IP.';
+    return 'País efectivo: $country · catálogo global (ETFs, NYSE/NASDAQ…). Ajustado automáticamente por la región del dispositivo.';
   }
 
   @override

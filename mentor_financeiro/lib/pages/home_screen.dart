@@ -17,6 +17,8 @@ import 'paywall_screen.dart';
 import 'settings_page.dart';
 import 'finance_configuration_page.dart';
 import '../widgets/ads/adaptive_banner_ad.dart';
+import '../widgets/currency_rates_home_card.dart';
+import '../widgets/investment_news_today_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -58,10 +60,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _carregarDados() async {
     final prefs = await SharedPreferences.getInstance();
     final user = FirebaseAuth.instance.currentUser;
-    _nomeUsuario =
-        (user?.displayName?.trim().isNotEmpty == true
-            ? user!.displayName!.trim()
-            : (prefs.getString('nome_usuario') ?? 'Usuário'));
+    _nomeUsuario = (user?.displayName?.trim().isNotEmpty == true
+        ? user!.displayName!.trim()
+        : (prefs.getString('nome_usuario') ?? 'Usuário'));
     _photoUrl = user?.photoURL?.trim().isNotEmpty == true
         ? user!.photoURL!.trim()
         : null;
@@ -91,257 +92,289 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             tooltip: 'Definições',
-            icon: Icon(
-              Icons.settings_outlined,
-              color: scheme.primary,
-            ),
+            icon: Icon(Icons.settings_outlined, color: scheme.primary),
             onPressed: () {
               Navigator.of(context).push<void>(
-                MaterialPageRoute<void>(
-                  builder: (_) => const SettingsPage(),
-                ),
+                MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
               );
             },
           ),
         ],
       ),
       body: SafeArea(
-          top: false,
-          child: CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 22,
-                            backgroundColor: scheme.primary.withValues(alpha: 0.18),
-                            foregroundImage: _photoUrl != null
-                                ? NetworkImage(_photoUrl!)
-                                : null,
-                            child: _photoUrl == null
-                                ? Icon(Icons.person, color: Colors.white.withValues(alpha: 0.85))
-                                : null,
+        top: false,
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 22,
+                          backgroundColor: scheme.primary.withValues(
+                            alpha: 0.18,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Olá, $_nomeUsuario',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.88),
-                                    fontSize: 14,
-                                    shadows: ClassicModeStyle.secondaryTextShadows(context),
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Dashboard',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    shadows: ClassicModeStyle.primaryTextShadows(context),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (!subscription.isPremium)
-                            TextButton(
-                              style: TextButton.styleFrom(foregroundColor: Colors.white),
-                              onPressed: () => Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => const PaywallScreen(),
-                                ),
-                              ),
-                              child: const Text(
-                                'Premium',
-                                style: TextStyle(fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                        ],
-                      ),
-                      StreamBuilder<User?>(
-                        stream: FirebaseAuth.instance.authStateChanges(),
-                        builder: (context, authSnap) {
-                          if (authSnap.data != null) {
-                            return const SizedBox.shrink();
-                          }
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: scheme.primary.withValues(alpha: 0.45),
-                                ),
-                                color: scheme.primary.withValues(alpha: 0.12),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 12,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.cloud_off_outlined,
-                                      color: scheme.primary,
-                                      size: 26,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        'Sem sessão na nuvem. Inicie sessão para guardar o perfil e sincronizar entre dispositivos.',
-                                        style: TextStyle(
-                                          color: Colors.white.withValues(alpha: 0.9),
-                                          fontSize: 13,
-                                          height: 1.35,
-                                          shadows: ClassicModeStyle.secondaryTextShadows(context),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    FilledButton.tonal(
-                                      onPressed: () => mentorPushNamed(
-                                        context,
-                                        AppRoutes.login,
-                                      ),
-                                      child: const Text('Entrar'),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      if (_mentorAlert != null) ...[
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: const Color(0xFFFF2D2D).withValues(alpha: 0.45),
-                            ),
-                            color: const Color(0xFFFF2D2D).withValues(alpha: 0.08),
-                          ),
-                          child: Row(
+                          foregroundImage: _photoUrl != null
+                              ? NetworkImage(_photoUrl!)
+                              : null,
+                          child: _photoUrl == null
+                              ? Icon(
+                                  Icons.person,
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.warning_amber, color: Color(0xFFFF2D2D)),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _mentorAlert!.title,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w800,
-                                        shadows: ClassicModeStyle.primaryTextShadows(context),
+                              Text(
+                                'Olá, $_nomeUsuario',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.88),
+                                  fontSize: 14,
+                                  shadows:
+                                      ClassicModeStyle.secondaryTextShadows(
+                                        context,
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _mentorAlert!.message,
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.88),
-                                        height: 1.25,
-                                        shadows: ClassicModeStyle.secondaryTextShadows(context),
-                                      ),
-                                    ),
-                                  ],
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                onPressed: () =>
-                                    mentorPushNamed(context, AppRoutes.mentoria),
-                                icon: const Icon(Icons.chevron_right),
-                                color: Colors.white.withValues(alpha: 0.85),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Dashboard',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: ClassicModeStyle.primaryTextShadows(
+                                    context,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        if (!subscription.isPremium)
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => const PaywallScreen(),
+                              ),
+                            ),
+                            child: const Text(
+                              'Premium',
+                              style: TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                          ),
                       ],
-                      const HomeDailyLimitPanel(),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Recursos',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          shadows: ClassicModeStyle.primaryTextShadows(context),
+                    ),
+                    StreamBuilder<User?>(
+                      stream: FirebaseAuth.instance.authStateChanges(),
+                      builder: (context, authSnap) {
+                        if (authSnap.data != null) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: scheme.primary.withValues(alpha: 0.45),
+                              ),
+                              color: scheme.primary.withValues(alpha: 0.12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.cloud_off_outlined,
+                                    color: scheme.primary,
+                                    size: 26,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Sem sessão na nuvem. Inicie sessão para guardar o perfil e sincronizar entre dispositivos.',
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.9,
+                                        ),
+                                        fontSize: 13,
+                                        height: 1.35,
+                                        shadows:
+                                            ClassicModeStyle.secondaryTextShadows(
+                                              context,
+                                            ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  FilledButton.tonal(
+                                    onPressed: () => mentorPushNamed(
+                                      context,
+                                      AppRoutes.login,
+                                    ),
+                                    child: const Text('Entrar'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    if (_mentorAlert != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(
+                              0xFFFF2D2D,
+                            ).withValues(alpha: 0.45),
+                          ),
+                          color: const Color(
+                            0xFFFF2D2D,
+                          ).withValues(alpha: 0.08),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.warning_amber,
+                              color: Color(0xFFFF2D2D),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _mentorAlert!.title,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      shadows:
+                                          ClassicModeStyle.primaryTextShadows(
+                                            context,
+                                          ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _mentorAlert!.message,
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.88,
+                                      ),
+                                      height: 1.25,
+                                      shadows:
+                                          ClassicModeStyle.secondaryTextShadows(
+                                            context,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: () =>
+                                  mentorPushNamed(context, AppRoutes.mentoria),
+                              icon: const Icon(Icons.chevron_right),
+                              color: Colors.white.withValues(alpha: 0.85),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      _buildFeatureGrid(context, subscription),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildQuickAction(
-                              context,
-                              Icons.receipt_long,
-                              'Transações',
-                              const Color(0xFF00D9FF),
-                              () {
-                                mentorPushNamed(context, AppRoutes.historico);
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildQuickAction(
-                              context,
-                              Icons.pie_chart,
-                              'Gráficos',
-                              const Color(0xFF26DE81),
-                              () {
-                                mentorPushNamed(context, AppRoutes.graficos);
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildQuickAction(
-                              context,
-                              Icons.history,
-                              'Histórico',
-                              const Color(0xFFFECA57),
-                              () {
-                                mentorPushNamed(context, AppRoutes.historico);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Banner no fim da Home (fora da árvore se Premium).
                       const SizedBox(height: 16),
-                      if (!subscription.isPremium) const AdaptiveBannerAd(),
-                      SizedBox(
-                        height: MediaQuery.paddingOf(context).bottom +
-                            kBottomNavigationBarHeight,
-                      ),
                     ],
-                  ),
+                    const HomeDailyLimitPanel(),
+                    const SizedBox(height: 16),
+                    const InvestmentNewsTodayCard(),
+                    const SizedBox(height: 16),
+                    const CurrencyRatesHomeCard(),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Recursos',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        shadows: ClassicModeStyle.primaryTextShadows(context),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFeatureGrid(context, subscription),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildQuickAction(
+                            context,
+                            Icons.receipt_long,
+                            'Transações',
+                            const Color(0xFF00D9FF),
+                            () {
+                              mentorPushNamed(context, AppRoutes.historico);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildQuickAction(
+                            context,
+                            Icons.pie_chart,
+                            'Gráficos',
+                            const Color(0xFF26DE81),
+                            () {
+                              mentorPushNamed(context, AppRoutes.graficos);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildQuickAction(
+                            context,
+                            Icons.history,
+                            'Histórico',
+                            const Color(0xFFFECA57),
+                            () {
+                              mentorPushNamed(context, AppRoutes.historico);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Banner no fim da Home (fora da árvore se Premium).
+                    const SizedBox(height: 16),
+                    if (!subscription.isPremium) const AdaptiveBannerAd(),
+                    SizedBox(
+                      height:
+                          MediaQuery.paddingOf(context).bottom +
+                          kBottomNavigationBarHeight,
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -388,7 +421,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFeatureGrid(BuildContext context, SubscriptionProvider subscription) {
+  Widget _buildFeatureGrid(
+    BuildContext context,
+    SubscriptionProvider subscription,
+  ) {
     Widget tile({
       required IconData icon,
       required String label,
@@ -400,8 +436,8 @@ class _HomeScreenState extends State<HomeScreen> {
       return InkWell(
         onTap: locked
             ? () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => const PaywallScreen()),
-                )
+                MaterialPageRoute<void>(builder: (_) => const PaywallScreen()),
+              )
             : onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
@@ -409,7 +445,10 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFF0D1118),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: color.withValues(alpha: 0.78), width: 1.2),
+            border: Border.all(
+              color: color.withValues(alpha: 0.78),
+              width: 1.2,
+            ),
             boxShadow: [
               BoxShadow(
                 color: color.withValues(alpha: 0.14),
@@ -427,7 +466,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Icon(icon, color: color, size: 26),
                       const Spacer(),
-                      if (locked) const Icon(Icons.lock, color: Colors.white54, size: 18),
+                      if (locked)
+                        const Icon(Icons.lock, color: Colors.white54, size: 18),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -471,7 +511,9 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'Renda e Gastos Fixos',
           color: const Color(0xFF00D9FF),
           onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => const FinanceConfigurationPage()),
+            MaterialPageRoute<void>(
+              builder: (_) => const FinanceConfigurationPage(),
+            ),
           ),
         ),
         tile(
@@ -479,7 +521,9 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'Registro de Gastos',
           color: const Color(0xFF26DE81),
           onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => const AdicionarTransacaoPage()),
+            MaterialPageRoute<void>(
+              builder: (_) => const AdicionarTransacaoPage(),
+            ),
           ),
         ),
         tile(

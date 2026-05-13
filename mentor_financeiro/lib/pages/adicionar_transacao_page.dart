@@ -131,7 +131,10 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao salvar: $e'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Não foi possível salvar agora. Tente novamente.'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       if (mounted) setState(() => _salvando = false);
@@ -184,7 +187,9 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
                       decimal: true,
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Informe o valor';
+                      if (v == null || v.trim().isEmpty) {
+                        return 'Informe o valor';
+                      }
                       final parsed = _parseValor(v);
                       if (parsed <= 0) return 'Valor inválido';
                       return null;
@@ -239,7 +244,8 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
                           children: [
                             Expanded(
                               child: _choiceChip(
-                                selected: _tipoPagamento == TipoPagamento.debito,
+                                selected:
+                                    _tipoPagamento == TipoPagamento.debito,
                                 label: 'Débito',
                                 onTap: () => setState(
                                   () => _tipoPagamento = TipoPagamento.debito,
@@ -277,7 +283,10 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
                     ),
                     subtitle: Text(
                       '${_data.day.toString().padLeft(2, '0')}/${_data.month.toString().padLeft(2, '0')}/${_data.year}',
-                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
                     ),
                     trailing: const Icon(
                       Icons.chevron_right,
@@ -423,4 +432,3 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
     );
   }
 }
-

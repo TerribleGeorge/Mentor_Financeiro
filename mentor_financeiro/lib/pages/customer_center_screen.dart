@@ -35,9 +35,11 @@ class CustomerCenterScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
-                    onPressed: () => sub.openPlayStoreListing(),
-                    icon: const Icon(Icons.storefront_outlined),
-                    label: const Text('Ver app na Play Store'),
+                    onPressed: sub.isLoading
+                        ? null
+                        : () => sub.purchaseMonthly(),
+                    icon: const Icon(Icons.workspace_premium_outlined),
+                    label: const Text('Assinar Premium mensal'),
                   ),
                   const SizedBox(height: 24),
                   FilledButton.tonal(

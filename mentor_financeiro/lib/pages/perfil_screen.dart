@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme/classic_mode_style.dart';
 import '../theme/mentor_adaptive_visuals.dart';
@@ -29,18 +32,33 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
   Future<void> _carregarDados() async {
     final user = FirebaseAuth.instance.currentUser;
+    final prefs = await SharedPreferences.getInstance();
+    final dadosLocais = <String, dynamic>{
+      'nome': prefs.getString('nome_usuario') ?? user?.displayName ?? 'Usuário',
+      'email': user?.email,
+      'photoURL': user?.photoURL,
+      'profissao': prefs.getString('profissao') ?? '',
+      'perfilInvestidor': prefs.getString('perfil_investidor') ?? '',
+      'objetivos': prefs.getString('objetivos') ?? '',
+    };
+
+    if (mounted) {
+      setState(() {
+        _dadosUsuario = dadosLocais;
+        _carregando = false;
+      });
+    }
+
     if (user != null) {
-      final dados = await FirebaseService.buscarDadosUsuario(user.uid);
+      final dados = await FirebaseService.buscarDadosUsuario(
+        user.uid,
+      ).timeout(const Duration(seconds: 3), onTimeout: () => null);
       if (mounted) {
         setState(() {
-          _dadosUsuario = dados;
-          _carregando = false;
-        });
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          _carregando = false;
+          _dadosUsuario = {
+            ...dadosLocais,
+            if (dados != null) ...dados,
+          };
         });
       }
     }
@@ -52,39 +70,38 @@ class _PerfilScreenState extends State<PerfilScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-          child: _carregando
-              ? Center(
-                  child: CircularProgressIndicator(color: scheme.primary),
-                )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Perfil',
-                        style: TextStyle(
-                          color: scheme.onSurface,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          shadows: ClassicModeStyle.primaryTextShadows(context),
-                        ),
+        child: _carregando
+            ? Center(child: CircularProgressIndicator(color: scheme.primary))
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Perfil',
+                      style: TextStyle(
+                        color: scheme.onSurface,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        shadows: ClassicModeStyle.primaryTextShadows(context),
                       ),
-                      const SizedBox(height: 24),
-                      _buildProfileHeader(),
-                      const SizedBox(height: 24),
-                      _buildMenuItens(),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildProfileHeader(),
+                    const SizedBox(height: 24),
+                    _buildMenuItens(),
+                  ],
                 ),
-        ),
+              ),
+      ),
     );
   }
 
   Widget _buildProfileHeader() {
     final user = FirebaseAuth.instance.currentUser;
     final nome = _dadosUsuario?['nome'] ?? user?.displayName ?? 'Usuário';
-    final email = FirebaseAuth.instance.currentUser?.email ?? 'Usuário não logado';
+    final email =
+        FirebaseAuth.instance.currentUser?.email ?? 'Usuário não logado';
     final photoUrl = FirebaseAuth.instance.currentUser?.photoURL;
 
     return Container(
@@ -278,7 +295,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
   Future<void> _showAjuda() async {
     final info = await PackageInfo.fromPlatform();
     if (!mounted) return;
-    final versionLine = 'Mentor Financeiro v${info.version}+${info.buildNumber}';
+    final versionLine =
+        'Mentor Financeiro v${info.version}+${info.buildNumber}';
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1E293B),
@@ -300,10 +318,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              versionLine,
-              style: const TextStyle(color: Colors.white70),
-            ),
+            Text(versionLine, style: const TextStyle(color: Colors.white70)),
             const SizedBox(height: 8),
             const Text(
               'Precisa de pomoc? Entre em contato pelo email: soport@mentorfinanceiro.com',
@@ -355,9 +370,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Erro ao sair: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Não foi possível sair agora. Tente novamente.'),
+            ),
+          );
         }
       }
     }

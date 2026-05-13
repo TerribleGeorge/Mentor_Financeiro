@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/subscription_constants.dart';
+import '../core/constants/play_store_billing.dart';
 import '../services/google_play_billing_service.dart';
 import '../services/subscription_provider.dart';
 
@@ -16,10 +17,6 @@ class TelaUpgrade extends StatefulWidget {
 }
 
 class _TelaUpgradeState extends State<TelaUpgrade> {
-  static const String _productId = 'premium_assinatura';
-  static const String _monthlyBasePlanId = 'a-premium';
-  static const String _yearlyBasePlanId = 'premium-anual';
-
   final GooglePlayBillingService _billing = GooglePlayBillingService.instance;
 
   String? _pendingPlan;
@@ -29,7 +26,10 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
   void initState() {
     super.initState();
     _billing.addListener(_onBillingChanged);
-    _billing.initialize(productId: _productId, basePlanId: _monthlyBasePlanId);
+    _billing.initialize(
+      productId: PlayStoreBilling.premiumProductId,
+      basePlanId: PlayStoreBilling.monthlyBasePlanId,
+    );
   }
 
   @override
@@ -308,7 +308,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
           ),
           const SizedBox(height: 8),
           const Text(
-            "Mesmos recursos premium com melhor custo no ano",
+            "12 meses pelo preço de 10: inclui 2 meses de Premium grátis",
             style: TextStyle(color: Colors.white60, fontSize: 14),
           ),
           const SizedBox(height: 16),
@@ -317,7 +317,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
             children: [
               Text("R\$", style: TextStyle(color: Colors.white, fontSize: 20)),
               const Text(
-                "79",
+                "99",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 40,
@@ -340,7 +340,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
-                  "-30%",
+                  "2 MESES GRÁTIS",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -352,7 +352,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
           ),
           const SizedBox(height: 8),
           const Text(
-            "Menos de R\$7 por mês",
+            "Economize R\$ 18,90 em relação ao plano mensal",
             style: TextStyle(color: Colors.greenAccent, fontSize: 14),
           ),
           const SizedBox(height: 16),
@@ -405,7 +405,7 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
         children: [
           _itemGarantia(
             Icons.calendar_month_outlined,
-            "Período gratuito conforme a oferta na Play Store; renovação automática após o teste, salvo cancelamento a tempo.",
+            "Teste grátis de 7 dias para novos usuários. O teste pode ser usado uma única vez e não é renovável.",
           ),
           const SizedBox(height: 12),
           _itemGarantia(Icons.lock, "Pagamento processado pela Play Store"),
@@ -479,9 +479,11 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
       children: [
         Icon(icon, color: Colors.white60, size: 20),
         const SizedBox(width: 12),
-        Text(
-          texto,
-          style: const TextStyle(color: Colors.white60, fontSize: 14),
+        Expanded(
+          child: Text(
+            texto,
+            style: const TextStyle(color: Colors.white60, fontSize: 14),
+          ),
         ),
       ],
     );
@@ -491,9 +493,12 @@ class _TelaUpgradeState extends State<TelaUpgrade> {
     _pendingPlan = plano;
     _handledSuccess = false;
     final basePlanId = plano == 'anual'
-        ? _yearlyBasePlanId
-        : _monthlyBasePlanId;
-    await _billing.buySubscription(basePlanId: basePlanId);
+        ? PlayStoreBilling.yearlyBasePlanId
+        : PlayStoreBilling.monthlyBasePlanId;
+    await _billing.buySubscription(
+      basePlanId: basePlanId,
+      preferFreeTrial: plano == 'mensal',
+    );
   }
 
   Future<void> _finalizePremiumActivation(String plano) async {

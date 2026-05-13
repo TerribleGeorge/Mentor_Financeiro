@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Android: iniciar emulador android_11",
+      "type": "shell",
+      "command": "flutter emulators --launch android_11",
+      "options": {
+        "cwd": "${workspaceFolder}/mentor_financeiro"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      }
+    }
+  ]
+}

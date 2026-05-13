@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../constants/subscription_constants.dart';
 import '../services/subscription_provider.dart';
 
-/// Assinatura: benefícios locais + abertura da Play Store (produtos na Play Console).
+/// Assinatura: benefícios locais + compra pelo Google Play Billing.
 class PaywallScreen extends StatelessWidget {
   const PaywallScreen({super.key});
 
@@ -12,6 +12,13 @@ class PaywallScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final localeTag = Localizations.localeOf(context).languageCode;
+    final trialHeadline = SubscriptionConstants.freeTrialHeadlineForLocale(
+      localeTag,
+    );
+    final trialDisclaimer = SubscriptionConstants.freeTrialDisclaimerForLocale(
+      localeTag,
+    );
+    final trialCta = SubscriptionConstants.freeTrialCtaForLocale(localeTag);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Assinatura')),
@@ -22,10 +29,15 @@ class PaywallScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               children: [
                 Text(
-                  'O Premium é gerido pela Google Play. Planos e preços mostram-se na loja conforme a Play Console.',
+                  'O Premium é processado pela Google Play. A confirmação da compra acontece dentro do app.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
                   ),
+                ),
+                const SizedBox(height: 14),
+                _FreeTrialCard(
+                  title: trialHeadline,
+                  disclaimer: trialDisclaimer,
                 ),
                 const SizedBox(height: 18),
                 _PremiumBenefitsCard(
@@ -35,7 +47,7 @@ class PaywallScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Referência na app (fallback)',
+                  'Valores da assinatura',
                   style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -58,27 +70,37 @@ class PaywallScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 28),
                 FilledButton.icon(
-                  onPressed: () async {
-                    final ok = await sub.openPlayStoreListing();
-                    if (!context.mounted || !ok) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Depois de subscrever na Play, toca em «Actualizar perfil» ou reinicia o app.',
-                        ),
-                      ),
-                    );
-                  },
+                  onPressed: sub.isLoading
+                      ? null
+                      : () async {
+                          final ok = await sub.purchaseMonthly();
+                          if (!context.mounted) return;
+                          _showPurchaseResult(
+                            context,
+                            ok,
+                            fallbackMessage:
+                                'Não foi possível abrir a compra mensal agora.',
+                          );
+                        },
                   icon: const Icon(Icons.shopping_bag_outlined),
-                  label: const Text('Abrir Play Store — Mentor Financeiro'),
+                  label: Text(trialCta),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
-                  onPressed: () async {
-                    await sub.openManageSubscriptions();
-                  },
-                  icon: const Icon(Icons.manage_accounts_outlined),
-                  label: const Text('Gerir subscrições na conta Google'),
+                  onPressed: sub.isLoading
+                      ? null
+                      : () async {
+                          final ok = await sub.purchaseYearly();
+                          if (!context.mounted) return;
+                          _showPurchaseResult(
+                            context,
+                            ok,
+                            fallbackMessage:
+                                'Não foi possível abrir a compra anual agora.',
+                          );
+                        },
+                  icon: const Icon(Icons.workspace_premium_outlined),
+                  label: const Text('Assinar plano anual por R\$ 99,90'),
                 ),
                 const SizedBox(height: 24),
                 FilledButton.tonal(
@@ -92,7 +114,7 @@ class PaywallScreen extends StatelessWidget {
                               content: Text(
                                 sub.isPremium
                                     ? 'Estado actualizado: Premium activo.'
-                                    : 'Perfil actualizado. Se já pagaste na Play, o servidor precisa marcar isPremium (Firestore / backend).',
+                                    : 'Nenhuma assinatura ativa foi encontrada na Google Play.',
                               ),
                             ),
                           );
@@ -123,6 +145,79 @@ class PaywallScreen extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+
+  void _showPurchaseResult(
+    BuildContext context,
+    bool ok, {
+    required String fallbackMessage,
+  }) {
+    if (!context.mounted) return;
+    final sub = context.read<SubscriptionProvider>();
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            ok
+                ? 'A compra foi enviada para a Google Play.'
+                : (sub.errorMessage?.trim().isNotEmpty == true
+                      ? sub.errorMessage!.trim()
+                      : fallbackMessage),
+          ),
+        ),
+      );
+  }
+}
+
+class _FreeTrialCard extends StatelessWidget {
+  const _FreeTrialCard({required this.title, required this.disclaimer});
+
+  final String title;
+  final String disclaimer;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: scheme.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.redeem_outlined, color: scheme.primary, size: 24),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  disclaimer,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurface.withValues(alpha: 0.72),
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

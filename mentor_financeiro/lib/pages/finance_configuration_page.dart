@@ -274,18 +274,10 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
       }
     }
 
-    // Faz backup no Firestore
-    if (uid != null) {
-      await FirebaseService.atualizarConfiguracoes(uid, configuracoes);
-    }
-
     // Marca como configurado
     await prefs.setBool('configurado', true);
 
     FinanceConfigSignals.notifySaved();
-    unawaited(
-      UserDataRetentionService.instance.backupNow(reason: 'finance_config'),
-    );
 
     if (!mounted) return;
     if (Navigator.of(context).canPop()) {
@@ -293,6 +285,22 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
     } else {
       Navigator.of(context).pushReplacementNamed(AppRoutes.home);
     }
+
+    // A tela precisa responder na hora. A nuvem sincroniza em segundo plano e
+    // não pode travar o usuário caso a conexão ou as regras recusem a escrita.
+    if (uid != null) {
+      unawaited(
+        FirebaseService.atualizarConfiguracoes(
+          uid,
+          configuracoes,
+        ).catchError((Object e, StackTrace st) {
+          debugPrint('FinanceConfigurationPage sync: $e\n$st');
+        }),
+      );
+    }
+    unawaited(
+      UserDataRetentionService.instance.backupNow(reason: 'finance_config'),
+    );
   }
 
   // ==============================================================================

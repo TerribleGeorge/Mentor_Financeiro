@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,12 +10,15 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/subscription_constants.dart';
 import '../core/constants/play_store_billing.dart';
 import 'app_theme_controller.dart';
+import 'google_play_billing_service.dart';
 
 class SubscriptionProvider extends ChangeNotifier {
   static const String _ownerEmail = 'george.guimares@gmail.com';
 
   bool get isOwner {
-    final email = FirebaseAuth.instance.currentUser?.email?.trim().toLowerCase();
+    final email = FirebaseAuth.instance.currentUser?.email
+        ?.trim()
+        .toLowerCase();
     return email != null && email == _ownerEmail.toLowerCase();
   }
 
@@ -23,6 +28,12 @@ class SubscriptionProvider extends ChangeNotifier {
   String? _errorMessage;
   String _currentRegion = 'BR';
   DateTime? _subscriptionEndDate;
+  String? _pendingPurchasePlan;
+  bool _billingListenerAttached = false;
+  bool _activatingBillingPurchase = false;
+  Future<void>? _billingInitFuture;
+
+  final GooglePlayBillingService _billing = GooglePlayBillingService.instance;
 
   bool get hasUnlockedPremium => _isPremium;
 
@@ -45,6 +56,7 @@ class SubscriptionProvider extends ChangeNotifier {
     notifyListeners();
 
     await _loadPremiumStatusFallback();
+    unawaited(_ensureBillingInitialized());
     await _enforcePremiumThemeGate();
 
     _isLoading = false;
@@ -73,9 +85,55 @@ class SubscriptionProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
+    await _ensureBillingInitialized();
     await _loadPremiumStatusFallback();
+    if (_billing.hasActivePurchase) {
+      await _activatePremiumFromBilling();
+    }
     await _enforcePremiumThemeGate();
     notifyListeners();
+  }
+
+  Future<void> _ensureBillingInitialized() async {
+    if (kIsWeb) return;
+    if (!_billingListenerAttached) {
+      _billing.addListener(_onBillingChanged);
+      _billingListenerAttached = true;
+    }
+
+    _billingInitFuture ??= _billing.initialize(
+      productId: PlayStoreBilling.premiumProductId,
+    );
+    await _billingInitFuture;
+    if (_billing.error != null && _billing.error!.trim().isNotEmpty) {
+      _errorMessage = _billing.error;
+    }
+  }
+
+  void _onBillingChanged() {
+    _isLoading = _billing.isLoading;
+    if (_billing.error != null && _billing.error!.trim().isNotEmpty) {
+      _errorMessage = _billing.error;
+    }
+    if (_billing.hasActivePurchase) {
+      unawaited(_activatePremiumFromBilling());
+    }
+    notifyListeners();
+  }
+
+  Future<void> _activatePremiumFromBilling() async {
+    if (_activatingBillingPurchase || _simulatePremiumActive) return;
+    _activatingBillingPurchase = true;
+    try {
+      final now = DateTime.now();
+      _subscriptionEndDate = _pendingPurchasePlan == 'anual'
+          ? now.add(const Duration(days: 366))
+          : now.add(const Duration(days: 31));
+      await updatePremiumStatus(true);
+      _errorMessage = null;
+    } finally {
+      _activatingBillingPurchase = false;
+    }
   }
 
   Future<void> _loadPremiumStatusFallback() async {
@@ -100,8 +158,8 @@ class SubscriptionProvider extends ChangeNotifier {
               final data = doc.data();
               _isPremium = data?['isPremium'] ?? false;
               if (data?['premiumEndDate'] != null) {
-                _subscriptionEndDate =
-                    (data!['premiumEndDate'] as Timestamp).toDate();
+                _subscriptionEndDate = (data!['premiumEndDate'] as Timestamp)
+                    .toDate();
               }
             } else {
               _isPremium = prefs.getBool('is_premium') ?? false;
@@ -134,12 +192,49 @@ class SubscriptionProvider extends ChangeNotifier {
     }
   }
 
-  /// Abre a ficha da app na Play Store para subscrever (produtos definidos na Play Console).
-  Future<bool> purchaseMonthly() async => openPlayStoreListing();
+  /// Inicia a assinatura usando o Google Play Billing dentro do app.
+  Future<bool> purchaseMonthly() async => _purchaseSubscription(
+    plan: 'mensal',
+    basePlanId: PlayStoreBilling.monthlyBasePlanId,
+    preferFreeTrial: true,
+  );
 
-  Future<bool> purchaseYearly() async => openPlayStoreListing();
+  Future<bool> purchaseYearly() async => _purchaseSubscription(
+    plan: 'anual',
+    basePlanId: PlayStoreBilling.yearlyBasePlanId,
+  );
 
-  Future<bool> purchaseLifetime() async => openPlayStoreListing();
+  Future<bool> purchaseLifetime() async => purchaseMonthly();
+
+  Future<bool> _purchaseSubscription({
+    required String plan,
+    required String basePlanId,
+    bool preferFreeTrial = false,
+  }) async {
+    _pendingPurchasePlan = plan;
+    _errorMessage = null;
+    _isLoading = true;
+    notifyListeners();
+
+    await _ensureBillingInitialized();
+    if (_billing.error != null && _billing.error!.trim().isNotEmpty) {
+      _errorMessage = _billing.error;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    await _billing.buySubscription(
+      basePlanId: basePlanId,
+      preferFreeTrial: preferFreeTrial,
+    );
+    final hasError =
+        _billing.error != null && _billing.error!.trim().isNotEmpty;
+    _errorMessage = hasError ? _billing.error : null;
+    _isLoading = _billing.isLoading;
+    notifyListeners();
+    return !hasError;
+  }
 
   Future<bool> openPlayStoreListing() async {
     notifyListeners();
@@ -151,12 +246,17 @@ class SubscriptionProvider extends ChangeNotifier {
     return _launchPlayUri(PlayStoreBilling.manageAppSubscriptions);
   }
 
-  /// Volta a ler Firestore/prefs. Após comprar na Play, actualize o perfil no backend ou abra sessão de novo.
+  /// Restaura compras pelo Google Play Billing e atualiza o estado local/Firestore.
   Future<void> restorePurchases() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
+    await _ensureBillingInitialized();
+    await _billing.restore();
+    if (_billing.hasActivePurchase) {
+      await _activatePremiumFromBilling();
+    }
     await refreshStatus();
 
     _isLoading = false;
@@ -170,10 +270,16 @@ class SubscriptionProvider extends ChangeNotifier {
 
   String getFormattedPrice(String offerType) {
     if (offerType == 'monthly') {
+      final billingPrice = _billing.formattedPriceForBasePlan(
+        PlayStoreBilling.monthlyBasePlanId,
+      );
+      if (billingPrice != null && billingPrice.trim().isNotEmpty) {
+        return '$billingPrice/mês';
+      }
       return SubscriptionConstants.getMonthlyPrice(_currentRegion);
-    } else {
-      return SubscriptionConstants.getYearlyPrice(_currentRegion);
     }
+
+    return SubscriptionConstants.getYearlyPrice(_currentRegion);
   }
 
   List<String> getLocalizedBenefits() {
@@ -195,14 +301,14 @@ class SubscriptionProvider extends ChangeNotifier {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     try {
-      await FirebaseFirestore.instance.collection('usuarios').doc(user.uid).set(
-        {
-          'isPremium': _isPremium,
-          if (_subscriptionEndDate != null)
-            'premiumEndDate': Timestamp.fromDate(_subscriptionEndDate!),
-        },
-        SetOptions(merge: true),
-      );
+      await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(user.uid)
+          .set({
+            'isPremium': _isPremium,
+            if (_subscriptionEndDate != null)
+              'premiumEndDate': Timestamp.fromDate(_subscriptionEndDate!),
+          }, SetOptions(merge: true));
     } catch (e) {
       debugPrint('mirrorPremiumToFirestore: $e');
     }
@@ -225,5 +331,14 @@ class SubscriptionProvider extends ChangeNotifier {
   Future<void> debugSimulatePremiumPurchase() async {
     if (!kDebugMode) return;
     await simulatePremium();
+  }
+
+  @override
+  void dispose() {
+    if (_billingListenerAttached) {
+      _billing.removeListener(_onBillingChanged);
+      _billingListenerAttached = false;
+    }
+    super.dispose();
   }
 }

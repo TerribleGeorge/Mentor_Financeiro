@@ -345,6 +345,27 @@ class _NotificationMonitoringPageState
                   ],
                 ),
                 const SizedBox(height: 8),
+                if (_diagnostics.any((entry) => entry.contains('|suspeita:')))
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.orange.withValues(alpha: 0.45),
+                      ),
+                    ),
+                    child: const Text(
+                      'Há uma notificação suspeita recente. Confira pelo app oficial do banco antes de considerar esse gasto como verdadeiro.',
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.w700,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
                 if (_diagnostics.isEmpty)
                   Text(
                     'Nenhuma leitura registada. Toque em atualizar após uma notificação '
@@ -417,6 +438,7 @@ class _NotificationMonitoringPageState
     final date = parts.isNotEmpty ? DateTime.tryParse(parts[0]) : null;
     final status = parts.length > 1 ? parts[1] : 'evento';
     final text = parts.length > 2 ? parts.sublist(2).join('|') : entry;
+    final isSuspicious = status.toLowerCase().contains('suspeita');
     final time = date == null
         ? ''
         : '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
@@ -427,8 +449,13 @@ class _NotificationMonitoringPageState
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          color: isSuspicious
+              ? Colors.orange.withValues(alpha: 0.12)
+              : scheme.surfaceContainerHighest.withValues(alpha: 0.35),
           borderRadius: BorderRadius.circular(12),
+          border: isSuspicious
+              ? Border.all(color: Colors.orange.withValues(alpha: 0.45))
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,7 +463,7 @@ class _NotificationMonitoringPageState
             Text(
               time.isEmpty ? status : '$time · $status',
               style: TextStyle(
-                color: scheme.primary,
+                color: isSuspicious ? Colors.orange : scheme.primary,
                 fontWeight: FontWeight.w800,
                 fontSize: 12,
               ),

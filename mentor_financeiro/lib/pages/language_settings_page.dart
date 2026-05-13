@@ -39,7 +39,7 @@ class LanguageSettingsPage extends StatelessWidget {
                   icon: Icons.translate_outlined,
                   title: 'Escolha o idioma da interface',
                   text:
-                      'Português, inglês e espanhol têm tradução própria. Os demais idiomas usam inglês como fallback até receberem tradução completa.',
+                      'Português, inglês e espanhol têm tradução própria. Os demais idiomas usam textos em inglês até receberem tradução completa.',
                 );
               }
 
@@ -59,7 +59,7 @@ class LanguageSettingsPage extends StatelessWidget {
                 title: Text(option.label),
                 subtitle: translated
                     ? const Text('Tradução nativa disponível')
-                    : const Text('Usa textos em inglês como fallback'),
+                    : const Text('Usa textos em inglês por enquanto'),
                 onTap: () async {
                   await LocaleController.instance.setLanguageCode(option.code);
                   unawaited(

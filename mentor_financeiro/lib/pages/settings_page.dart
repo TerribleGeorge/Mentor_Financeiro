@@ -230,9 +230,11 @@ class _SettingsPageState extends State<SettingsPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível alterar a senha agora.'),
+          ),
+        );
       }
     }
   }
@@ -290,9 +292,11 @@ class _SettingsPageState extends State<SettingsPage> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao sair: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível sair agora. Tente novamente.'),
+          ),
+        );
       }
     }
   }
@@ -393,7 +397,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             subtitle: Text(
               _podeAlterarSenha
-                  ? 'Atualizar credenciais do Firebase'
+                  ? 'Atualizar palavra-passe da conta'
                   : 'Indisponível para login só com Google',
               style: TextStyle(color: mutedColor, fontSize: 12),
             ),
@@ -409,10 +413,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               title: Text(
                 'Monitoramento por notificações',
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
                 'Permissões, diagnóstico de leitura e bateria',
@@ -540,7 +541,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     subtitle: Text(
                       languageUsesFallback
-                          ? '${LocaleController.languageLabel(selectableLanguageCode)} · fallback em inglês'
+                          ? '${LocaleController.languageLabel(selectableLanguageCode)} · textos em inglês'
                           : LocaleController.languageLabel(
                               selectableLanguageCode,
                             ),

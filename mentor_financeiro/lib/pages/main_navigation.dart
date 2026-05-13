@@ -12,6 +12,7 @@ import 'historico_screen.dart';
 import 'perfil_screen.dart';
 import '../services/notification_listener_service.dart';
 import '../services/user_data_retention_service.dart';
+import '../services/market_alert_service.dart';
 
 class MainNavigation extends StatefulWidget {
   final int initialIndex;
@@ -27,6 +28,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final _notificationListener = NotificationListenerService();
   bool _listenerStarted = false;
   late final _Lifecycle _lifecycle = _Lifecycle(this);
+  Timer? _listenerHealthTimer;
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -48,14 +50,22 @@ class _MainNavigationState extends State<MainNavigation> {
       // Remove SnackBars pendentes (ex.: erro de foto antigo ao voltar das Definições).
       ScaffoldMessenger.of(context).clearSnackBars();
       _ensureNotificationListenerStarted();
+      MarketAlertService.instance.start();
       unawaited(
         UserDataRetentionService.instance.backupNow(reason: 'main_navigation'),
       );
+    });
+    _listenerHealthTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+      if (!mounted) return;
+      unawaited(_ensureNotificationListenerStarted());
+      unawaited(_notificationListener.sincronizarRecentes());
     });
   }
 
   @override
   void dispose() {
+    _listenerHealthTimer?.cancel();
+    MarketAlertService.instance.stop();
     _notificationListener.parar();
     WidgetsBinding.instance.removeObserver(_lifecycle);
     super.dispose();
@@ -63,6 +73,9 @@ class _MainNavigationState extends State<MainNavigation> {
 
   Future<void> _ensureNotificationListenerStarted() async {
     if (!Platform.isAndroid) return;
+    if (FirebaseAuth.instance.currentUser != null) {
+      unawaited(_notificationListener.flushPendingTransactionsToFirestore());
+    }
 
     if (_listenerStarted) {
       final stillOk = await _notificationListener.verificarPermissao();
@@ -71,6 +84,7 @@ class _MainNavigationState extends State<MainNavigation> {
         _listenerStarted = false;
       } else {
         await _notificationListener.sincronizarPendentes();
+        unawaited(MarketAlertService.instance.checkNow());
         if (!_notificationListener.estaAtivo) {
           _notificationListener.parar();
           final restarted = await _notificationListener.iniciar();
@@ -269,6 +283,7 @@ class _Lifecycle extends WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       owner._ensureNotificationListenerStarted();
+      unawaited(MarketAlertService.instance.checkNow());
     }
   }
 }

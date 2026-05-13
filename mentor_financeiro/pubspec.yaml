@@ -19,7 +19,7 @@ description: "Mentor Financeiro - O melhor app de organização financeira do Br
 publish_to: 'none'
 
 # Versão do app no formato semântico: MAJOR.MINOR.PATCH+BUILD
-version: 1.0.2+19
+version: 1.0.2+41
 
 # ==============================================================================
 # AMBIENTE DE EXECUÇÃO
@@ -52,6 +52,7 @@ dependencies:
   # Importance: Permite comunicação com APIs externas
   # Impacto: essencial para integrar com serviços REST
   http: ^1.6.0
+  xml: ^6.6.1
 
   # URL Launcher: Abre URLs no navegador ou outros apps
   # Importance: Permite abrir links externos, WhatsApp, e-mail, etc
@@ -89,7 +90,9 @@ dependencies:
   # Google Sign In: Login com conta Google
   # Importance: Authentication rápido usando conta Google existente
   # Impacto: Aumenta taxa de conversão de login (usuário não precisa criar senha)
-  google_sign_in: ^7.2.0
+  # Mantém o SDK legado de login Google no Android; o fluxo 7.x/Credential
+  # Manager retornou cancelado em teste interno da Play neste app.
+  google_sign_in: 6.3.0
   fl_chart: ^1.0.0
   intl: ^0.20.2
   flutter_localizations:
@@ -128,6 +131,7 @@ dev_dependencies:
   # Importance: Padroniza o código e evita erros comuns
   # Impacto: Código mais limpo e manutenível
   flutter_lints: ^6.0.0
+
 
   # Flutter Launcher Icons: Gera ícones de launcher automáticamente
   # Importance: Cria ícones para Android/iOS a partir de uma imagem

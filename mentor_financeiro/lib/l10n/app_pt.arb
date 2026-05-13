@@ -475,7 +475,7 @@
       }
     }
   },
-  "investRegionHintGlobal": "País efetivo: {country} · catálogo global (ETFs, NYSE/NASDAQ…). Prioridade: país do dispositivo · fallback locale/IP.",
+  "investRegionHintGlobal": "País efetivo: {country} · catálogo global (ETFs, NYSE/NASDAQ…). Ajustado automaticamente pela região do dispositivo.",
   "@investRegionHintGlobal": {
     "placeholders": {
       "country": {

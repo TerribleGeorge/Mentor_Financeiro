@@ -76,9 +76,7 @@ class ConfiguracoesPage extends StatelessWidget {
                     )
                   : const Icon(Icons.workspace_premium_outlined, size: 20),
               label: Text(
-                subscription.isLoading
-                    ? 'A processar…'
-                    : 'Teste de assinatura (paywall)',
+                subscription.isLoading ? 'A processar…' : 'Teste de assinatura',
               ),
             ),
             if (kDebugMode) ...[
@@ -91,13 +89,13 @@ class ConfiguracoesPage extends StatelessWidget {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Premium simulado (debug).'),
+                        content: Text('Premium ativado para teste.'),
                       ),
                     );
                   }
                 },
                 icon: const Icon(Icons.science_outlined, size: 20),
-                label: const Text('Simular premium (só debug)'),
+                label: const Text('Ativar premium para teste'),
               ),
             ],
           ],

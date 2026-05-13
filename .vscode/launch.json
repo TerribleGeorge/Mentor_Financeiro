@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Mentor Financeiro",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/mentor_financeiro",
+      "program": "lib/main.dart",
+      "toolArgs": ["--device-timeout", "120"]
+    },
+    {
+      "name": "Mentor Financeiro (emulador Android)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/mentor_financeiro",
+      "program": "lib/main.dart",
+      "toolArgs": ["-d", "emulator", "--device-timeout", "180"]
+    }
+  ]
+}

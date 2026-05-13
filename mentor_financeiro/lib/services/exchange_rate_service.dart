@@ -38,8 +38,20 @@ abstract final class ExchangeRateService {
   static final Map<String, _CachedSnapshot> _tableCache = {};
   static final Map<String, _CachedRate> _pairCache = {};
 
-  static const _ttlTable = Duration(hours: 1);
-  static const _ttlPair = Duration(hours: 1);
+  /// Chave opcional para API live/near-live.
+  ///
+  /// Em produção, o ideal é servir isso por backend/Cloud Function para não
+  /// expor chave no APK/AAB. Sem chave, o app usa Frankfurter como plano B.
+  static const _exchangerateHostKey = String.fromEnvironment(
+    'EXCHANGERATE_HOST_ACCESS_KEY',
+  );
+
+  static bool get _hasLiveProvider => _exchangerateHostKey.trim().isNotEmpty;
+
+  static Duration get _ttlTable =>
+      _hasLiveProvider ? const Duration(minutes: 5) : const Duration(hours: 1);
+  static Duration get _ttlPair =>
+      _hasLiveProvider ? const Duration(minutes: 5) : const Duration(hours: 1);
 
   /// Últimas taxas com [base] como moeda de origem (ex.: USD → todas as outras).
   static Future<ExchangeRatesSnapshot?> getLatest({
@@ -54,10 +66,16 @@ abstract final class ExchangeRateService {
       }
     }
 
+    if (_hasLiveProvider) {
+      final live = await _getLatestFromExchangerateHost(base: key);
+      if (live != null) {
+        _tableCache[key] = _CachedSnapshot(live, DateTime.now().add(_ttlTable));
+        return live;
+      }
+    }
+
     try {
-      final uri = Uri.parse(
-        'https://api.frankfurter.app/latest?from=$key',
-      );
+      final uri = Uri.parse('https://api.frankfurter.app/latest?from=$key');
       final res = await http.get(uri).timeout(const Duration(seconds: 15));
       if (res.statusCode != 200) {
         debugPrint('ExchangeRateService getLatest HTTP ${res.statusCode}');
@@ -83,10 +101,7 @@ abstract final class ExchangeRateService {
         fetchedAt: DateTime.now().toUtc(),
         rates: rates,
       );
-      _tableCache[key] = _CachedSnapshot(
-        snap,
-        DateTime.now().add(_ttlTable),
-      );
+      _tableCache[key] = _CachedSnapshot(snap, DateTime.now().add(_ttlTable));
       return snap;
     } catch (e, st) {
       debugPrint('ExchangeRateService getLatest: $e\n$st');
@@ -94,8 +109,64 @@ abstract final class ExchangeRateService {
     }
   }
 
+  static Future<ExchangeRatesSnapshot?> _getLatestFromExchangerateHost({
+    required String base,
+  }) async {
+    try {
+      final uri = Uri.https('api.exchangerate.host', '/live', {
+        'access_key': _exchangerateHostKey,
+      });
+      final res = await http.get(uri).timeout(const Duration(seconds: 12));
+      if (res.statusCode != 200) {
+        debugPrint('ExchangeRateService live HTTP ${res.statusCode}');
+        return null;
+      }
+
+      final decoded = jsonDecode(res.body);
+      if (decoded is! Map<String, dynamic>) return null;
+      if (decoded['success'] == false) {
+        debugPrint('ExchangeRateService live: ${decoded['error']}');
+        return null;
+      }
+
+      final source = (decoded['source'] as String? ?? 'USD').toUpperCase();
+      final quotes = decoded['quotes'];
+      if (quotes is! Map<String, dynamic>) return null;
+
+      final sourceRates = <String, double>{source: 1};
+      for (final e in quotes.entries) {
+        final v = e.value;
+        if (v is! num) continue;
+        final pair = e.key.toString().toUpperCase();
+        if (!pair.startsWith(source) || pair.length <= source.length) continue;
+        sourceRates[pair.substring(source.length)] = v.toDouble();
+      }
+
+      final baseRate = sourceRates[base];
+      if (baseRate == null || baseRate <= 0) return null;
+
+      final rates = <String, double>{};
+      for (final e in sourceRates.entries) {
+        if (e.key == base || e.value <= 0) continue;
+        rates[e.key] = e.value / baseRate;
+      }
+
+      return ExchangeRatesSnapshot(
+        base: base,
+        fetchedAt: DateTime.now().toUtc(),
+        rates: rates,
+      );
+    } catch (e, st) {
+      debugPrint('ExchangeRateService live: $e\n$st');
+      return null;
+    }
+  }
+
   /// Converte um valor em **BRL** para [targetCurrency] (ISO 4217).
-  static Future<double?> convertFromBrl(double amountBrl, String targetCurrency) async {
+  static Future<double?> convertFromBrl(
+    double amountBrl,
+    String targetCurrency,
+  ) async {
     final rate = await rateBrlTo(targetCurrency);
     if (rate == null) return null;
     return amountBrl * rate;

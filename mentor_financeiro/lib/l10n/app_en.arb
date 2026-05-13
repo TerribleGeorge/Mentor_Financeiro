@@ -173,7 +173,7 @@
       }
     }
   },
-  "investRegionHintGlobal": "Effective country: {country} · Global catalog (ETFs, NYSE/NASDAQ…). Priority: device locale · fallback locale/IP.",
+  "investRegionHintGlobal": "Effective country: {country} · Global catalog (ETFs, NYSE/NASDAQ…). Automatically adjusted from your device region.",
   "@investRegionHintGlobal": {
     "placeholders": {
       "country": {

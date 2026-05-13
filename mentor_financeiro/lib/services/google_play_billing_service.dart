@@ -32,11 +32,24 @@ class GooglePlayBillingService extends ChangeNotifier {
   ProductDetails? _product;
   ProductDetails? get product => _product;
 
-  String _availableBasePlans(ProductDetails product) {
-    if (product is! GooglePlayProductDetails) return 'indisponível';
-    final offers = product.productDetails.subscriptionOfferDetails;
-    if (offers == null || offers.isEmpty) return 'nenhum plano retornado';
-    return offers.map((o) => o.basePlanId).join(', ');
+  String? formattedPriceForBasePlan(String basePlanId) {
+    final p = _product;
+    if (p is! GooglePlayProductDetails) return null;
+    final offers = p.productDetails.subscriptionOfferDetails;
+    if (offers == null || offers.isEmpty) return null;
+
+    for (final offer in offers) {
+      if (offer.basePlanId != basePlanId) continue;
+      if (offer.pricingPhases.isEmpty) return null;
+      final paidPhases = offer.pricingPhases
+          .where((phase) => phase.priceAmountMicros > 0)
+          .toList();
+      final phase = paidPhases.isNotEmpty
+          ? paidPhases.last
+          : offer.pricingPhases.last;
+      return phase.formattedPrice;
+    }
+    return null;
   }
 
   /// Inicializa listener e tenta carregar detalhes do produto.
@@ -52,7 +65,8 @@ class GooglePlayBillingService extends ChangeNotifier {
 
     _available = await _iap.isAvailable();
     if (!_available) {
-      _error = 'Google Play Billing indisponível neste dispositivo.';
+      _error =
+          'As compras da Google Play não estão disponíveis neste dispositivo.';
       _setLoading(false);
       return;
     }
@@ -75,8 +89,7 @@ class GooglePlayBillingService extends ChangeNotifier {
 
     if (response.productDetails.isEmpty) {
       _error =
-          'Produto não encontrado. Confirme se o app instalado é da Play Store (teste interno) '
-          'e se o ID `$productId` está ativo.';
+          'Não foi possível carregar as opções de assinatura. Tente novamente em instantes.';
       _product = null;
       _setLoading(false);
       return;
@@ -89,8 +102,7 @@ class GooglePlayBillingService extends ChangeNotifier {
       final token = _tryResolveOfferToken(_product!, basePlanId: basePlanId);
       if (token == null) {
         _error =
-            'Plano básico `$basePlanId` não encontrado no produto `$productId`. '
-            'Planos retornados pela Play: ${_availableBasePlans(_product!)}.';
+            'Não foi possível carregar este plano. Tente novamente em instantes.';
       }
     }
 
@@ -98,15 +110,20 @@ class GooglePlayBillingService extends ChangeNotifier {
   }
 
   /// Inicia compra da assinatura para o produto carregado.
-  Future<void> buySubscription({String? basePlanId}) async {
+  Future<void> buySubscription({
+    String? basePlanId,
+    bool preferFreeTrial = false,
+  }) async {
     if (!_available) {
-      _error = 'Billing indisponível.';
+      _error =
+          'As compras da Google Play não estão disponíveis neste dispositivo.';
       notifyListeners();
       return;
     }
     final p = _product;
     if (p == null) {
-      _error = 'Produto ainda não carregou.';
+      _error =
+          'As opções de assinatura ainda estão carregando. Tente novamente em alguns segundos.';
       notifyListeners();
       return;
     }
@@ -115,15 +132,17 @@ class GooglePlayBillingService extends ChangeNotifier {
     notifyListeners();
 
     final offerToken = basePlanId == null
-        ? _tryResolveOfferToken(p)
-        : _tryResolveOfferToken(p, basePlanId: basePlanId);
+        ? _tryResolveOfferToken(p, preferFreeTrial: preferFreeTrial)
+        : _tryResolveOfferToken(
+            p,
+            basePlanId: basePlanId,
+            preferFreeTrial: preferFreeTrial,
+          );
     if (basePlanId != null &&
         p is GooglePlayProductDetails &&
         offerToken == null) {
       _error =
-          'Plano básico `$basePlanId` não encontrado. '
-          'Planos retornados pela Play: ${_availableBasePlans(p)}. '
-          'Verifique se o plano está ativo no Play Console.';
+          'Não foi possível abrir este plano. Tente novamente em instantes.';
       notifyListeners();
       return;
     }
@@ -147,12 +166,13 @@ class GooglePlayBillingService extends ChangeNotifier {
         _error = 'Não foi possível iniciar a compra.';
         _setLoading(false);
       }
-    } on PlatformException catch (e) {
+    } on PlatformException {
       _error =
-          'Erro ao abrir a compra na Play Store: ${e.code}${e.message == null ? '' : ' - ${e.message}'}';
+          'Não foi possível abrir a compra na Google Play. Tente novamente em instantes.';
       _setLoading(false);
     } catch (e) {
-      _error = 'Erro inesperado ao abrir a compra: $e';
+      _error =
+          'Não foi possível abrir a compra agora. Tente novamente em instantes.';
       _setLoading(false);
     }
   }
@@ -198,18 +218,36 @@ class GooglePlayBillingService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Resolve o offerToken da Play (Android). Se [basePlanId] for fornecido, tenta casar.
-  String? _tryResolveOfferToken(ProductDetails product, {String? basePlanId}) {
+  /// Resolve o offerToken da Play (Android). Se [basePlanId] for fornecido,
+  /// tenta casar. Quando pedido, prioriza a oferta que contém fase gratuita.
+  String? _tryResolveOfferToken(
+    ProductDetails product, {
+    String? basePlanId,
+    bool preferFreeTrial = false,
+  }) {
     if (product is! GooglePlayProductDetails) return null;
     final offers = product.productDetails.subscriptionOfferDetails;
     if (offers == null || offers.isEmpty) return null;
 
-    if (basePlanId != null) {
-      for (final o in offers) {
-        if (o.basePlanId == basePlanId) return o.offerIdToken;
+    final matchingOffers = basePlanId == null
+        ? offers
+        : offers.where((o) => o.basePlanId == basePlanId).toList();
+
+    if (matchingOffers.isEmpty) return null;
+
+    if (preferFreeTrial) {
+      for (final offer in matchingOffers) {
+        final hasFreePhase = offer.pricingPhases.any(
+          (phase) => phase.priceAmountMicros == 0,
+        );
+        if (hasFreePhase) return offer.offerIdToken;
       }
     }
 
-    return offers.first.offerIdToken;
+    if (basePlanId != null) {
+      return matchingOffers.first.offerIdToken;
+    }
+
+    return matchingOffers.first.offerIdToken;
   }
 }

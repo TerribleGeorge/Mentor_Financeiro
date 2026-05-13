@@ -8,6 +8,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/services.dart';
+
 // Pacotes Firebase para autenticação
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -48,16 +50,9 @@ class FirebaseService {
   // Importância: Login, logout, verificação de usuário logado
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// [GoogleSignIn.instance.initialize] deve completar antes de qualquer outro uso (google_sign_in 7+).
-  static Future<void>? _googleSignInInitialized;
-  static const String _googleWebClientId =
-      '841128243215-t5lkthv9odaect1sj7heodftkv200dni.apps.googleusercontent.com';
-
-  static Future<void> _ensureGoogleSignInInitialized() {
-    return _googleSignInInitialized ??= GoogleSignIn.instance
-        .initialize(serverClientId: _googleWebClientId)
-        .timeout(_googleSignInTimeout);
-  }
+  static final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: const <String>['email', 'profile'],
+  );
 
   // Firestore: Banco de dados principal
   // Importância: Persistência de dados do usuário
@@ -223,44 +218,24 @@ class FirebaseService {
   // Impacto: Aumenta taxa de conversão de login
   static Future<User?> loginGoogle() async {
     try {
-      await _ensureGoogleSignInInitialized();
-      if (!GoogleSignIn.instance.supportsAuthenticate()) {
-        if (kDebugMode) {
-          debugPrint(
-            'Google Sign-In: fluxo interativo não disponível nesta plataforma.',
-          );
-        }
-        throw GoogleLoginFailure(
-          'Google Sign-In indisponível neste dispositivo/plataforma.',
-        );
-      }
-
-      final GoogleSignInAccount googleUser = await GoogleSignIn.instance
-          .authenticate(scopeHint: const <String>['email', 'profile'])
+      await _googleSignIn.signOut().timeout(_googleSignInTimeout);
+      final GoogleSignInAccount? googleUser = await _googleSignIn
+          .signIn()
           .timeout(_googleSignInTimeout);
-
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-      final idToken = googleAuth.idToken;
-      if (idToken == null || idToken.trim().isEmpty) {
-        throw GoogleLoginFailure(
-          'Falha ao obter token do Google (idToken vazio). '
-          'Geralmente é configuração do Firebase/Google Sign-In (SHA-1/SHA-256 do app).',
-        );
+      if (googleUser == null) {
+        throw GoogleLoginFailure('Login Google cancelado ou não concluído.');
       }
 
-      String? accessToken;
-      try {
-        final existing = await googleUser.authorizationClient
-            .authorizationForScopes(const <String>['email', 'profile']);
-        final GoogleSignInClientAuthorization authz =
-            existing ??
-            await googleUser.authorizationClient.authorizeScopes(const <String>[
-              'email',
-              'profile',
-            ]);
-        accessToken = authz.accessToken;
-      } catch (_) {
-        accessToken = null;
+      final GoogleSignInAuthentication googleAuth = await googleUser
+          .authentication
+          .timeout(_googleSignInTimeout);
+      final idToken = googleAuth.idToken;
+      final accessToken = googleAuth.accessToken;
+      if ((idToken == null || idToken.trim().isEmpty) &&
+          (accessToken == null || accessToken.trim().isEmpty)) {
+        throw GoogleLoginFailure(
+          'Não foi possível concluir o login com Google. Tente novamente em instantes.',
+        );
       }
 
       final credential = GoogleAuthProvider.credential(
@@ -276,18 +251,16 @@ class FirebaseService {
         throw GoogleLoginFailure('Login Google retornou usuário nulo.');
       }
       return user;
-    } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled ||
-          e.code == GoogleSignInExceptionCode.interrupted) {
-        if (kDebugMode) debugPrint('Google Sign-In interrompido: $e');
-        throw GoogleLoginFailure(
-          'O Google interrompeu o login (${e.code}). '
-          'Se você não cancelou manualmente, reinstale a versão mais recente do teste interno e confirme os SHA da Play no Firebase.',
-          cause: e,
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          'PlatformException no login Google: code=${e.code} message=${e.message} details=${e.details}',
         );
       }
-      if (kDebugMode) debugPrint('Erro no login Google: $e');
-      throw GoogleLoginFailure('Erro no Google Sign-In: ${e.code}', cause: e);
+      throw GoogleLoginFailure(
+        'Não foi possível concluir o login com Google. Tente novamente em instantes.',
+        cause: e,
+      );
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
         debugPrint(
@@ -295,12 +268,12 @@ class FirebaseService {
         );
       }
       throw GoogleLoginFailure(
-        'Falha no Firebase Auth: ${e.code}${e.message == null ? "" : " (${e.message})"}',
+        'Não foi possível entrar com essa conta agora. Tente novamente em instantes.',
         cause: e,
       );
     } on TimeoutException catch (e) {
       throw GoogleLoginFailure(
-        'Tempo esgotado ao autenticar com Google. No emulador, confirme internet, Google Play Services e se a conta Google está ativa.',
+        'O login demorou mais que o esperado. Verifique sua internet e tente novamente.',
         cause: e,
       );
     } catch (e) {
@@ -360,7 +333,7 @@ class FirebaseService {
   // Importance: Seguraança - usuário pode sair
   static Future<void> logout() async {
     await _auth.signOut();
-    await GoogleSignIn.instance.signOut();
+    await _googleSignIn.signOut();
   }
 
   // ==============================================================================
@@ -454,26 +427,20 @@ class FirebaseService {
   static Future<void> salvarPerfilInvestidor(String uid, String perfil) async {
     final email = (await buscarDadosUsuario(uid))?['email'];
     final isAdmin = verificarAdmin(email);
-    await _firestore.collection('usuarios').doc(uid).set(
-      {
-        'perfilInvestidor': perfil.toLowerCase(),
-        'isPremium': isAdmin ? true : FieldValue.delete(),
-      },
-      SetOptions(merge: true),
-    );
+    await _firestore.collection('usuarios').doc(uid).set({
+      'perfilInvestidor': perfil.toLowerCase(),
+      'isPremium': isAdmin ? true : FieldValue.delete(),
+    }, SetOptions(merge: true));
   }
 
   // Completa onboarding no Firestore
   static Future<void> completarOnboarding(String uid) async {
     final email = (await buscarDadosUsuario(uid))?['email'];
     final isAdmin = verificarAdmin(email);
-    await _firestore.collection('usuarios').doc(uid).set(
-      {
-        'onboardingCompleto': true,
-        'isPremium': isAdmin ? true : FieldValue.delete(),
-      },
-      SetOptions(merge: true),
-    );
+    await _firestore.collection('usuarios').doc(uid).set({
+      'onboardingCompleto': true,
+      'isPremium': isAdmin ? true : FieldValue.delete(),
+    }, SetOptions(merge: true));
   }
 
   // Atualiza dados do usuário (sync)
@@ -488,10 +455,10 @@ class FirebaseService {
     if (nome != null) updates['displayName'] = nome;
     if (updates.isEmpty) return;
     // merge: true evita falha quando o doc `usuarios/{uid}` ainda não existe.
-    await _firestore.collection('usuarios').doc(uid).set(
-          updates,
-          SetOptions(merge: true),
-        );
+    await _firestore
+        .collection('usuarios')
+        .doc(uid)
+        .set(updates, SetOptions(merge: true));
   }
 
   // Salva perfil completo do usuário
@@ -500,6 +467,7 @@ class FirebaseService {
     String? profissao,
     String? perfilInvestidor,
     String? objetivos,
+    String? tratamento,
   }) async {
     final email = (await buscarDadosUsuario(uid))?['email'];
     final isAdmin = verificarAdmin(email);
@@ -509,12 +477,13 @@ class FirebaseService {
       updates['perfilInvestidor'] = perfilInvestidor.toLowerCase();
     }
     if (objetivos != null) updates['objetivos'] = objetivos;
+    if (tratamento != null) updates['tratamento'] = tratamento;
     if (isAdmin) updates['isPremium'] = true;
     updates['perfilCompleto'] = true;
-    await _firestore.collection('usuarios').doc(uid).set(
-          updates,
-          SetOptions(merge: true),
-        );
+    await _firestore
+        .collection('usuarios')
+        .doc(uid)
+        .set(updates, SetOptions(merge: true));
   }
 
   // Getter público para Firestore

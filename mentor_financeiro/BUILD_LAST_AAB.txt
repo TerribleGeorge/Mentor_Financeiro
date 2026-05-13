@@ -2,9 +2,9 @@
 ============================================================
 Actualizar este ficheiro sempre que correr: flutter build appbundle --release
 
-Versão (pubspec.yaml):     1.0.2+19
+Versão (pubspec.yaml):     1.0.2+41
 Ficheiro gerado:           build/app/outputs/bundle/release/app-release.aab
-Última actualização:       2026-05-11
+Última actualização:       2026-05-13
 
 Notas:
 - Assinatura: android/key.properties + android/app/upload-keystore.jks (não versionar segredos).

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +19,7 @@ class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
   String _profissao = "";
   String _perfilInvestidor = "";
   String _objetivos = "";
+  String _tratamento = "neutro";
   bool _planoPro = false;
   bool _carregando = true;
 
@@ -41,22 +44,33 @@ class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
 
   Future<void> _carregarDados() async {
     final prefs = await SharedPreferences.getInstance();
-    final uid = prefs.getString('uid');
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = prefs.getString('uid') ?? user?.uid;
+
+    _nomeUsuario =
+        prefs.getString('nome_usuario') ?? user?.displayName ?? 'Usuário';
+    _photoURL = user?.photoURL ?? '';
+    _profissao = prefs.getString('profissao') ?? '';
+    _perfilInvestidor = prefs.getString('perfil_investidor') ?? '';
+    _objetivos = prefs.getString('objetivos') ?? '';
+    _tratamento = prefs.getString('tratamento_usuario') ?? 'neutro';
 
     if (uid != null) {
-      final dados = await FirebaseService.buscarDadosUsuario(uid);
+      final dados = await FirebaseService.buscarDadosUsuario(
+        uid,
+      ).timeout(const Duration(seconds: 3), onTimeout: () => null);
       if (dados != null) {
-        setState(() {
-          _nomeUsuario = dados['nome'] ?? 'Usuário';
-          _photoURL = dados['photoURL'] ?? '';
-          _profissao = dados['profissao'] ?? '';
-          _perfilInvestidor = dados['perfilInvestidor'] ?? '';
-          _objetivos = dados['objetivos'] ?? '';
-          _planoPro = dados['isPremium'] ?? false;
-        });
+        _nomeUsuario = dados['nome'] ?? _nomeUsuario;
+        _photoURL = dados['photoURL'] ?? _photoURL;
+        _profissao = dados['profissao'] ?? _profissao;
+        _perfilInvestidor = dados['perfilInvestidor'] ?? _perfilInvestidor;
+        _objetivos = dados['objetivos'] ?? _objetivos;
+        _tratamento = dados['tratamento'] ?? _tratamento;
+        _planoPro = dados['isPremium'] ?? false;
       }
     }
 
+    if (!mounted) return;
     setState(() {
       _carregando = false;
     });
@@ -64,18 +78,27 @@ class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
 
   Future<void> _salvarDados() async {
     final prefs = await SharedPreferences.getInstance();
-    final uid = prefs.getString('uid');
+    final uid =
+        prefs.getString('uid') ?? FirebaseAuth.instance.currentUser?.uid;
+
+    await prefs.setString('profissao', _profissao.trim());
+    await prefs.setString('tratamento_usuario', _tratamento);
+    await prefs.setString('perfil_investidor', _perfilInvestidor.toLowerCase());
+    await prefs.setString('objetivos', _objetivos.trim());
+    await prefs.setBool('perfil_completo', true);
 
     if (uid != null) {
-      await FirebaseService.salvarPerfilCompleto(
-        uid: uid,
-        profissao: _profissao,
-        perfilInvestidor: _perfilInvestidor,
-        objetivos: _objetivos,
-      );
-      await prefs.setString(
-        'perfil_investidor',
-        _perfilInvestidor.toLowerCase(),
+      await prefs.setString('uid', uid);
+      unawaited(
+        FirebaseService.salvarPerfilCompleto(
+          uid: uid,
+          profissao: _profissao.trim(),
+          perfilInvestidor: _perfilInvestidor,
+          objetivos: _objetivos.trim(),
+          tratamento: _tratamento,
+        ).catchError((Object e, StackTrace st) {
+          debugPrint('TelaMeuPerfil sync: $e\n$st');
+        }),
       );
     }
 
@@ -129,6 +152,22 @@ class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
                   "Profissão",
                   "Ex: Desenvolvedor, Professor...",
                 ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: _tratamento.isEmpty ? 'neutro' : _tratamento,
+                dropdownColor: const Color(0xFF1E293B),
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration("Tratamento na mentoria", ""),
+                items: const [
+                  DropdownMenuItem(value: "neutro", child: Text("Neutro")),
+                  DropdownMenuItem(value: "feminino", child: Text("Feminino")),
+                  DropdownMenuItem(
+                    value: "masculino",
+                    child: Text("Masculino"),
+                  ),
+                ],
+                onChanged: (v) => setState(() => _tratamento = v ?? "neutro"),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
@@ -306,6 +345,12 @@ class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
           ),
           const Divider(color: Colors.white12),
           _itemDado(
+            Icons.badge_outlined,
+            "Tratamento na mentoria",
+            _tratamentoLabel,
+          ),
+          const Divider(color: Colors.white12),
+          _itemDado(
             Icons.trending_up,
             "Perfil de Investidor",
             _perfilInvestidor.isEmpty ? "Não definido" : _perfilInvestidor,
@@ -319,6 +364,17 @@ class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
         ],
       ),
     );
+  }
+
+  String get _tratamentoLabel {
+    switch (_tratamento) {
+      case 'feminino':
+        return 'Feminino';
+      case 'masculino':
+        return 'Masculino';
+      default:
+        return 'Neutro';
+    }
   }
 
   Widget _itemDado(IconData icone, String label, String valor) {

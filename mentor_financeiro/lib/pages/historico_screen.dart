@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/transacao_model.dart';
+import '../services/local_transaction_store.dart';
 import '../services/localization_service.dart';
 import '../services/subscription_provider.dart';
 import '../theme/classic_mode_style.dart';
@@ -26,86 +27,108 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
     final premium = context.watch<SubscriptionProvider>().isPremium;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      bottomNavigationBar:
-          premium ? null : const AdaptiveBannerAd(),
+      bottomNavigationBar: premium ? null : const AdaptiveBannerAd(),
       body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  'Histórico',
-                  style: TextStyle(
-                    color: scheme.onSurface,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    shadows: ClassicModeStyle.primaryTextShadows(context),
-                  ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'Histórico',
+                style: TextStyle(
+                  color: scheme.onSurface,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  shadows: ClassicModeStyle.primaryTextShadows(context),
                 ),
               ),
-              Expanded(
-                child: user == null
-                    ? const Center(
-                        child: Text(
-                          'Faça login para ver o histórico',
-                          style: TextStyle(color: Colors.white54),
-                        ),
-                      )
-                    : StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('usuarios')
-                            .doc(user!.uid)
-                            .collection('transacoes')
-                            .orderBy('data', descending: true)
-                            .limit(50)
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF00D9FF),
-                              ),
-                            );
-                          }
-
-                          if (!snapshot.hasData ||
-                              snapshot.data!.docs.isEmpty) {
-                            return const Center(
-                              child: Text(
-                                'Nenhuma transação encontrada',
-                                style: TextStyle(color: Colors.white54),
-                              ),
-                            );
-                          }
-
-                          final transacoes = snapshot.data!.docs.map((doc) {
-                            return TransacaoModel.fromMap(
-                              doc.data() as Map<String, dynamic>,
-                            );
-                          }).toList();
-
-                          return ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            itemCount: transacoes.length,
-                            itemBuilder: (context, index) {
-                              final t = transacoes[index];
-                              return _buildTransacaoItem(context, t);
-                            },
-                          );
-                        },
+            ),
+            Expanded(
+              child: user == null
+                  ? const Center(
+                      child: Text(
+                        'Faça login para ver o histórico',
+                        style: TextStyle(color: Colors.white54),
                       ),
-              ),
-            ],
-          ),
+                    )
+                  : StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('usuarios')
+                          .doc(user!.uid)
+                          .collection('transacoes')
+                          .orderBy('data', descending: true)
+                          .limit(50)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF00D9FF),
+                            ),
+                          );
+                        }
+
+                        if (!snapshot.hasData) {
+                          return const Center(
+                            child: Text(
+                              'Nenhuma transação encontrada',
+                              style: TextStyle(color: Colors.white54),
+                            ),
+                          );
+                        }
+
+                        final cloud = snapshot.data!.docs.map((doc) {
+                          return TransacaoModel.fromMap(
+                            doc.data() as Map<String, dynamic>,
+                          );
+                        }).toList();
+
+                        return FutureBuilder<List<TransacaoModel>>(
+                          future: LocalTransactionStore.load(limit: 50),
+                          builder: (context, localSnapshot) {
+                            final transacoes = LocalTransactionStore.merge(
+                              cloud,
+                              localSnapshot.data ?? const <TransacaoModel>[],
+                              limit: 50,
+                            );
+
+                            if (transacoes.isEmpty) {
+                              return const Center(
+                                child: Text(
+                                  'Nenhuma transação encontrada',
+                                  style: TextStyle(color: Colors.white54),
+                                ),
+                              );
+                            }
+
+                            return ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              itemCount: transacoes.length,
+                              itemBuilder: (context, index) {
+                                final t = transacoes[index];
+                                return _buildTransacaoItem(context, t);
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
+      ),
     );
   }
 
   Widget _buildTransacaoItem(BuildContext context, TransacaoModel t) {
     final isCredito = t.tipoPagamento == TipoPagamento.credito;
-    final surface = Theme.of(context).colorScheme.surface.withValues(alpha: 0.62);
+    final surface = Theme.of(
+      context,
+    ).colorScheme.surface.withValues(alpha: 0.62);
     final onSurface = Theme.of(context).colorScheme.onSurface;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -114,7 +137,9 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
         color: surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurface.withValues(alpha: 0.08),
         ),
       ),
       child: Row(

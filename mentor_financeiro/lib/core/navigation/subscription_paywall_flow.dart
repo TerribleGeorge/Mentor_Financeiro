@@ -22,7 +22,9 @@ Future<bool> presentPaywallAndRefresh(
   } catch (e) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro: $e')),
+        const SnackBar(
+          content: Text('Não foi possível abrir a assinatura agora.'),
+        ),
       );
     }
     return false;

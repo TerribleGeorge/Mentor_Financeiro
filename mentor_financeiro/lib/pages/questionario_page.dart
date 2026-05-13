@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/firebase_service.dart';
@@ -38,31 +40,46 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
     var ok = false;
     try {
       final prefs = await SharedPreferences.getInstance();
-      final uid = prefs.getString('uid');
+      final uid = prefs.getString('uid') ?? FirebaseService.usuarioAtual?.uid;
+      final profissao = _profissao.trim();
+      final perfil = _perfilInvestidor.toLowerCase();
+      final objetivos = _objetivos.trim();
 
+      await prefs.setString('profissao', profissao);
+      await prefs.setString('perfil_investidor', perfil);
+      await prefs.setString('objetivos', objetivos);
+      await prefs.setBool('perfil_completo', true);
+      await prefs.setBool('onboarding_completo', true);
       if (uid != null) {
-        await FirebaseService.salvarPerfilCompleto(
-          uid: uid,
-          profissao: _profissao.trim(),
-          perfilInvestidor: _perfilInvestidor.toLowerCase(),
-          objetivos: _objetivos.trim(),
+        await prefs.setString('uid', uid);
+      }
+      ok = true;
+
+      // A entrada no app deve ser instantânea. A nuvem sincroniza depois,
+      // sem prender o botão em carregamento quando rede/regras falham.
+      if (uid != null) {
+        unawaited(
+          Future<void>(() async {
+            await FirebaseService.salvarPerfilCompleto(
+              uid: uid,
+              profissao: profissao,
+              perfilInvestidor: perfil,
+              objetivos: objetivos,
+            );
+            await FirebaseService.completarOnboarding(uid);
+            try {
+              await FirebaseService.inscricaoTopico(perfil);
+            } catch (_) {}
+          }).catchError((Object e, StackTrace st) {
+            debugPrint('QuestionarioPage sync: $e\n$st');
+          }),
         );
-        await FirebaseService.completarOnboarding(uid);
-        await prefs.setBool('onboarding_completo', true);
-        await prefs.setString(
-          'perfil_investidor',
-          _perfilInvestidor.toLowerCase(),
-        );
-        try {
-          await FirebaseService.inscricaoTopico(_perfilInvestidor.toLowerCase());
-        } catch (_) {
-          // FCM / tópico é opcional; não bloquear entrada na app.
-        }
-        ok = true;
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Sessão inválida. Volte a iniciar sessão e tente novamente.'),
+            content: Text(
+              'Perfil salvo neste aparelho. Entre em uma conta para sincronizar.',
+            ),
           ),
         );
       }

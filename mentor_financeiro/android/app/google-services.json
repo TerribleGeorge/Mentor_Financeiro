@@ -14,19 +14,19 @@
       },
       "oauth_client": [
         {
+          "client_id": "841128243215-5mdc3i9fu4n2ob3pa75pk2bsu7462bk3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.georgeguimares.mentorfinanceiro",
+            "certificate_hash": "d11519dddae0b0cd9da6fc1b2316b311dd5f3945"
+          }
+        },
+        {
           "client_id": "841128243215-t4fp2leggib1k5qfe7rf2e1v8oq5fn4v.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.georgeguimares.mentorfinanceiro",
             "certificate_hash": "101d137e3094124c271ee21ea8d4a9cc16e43e8a"
-          }
-        },
-        {
-          "client_id": "841128243215-u0li1f57nsj1ir2ms3utqkf437hk5lqp.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.georgeguimares.mentorfinanceiro",
-            "certificate_hash": "d11519dddaf0b0cd9da6fc1b2316b311dd5f3945"
           }
         },
         {

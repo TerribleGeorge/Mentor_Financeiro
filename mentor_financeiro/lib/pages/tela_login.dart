@@ -8,6 +8,7 @@
 //
 
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 
@@ -54,7 +55,7 @@ class _TelaLoginState extends State<TelaLogin> {
   // Estado de carregamento (bloqueia interação durante processo)
   bool _carregando = false;
 
-  // Método de login escolhido (google, apple, celular, anonimo)
+  // Método de login escolhido (google, apple, email, anonimo)
   String? _metodoLogin;
 
   // Usuário Firebase (se logado)
@@ -215,23 +216,25 @@ class _TelaLoginState extends State<TelaLogin> {
           ),
           const SizedBox(height: 40),
 
-          // Botão login Google
-          _botaoLogin(
-            const Icon(Icons.g_mobiledata, color: Colors.white, size: 28),
-            "Continuar com Google",
-            const Color(0xFF4285F4),
-            _loginGoogle,
-          ),
-          const SizedBox(height: 15),
+          if (Platform.isAndroid) ...[
+            _botaoLogin(
+              const Icon(Icons.g_mobiledata, color: Colors.white, size: 28),
+              "Continuar com Google",
+              const Color(0xFF4285F4),
+              _loginGoogle,
+            ),
+            const SizedBox(height: 15),
+          ],
 
-          // Botão login Apple
-          _botaoLogin(
-            const Icon(Icons.apple, color: Colors.white),
-            "Continuar com Apple",
-            Colors.black,
-            _loginApple,
-          ),
-          const SizedBox(height: 15),
+          if (Platform.isIOS) ...[
+            _botaoLogin(
+              const Icon(Icons.apple, color: Colors.white),
+              "Continuar com Apple",
+              Colors.black,
+              _loginApple,
+            ),
+            const SizedBox(height: 15),
+          ],
 
           // Botão login Email/Senha
           _botaoLogin(
@@ -242,19 +245,10 @@ class _TelaLoginState extends State<TelaLogin> {
           ),
           const SizedBox(height: 15),
 
-          // Botão login Celular
-          _botaoLogin(
-            const Icon(Icons.phone_android, color: Colors.white),
-            "Continuar com Celular",
-            const Color(0xFF00D9FF),
-            _loginCelular,
-          ),
-          const SizedBox(height: 15),
-
           // Botão anônimo
           _botaoLogin(
             const Icon(Icons.person_outline, color: Colors.white54),
-            "Continuar sem conta",
+            "Experimentar sem conta",
             const Color(0xFF1E293B),
             _loginAnonimo,
           ),
@@ -657,7 +651,7 @@ class _TelaLoginState extends State<TelaLogin> {
       if (!mounted) return;
       if (user == null) {
         throw GoogleLoginFailure(
-          'O Google não retornou usuário. Isso pode indicar interrupção do login ou configuração incompleta do Google Sign-In.',
+          'Não foi possível concluir o login com Google. Tente novamente em instantes.',
         );
       }
       setState(() {
@@ -672,10 +666,7 @@ class _TelaLoginState extends State<TelaLogin> {
       setState(() => _carregando = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            '${e.message}\n'
-            'Se você estiver em Android, confirme o SHA-1/SHA-256 do app no Firebase e atualize o google-services.json.',
-          ),
+          content: Text(e.message),
           duration: const Duration(seconds: 6),
         ),
       );
@@ -691,12 +682,6 @@ class _TelaLoginState extends State<TelaLogin> {
   // Login Apple
   Future<void> _loginApple() async {
     setState(() => _metodoLogin = "apple");
-    _pageController.jumpToPage(2);
-  }
-
-  // Login Celular
-  Future<void> _loginCelular() async {
-    setState(() => _metodoLogin = "celular");
     _pageController.jumpToPage(2);
   }
 
@@ -839,11 +824,11 @@ class _TelaLoginState extends State<TelaLogin> {
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text(
-                  'Login feito, mas não foi possível sincronizar o perfil agora: $e',
+                  'Login feito, mas não foi possível sincronizar o perfil agora. A sincronização será retomada automaticamente.',
                 ),
-                duration: const Duration(seconds: 4),
+                duration: Duration(seconds: 4),
               ),
             );
           }
@@ -863,7 +848,9 @@ class _TelaLoginState extends State<TelaLogin> {
       if (!mounted) return;
       setState(() => _carregando = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Não foi possível finalizar o login: $e')),
+        const SnackBar(
+          content: Text('Não foi possível finalizar o login agora.'),
+        ),
       );
     }
   }

@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_routes.dart';
 import '../../core/navigation/mentor_navigator.dart';
@@ -145,17 +146,27 @@ class _SplashScreenState extends State<SplashScreen>
       _pushReplacementNamed(AppRoutes.login);
       return;
     }
-    if (dados != null) {
-      if (!(dados['perfilCompleto'] ?? false)) {
-        _pushReplacementNamed(AppRoutes.questionario);
-        return;
+    SharedPreferences.getInstance().then((prefs) {
+      if (!mounted) return;
+      final localProfileComplete =
+          prefs.getBool('perfil_completo') == true ||
+          prefs.getString('perfil_investidor')?.isNotEmpty == true;
+      final localOnboardingComplete =
+          prefs.getBool('onboarding_completo') == true;
+
+      if (dados != null && !localProfileComplete) {
+        if (!(dados['perfilCompleto'] ?? false)) {
+          _pushReplacementNamed(AppRoutes.questionario);
+          return;
+        }
+        if (!(dados['onboardingCompleto'] ?? false) &&
+            !localOnboardingComplete) {
+          _pushReplacementNamed(AppRoutes.onboardingMentor);
+          return;
+        }
       }
-      if (!(dados['onboardingCompleto'] ?? false)) {
-        _pushReplacementNamed(AppRoutes.onboardingMentor);
-        return;
-      }
-    }
-    _pushReplacementNamed(AppRoutes.home);
+      _pushReplacementNamed(AppRoutes.home);
+    });
   }
 
   @override
