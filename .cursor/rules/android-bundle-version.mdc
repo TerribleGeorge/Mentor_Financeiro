@@ -1,0 +1,15 @@
+---
+description: Ao pedir nova bundle Android, incrementar versionCode (+1) e compilar.
+alwaysApply: true
+---
+
+# Bundle Android (Play Store)
+
+Quando o utilizador pedir para **gerar uma nova bundle** (ou expressões equivalentes, ex.: "gere uma nova bundle", "gerar appbundle", "build release bundle"):
+
+1. Abrir `mentor_financeiro/pubspec.yaml` e localizar `version: X.Y.Z+BUILD` (formato `MAJOR.MINOR.PATCH+versionCode`).
+2. **Incrementar sempre `BUILD` em +1** relativamente ao valor atual no ficheiro (nunca reutilizar o mesmo `versionCode` que já foi publicado ou entregue).
+3. Executar a partir de `mentor_financeiro/`: `flutter build appbundle --release`.
+4. Indicar o caminho do `.aab` e a nova versão (`X.Y.Z+BUILD`).
+
+Se o utilizador especificar um número explícito (ex.: "gere a 48"), usar esse `versionCode` em vez de só +1.
