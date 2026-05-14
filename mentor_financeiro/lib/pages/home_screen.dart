@@ -436,8 +436,69 @@ class _HomeScreenState extends State<HomeScreen> {
       required Color color,
       required VoidCallback onTap,
       bool premium = false,
+      /// Quando true, o card estica à célula (ex.: linha Premium com [Expanded]).
+      bool expand = false,
     }) {
       final locked = premium && !subscription.isPremium;
+      final card = Container(
+        width: expand ? double.infinity : null,
+        height: expand ? double.infinity : null,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D1118),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: color.withValues(alpha: 0.78),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.14),
+              blurRadius: 18,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, color: color, size: 26),
+                    const Spacer(),
+                    if (locked)
+                      const Icon(Icons.lock, color: Colors.white54, size: 18),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    shadows: ClassicModeStyle.secondaryTextShadows(context),
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+            if (locked)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+
       return InkWell(
         onTap: locked
             ? () => Navigator.of(context).push(
@@ -445,65 +506,12 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             : onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D1118),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: color.withValues(alpha: 0.78),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.14),
-                blurRadius: 18,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(icon, color: color, size: 26),
-                      const Spacer(),
-                      if (locked)
-                        const Icon(Icons.lock, color: Colors.white54, size: 18),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      shadows: ClassicModeStyle.secondaryTextShadows(context),
-                    ),
-                  ),
-                ],
-              ),
-              if (locked)
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
+        child: card,
       );
     }
 
-    /// Grelha 2×N com altura previsível (evita scroll dentro da [CustomScrollView]).
-    Widget featureGrid(List<Widget> tiles) {
+    /// Grelha 2×2 (4 cards): sem buracos; altura derivada de [childAspectRatio].
+    Widget featureGrid2x2(List<Widget> tiles) {
       return GridView.count(
         crossAxisCount: 2,
         shrinkWrap: true,
@@ -515,77 +523,108 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _homeFeatureSectionTitle(context, 'Organização e registo'),
-        const SizedBox(height: 10),
-        featureGrid(<Widget>[
-          tile(
-            icon: Icons.tune,
-            label: 'Renda e Gastos Fixos',
-            color: const Color(0xFF00D9FF),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const FinanceConfigurationPage(),
+    /// Uma linha com 3 cards à mesma largura (evita o “buraco” da grelha 2 colunas).
+    Widget premiumRow3(List<Widget> tiles, double maxWidth) {
+      assert(tiles.length == 3);
+      final gap = 12.0;
+      // Mesma altura visual que uma célula da grelha 2×2 em cima.
+      final cellW2 = (maxWidth - gap) / 2;
+      final rowHeight = cellW2 / 1.35;
+
+      return SizedBox(
+        height: rowHeight,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: tiles[0]),
+            SizedBox(width: gap),
+            Expanded(child: tiles[1]),
+            SizedBox(width: gap),
+            Expanded(child: tiles[2]),
+          ],
+        ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _homeFeatureSectionTitle(context, 'Organização e registo'),
+            const SizedBox(height: 10),
+            featureGrid2x2(<Widget>[
+              tile(
+                icon: Icons.tune,
+                label: 'Renda e Gastos Fixos',
+                color: const Color(0xFF00D9FF),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const FinanceConfigurationPage(),
+                  ),
+                ),
               ),
-            ),
-          ),
-          tile(
-            icon: Icons.edit_note,
-            label: 'Registro de Gastos',
-            color: const Color(0xFF26DE81),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const AdicionarTransacaoPage(),
+              tile(
+                icon: Icons.edit_note,
+                label: 'Registro de Gastos',
+                color: const Color(0xFF26DE81),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const AdicionarTransacaoPage(),
+                  ),
+                ),
               ),
-            ),
-          ),
-          tile(
-            icon: Icons.flag,
-            label: 'Simulador de Metas',
-            color: const Color(0xFFFECA57),
-            onTap: () => mentorPushNamed(context, AppRoutes.metas),
-          ),
-          tile(
-            icon: Icons.menu_book,
-            label: 'Conteúdo Educacional',
-            color: const Color(0xFF6366F1),
-            onTap: () => mentorPushNamed(context, AppRoutes.conhecimento),
-          ),
-        ]),
-        const SizedBox(height: 22),
-        _homeFeatureSectionTitle(context, 'Mentor Premium'),
-        const SizedBox(height: 10),
-        featureGrid(<Widget>[
-          tile(
-            icon: Icons.psychology_alt,
-            label: 'Mentoria',
-            color: const Color(0xFFFF4D4D),
-            premium: true,
-            onTap: () => mentorPushNamed(context, AppRoutes.mentoria),
-          ),
-          tile(
-            icon: Icons.query_stats,
-            label: 'Análise Personalizada',
-            color: const Color(0xFF00D9FF),
-            premium: true,
-            onTap: () => mentorPushNamed(
-              context,
-              AppRoutes.relatorios,
-              arguments: 'Análise Personalizada',
-            ),
-          ),
-          tile(
-            icon: Icons.auto_graph,
-            label: 'Estratégias Avançadas',
-            color: const Color(0xFF6366F1),
-            premium: true,
-            onTap: () =>
-                mentorPushNamed(context, AppRoutes.conhecimentoEstrategias),
-          ),
-        ]),
-      ],
+              tile(
+                icon: Icons.flag,
+                label: 'Simulador de Metas',
+                color: const Color(0xFFFECA57),
+                onTap: () => mentorPushNamed(context, AppRoutes.metas),
+              ),
+              tile(
+                icon: Icons.menu_book,
+                label: 'Conteúdo Educacional',
+                color: const Color(0xFF6366F1),
+                onTap: () => mentorPushNamed(context, AppRoutes.conhecimento),
+              ),
+            ]),
+            const SizedBox(height: 22),
+            _homeFeatureSectionTitle(context, 'Mentor Premium'),
+            const SizedBox(height: 10),
+            premiumRow3(<Widget>[
+              tile(
+                icon: Icons.psychology_alt,
+                label: 'Mentoria',
+                color: const Color(0xFFFF4D4D),
+                premium: true,
+                expand: true,
+                onTap: () => mentorPushNamed(context, AppRoutes.mentoria),
+              ),
+              tile(
+                icon: Icons.query_stats,
+                label: 'Análise Personalizada',
+                color: const Color(0xFF00D9FF),
+                premium: true,
+                expand: true,
+                onTap: () => mentorPushNamed(
+                  context,
+                  AppRoutes.relatorios,
+                  arguments: 'Análise Personalizada',
+                ),
+              ),
+              tile(
+                icon: Icons.auto_graph,
+                label: 'Estratégias Avançadas',
+                color: const Color(0xFF6366F1),
+                premium: true,
+                expand: true,
+                onTap: () =>
+                    mentorPushNamed(context, AppRoutes.conhecimentoEstrategias),
+              ),
+            ], w),
+          ],
+        );
+      },
     );
   }
 }
