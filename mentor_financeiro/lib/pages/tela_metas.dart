@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../domain/finance/daily_limit_calculator.dart';
 import '../services/exchange_rate_service.dart';
 import '../services/user_data_retention_service.dart';
+import 'finance_configuration_page.dart';
 
 class TelaMetas extends StatefulWidget {
   const TelaMetas({super.key});
@@ -24,6 +25,7 @@ class _TelaMetasState extends State<TelaMetas> {
   );
   String _resultado = "Preencha para calcular";
   String _cotacaoDolar = "Carregando...";
+  bool _sugereAbrirFinancas = false;
 
   static final NumberFormat _moneyInputFormat = NumberFormat.currency(
     locale: 'pt_BR',
@@ -102,11 +104,26 @@ class _TelaMetasState extends State<TelaMetas> {
         0;
 
     if (aporteMensal <= 0 || meta <= 0) {
-      setState(
-        () => _resultado = "Ajuste sua sobra mensal ou o valor da meta!",
-      );
+      final linhas = <String>[
+        'Sobra mensal estimada: R\$ ${aporteMensal.toStringAsFixed(2)}',
+        '(soma das rendas ativas − soma dos gastos fixos ativos na configuração).',
+      ];
+      if (meta <= 0) {
+        linhas.add('Indique acima o valor do objetivo em reais.');
+      }
+      if (aporteMensal <= 0) {
+        linhas.add(
+          'Com sobra zero ou negativa, ajuste rendas e gastos fixos em «Renda e Gastos Fixos».',
+        );
+      }
+      setState(() {
+        _resultado = linhas.join('\n');
+        _sugereAbrirFinancas = true;
+      });
       return;
     }
+
+    setState(() => _sugereAbrirFinancas = false);
 
     double i = (taxa / 100) / 12;
     int meses;
@@ -264,7 +281,11 @@ class _TelaMetasState extends State<TelaMetas> {
       ),
       child: Column(
         children: [
-          const Icon(Icons.auto_awesome, color: Color(0xFF00D9FF), size: 30),
+          Icon(
+            _sugereAbrirFinancas ? Icons.tune : Icons.auto_awesome,
+            color: const Color(0xFF00D9FF),
+            size: 30,
+          ),
           const SizedBox(height: 15),
           Text(
             _resultado,
@@ -276,6 +297,31 @@ class _TelaMetasState extends State<TelaMetas> {
               height: 1.5,
             ),
           ),
+          if (_sugereAbrirFinancas) ...[
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  await Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const FinanceConfigurationPage(),
+                    ),
+                  );
+                  if (!mounted) return;
+                  await _carregarDados();
+                  _calcular();
+                },
+                icon: const Icon(Icons.open_in_new, size: 18),
+                label: const Text('Abrir Renda e Gastos Fixos'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF00D9FF),
+                  side: const BorderSide(color: Color(0xFF00D9FF)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

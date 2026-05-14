@@ -20,13 +20,21 @@ class HistoricoScreen extends StatefulWidget {
 }
 
 class _HistoricoScreenState extends State<HistoricoScreen> {
+  late Future<List<TransacaoModel>> _localFuture;
+
+  void _refreshLocalFuture() {
+    _localFuture = LocalTransactionStore.load(limit: 50);
+  }
+
   void _onTransacoesChanged() {
+    _refreshLocalFuture();
     if (mounted) setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
+    _refreshLocalFuture();
     TransactionRefreshSignal.addListener(_onTransacoesChanged);
   }
 
@@ -78,7 +86,8 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                           .snapshots(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
+                                ConnectionState.waiting &&
+                            !snapshot.hasData) {
                           return const Center(
                             child: CircularProgressIndicator(
                               color: Color(0xFF00D9FF),
@@ -86,36 +95,16 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                           );
                         }
 
-                        if (snapshot.hasError) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Text(
-                                'Erro ao carregar: ${snapshot.error}',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(color: Colors.white54),
-                              ),
-                            ),
-                          );
-                        }
-
-                        if (!snapshot.hasData) {
-                          return const Center(
-                            child: Text(
-                              'Nenhuma transação encontrada',
-                              style: TextStyle(color: Colors.white54),
-                            ),
-                          );
-                        }
-
-                        final cloud = snapshot.data!.docs.map((doc) {
-                          return TransacaoModel.fromMap(
-                            doc.data() as Map<String, dynamic>,
-                          );
-                        }).toList();
+                        final cloud = snapshot.hasError || !snapshot.hasData
+                            ? <TransacaoModel>[]
+                            : snapshot.data!.docs.map((doc) {
+                                return TransacaoModel.fromMap(
+                                  doc.data() as Map<String, dynamic>,
+                                );
+                              }).toList();
 
                         return FutureBuilder<List<TransacaoModel>>(
-                          future: LocalTransactionStore.load(limit: 50),
+                          future: _localFuture,
                           builder: (context, localSnapshot) {
                             final transacoes = LocalTransactionStore.merge(
                               cloud,

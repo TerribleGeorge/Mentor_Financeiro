@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/transacao_model.dart';
 import '../services/ad_manager_service.dart';
 import '../services/daily_spend_limit_notifier.dart';
+import '../services/local_transaction_store.dart';
+import '../services/notification_listener_service.dart';
 import '../services/subscription_provider.dart';
 import '../services/transaction_refresh_signal.dart';
 
@@ -85,7 +89,14 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
     if (user == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Você precisa estar logado para salvar.')),
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFF1E293B),
+          content: Text(
+            'Inicie sessão na página inicial para guardar na nuvem.',
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.92)),
+          ),
+        ),
       );
       return;
     }
@@ -109,11 +120,39 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
         tipoPagamento: _tipoPagamento,
       );
 
-      await FirebaseFirestore.instance
-          .collection('usuarios')
-          .doc(user.uid)
-          .collection('transacoes')
-          .add(transacao.toMap());
+      var cloudOk = false;
+      for (var attempt = 0; attempt < 4; attempt++) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(user.uid)
+              .collection('transacoes')
+              .add(transacao.toMap());
+          cloudOk = true;
+          break;
+        } catch (_) {
+          if (attempt < 3) {
+            await Future<void>.delayed(
+              Duration(milliseconds: 350 * (1 << attempt)),
+            );
+          }
+        }
+      }
+
+      final sourceId =
+          'manual|${user.uid}|${DateTime.now().millisecondsSinceEpoch}|'
+          '${transacao.descricao.hashCode}';
+
+      if (!cloudOk) {
+        await LocalTransactionStore.save(transacao, sourceId: sourceId);
+        await NotificationListenerService.enqueueManualRegistroForLaterSync(
+          t: transacao,
+          sourceId: sourceId,
+        );
+        unawaited(
+          NotificationListenerService().flushPendingTransactionsToFirestore(),
+        );
+      }
 
       if (_tipoPagamento == TipoPagamento.debito) {
         final prefs = await SharedPreferences.getInstance();
@@ -133,9 +172,13 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Transação salva com sucesso.'),
-          backgroundColor: Color(0xFF26DE81),
+        SnackBar(
+          content: Text(
+            cloudOk
+                ? 'Transação salva com sucesso.'
+                : 'Registo guardado neste telemóvel; a sincronizar com a nuvem em segundo plano.',
+          ),
+          backgroundColor: const Color(0xFF26DE81),
         ),
       );
       final sub = context.read<SubscriptionProvider>();
@@ -146,14 +189,6 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
             Navigator.of(context).pop();
           }
         },
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Não foi possível salvar agora. Tente novamente.'),
-          backgroundColor: Colors.red,
-        ),
       );
     } finally {
       if (mounted) setState(() => _salvando = false);

@@ -2610,6 +2610,54 @@ class NotificationListenerService {
     return saved;
   }
 
+  /// Mesmo formato que [_enqueuePendingTransaction] / [flushPendingTransactionsToFirestore].
+  /// Usado pelo registo manual quando a Firestore falha temporariamente.
+  static Future<void> enqueueManualRegistroForLaterSync({
+    required TransacaoModel t,
+    required String sourceId,
+  }) async {
+    if (sourceId.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final list = <Map<String, dynamic>>[];
+    final raw = prefs.getString(_pendingTxKey);
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          for (final e in decoded) {
+            if (e is Map) {
+              list.add(Map<String, dynamic>.from(e));
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (list.any((e) => e['sourceId']?.toString() == sourceId)) return;
+
+    list.add({
+      'valor': t.valor,
+      'descricao': t.descricao,
+      'dataMillis': t.data.millisecondsSinceEpoch,
+      'categoria': t.categoria,
+      'tipoPagamento': t.tipoPagamento == TipoPagamento.credito
+          ? 'credito'
+          : 'debito',
+      'limiteDisponivel': t.limiteDisponivel,
+      'banco': t.banco,
+      'packageName': 'mentor_registro_manual',
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'texto': t.descricao,
+      'sourceId': sourceId,
+    });
+    while (list.length > _pendingTxMax) {
+      list.removeAt(0);
+    }
+    try {
+      await prefs.setString(_pendingTxKey, jsonEncode(list));
+    } catch (_) {}
+  }
+
   Future<void> _processarNotificacao(
     String texto, {
     required String packageName,

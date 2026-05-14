@@ -213,12 +213,16 @@ class MentorAppRouter {
               : MentoriaLessonScreen(args: args),
         );
       case AppRoutes.relatorios:
+        final raw = settings.arguments;
+        final title = raw is String && raw.trim().isNotEmpty
+            ? raw.trim()
+            : 'Relatórios';
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const PremiumWrapper(
-            feature: 'Relatórios mensais',
+          builder: (_) => PremiumWrapper(
+            feature: title,
             child: DashboardScreen(
-              title: 'Relatórios',
+              title: title,
               showBackButton: true,
               chartsOnly: false,
             ),

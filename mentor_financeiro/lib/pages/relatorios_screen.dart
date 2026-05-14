@@ -43,13 +43,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
   /// Evita recalcular mentoria a cada frame quando os dados não mudaram.
   String? _mentoriaCacheKey;
 
+  Future<List<TransacaoModel>> _localMonthFuture =
+      Future.value(const <TransacaoModel>[]);
+
+  void _rebindLocalMonthFuture() {
+    final start = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
+    final end = DateTime(
+      _selectedMonth.year,
+      _selectedMonth.month + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+    _localMonthFuture = LocalTransactionStore.load(start: start, end: end);
+  }
+
   void _onTransacoesChanged() {
+    _rebindLocalMonthFuture();
     if (mounted) setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
+    _rebindLocalMonthFuture();
     TransactionRefreshSignal.addListener(_onTransacoesChanged);
   }
 
@@ -95,13 +114,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       default:
         return Icons.receipt;
     }
-  }
-
-  String _mensagemErroRelatorios(Object? error) {
-    if (error is FirebaseException && error.code == 'permission-denied') {
-      return 'Não consegui acessar seus dados na nuvem agora. Verifique se você está logado na conta correta e tente novamente.';
-    }
-    return 'Não foi possível carregar os relatórios neste momento. Tente novamente em instantes.';
   }
 
   @override
@@ -176,49 +188,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             .orderBy('data', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
             return const Center(
               child: CircularProgressIndicator(color: Color(0xFF00D9FF)),
             );
           }
 
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.cloud_off,
-                      color: Colors.white54,
-                      size: 48,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Não foi possível carregar os relatórios.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      _mensagemErroRelatorios(snapshot.error),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 13,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          final cloud = snapshot.hasData
+          final cloud = (!snapshot.hasError && snapshot.hasData)
               ? snapshot.data!.docs
                     .map(
                       (doc) => TransacaoModel.fromMap(
@@ -229,10 +206,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               : <TransacaoModel>[];
 
           return FutureBuilder<List<TransacaoModel>>(
-            future: LocalTransactionStore.load(
-              start: startOfMonth,
-              end: endOfMonth,
-            ),
+            future: _localMonthFuture,
             builder: (context, localSnapshot) {
               final transacoesAll = LocalTransactionStore.merge(
                 cloud,
@@ -699,12 +673,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           IconButton(
             icon: const Icon(Icons.chevron_left, color: Color(0xFF00D9FF)),
-            onPressed: () => setState(() {
-              _selectedMonth = DateTime(
-                _selectedMonth.year,
-                _selectedMonth.month - 1,
-              );
-            }),
+            onPressed: () {
+              setState(() {
+                _selectedMonth = DateTime(
+                  _selectedMonth.year,
+                  _selectedMonth.month - 1,
+                );
+                _rebindLocalMonthFuture();
+              });
+            },
           ),
           Text(
             DateFormat(
@@ -720,12 +697,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.chevron_right, color: Color(0xFF00D9FF)),
-            onPressed: () => setState(() {
-              _selectedMonth = DateTime(
-                _selectedMonth.year,
-                _selectedMonth.month + 1,
-              );
-            }),
+            onPressed: () {
+              setState(() {
+                _selectedMonth = DateTime(
+                  _selectedMonth.year,
+                  _selectedMonth.month + 1,
+                );
+                _rebindLocalMonthFuture();
+              });
+            },
           ),
         ],
       ),

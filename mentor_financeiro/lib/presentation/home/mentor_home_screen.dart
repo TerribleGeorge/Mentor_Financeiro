@@ -173,19 +173,14 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
         vitrineCard(
           icon: Icons.query_stats,
           accent: const Color(0xFF00D9FF),
-          title: 'Gráficos avançados',
+          title: 'Análise personalizada',
           subtitle: 'Dashboards por categoria e forma de pagamento',
           locked: !subscription.isPremium,
-          onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
-        ),
-        const SizedBox(height: 12),
-        vitrineCard(
-          icon: Icons.picture_as_pdf,
-          accent: const Color(0xFFE5B100),
-          title: 'Relatórios mensais detalhados',
-          subtitle: 'Visão organizada do mês e exportação',
-          locked: !subscription.isPremium,
-          onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
+          onTap: () => mentorPushNamed(
+            context,
+            AppRoutes.relatorios,
+            arguments: 'Análise Personalizada',
+          ),
         ),
       ],
     );

@@ -327,18 +327,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: _buildQuickAction(
                             context,
-                            Icons.receipt_long,
-                            'Transações',
-                            const Color(0xFF00D9FF),
-                            () {
-                              mentorPushNamed(context, AppRoutes.historico);
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildQuickAction(
-                            context,
                             Icons.pie_chart,
                             'Gráficos',
                             const Color(0xFF26DE81),
@@ -552,7 +540,11 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'Análise Personalizada',
           color: const Color(0xFF00D9FF),
           premium: true,
-          onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
+          onTap: () => mentorPushNamed(
+            context,
+            AppRoutes.relatorios,
+            arguments: 'Análise Personalizada',
+          ),
         ),
         tile(
           icon: Icons.auto_graph,
@@ -561,13 +553,6 @@ class _HomeScreenState extends State<HomeScreen> {
           premium: true,
           onTap: () =>
               mentorPushNamed(context, AppRoutes.conhecimentoEstrategias),
-        ),
-        tile(
-          icon: Icons.picture_as_pdf,
-          label: 'Relatórios',
-          color: const Color(0xFFE5B100),
-          premium: true,
-          onTap: () => mentorPushNamed(context, AppRoutes.relatorios),
         ),
       ],
     );
