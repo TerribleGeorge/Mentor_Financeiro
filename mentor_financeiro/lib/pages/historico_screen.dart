@@ -9,8 +9,10 @@ import '../services/local_transaction_store.dart';
 import '../services/localization_service.dart';
 import '../services/subscription_provider.dart';
 import '../services/transaction_refresh_signal.dart';
+import '../services/transaction_category_update_service.dart';
 import '../theme/classic_mode_style.dart';
 import '../widgets/ads/adaptive_banner_ad.dart';
+import '../widgets/edit_transaction_category_sheet.dart';
 
 class HistoricoScreen extends StatefulWidget {
   const HistoricoScreen({super.key});
@@ -100,6 +102,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                             : snapshot.data!.docs.map((doc) {
                                 return TransacaoModel.fromMap(
                                   doc.data() as Map<String, dynamic>,
+                                  firestoreDocumentId: doc.id,
                                 );
                               }).toList();
 
@@ -196,6 +199,17 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
+                  t.categoria?.trim().isNotEmpty == true
+                      ? t.categoria!.trim()
+                      : 'Outros',
+                  style: TextStyle(
+                    color: onSurface.withValues(alpha: 0.65),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
                   DateFormat('dd/MM/yyyy', 'pt_BR').format(t.data),
                   style: TextStyle(
                     color: onSurface.withValues(alpha: 0.55),
@@ -205,6 +219,17 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
               ],
             ),
           ),
+          if (TransactionCategoryUpdateService.canEdit(t))
+            IconButton(
+              tooltip: 'Editar categoria',
+              icon: Icon(
+                Icons.edit_outlined,
+                size: 20,
+                color: onSurface.withValues(alpha: 0.7),
+              ),
+              onPressed: () =>
+                  showTransactionCategoryEditor(context, transaction: t),
+            ),
           Text(
             '${isCredito ? '+' : '-'} ${LocalizationService.formatCurrency(t.valor)}',
             style: TextStyle(

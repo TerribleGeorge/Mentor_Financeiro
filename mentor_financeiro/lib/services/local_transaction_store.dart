@@ -49,6 +49,22 @@ class LocalTransactionStore {
     return true;
   }
 
+  /// Atualiza a categoria de uma entrada já guardada (ex.: correção pelo utilizador).
+  static Future<bool> updateCategoryBySourceId({
+    required String sourceId,
+    required String categoria,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final items = await _readRaw(prefs);
+    final i = items.indexWhere((e) => e['sourceId'] == sourceId);
+    if (i < 0) return false;
+    final copy = Map<String, dynamic>.from(items[i]);
+    copy['categoria'] = categoria;
+    items[i] = copy;
+    await prefs.setString(_key, jsonEncode(items));
+    return true;
+  }
+
   static Future<void> removeBySourceId(String sourceId) async {
     final prefs = await SharedPreferences.getInstance();
     final items = await _readRaw(prefs);
@@ -134,6 +150,7 @@ class LocalTransactionStore {
           ? TipoPagamento.credito
           : TipoPagamento.debito,
       limiteDisponivel: (item['limiteDisponivel'] as num?)?.toDouble(),
+      localSourceId: item['sourceId'] as String?,
     );
   }
 

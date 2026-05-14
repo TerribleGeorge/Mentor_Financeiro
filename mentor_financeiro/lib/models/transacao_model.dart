@@ -12,6 +12,12 @@ class TransacaoModel {
   final TipoPagamento tipoPagamento;
   final double? limiteDisponivel;
 
+  /// ID do documento em `usuarios/{uid}/transacoes/{id}` (quando vem da Firestore).
+  final String? firestoreDocumentId;
+
+  /// Chave estável em [LocalTransactionStore] (ex.: notificações antes do sync).
+  final String? localSourceId;
+
   TransacaoModel({
     required this.valor,
     required this.descricao,
@@ -21,9 +27,35 @@ class TransacaoModel {
     this.banco,
     this.tipoPagamento = TipoPagamento.debito,
     this.limiteDisponivel,
+    this.firestoreDocumentId,
+    this.localSourceId,
   });
 
-  factory TransacaoModel.fromMap(Map<String, dynamic> map) {
+  /// Cópia com campos opcionais substituídos (útil após editar categoria na UI).
+  TransacaoModel copyWith({
+    String? categoria,
+    String? firestoreDocumentId,
+    String? localSourceId,
+  }) {
+    return TransacaoModel(
+      valor: valor,
+      descricao: descricao,
+      data: data,
+      metodo: metodo,
+      categoria: categoria ?? this.categoria,
+      banco: banco,
+      tipoPagamento: tipoPagamento,
+      limiteDisponivel: limiteDisponivel,
+      firestoreDocumentId: firestoreDocumentId ?? this.firestoreDocumentId,
+      localSourceId: localSourceId ?? this.localSourceId,
+    );
+  }
+
+  factory TransacaoModel.fromMap(
+    Map<String, dynamic> map, {
+    String? firestoreDocumentId,
+    String? localSourceId,
+  }) {
     TipoPagamento tipo = TipoPagamento.debito;
     if (map['tipoPagamento'] != null) {
       final tipoStr = map['tipoPagamento'] as String;
@@ -43,6 +75,8 @@ class TransacaoModel {
       banco: map['banco'] as String?,
       tipoPagamento: tipo,
       limiteDisponivel: (map['limiteDisponivel'] as num?)?.toDouble(),
+      firestoreDocumentId: firestoreDocumentId,
+      localSourceId: localSourceId,
     );
   }
 

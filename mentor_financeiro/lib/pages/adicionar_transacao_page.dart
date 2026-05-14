@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/constants/transaction_categories.dart';
 import '../models/transacao_model.dart';
 import '../services/ad_manager_service.dart';
 import '../services/daily_spend_limit_notifier.dart';
@@ -32,14 +33,8 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
 
   bool _salvando = false;
 
-  static const _categorias = <String>[
-    'Alimentação',
-    'Transporte',
-    'Lazer',
-    'Saúde',
-    'Fixos',
-    'Outros',
-  ];
+  /// Alinhado com [kTransactionCategoryPickerChoices] (Análise / editor de categoria).
+  List<String> get _categorias => kTransactionCategoryPickerChoices;
 
   @override
   void dispose() {

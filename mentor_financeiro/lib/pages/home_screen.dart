@@ -409,6 +409,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Rótulo de secção para a grelha de atalhos da home (modo clássico).
+  Widget _homeFeatureSectionTitle(
+    BuildContext context,
+    String title,
+  ) {
+    return Text(
+      title,
+      style: TextStyle(
+        color: Colors.white.withValues(alpha: 0.72),
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.4,
+        shadows: ClassicModeStyle.secondaryTextShadows(context),
+      ),
+    );
+  }
+
   Widget _buildFeatureGrid(
     BuildContext context,
     SubscriptionProvider subscription,
@@ -485,75 +502,89 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 1.35,
-      children: [
-        // FREE
-        tile(
-          icon: Icons.tune,
-          label: 'Renda e Gastos Fixos',
-          color: const Color(0xFF00D9FF),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => const FinanceConfigurationPage(),
-            ),
-          ),
-        ),
-        tile(
-          icon: Icons.edit_note,
-          label: 'Registro de Gastos',
-          color: const Color(0xFF26DE81),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => const AdicionarTransacaoPage(),
-            ),
-          ),
-        ),
-        tile(
-          icon: Icons.flag,
-          label: 'Simulador de Metas',
-          color: const Color(0xFFFECA57),
-          onTap: () => mentorPushNamed(context, AppRoutes.metas),
-        ),
-        tile(
-          icon: Icons.menu_book,
-          label: 'Conteúdo Educacional',
-          color: const Color(0xFF6366F1),
-          onTap: () => mentorPushNamed(context, AppRoutes.conhecimento),
-        ),
+    /// Grelha 2×N com altura previsível (evita scroll dentro da [CustomScrollView]).
+    Widget featureGrid(List<Widget> tiles) {
+      return GridView.count(
+        crossAxisCount: 2,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.35,
+        children: tiles,
+      );
+    }
 
-        // PREMIUM (interceptor → paywall)
-        tile(
-          icon: Icons.psychology_alt,
-          label: 'Mentoria',
-          color: const Color(0xFFFF4D4D),
-          premium: true,
-          onTap: () => mentorPushNamed(context, AppRoutes.mentoria),
-        ),
-        tile(
-          icon: Icons.query_stats,
-          label: 'Análise Personalizada',
-          color: const Color(0xFF00D9FF),
-          premium: true,
-          onTap: () => mentorPushNamed(
-            context,
-            AppRoutes.relatorios,
-            arguments: 'Análise Personalizada',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _homeFeatureSectionTitle(context, 'Organização e registo'),
+        const SizedBox(height: 10),
+        featureGrid(<Widget>[
+          tile(
+            icon: Icons.tune,
+            label: 'Renda e Gastos Fixos',
+            color: const Color(0xFF00D9FF),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const FinanceConfigurationPage(),
+              ),
+            ),
           ),
-        ),
-        tile(
-          icon: Icons.auto_graph,
-          label: 'Estratégias Avançadas',
-          color: const Color(0xFF6366F1),
-          premium: true,
-          onTap: () =>
-              mentorPushNamed(context, AppRoutes.conhecimentoEstrategias),
-        ),
+          tile(
+            icon: Icons.edit_note,
+            label: 'Registro de Gastos',
+            color: const Color(0xFF26DE81),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const AdicionarTransacaoPage(),
+              ),
+            ),
+          ),
+          tile(
+            icon: Icons.flag,
+            label: 'Simulador de Metas',
+            color: const Color(0xFFFECA57),
+            onTap: () => mentorPushNamed(context, AppRoutes.metas),
+          ),
+          tile(
+            icon: Icons.menu_book,
+            label: 'Conteúdo Educacional',
+            color: const Color(0xFF6366F1),
+            onTap: () => mentorPushNamed(context, AppRoutes.conhecimento),
+          ),
+        ]),
+        const SizedBox(height: 22),
+        _homeFeatureSectionTitle(context, 'Mentor Premium'),
+        const SizedBox(height: 10),
+        featureGrid(<Widget>[
+          tile(
+            icon: Icons.psychology_alt,
+            label: 'Mentoria',
+            color: const Color(0xFFFF4D4D),
+            premium: true,
+            onTap: () => mentorPushNamed(context, AppRoutes.mentoria),
+          ),
+          tile(
+            icon: Icons.query_stats,
+            label: 'Análise Personalizada',
+            color: const Color(0xFF00D9FF),
+            premium: true,
+            onTap: () => mentorPushNamed(
+              context,
+              AppRoutes.relatorios,
+              arguments: 'Análise Personalizada',
+            ),
+          ),
+          tile(
+            icon: Icons.auto_graph,
+            label: 'Estratégias Avançadas',
+            color: const Color(0xFF6366F1),
+            premium: true,
+            onTap: () =>
+                mentorPushNamed(context, AppRoutes.conhecimentoEstrategias),
+          ),
+        ]),
       ],
     );
   }

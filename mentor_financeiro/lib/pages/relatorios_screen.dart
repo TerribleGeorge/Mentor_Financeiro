@@ -10,12 +10,14 @@ import '../services/local_transaction_store.dart';
 import '../services/localization_service.dart';
 import '../services/mentoria_service.dart';
 import '../services/transaction_refresh_signal.dart';
+import '../services/transaction_category_update_service.dart';
 import '../services/exchange_rate_service.dart';
 import 'adicionar_transacao_page.dart';
 import '../theme/classic_mode_style.dart';
 import '../widgets/premium_wrapper.dart';
 import '../widgets/dica_card.dart';
 import '../widgets/nota_saude_circle.dart';
+import '../widgets/edit_transaction_category_sheet.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String title;
@@ -94,6 +96,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return const Color(0xFFFF6B9D);
       case 'Fixos':
         return const Color(0xFF45A7E3);
+      case 'Compras':
+        return const Color(0xFF26DE81);
       default:
         return const Color(0xFF636E72);
     }
@@ -111,6 +115,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return Icons.local_hospital;
       case 'Fixos':
         return Icons.home;
+      case 'Compras':
+        return Icons.shopping_bag_outlined;
       default:
         return Icons.receipt;
     }
@@ -200,6 +206,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     .map(
                       (doc) => TransacaoModel.fromMap(
                         doc.data() as Map<String, dynamic>,
+                        firestoreDocumentId: doc.id,
                       ),
                     )
                     .toList()
@@ -311,7 +318,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     if (!widget.chartsOnly) ...[
                       const SizedBox(height: 24),
-                      _buildRecentTransactions(transacoes.take(5).toList()),
+                      _buildMonthlyTransactionsReview(transacoes),
                     ],
                   ],
                 ),
@@ -1187,34 +1194,73 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildRecentTransactions(List<TransacaoModel> transacoes) {
+  /// Lista **completa** do mês (respeita o filtro débito/crédito) para revisão crítica.
+  ///
+  /// Vive dentro do [SingleChildScrollView] principal: usa [shrinkWrap] e desliga
+  /// scroll próprio para não competir com o gráfico nem com gestos verticais.
+  Widget _buildMonthlyTransactionsReview(List<TransacaoModel> transacoes) {
+    if (transacoes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'ÚLTIMAS TRANSAÇÕES',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1,
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'ANÁLISE CRÍTICA DO MÊS',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Todas as transações do período. Use o lápis para corrigir categorias quando o automático falhar.',
+                    style: TextStyle(
+                      color: Colors.white54,
+                      fontSize: 12,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
               ),
             ),
             TextButton(
               onPressed: () =>
                   mentorPushNamed(context, AppRoutes.principal, arguments: 2),
               child: const Text(
-                'Ver todas',
+                'Histórico',
                 style: TextStyle(color: Color(0xFF00D9FF), fontSize: 12),
               ),
             ),
           ],
         ),
+        const SizedBox(height: 8),
+        Text(
+          '${transacoes.length} movimento${transacoes.length == 1 ? '' : 's'}',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.45),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         const SizedBox(height: 12),
-        ...transacoes.map((t) => _buildTransactionItem(t)),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: transacoes.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
+          itemBuilder: (context, i) => _buildTransactionItem(transacoes[i]),
+        ),
       ],
     );
   }
@@ -1240,7 +1286,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: Icon(
               _getCategoryIcon(categoria),
-              color: _getCategoryColor(categoria).withValues(alpha: 0.15),
+              color: _getCategoryColor(categoria),
               size: 22,
             ),
           ),
@@ -1290,10 +1336,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ),
+          if (TransactionCategoryUpdateService.canEdit(transacao))
+            IconButton(
+              tooltip: 'Editar categoria',
+              icon: const Icon(
+                Icons.edit_outlined,
+                color: Color(0xFF00D9FF),
+                size: 22,
+              ),
+              onPressed: () => showTransactionCategoryEditor(
+                context,
+                transaction: transacao,
+              ),
+            ),
           Text(
-            '- ${_formatarMoeda(transacao.valor)}',
-            style: const TextStyle(
-              color: Color(0xFFFF6B6B),
+            transacao.isCredito
+                ? '+ ${_formatarMoeda(transacao.valor)}'
+                : '- ${_formatarMoeda(transacao.valor)}',
+            style: TextStyle(
+              color: transacao.isCredito
+                  ? const Color(0xFF26DE81)
+                  : const Color(0xFFFF6B6B),
               fontWeight: FontWeight.bold,
               fontSize: 15,
             ).withFinancialShadows(context),
