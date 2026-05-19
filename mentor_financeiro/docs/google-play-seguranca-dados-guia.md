@@ -12,13 +12,13 @@ Os caminhos na Console podem mudar; procure por “Segurança dos dados” / “
 ## Antes de começar
 
 1. Ative o **GitHub Pages** (branch `main`, pasta `/docs`) no repositório e cadastre na Play a URL acima.  
-2. Tenha em mão os links de privacidade da **Google (Firebase)** e da **RevenueCat**.
+2. Tenha em mão os links de privacidade da **Google** para Firebase, Google Play, AdMob e demais serviços usados no app.
 
 ---
 
 ## Coleta de dados e segurança — respostas sugeridas
 
-Marque **Sim, os dados coletados são compartilhados** quando indicado (terceiros como Google/RevenueCat tratam ou recebem dados).
+Marque **Sim, os dados coletados são compartilhados** quando indicado (terceiros como Google/Firebase/AdMob/Google Play tratam ou recebem dados).
 
 ### Informações pessoais
 
@@ -33,7 +33,7 @@ Marque **Sim, os dados coletados são compartilhados** quando indicado (terceiro
 | Tipo | Coletado? | Finalidade | Observação |
 |------|-----------|------------|------------|
 | **Informações financeiras do usuário** (gastos, metas, valores que o usuário digita) | Sim | Funcionalidade principal | Armazenados no Firestore na coleção do usuário |
-| **Histórico de compras** | Sim | Assinatura Pro | Via Google Play + RevenueCat |
+| **Histórico de compras** | Sim | Assinatura Premium | Via Google Play Billing |
 
 ### Mensagens (notificações lidas — recurso opcional)
 
@@ -68,6 +68,7 @@ Na Console, se perguntarem “enviados para servidores”: para imagem de tema *
 |------|-----------|------------|
 | **Token FCM** | Sim (quando notificações autorizadas) | Push |
 | **Dados de diagnóstico / uso (Analytics)** | Sim | Firebase Analytics (eventos automáticos e agregados) |
+| **Identificador de publicidade / sinais de anúncios** | Sim, se anúncios forem exibidos | Google AdMob |
 
 ---
 
@@ -76,8 +77,8 @@ Na Console, se perguntarem “enviados para servidores”: para imagem de tema *
 Declare na seção apropriada (ex.: “transferência para terceiros”):
 
 - **Google Firebase** — Auth, Firestore, FCM, Analytics.  
-- **RevenueCat** — assinaturas (associado ao ID do usuário / conta).  
 - **Google Play** — cobrança.
+- **Google AdMob** — anúncios.
 
 ---
 
@@ -133,6 +134,6 @@ Textos ainda podem misturar strings fixas em PT em algumas telas; vá uniformiza
 - [ ] Formulário de segurança dos dados alinhado à política  
 - [ ] Conta / dados financeiros / localização / FCM / Analytics revisados  
 - [ ] Recurso de **notificações bancárias** explicado na política e refletido nas declarações  
-- [ ] RevenueCat e Firebase listados onde a Console pedir “SDKs” ou dados compartilhados  
+- [ ] Firebase, Google Play Billing e AdMob listados onde a Console pedir “SDKs” ou dados compartilhados  
 
 Se a Google pedir vídeo ou texto extra sobre o uso de dados financeiros ou do leitor de notificações, use os trechos da política de privacidade como base.

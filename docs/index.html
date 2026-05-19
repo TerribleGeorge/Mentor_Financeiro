@@ -3,197 +3,232 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Política de Privacidade — Mentor Financeiro</title>
-  <meta name="description" content="Política de Privacidade do aplicativo Mentor Financeiro para Android.">
+  <title>Política de Privacidade - Mentor Financeiro</title>
+  <meta name="description" content="Política de Privacidade do aplicativo Mentor Financeiro.">
   <style>
-    :root {
-      color-scheme: light dark;
-      --fg: #1a1a1a;
-      --bg: #fafafa;
-      --muted: #555;
-      --link: #0066cc;
-      --border: #ddd;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --fg: #e8e8e8;
-        --bg: #121212;
-        --muted: #aaa;
-        --link: #6eb3ff;
-        --border: #333;
-      }
-    }
-    body {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
-      line-height: 1.6;
-      max-width: 42rem;
-      margin: 0 auto;
-      padding: 1.5rem 1.25rem 3rem;
-      color: var(--fg);
-      background: var(--bg);
-    }
-    h1 { font-size: 1.65rem; margin-bottom: 0.25rem; }
-    .meta { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; }
-    h3 { font-size: 1.05rem; margin-top: 1.25rem; }
+    :root { color-scheme: light dark; --fg:#172033; --bg:#fbfcff; --muted:#5f6b7a; --link:#0f66d0; --border:#d9e1ec; --surface:#ffffff; }
+    @media (prefers-color-scheme: dark) { :root { --fg:#edf2f7; --bg:#101722; --muted:#a8b3c2; --link:#79b8ff; --border:#2b384a; --surface:#141d2a; } }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif; line-height: 1.62; max-width: 48rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; color: var(--fg); background: var(--bg); }
+    nav { display: flex; flex-wrap: wrap; gap: .5rem; margin: .25rem 0 1.75rem; padding: .75rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+    nav a { padding: .35rem .55rem; border-radius: 7px; text-decoration: none; font-weight: 650; }
+    h1 { font-size: clamp(1.7rem, 4vw, 2.25rem); line-height: 1.16; margin: .25rem 0 1rem; }
+    h2 { font-size: 1.22rem; margin: 2rem 0 .6rem; padding-bottom: .35rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.05rem; margin: 1.35rem 0 .35rem; }
+    p { margin: .65rem 0; }
+    ul { padding-left: 1.35rem; margin: .55rem 0 .9rem; }
+    li { margin: .28rem 0; }
     a { color: var(--link); }
-    ul { padding-left: 1.25rem; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 0.75rem 0; }
-    th, td { border: 1px solid var(--border); padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
-    th { background: rgba(127,127,127,0.12); }
-    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .92em; padding: .1rem .25rem; border-radius: 5px; background: color-mix(in srgb, var(--muted) 14%, transparent); }
+    hr { border: 0; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    strong { font-weight: 750; }
   </style>
 </head>
 <body>
-  <h1>Política de Privacidade — Mentor Financeiro</h1>
-  <p class="meta">
-    <strong>Última atualização:</strong> 30 de abril de 2026<br>
-    <strong>Pacote:</strong> <code>com.georgeguimares.mentorfinanceiro</code>
-  </p>
-
-  <h2>1. Quem somos</h2>
-  <p>O aplicativo <strong>Mentor Financeiro</strong> (“App”) é oferecido pelo desenvolvedor responsável pela conta na Google Play. Esta política descreve como tratamos dados pessoais na versão Android do App, em conformidade com a Lei Geral de Proteção de Dados (LGPD – Lei nº 13.709/2018), quando aplicável.</p>
-
+  <nav>
+    <a href="index.html">Política de Privacidade</a>
+    <a href="seguranca.html">Segurança</a>
+    <a href="termos-de-uso.html">Termos de Uso</a>
+  </nav>
+  <h1>Pol&#237;tica de Privacidade - Mentor Financeiro</h1>
+  <p><strong>&#218;ltima atualiza&#231;&#227;o:</strong> 19 de maio de 2026</p>
+  <p><strong>Aplicativo:</strong> Mentor Financeiro</p>
+  <p><strong>Pacote Android:</strong> <code>com.georgeguimares.mentorfinanceiro</code></p>
+  <p><strong>Pol&#237;tica publicada em:</strong> <a href="https://terriblegeorge.github.io/Mentor_Financeiro/" rel="noopener noreferrer">https://terriblegeorge.github.io/Mentor_Financeiro/</a></p>
+  <p>Esta Pol&#237;tica de Privacidade explica, de forma clara, quais dados o Mentor Financeiro pode acessar, coletar, usar, armazenar, compartilhar e proteger. Ela foi escrita para refletir o funcionamento atual do aplicativo e deve ser lida junto com os Termos de Uso e a p&#225;gina de Seguran&#231;a.</p>
+  <p>O Mentor Financeiro &#233; um aplicativo de organiza&#231;&#227;o financeira, educa&#231;&#227;o financeira, metas, registros de gastos, gr&#225;ficos, relat&#243;rios, conte&#250;dos de investimento e recursos opcionais de assinatura Premium. O aplicativo n&#227;o &#233; banco, corretora, institui&#231;&#227;o financeira, consultor de investimentos registrado, seguradora ou meio de pagamento.</p>
+  <h2>1. Quem &#233; o respons&#225;vel</h2>
+  <p>O Mentor Financeiro &#233; oferecido pelo desenvolvedor respons&#225;vel pela publica&#231;&#227;o do aplicativo na Google Play.</p>
+  <p>Para exercer direitos relacionados aos seus dados, tirar d&#250;vidas ou solicitar exclus&#227;o, entre em contato pelo e-mail:</p>
+  <p><strong>george.guimares@gmail.com</strong></p>
   <h2>2. Resumo em linguagem simples</h2>
   <ul>
-    <li>O App permite organizar finanças, metas e conteúdos educativos.</li>
-    <li>Para funcionar, pode ser necessário <strong>criar conta ou entrar</strong> (e-mail/senha, conta Google ou modo anônimo via Firebase).</li>
-    <li><strong>Dados financeiros que você registra</strong> (como gastos e metas) podem ser armazenados na nuvem (Firebase) associados à sua conta.</li>
-    <li>Usamos <strong>Firebase</strong> (Google) para autenticação, banco de dados, notificações e estatísticas de uso.</li>
-    <li>Assinaturas podem ser processadas via <strong>Google Play</strong> e <strong>RevenueCat</strong>.</li>
-    <li>Se você <strong>ativar</strong> o recurso opcional de leitura de <strong>notificações de apps bancários</strong>, o App poderá <strong>processar</strong> o texto dessas notificações <strong>no próprio dispositivo</strong> para funcionalidades relacionadas à organização financeira — apenas quando você conceder a permissão específica do Android para “acesso às notificações”.</li>
-    <li>A <strong>localização</strong> é <strong>opcional</strong> e usada apenas para contextualizar comparações de investimentos (por exemplo, saber se você está no Brasil), quando você autorizar.</li>
-    <li>Imagens escolhidas por você (por exemplo, para personalização) podem ficar <strong>armazenadas localmente</strong> no aparelho.</li>
+    <li>O app ajuda voc&#234; a organizar gastos, metas, limites, hist&#243;rico financeiro, investimentos e conte&#250;dos educativos.</li>
+    <li>Para usar determinados recursos, voc&#234; pode entrar com e-mail/senha, conta Google, Apple ou modo an&#244;nimo, por meio do Firebase Authentication.</li>
+    <li>Os dados financeiros que voc&#234; informa, como gastos, metas, limites, perfil e prefer&#234;ncias, podem ser salvos no Firebase/Cloud Firestore para sincroniza&#231;&#227;o e funcionamento da conta.</li>
+    <li>O app usa servi&#231;os do Google/Firebase para login, banco de dados, notifica&#231;&#245;es push, analytics e diagn&#243;stico de falhas.</li>
+    <li>O app pode usar Google AdMob para exibi&#231;&#227;o de an&#250;ncios.</li>
+    <li>O Premium &#233; processado pela Google Play Billing dentro do pr&#243;prio app.</li>
+    <li>A localiza&#231;&#227;o &#233; opcional e usada apenas quando voc&#234; autoriza, por exemplo para adaptar compara&#231;&#245;es de investimentos ao pa&#237;s ou contexto local.</li>
+    <li>O recurso de monitoramento de notifica&#231;&#245;es &#233; opcional. Se voc&#234; ativar o acesso a notifica&#231;&#245;es no Android, o app pode ler t&#237;tulo e texto de notifica&#231;&#245;es compat&#237;veis para identificar compras, pagamentos e transfer&#234;ncias e transformar isso em registros financeiros. O app n&#227;o acessa sua conta banc&#225;ria e n&#227;o pede senha.</li>
+    <li>Imagens escolhidas por voc&#234; para personaliza&#231;&#227;o podem ficar armazenadas localmente no aparelho.</li>
+    <li>Voc&#234; pode solicitar exclus&#227;o de conta e dados pelo e-mail indicado nesta pol&#237;tica.</li>
   </ul>
-
   <h2>3. Dados que podemos tratar</h2>
-  <p>Conforme você usa o App, podem ser tratados:</p>
-
-  <h3>3.1 Conta e perfil</h3>
+  <p>Dependendo de como voc&#234; usa o aplicativo, podemos tratar as seguintes categorias de dados.</p>
+  <h3>3.1 Dados de conta e identifica&#231;&#227;o</h3>
   <ul>
-    <li>Nome, e-mail, identificador de usuário (UID), método de login.</li>
-    <li>URL da foto de perfil quando você usa login Google e esta informação é disponibilizada pelo provedor.</li>
-    <li>Informações opcionais de perfil que você preencher (por exemplo, profissão, objetivos, perfil de investidor).</li>
+    <li>Nome informado no cadastro.</li>
+    <li>E-mail.</li>
+    <li>Identificador de usu&#225;rio do Firebase (UID).</li>
+    <li>M&#233;todo de login utilizado.</li>
+    <li>Foto de perfil, quando fornecida pelo provedor de login.</li>
+    <li>Estado de assinatura Premium associado ao perfil.</li>
+    <li>Dados t&#233;cnicos necess&#225;rios para manter a sessao e sincronizar informa&#231;&#245;es.</li>
   </ul>
-
-  <h3>3.2 Dados financeiros inseridos por você</h3>
+  <h3>3.2 Dados financeiros inseridos por voc&#234;</h3>
   <ul>
-    <li>Registros de <strong>gastos</strong>, <strong>metas</strong>, limites e preferências relacionadas à organização financeira.</li>
-    <li>Esses dados ficam vinculados à sua conta quando você está autenticado e são sincronizados por meio dos serviços descritos na seção 5.</li>
+    <li>Gastos, despesas, receitas, categorias, hist&#243;rico financeiro e transa&#231;&#245;es.</li>
+    <li>Metas, limites, planejamento, sonhos financeiros e prefer&#234;ncias.</li>
+    <li>Informa&#231;&#245;es usadas em gr&#225;ficos, relat&#243;rios, analises e mentoria automatica dentro do app.</li>
+    <li>Perfil de investidor, objetivos e respostas fornecidas em questionarios ou telas de planejamento.</li>
   </ul>
-
-  <h3>3.3 Identificadores e dispositivo</h3>
+  <p>Esses dados podem ser sensiveis no sentido pratico, porque revelam aspectos da sua vida financeira. Por isso, voc&#234; deve cadastrar apenas informa&#231;&#245;es que deseja manter no aplicativo.</p>
+  <h3>3.3 Dados de assinatura e compras</h3>
   <ul>
-    <li>Token de <strong>notificações push</strong> (FCM), quando aceito, para envio de comunicações do App.</li>
-    <li>Dados de uso coletados por <strong>Firebase Analytics</strong> (por exemplo, eventos agregados de uso do aplicativo), conforme configuração padrão do SDK.</li>
+    <li>Produto adquirido, status de assinatura, per&#237;odo, renova&#231;&#227;o, restaura&#231;&#227;o de compra e identificadores t&#233;cnicos necess&#225;rios para confirmar o Premium.</li>
+    <li>A compra, cancelamento, renova&#231;&#227;o, reembolso e cobran&#231;a sao processados pela Google Play, conforme as regras da conta Google e da loja.</li>
   </ul>
-
-  <h3>3.4 Localização</h3>
+  <p>O app n&#227;o coleta nem armazena numero de cartao, c&#243;digo de seguran&#231;a do cartao ou dados banc&#225;rios de pagamento.</p>
+  <h3>3.4 Dados de uso, diagn&#243;stico e desempenho</h3>
   <ul>
-    <li><strong>Coordenadas aproximadas</strong> somente se você conceder permissão de localização, para funcionalidades que dependem de saber se você está no Brasil ou não.</li>
+    <li>Eventos de uso e intera&#231;&#227;o no app, por exemplo telas acessadas, recursos utilizados e fluxos conclu&#237;do.</li>
+    <li>Dados agregados ou t&#233;cnicos para entender estabilidade, desempenho e melhoria do produto.</li>
+    <li>Relatorios de falha e diagn&#243;stico por Firebase Crashlytics, quando aplic&#225;vel, incluindo informa&#231;&#245;es t&#233;cnicas do dispositivo, vers&#227;o do app, sistema operacional, logs de erro e identificador de usu&#225;rio quando configurado.</li>
   </ul>
-
-  <h3>3.5 Notificações (recurso opcional)</h3>
+  <h3>3.5 Dados de notifica&#231;&#245;es push</h3>
+  <p>Se voc&#234; permitir notifica&#231;&#245;es do app, podemos tratar:</p>
   <ul>
-    <li>Se você habilitar o serviço de <strong>detecção de notificações</strong> na configuração do sistema Android, o App poderá receber <strong>título e texto</strong> de notificações de aplicativos instalados no dispositivo que se enquadrem nos filtros definidos pelo App (por exemplo, instituições financeiras e palavras-chave relacionadas a transações).</li>
-    <li>O tratamento visa apoiar funcionalidades do App; <strong>recomendamos avaliar os riscos</strong> de exposição de informações sensíveis antes de conceder essa permissão.</li>
+    <li>Token do Firebase Cloud Messaging (FCM).</li>
+    <li>Prefer&#234;ncias relacionadas ao recebimento de notifica&#231;&#245;es.</li>
+    <li>Topicos ou segmentos necess&#225;rios para envio de comunicacoes do pr&#243;prio aplicativo.</li>
   </ul>
-
-  <h3>3.6 Compras e assinaturas</h3>
+  <p>Voc&#234; pode controlar a permissao de notifica&#231;&#245;es nas configura&#231;&#245;es do Android.</p>
+  <h3>3.6 Dados de notifica&#231;&#245;es lidas no Android</h3>
+  <p>O monitoramento de notifica&#231;&#245;es e um recurso opcional. Ele so funciona se voc&#234; ativar manualmente o acesso a notifica&#231;&#245;es nas configura&#231;&#245;es do Android.</p>
+  <p>Quando ativado, o app pode receber t&#237;tulo, texto, nome do pacote do aplicativo de origem, horario e metadados t&#233;cnicos de notifica&#231;&#245;es exibidas no seu aparelho. O objetivo e identificar notifica&#231;&#245;es compat&#237;veis com gastos, compras, pagamentos, assinaturas e transfer&#234;ncias para gerar registros financeiros.</p>
+  <p>Medidas importantes desse recurso:</p>
   <ul>
-    <li>Informações de <strong>status de assinatura</strong> e identificadores necessários para validar compras via Google Play e RevenueCat.</li>
+    <li>O app n&#227;o acessa sua conta banc&#225;ria.</li>
+    <li>O app n&#227;o faz login em bancos, cartoes ou carteiras digitais.</li>
+    <li>O app n&#227;o pede senha banc&#225;ria.</li>
+    <li>O app aplica filtros para evitar capturar c&#243;digos de seguran&#231;a, OTP, senhas e mensagens de autentica&#231;&#227;o.</li>
+    <li>O foco do filtro e identificar compras, pagamentos, transfer&#234;ncias enviadas e movimentos financeiros compat&#237;veis.</li>
+    <li>Voc&#234; pode desativar o recurso no app ou revogar a permissao nas configura&#231;&#245;es do Android.</li>
   </ul>
-
-  <h3>3.7 Armazenamento local</h3>
+  <p>Mesmo com filtros, notifica&#231;&#245;es podem conter informa&#231;&#245;es sensiveis. Ative esse recurso apenas se entender e aceitar esse tipo de processamento.</p>
+  <h3>3.7 Localiza&#231;&#227;o</h3>
+  <p>O app pode solicitar localiza&#231;&#227;o aproximada ou precisa, conforme a permissao concedida pelo Android, para adaptar compara&#231;&#245;es, conte&#250;dos ou contexto de investimentos ao pa&#237;s/regiao.</p>
+  <p>A localiza&#231;&#227;o n&#227;o e necess&#225;ria para todos os recursos. Se voc&#234; negar a permissao, algumas compara&#231;&#245;es ou personalizacoes podem ficar limitadas.</p>
+  <h3>3.8 Imagens e arquivos locais</h3>
+  <p>Quando voc&#234; escolhe uma imagem para personaliza&#231;&#227;o visual do app, ela pode ser armazenada localmente no aparelho. Salvo implementacao especifica futura, essas imagens de personaliza&#231;&#227;o n&#227;o sao enviadas para nossos servidores.</p>
+  <h3>3.9 Publicidade</h3>
+  <p>O app pode exibir an&#250;ncios por meio do Google AdMob. O Google pode tratar identificadores do dispositivo, dados de uso, informa&#231;&#245;es t&#233;cnicas e sinais de publicidade conforme as pol&#237;ticas da pr&#243;pria Google e as configura&#231;&#245;es de an&#250;ncios do usu&#225;rio.</p>
+  <h3>3.10 Dados de APIs externas de mercado</h3>
+  <p>O app pode consultar APIs externas para cambio, cotacoes, indices ou informa&#231;&#245;es de mercado. Essas consultas normalmente envolvem parametros como moeda, ativo, pa&#237;s ou simbolo pesquisado. N&#227;o e necess&#225;rio enviar seus dados financeiros pessoais cadastrados para obter essas informa&#231;&#245;es.</p>
+  <h2>4. Para que usamos os dados</h2>
+  <p>Usamos dados para:</p>
   <ul>
-    <li>Preferências (tema, imagem de fundo local, flags como status premium em cache) por meio de armazenamento local do Android.</li>
+    <li>Criar e manter sua conta.</li>
+    <li>Sincronizar gastos, metas, prefer&#234;ncias, hist&#243;rico e configura&#231;&#245;es.</li>
+    <li>Exibir dashboards, gr&#225;ficos, relat&#243;rios, limites e conte&#250;dos personalizados.</li>
+    <li>Permitir compras, restaura&#231;&#227;o e validacao do Premium.</li>
+    <li>Enviar notifica&#231;&#245;es do pr&#243;prio app, quando permitidas.</li>
+    <li>Processar notifica&#231;&#245;es financeiras compat&#237;veis, se voc&#234; ativar esse recurso.</li>
+    <li>Adaptar conte&#250;dos de investimento ao contexto local, quando a localiza&#231;&#227;o for autorizada.</li>
+    <li>Melhorar estabilidade, desempenho, seguran&#231;a e experiencia do aplicativo.</li>
+    <li>Cumprir obriga&#231;&#245;es legais, responder solicitacoes e prevenir abuso.</li>
+    <li>Exibir an&#250;ncios, quando aplic&#225;vel.</li>
   </ul>
-
-  <h2>4. Finalidades e bases legais (LGPD)</h2>
-  <p>Tratamos dados para:</p>
-  <table>
-    <thead><tr><th>Finalidade</th><th>Exemplo</th></tr></thead>
-    <tbody>
-      <tr><td>Prestação do serviço do App</td><td>Login, sincronização de gastos/metas, perfil</td></tr>
-      <tr><td>Melhorias e segurança</td><td>Analytics agregado, diagnóstico de erros via provedores</td></tr>
-      <tr><td>Comunicações</td><td>Notificações push, quando aceitas</td></tr>
-      <tr><td>Assinaturas</td><td>Verificação de plano pago</td></tr>
-      <tr><td>Funcionalidades opcionais</td><td>Localização; leitura de notificações apenas com permissão explícita</td></tr>
-    </tbody>
-  </table>
-  <p>As bases podem incluir <strong>execução de contrato ou procedimentos preliminares</strong> (uso do App), <strong>consentimento</strong> (localização, notificações push, leitor de notificações) e <strong>legítimo interesse</strong> em certos casos (segurança, melhoria do produto), observados seus direitos nas seções 9 e 10.</p>
-
-  <h2>5. Com quem compartilhamos dados</h2>
-  <p>Utilizamos prestadores que podem processar dados em nome do App ou como controladores autônomos, conforme seus termos:</p>
+  <h2>5. Bases legais</h2>
+  <p>Quando a LGPD se aplicar, o tratamento pode se apoiar em uma ou mais bases legais, incluindo:</p>
   <ul>
-    <li><strong>Google LLC / Google Ireland Limited</strong> — Firebase (Authentication, Cloud Firestore, Cloud Messaging, Analytics), login Google. Políticas: <a href="https://policies.google.com/privacy" rel="noopener noreferrer">Privacidade Google</a>.</li>
-    <li><strong>RevenueCat, Inc.</strong> — gestão de assinaturas e entitlement. Política: <a href="https://www.revenuecat.com/privacy" rel="noopener noreferrer">https://www.revenuecat.com/privacy</a>.</li>
-    <li><strong>Google Play</strong> — processamento de pagamentos e termos da loja.</li>
+    <li>Execucao de contrato ou procedimentos preliminares, para entregar os recursos do aplicativo.</li>
+    <li>Consentimento, para permiss&#245;es opcionais como localiza&#231;&#227;o, notifica&#231;&#245;es push e acesso a notifica&#231;&#245;es do Android.</li>
+    <li>Legitimo interesse, para seguran&#231;a, diagn&#243;stico, melhoria do produto, prevencao de abuso e estatisticas proporcionais.</li>
+    <li>Cumprimento de obriga&#231;&#227;o legal ou regulatoria, quando necess&#225;rio.</li>
+    <li>Exercicio regular de direitos, em processos administrativos, judiciais ou extrajudiciais.</li>
   </ul>
-  <p>Para <strong>câmbio</strong>, o App pode consultar APIs públicas de taxas (por exemplo, serviços como Open Exchange Rates / endpoints compatíveis); essas consultas <strong>não enviam</strong> seus dados financeiros cadastrais, apenas moedas solicitadas.</p>
-  <p>Não vendemos seus dados pessoais.</p>
-
-  <h2>6. Transferência internacional</h2>
-  <p>Serviços como Firebase e RevenueCat podem processar dados <strong>fora do Brasil</strong>. Ao usar o App, você reconhece essa possibilidade, nos termos dos provedores citados.</p>
-
-  <h2>7. Retenção</h2>
+  <p>Voc&#234; pode revogar consentimentos opcionais nas configura&#231;&#245;es do app ou do sistema operacional, mas isso pode limitar funcionalidades.</p>
+  <h2>6. Compartilhamento com terceiros</h2>
+  <p>N&#227;o vendemos seus dados pessoais.</p>
+  <p>Podemos compartilhar ou permitir o processamento de dados por prestadores necess&#225;rios ao funcionamento do app, incluindo:</p>
   <ul>
-    <li>Mantemos os dados enquanto sua conta existir ou enquanto forem necessários para a finalidade.</li>
-    <li>Após um pedido válido de exclusão (seção 9), removemos ou anonimizamos os dados em nuvem em prazo razoável, em geral <strong>até 30 dias úteis</strong>, salvo obrigação legal de guarda maior.</li>
-    <li>Dados armazenados <strong>somente no dispositivo</strong> (por exemplo, preferências locais, imagem de fundo) devem ser apagados por você nas configurações do aparelho ou ao desinstalar o App.</li>
+    <li><strong>Google Firebase</strong>: Firebase Authentication, Cloud Firestore, Firebase Cloud Messaging, Firebase Analytics e Firebase Crashlytics.</li>
+    <li><strong>Google Sign-In / Apple Sign-In</strong>: login por conta de terceiros, quando escolhido por voc&#234;.</li>
+    <li><strong>Google Play Billing</strong>: processamento de assinaturas, compras, cancelamentos, restaura&#231;&#227;o e status do Premium.</li>
+    <li><strong>Google AdMob</strong>: exibi&#231;&#227;o e medicao de an&#250;ncios.</li>
+    <li><strong>APIs de mercado, cambio ou cotacoes</strong>: consulta de informa&#231;&#245;es financeiras publicas ou de mercado usadas no app.</li>
+    <li><strong>Servi&#231;os de sistema do Android</strong>: permiss&#245;es, notifica&#231;&#245;es e recursos do aparelho.</li>
   </ul>
-
-  <h2>8. Segurança</h2>
-  <p>Adotamos medidas razoáveis (controle de acesso via conta, comunicação criptografada com os serviços em nuvem, permissões solicitadas apenas quando necessárias). <strong>Nenhum sistema é 100% seguro.</strong> Proteja sua conta com senha forte e não compartilhe o dispositivo sem bloqueio.</p>
-
-  <h2>9. Exclusão de conta e dados (Mentor Financeiro)</h2>
-  <p>Esta seção atende à transparência exigida pela <strong>Google Play</strong> e aos seus direitos sob a LGPD, quando aplicável.</p>
-  <h3>Como solicitar</h3>
-  <ol>
-    <li>Envie um e-mail para <a href="mailto:george.guimares@gmail.com">george.guimares@gmail.com</a> a partir da caixa de entrada que você usa no App (ou informe claramente o <strong>e-mail da conta</strong> ou o identificador que conseguir associar à sua conta).</li>
-    <li>Use o assunto <strong>“Exclusão de dados – Mentor Financeiro”</strong> ou <strong>“LGPD – Mentor Financeiro”</strong>.</li>
-    <li>Indique o que deseja: <strong>exclusão completa da conta e dos dados em nuvem</strong>, ou <strong>exclusão de categorias específicas</strong> (por exemplo, apenas registros de gastos/metas), <strong>sem encerrar a conta</strong>, quando tecnicamente possível.</li>
-    <li>Podemos pedir confirmação de identidade para evitar exclusões indevidas.</li>
-  </ol>
-  <h3>O que tende a ser excluído ou desvinculado após o atendimento</h3>
+  <p>Esses terceiros podem tratar dados conforme seus pr&#243;prios termos, pol&#237;ticas e configura&#231;&#245;es.</p>
+  <h2>7. Transferencia internacional</h2>
+  <p>Servi&#231;os como Firebase, Google Play, AdMob e outros provedores podem processar dados em servidores localizados fora do Brasil. Ao usar o app, voc&#234; reconhece que esse tratamento internacional pode ocorrer, observadas as regras aplicaveis de prote&#231;&#227;o de dados e os termos dos provedores.</p>
+  <h2>8. Retencao</h2>
+  <p>Mantemos dados pelo tempo necess&#225;rio para entregar o aplicativo, cumprir finalidades descritas nesta pol&#237;tica, atender obriga&#231;&#245;es legais, resolver disputas, prevenir fraudes e manter seguran&#231;a.</p>
+  <p>Em geral:</p>
   <ul>
-    <li>Documentos e campos do seu usuário no <strong>Cloud Firestore</strong> (perfil, gastos, metas, configurações e dados equivalentes guardados nas coleções do App).</li>
-    <li>Vínculos necessários para encerrar o tratamento no âmbito do App (por exemplo, remoção do usuário na autenticação <strong>Firebase</strong>, quando couber e for solicitada exclusão total).</li>
-    <li><strong>Token de notificações (FCM)</strong> associado ao seu perfil, quando armazenado conosco.</li>
+    <li>Dados da conta e dados financeiros em nuvem permanecem enquanto a conta existir ou ate pedido valido de exclus&#227;o.</li>
+    <li>Dados locais podem permanecer no aparelho ate que voc&#234; apague, limpe os dados do app ou desinstale o aplicativo.</li>
+    <li>Dados de diagn&#243;stico, analytics e logs podem ser mantidos por per&#237;odos definidos pelos provedores.</li>
+    <li>Informa&#231;&#245;es de compra podem permanecer na Google Play conforme regras fiscais, comerciais e da pr&#243;pria loja.</li>
+    <li>Dados anonimizados ou agregados podem ser mantidos sem identificar voc&#234;.</li>
   </ul>
-  <h3>O que pode ser mantido por mais tempo</h3>
+  <h2>9. Seguran&#231;a</h2>
+  <p>Adotamos medidas t&#233;cnicas e organizacionais razoaveis para proteger dados, incluindo:</p>
   <ul>
-    <li>Registros <strong>anonimizados ou agregados</strong> que não identifiquem você.</li>
-    <li>Dados cuja guarda seja <strong>obrigatória por lei</strong> ou necessária para <strong>defesa em disputas</strong>, pelo tempo legal ou razoável.</li>
-    <li>Informações tratadas diretamente pela <strong>Google Play</strong> ou pela <strong>Google</strong>: use também as ferramentas da conta Google e da Play, quando aplicável.</li>
-    <li>Dados processados pela <strong>RevenueCat</strong> ou outros provedores: podem permanecer conforme os termos e ferramentas desses provedores, além do que excluímos na nossa base.</li>
+    <li>Autentica&#231;&#227;o por Firebase.</li>
+    <li>Regras de acesso no banco de dados para limitar dados ao usu&#225;rio correspondente.</li>
+    <li>Comunicacao criptografada pelos SDKs e APIs utilizados.</li>
+    <li>Uso de permiss&#245;es do Android apenas quando relacionadas a recursos do app.</li>
+    <li>Filtros no monitoramento de notifica&#231;&#245;es para evitar c&#243;digos de seguran&#231;a, OTP, senhas e mensagens de autentica&#231;&#227;o.</li>
+    <li>Diagn&#243;stico de falhas para corrigir erros e melhorar estabilidade.</li>
   </ul>
-  <h3>Prazo</h3>
-  <p>Respondemos e tratamos pedidos válidos em <strong>até 30 dias úteis</strong>, salvo complexidade ou exigência legal.</p>
-
-  <h2>10. Seus direitos (titular de dados)</h2>
-  <p>Além da exclusão (seção 9), dependendo da lei aplicável, você pode solicitar:</p>
+  <p>Nenhum sistema e 100% seguro. Voc&#234; tambem deve proteger seu aparelho, usar bloqueio de tela, manter senha forte, evitar compartilhar a conta e atualizar o app quando houver nova vers&#227;o.</p>
+  <h2>10. Seus controles</h2>
+  <p>Voc&#234; pode:</p>
   <ul>
-    <li>Confirmação de tratamento e acesso;</li>
-    <li>Correção de dados incompletos ou desatualizados;</li>
-    <li>Anonimização, bloqueio ou eliminação de dados desnecessários;</li>
-    <li>Informação sobre compartilhamentos;</li>
-    <li>Revogação de consentimento, quando o tratamento depender dele.</li>
+    <li>Editar ou apagar informa&#231;&#245;es dentro do app, quando houver essa funcao.</li>
+    <li>Desativar notifica&#231;&#245;es push nas configura&#231;&#245;es do Android.</li>
+    <li>Revogar localiza&#231;&#227;o nas configura&#231;&#245;es do Android.</li>
+    <li>Revogar o acesso a notifica&#231;&#245;es nas configura&#231;&#245;es do Android.</li>
+    <li>Cancelar ou gerenciar assinatura pela Google Play.</li>
+    <li>Limpar dados locais do app ou desinstalar o aplicativo.</li>
+    <li>Solicitar acesso, corre&#231;&#227;o ou exclus&#227;o pelo e-mail de contato.</li>
   </ul>
-  <p>Envie pedidos para <a href="mailto:george.guimares@gmail.com?subject=LGPD%20%E2%80%93%20Mentor%20Financeiro">george.guimares@gmail.com</a> com assunto “LGPD – Mentor Financeiro”. Também poderão existir ferramentas na própria Google Play / conta Google para gerenciar dados vinculados ao login Google.</p>
-
-  <h2>11. Crianças e adolescentes</h2>
-  <p>O App <strong>não é direcionado</strong> a menores de 13 anos. Se você é responsável legal e acredita que uma criança nos enviou dados, contate <a href="mailto:george.guimares@gmail.com">george.guimares@gmail.com</a> para que possamos avaliar a exclusão.</p>
-
-  <h2>12. Alterações</h2>
-  <p>Podemos atualizar esta política. A data no topo indica a versão vigente. Alterações relevantes podem ser comunicadas no App ou por outros meios razoáveis.</p>
-
-  <h2>13. Contato</h2>
-  <p><strong>Aplicativo:</strong> Mentor Financeiro (conforme ficha na Google Play).<br>
-  <strong>E-mail:</strong> <a href="mailto:george.guimares@gmail.com">george.guimares@gmail.com</a><br>
-  <strong>Política publicada em:</strong> <a href="https://terriblegeorge.github.io/Mentor_Financeiro/">https://terriblegeorge.github.io/Mentor_Financeiro/</a></p>
-
-  <hr>
-  <p class="meta"><a href="https://github.com/TerribleGeorge/Mentor_Financeiro">Repositório no GitHub</a></p>
+  <h2>11. Exclus&#227;o de conta e dados</h2>
+  <p>Para solicitar exclus&#227;o de conta e dados:</p>
+  <p>1. Envie e-mail para <strong>george.guimares@gmail.com</strong>.</p>
+  <p>2. Use o assunto <strong>&quot;Exclus&#227;o de dados - Mentor Financeiro&quot;</strong> ou <strong>&quot;LGPD - Mentor Financeiro&quot;</strong>.</p>
+  <p>3. Informe o e-mail da conta, m&#233;todo de login ou outro identificador que ajude a localizar o perfil.</p>
+  <p>4. Indique se deseja exclus&#227;o total da conta/dados em nuvem ou exclus&#227;o de categorias especificas, quando tecnicamente poss&#237;vel.</p>
+  <p>Podemos solicitar confirmacao de identidade para evitar exclusoes indevidas.</p>
+  <p>Podem ser excluidos ou desvinculados, conforme o caso:</p>
+  <ul>
+    <li>Perfil e documentos do usu&#225;rio no Cloud Firestore.</li>
+    <li>Gastos, metas, prefer&#234;ncias, hist&#243;rico financeiro e configura&#231;&#245;es salvas na nuvem.</li>
+    <li>Token FCM associado ao perfil, quando armazenado.</li>
+    <li>Conta no Firebase Authentication, quando solicitada exclus&#227;o total e tecnicamente aplic&#225;vel.</li>
+  </ul>
+  <p>Podem permanecer por mais tempo:</p>
+  <ul>
+    <li>Dados anonimizados ou agregados.</li>
+    <li>Registros necess&#225;rios para cumprimento legal, prevencao de fraude, seguran&#231;a ou defesa de direitos.</li>
+    <li>Hist&#243;rico de compras, pagamentos e assinaturas mantido pela Google Play.</li>
+    <li>Dados tratados diretamente por provedores terceiros conforme as pol&#237;ticas deles.</li>
+  </ul>
+  <p>Buscaremos responder pedidos validos em ate 30 dias uteis, salvo complexidade, obriga&#231;&#227;o legal ou necessidade de verificacao adicional.</p>
+  <h2>12. Direitos do titular</h2>
+  <p>Conforme a lei aplic&#225;vel, voc&#234; pode solicitar:</p>
+  <ul>
+    <li>Confirmacao de existencia de tratamento.</li>
+    <li>Acesso aos dados.</li>
+    <li>Correcao de dados incompletos, inexatos ou desatualizados.</li>
+    <li>Anonimizacao, bloqueio ou elimina&#231;&#227;o de dados desnecess&#225;rios, excessivos ou tratados em desconformidade.</li>
+    <li>Informacao sobre compartilhamento.</li>
+    <li>Revogacao de consentimento.</li>
+    <li>Eliminacao de dados tratados com base em consentimento, quando aplic&#225;vel.</li>
+    <li>Portabilidade, quando regulamentada e tecnicamente poss&#237;vel.</li>
+    <li>Revisao de decis&#245;es automatizadas, quando aplic&#225;vel.</li>
+  </ul>
+  <p>Para exercer esses direitos, envie e-mail para <strong>george.guimares@gmail.com</strong>.</p>
+  <h2>13. Criancas e adolescentes</h2>
+  <p>O aplicativo n&#227;o &#233; direcionado a criancas menores de 13 anos. Se um respons&#225;vel legal entender que uma crianca forneceu dados ao app, deve entrar em contato para avaliarmos a exclus&#227;o.</p>
+  <h2>14. Alteracoes nesta pol&#237;tica</h2>
+  <p>Podemos atualizar esta Pol&#237;tica de Privacidade para refletir mudancas no app, em provedores, em requisitos legais ou em regras da Google Play. A data no topo indica a vers&#227;o vigente. Alteracoes relevantes podem ser comunicadas dentro do app, na p&#225;gina publicada ou por outros meios razoaveis.</p>
+  <h2>15. Contato</h2>
+  <p><strong>Aplicativo:</strong> Mentor Financeiro</p>
+  <p><strong>E-mail:</strong> george.guimares@gmail.com</p>
+  <p><strong>Pol&#237;tica publicada em:</strong> <a href="https://terriblegeorge.github.io/Mentor_Financeiro/" rel="noopener noreferrer">https://terriblegeorge.github.io/Mentor_Financeiro/</a></p>
 </body>
 </html>

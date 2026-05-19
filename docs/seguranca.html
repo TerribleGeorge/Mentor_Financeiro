@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Segurança - Mentor Financeiro</title>
+  <meta name="description" content="Práticas de segurança do aplicativo Mentor Financeiro.">
+  <style>
+    :root { color-scheme: light dark; --fg:#172033; --bg:#fbfcff; --muted:#5f6b7a; --link:#0f66d0; --border:#d9e1ec; --surface:#ffffff; }
+    @media (prefers-color-scheme: dark) { :root { --fg:#edf2f7; --bg:#101722; --muted:#a8b3c2; --link:#79b8ff; --border:#2b384a; --surface:#141d2a; } }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif; line-height: 1.62; max-width: 48rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; color: var(--fg); background: var(--bg); }
+    nav { display: flex; flex-wrap: wrap; gap: .5rem; margin: .25rem 0 1.75rem; padding: .75rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+    nav a { padding: .35rem .55rem; border-radius: 7px; text-decoration: none; font-weight: 650; }
+    h1 { font-size: clamp(1.7rem, 4vw, 2.25rem); line-height: 1.16; margin: .25rem 0 1rem; }
+    h2 { font-size: 1.22rem; margin: 2rem 0 .6rem; padding-bottom: .35rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.05rem; margin: 1.35rem 0 .35rem; }
+    p { margin: .65rem 0; }
+    ul { padding-left: 1.35rem; margin: .55rem 0 .9rem; }
+    li { margin: .28rem 0; }
+    a { color: var(--link); }
+    code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .92em; padding: .1rem .25rem; border-radius: 5px; background: color-mix(in srgb, var(--muted) 14%, transparent); }
+    hr { border: 0; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    strong { font-weight: 750; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Política de Privacidade</a>
+    <a href="seguranca.html">Segurança</a>
+    <a href="termos-de-uso.html">Termos de Uso</a>
+  </nav>
+  <h1>Seguran&#231;a - Mentor Financeiro</h1>
+  <p><strong>&#218;ltima atualiza&#231;&#227;o:</strong> 19 de maio de 2026</p>
+  <p>Esta p&#225;gina explica as pr&#225;ticas de seguran&#231;a do Mentor Financeiro em linguagem direta. Ela complementa a Pol&#237;tica de Privacidade e os Termos de Uso.</p>
+  <h2>1. Compromisso de seguran&#231;a</h2>
+  <p>O Mentor Financeiro foi desenvolvido para ajudar na organiza&#231;&#227;o financeira sem pedir acesso direto a conta banc&#225;ria, sem solicitar senha banc&#225;ria e sem funcionar como banco, corretora ou meio de pagamento.</p>
+  <p>O app pode armazenar dados financeiros informados por voc&#234; ou identificados por recursos opcionais, por isso tratamos seguran&#231;a como parte central do produto.</p>
+  <h2>2. O que o app n&#227;o faz</h2>
+  <ul>
+    <li>N&#227;o pede senha de banco, cartao ou carteira digital.</li>
+    <li>N&#227;o acessa sua conta banc&#225;ria.</li>
+    <li>N&#227;o movimenta dinheiro.</li>
+    <li>N&#227;o faz pagamentos, Pix, transfer&#234;ncias ou investimentos em seu nome.</li>
+    <li>N&#227;o solicita c&#243;digo de seguran&#231;a de cartao.</li>
+    <li>N&#227;o solicita c&#243;digo OTP de banco.</li>
+    <li>N&#227;o vende seus dados pessoais.</li>
+  </ul>
+  <h2>3. Medidas t&#233;cnicas usadas</h2>
+  <p>Conforme o recurso utilizado, o app pode usar:</p>
+  <ul>
+    <li>Login por Firebase Authentication.</li>
+    <li>Cloud Firestore com dados associados ao usu&#225;rio autenticado.</li>
+    <li>Regras de seguran&#231;a para restringir acesso aos dados do pr&#243;prio usu&#225;rio.</li>
+    <li>Comunicacao criptografada pelos SDKs e servi&#231;os utilizados.</li>
+    <li>Firebase Crashlytics para identificar falhas t&#233;cnicas e corrigir problemas.</li>
+    <li>Permiss&#245;es do Android solicitadas somente quando relacionadas a recursos do app.</li>
+    <li>Armazenamento local para prefer&#234;ncias, tema, cache e dados do aparelho.</li>
+  </ul>
+  <h2>4. Monitoramento de notifica&#231;&#245;es</h2>
+  <p>O monitoramento de notifica&#231;&#245;es &#233; opcional e exige ativacao manual no Android.</p>
+  <p>Quando ativado, o app pode ler notifica&#231;&#245;es compat&#237;veis para reconhecer gastos, compras, pagamentos, assinaturas e transfer&#234;ncias. O objetivo e reduzir trabalho manual ao registrar despesas.</p>
+  <p>Para reduzir riscos:</p>
+  <ul>
+    <li>O app informa o motivo da permissao antes de direcionar voc&#234; para as configura&#231;&#245;es.</li>
+    <li>O acesso pode ser revogado a qualquer momento nas configura&#231;&#245;es do Android.</li>
+    <li>O filtro busca eventos financeiros compat&#237;veis, n&#227;o conversas pessoais.</li>
+    <li>O app tenta ignorar c&#243;digos OTP, senhas, c&#243;digos de seguran&#231;a e mensagens de autentica&#231;&#227;o.</li>
+    <li>O app n&#227;o usa esse recurso para entrar em bancos, cartoes ou carteiras digitais.</li>
+  </ul>
+  <p>Mesmo assim, notifica&#231;&#245;es podem conter dados sensiveis. Use esse recurso apenas se voc&#234; concordar com esse tipo de processamento.</p>
+  <h2>5. Permiss&#245;es sensiveis</h2>
+  <p>O app pode solicitar:</p>
+  <ul>
+    <li><strong>Internet:</strong> conexao com Firebase, Google Play, APIs e recursos online.</li>
+    <li><strong>Notifica&#231;&#245;es:</strong> envio de alertas do pr&#243;prio app.</li>
+    <li><strong>Localiza&#231;&#227;o:</strong> adaptacao de conte&#250;dos ou compara&#231;&#245;es ao pa&#237;s/regiao, quando autorizado.</li>
+    <li><strong>Acesso a notifica&#231;&#245;es do Android:</strong> identifica&#231;&#227;o opcional de gastos a partir de notifica&#231;&#245;es compat&#237;veis.</li>
+    <li><strong>Compras no app:</strong> assinatura Premium pela Google Play.</li>
+  </ul>
+  <p>Voc&#234; controla essas permiss&#245;es nas configura&#231;&#245;es do Android.</p>
+  <h2>6. Sua parte na seguran&#231;a</h2>
+  <p>Para proteger seus dados:</p>
+  <ul>
+    <li>Use bloqueio de tela no aparelho.</li>
+    <li>N&#227;o compartilhe sua conta.</li>
+    <li>Mantenha o app &#233; o Android atualizados.</li>
+    <li>Revogue permiss&#245;es que n&#227;o deseja mais usar.</li>
+    <li>Confira transa&#231;&#245;es identificadas automaticamente antes de tomar decis&#245;es.</li>
+    <li>N&#227;o cadastre informa&#231;&#245;es que voc&#234; n&#227;o deseja manter no aplicativo.</li>
+    <li>Cancele assinaturas diretamente na Google Play quando n&#227;o quiser renova&#231;&#227;o.</li>
+  </ul>
+  <h2>7. Limitacoes</h2>
+  <p>Nenhum aplicativo, servidor, sistema operacional ou servico de nuvem e 100% seguro. Apesar das medidas adotadas, podem ocorrer falhas, indisponibilidade, erros de sincroniza&#231;&#227;o, perda de acesso, problemas de terceiros ou tentativas externas de abuso.</p>
+  <p>O Mentor Financeiro busca reduzir riscos de forma razoavel, mas voc&#234; deve manter copias ou controles pr&#243;prios das informa&#231;&#245;es financeiras essenciais.</p>
+  <h2>8. Incidentes e contato</h2>
+  <p>Se voc&#234; perceber comportamento estranho, acesso indevido, dado incorreto, suspeita de falha de seguran&#231;a ou problema com permissao sensivel, entre em contato:</p>
+  <p><strong>george.guimares@gmail.com</strong></p>
+  <p>Inclua, se poss&#237;vel:</p>
+  <ul>
+    <li>Modelo do aparelho.</li>
+    <li>Vers&#227;o do Android.</li>
+    <li>Vers&#227;o do app.</li>
+    <li>Descricao do problema.</li>
+    <li>Capturas de tela sem expor senhas, c&#243;digos ou dados excessivos.</li>
+  </ul>
+</body>
+</html>

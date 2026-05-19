@@ -18,6 +18,7 @@ import '../services/user_persona_service.dart';
 import '../presentation/intro/intro_tour_screen.dart';
 import 'currency_settings_page.dart';
 import 'language_settings_page.dart';
+import 'legal_documents_page.dart';
 import 'tela_login.dart';
 import 'notification_monitoring_page.dart';
 
@@ -533,6 +534,39 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ],
+          Divider(height: 24, color: dividerColor),
+          _secTitle(
+            strings.text(
+              'Legal e segurança',
+              en: 'Legal and security',
+              es: 'Legal y seguridad',
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.policy_outlined, color: accentColor),
+            title: Text(
+              strings.text(
+                'Política, segurança e termos',
+                en: 'Privacy, security, and terms',
+                es: 'Privacidad, seguridad y términos',
+              ),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              strings.text(
+                'Textos exibidos conforme o idioma selecionado no app',
+                en: 'Texts shown according to the selected app language',
+                es: 'Textos mostrados según el idioma seleccionado en la app',
+              ),
+              style: TextStyle(color: mutedColor, fontSize: 12),
+            ),
+            trailing: _chevron,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const LegalDocumentsPage(),
+              ),
+            ),
+          ),
           Divider(height: 24, color: dividerColor),
           _secTitle(
             strings.text(

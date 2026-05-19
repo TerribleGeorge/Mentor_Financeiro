@@ -28,6 +28,7 @@ import '../services/firebase_service.dart';
 import '../services/locale_ui_strings.dart';
 // Notification listener é iniciado em `MainNavigation` (Android).
 import '../presentation/intro/intro_tour_screen.dart';
+import 'legal_documents_page.dart';
 import 'main_navigation.dart';
 import 'tela_upgrade.dart';
 
@@ -203,6 +204,7 @@ class _TelaLoginState extends State<TelaLogin> {
   // PÁGINA 2: LOGIN
   // ==============================================================================
   Widget _paginaLogin() {
+    final strings = LocaleUiStrings.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(30),
       child: Column(
@@ -261,10 +263,30 @@ class _TelaLoginState extends State<TelaLogin> {
           ),
 
           const SizedBox(height: 30),
-          const Text(
-            "Ao continuar, você aceita nossos Termos de Uso e Política de Privacidade.",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white38, fontSize: 11),
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const LegalDocumentsPage(),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Text(
+                strings.text(
+                  'Ao continuar, você aceita nossos Termos de Uso e Política de Privacidade.',
+                  en: 'By continuing, you accept our Terms of Use and Privacy Policy.',
+                  es: 'Al continuar, aceptas nuestros Términos de uso y Política de privacidad.',
+                ),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 11,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.white38,
+                ),
+              ),
+            ),
           ),
         ],
       ),

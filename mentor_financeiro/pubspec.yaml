@@ -180,6 +180,83 @@ flutter:
   # Impacto: Recursos disponíveis offline sem necessidade de download
   assets:
     - assets/dotenv.defaults
+    - assets/legal/af/
+    - assets/legal/am/
+    - assets/legal/ar/
+    - assets/legal/as/
+    - assets/legal/az/
+    - assets/legal/be/
+    - assets/legal/bg/
+    - assets/legal/bn/
+    - assets/legal/bs/
+    - assets/legal/ca/
+    - assets/legal/cs/
+    - assets/legal/da/
+    - assets/legal/de/
+    - assets/legal/el/
+    - assets/legal/en/
+    - assets/legal/es/
+    - assets/legal/et/
+    - assets/legal/eu/
+    - assets/legal/fa/
+    - assets/legal/fi/
+    - assets/legal/fil/
+    - assets/legal/fr/
+    - assets/legal/gl/
+    - assets/legal/gsw/
+    - assets/legal/gu/
+    - assets/legal/he/
+    - assets/legal/hi/
+    - assets/legal/hr/
+    - assets/legal/hu/
+    - assets/legal/hy/
+    - assets/legal/id/
+    - assets/legal/is/
+    - assets/legal/it/
+    - assets/legal/ja/
+    - assets/legal/ka/
+    - assets/legal/kk/
+    - assets/legal/km/
+    - assets/legal/kn/
+    - assets/legal/ko/
+    - assets/legal/ky/
+    - assets/legal/lo/
+    - assets/legal/lt/
+    - assets/legal/lv/
+    - assets/legal/mk/
+    - assets/legal/ml/
+    - assets/legal/mn/
+    - assets/legal/mr/
+    - assets/legal/ms/
+    - assets/legal/my/
+    - assets/legal/nb/
+    - assets/legal/ne/
+    - assets/legal/nl/
+    - assets/legal/or/
+    - assets/legal/pa/
+    - assets/legal/pl/
+    - assets/legal/ps/
+    - assets/legal/pt/
+    - assets/legal/ro/
+    - assets/legal/ru/
+    - assets/legal/si/
+    - assets/legal/sk/
+    - assets/legal/sl/
+    - assets/legal/sq/
+    - assets/legal/sr/
+    - assets/legal/sv/
+    - assets/legal/sw/
+    - assets/legal/ta/
+    - assets/legal/te/
+    - assets/legal/th/
+    - assets/legal/tl/
+    - assets/legal/tr/
+    - assets/legal/uk/
+    - assets/legal/ur/
+    - assets/legal/uz/
+    - assets/legal/vi/
+    - assets/legal/zh/
+    - assets/legal/zu/
     - assets/icons/icone.png
     - assets/images/DevVoid_logo.png
     - assets/images/devvoid_standard.png
@@ -189,3 +266,4 @@ flutter:
     - assets/images/bg_cyber.png
     - assets/images/bg_grimm.png
     - assets/images/hive_bg.png
+
