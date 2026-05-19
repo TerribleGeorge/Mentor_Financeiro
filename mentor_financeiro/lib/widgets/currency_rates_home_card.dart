@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../core/constants/app_routes.dart';
 import '../core/navigation/mentor_navigation.dart';
 import '../services/exchange_rate_service.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/localization_service.dart';
 import '../services/regional_context_controller.dart';
 import '../theme/classic_mode_style.dart';
@@ -75,6 +76,7 @@ class _CurrencyRatesHomeCardState extends State<CurrencyRatesHomeCard>
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final strings = LocaleUiStrings.of(context);
     final country = context.watch<RegionalContextController>().countryCode;
     final base = LocalizationService.currencyCodeForCountry(country);
     if (_base != base || _future == null) {
@@ -124,7 +126,11 @@ class _CurrencyRatesHomeCardState extends State<CurrencyRatesHomeCard>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Moedas',
+                          strings.text(
+                            'Moedas',
+                            en: 'Currencies',
+                            es: 'Monedas',
+                          ),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 17,
@@ -135,7 +141,11 @@ class _CurrencyRatesHomeCardState extends State<CurrencyRatesHomeCard>
                           ),
                         ),
                         Text(
-                          'Cotações em ${LocalizationService.currencyNameForCode(base)}',
+                          strings.text(
+                            'Cotações em ${LocalizationService.currencyNameForCode(base)}',
+                            en: 'Rates in ${LocalizationService.currencyNameForCode(base)}',
+                            es: 'Cotizaciones en ${LocalizationService.currencyNameForCode(base)}',
+                          ),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.65),
                             fontSize: 12,
@@ -161,7 +171,7 @@ class _CurrencyRatesHomeCardState extends State<CurrencyRatesHomeCard>
                   ),
                   TextButton(
                     onPressed: () => mentorPushNamed(context, AppRoutes.cambio),
-                    child: const Text('Todas'),
+                    child: Text(strings.text('Todas', en: 'All', es: 'Todas')),
                   ),
                 ],
               ),
@@ -170,7 +180,11 @@ class _CurrencyRatesHomeCardState extends State<CurrencyRatesHomeCard>
                 const LinearProgressIndicator(minHeight: 3)
               else if (data == null || rows.isEmpty)
                 Text(
-                  'Sem cotações no momento. Tente novamente com internet.',
+                  strings.text(
+                    'Sem cotações no momento. Tente novamente com internet.',
+                    en: 'No rates right now. Try again with internet.',
+                    es: 'Sin cotizaciones por ahora. Inténtalo con internet.',
+                  ),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 13,
@@ -205,7 +219,11 @@ class _CurrencyRatesHomeCardState extends State<CurrencyRatesHomeCard>
                         ),
                       ),
                     Text(
-                      'Atualiza ao abrir, voltar para o app ou tocar em atualizar.',
+                      strings.text(
+                        'Atualiza ao abrir, voltar para o app ou tocar em atualizar.',
+                        en: 'Updates when opening, returning to the app, or tapping refresh.',
+                        es: 'Se actualiza al abrir, volver a la app o tocar actualizar.',
+                      ),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 11,

@@ -25,6 +25,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 // Serviço Firebase
 import '../services/firebase_service.dart';
+import '../services/locale_ui_strings.dart';
 // Notification listener é iniciado em `MainNavigation` (Android).
 import '../presentation/intro/intro_tour_screen.dart';
 import 'main_navigation.dart';
@@ -693,7 +694,9 @@ class _TelaLoginState extends State<TelaLogin> {
     try {
       final isAvailable = await SignInWithApple.isAvailable();
       if (!isAvailable) {
-        throw StateError('Sign in with Apple não disponível neste dispositivo.');
+        throw StateError(
+          'Sign in with Apple não disponível neste dispositivo.',
+        );
       }
 
       final rawNonce = _generateNonce();
@@ -712,10 +715,9 @@ class _TelaLoginState extends State<TelaLogin> {
         throw StateError('Resposta Apple sem id_token.');
       }
 
-      final oauth = OAuthProvider('apple.com').credential(
-        idToken: idToken,
-        rawNonce: rawNonce,
-      );
+      final oauth = OAuthProvider(
+        'apple.com',
+      ).credential(idToken: idToken, rawNonce: rawNonce);
 
       final cred = await FirebaseAuth.instance.signInWithCredential(oauth);
       final user = cred.user;
@@ -729,7 +731,8 @@ class _TelaLoginState extends State<TelaLogin> {
         final fn = appleCredential.familyName?.trim() ?? '';
         displayName = '$gn $fn'.trim();
       }
-      if (displayName.isNotEmpty && (user.displayName == null || user.displayName!.isEmpty)) {
+      if (displayName.isNotEmpty &&
+          (user.displayName == null || user.displayName!.isEmpty)) {
         await user.updateDisplayName(displayName);
         await user.reload();
       }
@@ -826,11 +829,19 @@ class _TelaLoginState extends State<TelaLogin> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(
+              LocaleUiStrings.of(
+                context,
+              ).text('Cancelar', en: 'Cancel', es: 'Cancelar'),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Entrar'),
+            child: Text(
+              LocaleUiStrings.of(
+                context,
+              ).text('Entrar', en: 'Sign in', es: 'Entrar'),
+            ),
           ),
         ],
       ),
@@ -943,8 +954,14 @@ class _TelaLoginState extends State<TelaLogin> {
       if (!mounted) return;
       setState(() => _carregando = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Não foi possível finalizar o login agora.'),
+        SnackBar(
+          content: Text(
+            LocaleUiStrings.of(context).text(
+              'Não foi possível finalizar o login agora.',
+              en: 'Could not finish sign-in right now.',
+              es: 'No se pudo finalizar el inicio de sesión ahora.',
+            ),
+          ),
         ),
       );
     }

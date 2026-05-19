@@ -10,6 +10,7 @@ import '../../domain/entities/risk_profile.dart';
 import '../../l10n/app_localizations.dart';
 import '../../pages/paywall_screen.dart';
 import '../../services/investment_category_provider.dart';
+import '../../services/locale_ui_strings.dart';
 import '../../services/subscription_provider.dart';
 import '../../services/user_persona_service.dart';
 import '../../theme/mentor_adaptive_visuals.dart';
@@ -164,8 +165,16 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
         vitrineCard(
           icon: Icons.psychology_alt,
           accent: const Color(0xFFFF4D4D),
-          title: 'Insights automáticos',
-          subtitle: 'Dicas geradas a partir dos seus registros',
+          title: LocaleUiStrings.of(context).text(
+            'Insights automáticos',
+            en: 'Automatic insights',
+            es: 'Insights automáticos',
+          ),
+          subtitle: LocaleUiStrings.of(context).text(
+            'Dicas geradas a partir dos seus registros',
+            en: 'Tips generated from your records',
+            es: 'Consejos generados a partir de tus registros',
+          ),
           locked: !subscription.isPremium,
           onTap: () => mentorPushNamed(context, AppRoutes.mentoria),
         ),
@@ -173,8 +182,16 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
         vitrineCard(
           icon: Icons.query_stats,
           accent: const Color(0xFF00D9FF),
-          title: 'Análise personalizada',
-          subtitle: 'Dashboards por categoria e forma de pagamento',
+          title: LocaleUiStrings.of(context).text(
+            'Análise personalizada',
+            en: 'Personalized analysis',
+            es: 'Análisis personalizado',
+          ),
+          subtitle: LocaleUiStrings.of(context).text(
+            'Dashboards por categoria e forma de pagamento',
+            en: 'Dashboards by category and payment method',
+            es: 'Paneles por categoría y forma de pago',
+          ),
           locked: !subscription.isPremium,
           onTap: () => mentorPushNamed(
             context,
@@ -293,8 +310,9 @@ class _MentorHomeScreenState extends State<MentorHomeScreen> {
                   context: context,
                   backgroundColor: tileFill,
                   shape: const RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(18)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(18),
+                    ),
                   ),
                   builder: (ctx) {
                     return SafeArea(

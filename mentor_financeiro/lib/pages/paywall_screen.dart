@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/subscription_constants.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/subscription_provider.dart';
 
 /// Assinatura: benefícios locais + compra pelo Google Play Billing.
@@ -11,6 +12,7 @@ class PaywallScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final strings = LocaleUiStrings.of(context);
     final localeTag = Localizations.localeOf(context).languageCode;
     final trialHeadline = SubscriptionConstants.freeTrialHeadlineForLocale(
       localeTag,
@@ -21,7 +23,11 @@ class PaywallScreen extends StatelessWidget {
     final trialCta = SubscriptionConstants.freeTrialCtaForLocale(localeTag);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Assinatura')),
+      appBar: AppBar(
+        title: Text(
+          strings.text('Assinatura', en: 'Subscription', es: 'Suscripción'),
+        ),
+      ),
       body: SafeArea(
         child: Consumer<SubscriptionProvider>(
           builder: (context, sub, _) {
@@ -29,7 +35,11 @@ class PaywallScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               children: [
                 Text(
-                  'O Premium é processado pela Google Play. A confirmação da compra acontece dentro do app.',
+                  strings.text(
+                    'O Premium é processado pela Google Play. A confirmação da compra acontece dentro do app.',
+                    en: 'Premium is processed by Google Play. Purchase confirmation happens inside the app.',
+                    es: 'Premium se procesa por Google Play. La confirmación de compra ocurre dentro de la app.',
+                  ),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
                   ),
@@ -47,23 +57,39 @@ class PaywallScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Valores da assinatura',
+                  strings.text(
+                    'Valores da assinatura',
+                    en: 'Subscription prices',
+                    es: 'Precios de suscripción',
+                  ),
                   style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Mensal: ${sub.getFormattedPrice('monthly')}',
+                  strings.text(
+                    'Mensal: ${sub.getFormattedPrice('monthly')}',
+                    en: 'Monthly: ${sub.getFormattedPrice('monthly')}',
+                    es: 'Mensual: ${sub.getFormattedPrice('monthly')}',
+                  ),
                   style: theme.textTheme.bodyMedium,
                 ),
                 Text(
-                  'Anual: ${sub.getFormattedPrice('yearly')}',
+                  strings.text(
+                    'Anual: ${sub.getFormattedPrice('yearly')}',
+                    en: 'Yearly: ${sub.getFormattedPrice('yearly')}',
+                    es: 'Anual: ${sub.getFormattedPrice('yearly')}',
+                  ),
                   style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Os valores cobrados são sempre os da Play Store na tua região.',
+                  strings.text(
+                    'Os valores cobrados são sempre os da Play Store na tua região.',
+                    en: 'Charged amounts are always the Play Store prices for your region.',
+                    es: 'Los importes cobrados son siempre los de Play Store en tu región.',
+                  ),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
                   ),
@@ -78,8 +104,11 @@ class PaywallScreen extends StatelessWidget {
                           _showPurchaseResult(
                             context,
                             ok,
-                            fallbackMessage:
-                                'Não foi possível abrir a compra mensal agora.',
+                            fallbackMessage: strings.text(
+                              'Não foi possível abrir a compra mensal agora.',
+                              en: 'Could not open the monthly purchase right now.',
+                              es: 'No se pudo abrir la compra mensual ahora.',
+                            ),
                           );
                         },
                   icon: const Icon(Icons.shopping_bag_outlined),
@@ -95,12 +124,21 @@ class PaywallScreen extends StatelessWidget {
                           _showPurchaseResult(
                             context,
                             ok,
-                            fallbackMessage:
-                                'Não foi possível abrir a compra anual agora.',
+                            fallbackMessage: strings.text(
+                              'Não foi possível abrir a compra anual agora.',
+                              en: 'Could not open the yearly purchase right now.',
+                              es: 'No se pudo abrir la compra anual ahora.',
+                            ),
                           );
                         },
                   icon: const Icon(Icons.workspace_premium_outlined),
-                  label: const Text('Assinar plano anual por R\$ 99,90'),
+                  label: Text(
+                    strings.text(
+                      'Assinar plano anual por R\$ 99,90',
+                      en: r'Subscribe yearly plan for R$ 99.90',
+                      es: r'Suscribir plan anual por R$ 99,90',
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 FilledButton.tonal(
@@ -113,8 +151,16 @@ class PaywallScreen extends StatelessWidget {
                             SnackBar(
                               content: Text(
                                 sub.isPremium
-                                    ? 'Estado actualizado: Premium activo.'
-                                    : 'Nenhuma assinatura ativa foi encontrada na Google Play.',
+                                    ? strings.text(
+                                        'Estado actualizado: Premium activo.',
+                                        en: 'Status updated: Premium active.',
+                                        es: 'Estado actualizado: Premium activo.',
+                                      )
+                                    : strings.text(
+                                        'Nenhuma assinatura ativa foi encontrada na Google Play.',
+                                        en: 'No active subscription was found on Google Play.',
+                                        es: 'No se encontró ninguna suscripción activa en Google Play.',
+                                      ),
                               ),
                             ),
                           );
@@ -128,7 +174,13 @@ class PaywallScreen extends StatelessWidget {
                           width: 22,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Actualizar perfil / estado Premium'),
+                      : Text(
+                          strings.text(
+                            'Actualizar perfil / estado Premium',
+                            en: 'Refresh profile / Premium status',
+                            es: 'Actualizar perfil / estado Premium',
+                          ),
+                        ),
                 ),
                 if (sub.errorMessage != null &&
                     sub.errorMessage!.isNotEmpty) ...[
@@ -231,6 +283,7 @@ class _PremiumBenefitsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final strings = LocaleUiStrings.of(context);
 
     return Card(
       elevation: 0,
@@ -241,7 +294,11 @@ class _PremiumBenefitsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'O que o Premium liberta',
+              strings.text(
+                'O que o Premium liberta',
+                en: 'What Premium unlocks',
+                es: 'Lo que desbloquea Premium',
+              ),
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -268,7 +325,11 @@ class _PremiumBenefitsCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Sem promessa de consultoria individual, suporte 24h ou resultado financeiro garantido.',
+              strings.text(
+                'Sem promessa de consultoria individual, suporte 24h ou resultado financeiro garantido.',
+                en: 'No promise of individual advisory, 24h support, or guaranteed financial results.',
+                es: 'Sin promesa de asesoría individual, soporte 24h ni resultado financiero garantizado.',
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
               ),

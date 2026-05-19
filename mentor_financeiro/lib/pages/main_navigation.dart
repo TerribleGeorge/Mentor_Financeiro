@@ -14,6 +14,7 @@ import 'perfil_screen.dart';
 import '../services/daily_spend_limit_notifier.dart';
 import '../services/market_alert_service.dart';
 import '../services/notification_listener_service.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/transaction_refresh_signal.dart';
 import '../services/pending_renda_extra_confirmation_service.dart';
 import '../services/user_data_retention_service.dart';
@@ -74,7 +75,8 @@ class _MainNavigationState extends State<MainNavigation> {
     // Assim que a rede voltar (sem fechar o app), drena fila → Firestore e relê notificações.
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       if (!mounted) return;
-      final online = results.isNotEmpty &&
+      final online =
+          results.isNotEmpty &&
           !results.every((r) => r == ConnectivityResult.none);
       if (!online) return;
       unawaited(_syncSpendPipelineAfterNetworkBack());
@@ -98,8 +100,8 @@ class _MainNavigationState extends State<MainNavigation> {
     if (_syncSpendPipelineInFlight) return;
     _syncSpendPipelineInFlight = true;
     try {
-      final saved =
-          await _notificationListener.flushPendingTransactionsToFirestore();
+      final saved = await _notificationListener
+          .flushPendingTransactionsToFirestore();
       await _ensureNotificationListenerStarted();
       if (saved == 0) {
         // Streams Firestore podem já ter dados; prefs/locais já foram tratados no flush.
@@ -176,6 +178,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = LocaleUiStrings.of(context);
     final theme = Theme.of(context);
     final bright = theme.brightness == Brightness.light;
     final edge = bright
@@ -249,7 +252,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   0,
                   Icons.home_outlined,
                   Icons.home,
-                  'Início',
+                  strings.navHome,
                   accent,
                   labelIdle,
                 ),
@@ -257,7 +260,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   1,
                   Icons.pie_chart_outline,
                   Icons.pie_chart,
-                  'Gráficos',
+                  strings.navCharts,
                   accent,
                   labelIdle,
                 ),
@@ -265,7 +268,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   2,
                   Icons.history_outlined,
                   Icons.history,
-                  'Histórico',
+                  strings.navHistory,
                   accent,
                   labelIdle,
                 ),
@@ -273,7 +276,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   3,
                   Icons.person_outline,
                   Icons.person,
-                  'Perfil',
+                  strings.navProfile,
                   accent,
                   labelIdle,
                 ),

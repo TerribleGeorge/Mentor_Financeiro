@@ -11,6 +11,7 @@ import '../models/transacao_model.dart';
 import '../services/ad_manager_service.dart';
 import '../services/daily_spend_limit_notifier.dart';
 import '../services/local_transaction_store.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/notification_listener_service.dart';
 import '../services/subscription_provider.dart';
 import '../services/transaction_refresh_signal.dart';
@@ -44,12 +45,17 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
   }
 
   Future<void> _selecionarData() async {
+    final strings = LocaleUiStrings.of(context);
     final picked = await showDatePicker(
       context: context,
       initialDate: _data,
       firstDate: DateTime(DateTime.now().year - 5),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      helpText: 'Selecionar data',
+      helpText: strings.text(
+        'Selecionar data',
+        en: 'Select date',
+        es: 'Seleccionar fecha',
+      ),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -78,6 +84,7 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
   }
 
   Future<void> _salvar() async {
+    final strings = LocaleUiStrings.of(context);
     if (!_formKey.currentState!.validate()) return;
 
     final user = FirebaseAuth.instance.currentUser;
@@ -88,7 +95,11 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
           behavior: SnackBarBehavior.floating,
           backgroundColor: const Color(0xFF1E293B),
           content: Text(
-            'Inicie sessão na página inicial para guardar na nuvem.',
+            strings.text(
+              'Inicie sessão na página inicial para guardar na nuvem.',
+              en: 'Sign in from the home page to save to the cloud.',
+              es: 'Inicia sesión en la página inicial para guardar en la nube.',
+            ),
             style: TextStyle(color: Colors.white.withValues(alpha: 0.92)),
           ),
         ),
@@ -99,7 +110,15 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
     final valor = _parseValor(_valorController.text);
     if (valor <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Informe um valor maior que zero.')),
+        SnackBar(
+          content: Text(
+            strings.text(
+              'Informe um valor maior que zero.',
+              en: 'Enter an amount greater than zero.',
+              es: 'Ingresa un valor mayor que cero.',
+            ),
+          ),
+        ),
       );
       return;
     }
@@ -170,8 +189,16 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
         SnackBar(
           content: Text(
             cloudOk
-                ? 'Transação salva com sucesso.'
-                : 'Registo guardado neste telemóvel; a sincronizar com a nuvem em segundo plano.',
+                ? strings.text(
+                    'Transação salva com sucesso.',
+                    en: 'Transaction saved successfully.',
+                    es: 'Transacción guardada correctamente.',
+                  )
+                : strings.text(
+                    'Registo guardado neste telemóvel; a sincronizar com a nuvem em segundo plano.',
+                    en: 'Record saved on this phone; syncing with the cloud in the background.',
+                    es: 'Registro guardado en este teléfono; sincronizando con la nube en segundo plano.',
+                  ),
           ),
           backgroundColor: const Color(0xFF26DE81),
         ),
@@ -192,6 +219,7 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = LocaleUiStrings.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -200,8 +228,12 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        title: const Text(
-          'Adicionar Transação',
+        title: Text(
+          strings.text(
+            'Adicionar Transação',
+            en: 'Add Transaction',
+            es: 'Agregar transacción',
+          ),
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
@@ -211,18 +243,32 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              _sectionTitle('Detalhes'),
+              _sectionTitle(
+                strings.text('Detalhes', en: 'Details', es: 'Detalles'),
+              ),
               const SizedBox(height: 12),
               _card(
                 children: [
                   _textField(
                     controller: _descricaoController,
-                    label: 'Descrição',
-                    hint: 'Ex: Mercado, Uber, Restaurante...',
+                    label: strings.text(
+                      'Descrição',
+                      en: 'Description',
+                      es: 'Descripción',
+                    ),
+                    hint: strings.text(
+                      'Ex: Mercado, Uber, Restaurante...',
+                      en: 'Ex: Market, Uber, Restaurant...',
+                      es: 'Ej: Mercado, Uber, Restaurante...',
+                    ),
                     textInputAction: TextInputAction.next,
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) {
-                        return 'Informe uma descrição';
+                        return strings.text(
+                          'Informe uma descrição',
+                          en: 'Enter a description',
+                          es: 'Ingresa una descripción',
+                        );
                       }
                       return null;
                     },
@@ -237,24 +283,44 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
                     ),
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) {
-                        return 'Informe o valor';
+                        return strings.text(
+                          'Informe o valor',
+                          en: 'Enter the amount',
+                          es: 'Ingresa el valor',
+                        );
                       }
                       final parsed = _parseValor(v);
-                      if (parsed <= 0) return 'Valor inválido';
+                      if (parsed <= 0) {
+                        return strings.text(
+                          'Valor inválido',
+                          en: 'Invalid amount',
+                          es: 'Valor inválido',
+                        );
+                      }
                       return null;
                     },
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-              _sectionTitle('Categoria e tipo'),
+              _sectionTitle(
+                strings.text(
+                  'Categoria e tipo',
+                  en: 'Category and type',
+                  es: 'Categoría y tipo',
+                ),
+              ),
               const SizedBox(height: 12),
               _card(
                 children: [
                   ListTile(
                     leading: const Icon(Icons.category, color: Colors.white70),
-                    title: const Text(
-                      'Categoria',
+                    title: Text(
+                      strings.text(
+                        'Categoria',
+                        en: 'Category',
+                        es: 'Categoría',
+                      ),
                       style: TextStyle(color: Colors.white),
                     ),
                     trailing: DropdownButtonHideUnderline(
@@ -284,8 +350,12 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Tipo de pagamento',
+                        Text(
+                          strings.text(
+                            'Tipo de pagamento',
+                            en: 'Payment type',
+                            es: 'Tipo de pago',
+                          ),
                           style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                         const SizedBox(height: 10),
@@ -295,7 +365,11 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
                               child: _choiceChip(
                                 selected:
                                     _tipoPagamento == TipoPagamento.debito,
-                                label: 'Débito',
+                                label: strings.text(
+                                  'Débito',
+                                  en: 'Debit',
+                                  es: 'Débito',
+                                ),
                                 onTap: () => setState(
                                   () => _tipoPagamento = TipoPagamento.debito,
                                 ),
@@ -306,7 +380,11 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
                               child: _choiceChip(
                                 selected:
                                     _tipoPagamento == TipoPagamento.credito,
-                                label: 'Crédito',
+                                label: strings.text(
+                                  'Crédito',
+                                  en: 'Credit',
+                                  es: 'Crédito',
+                                ),
                                 onTap: () => setState(
                                   () => _tipoPagamento = TipoPagamento.credito,
                                 ),
@@ -320,14 +398,18 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
                 ],
               ),
               const SizedBox(height: 20),
-              _sectionTitle('Data'),
+              _sectionTitle(strings.text('Data', en: 'Date', es: 'Fecha')),
               const SizedBox(height: 12),
               _card(
                 children: [
                   ListTile(
                     leading: const Icon(Icons.event, color: Colors.white70),
-                    title: const Text(
-                      'Data da transação',
+                    title: Text(
+                      strings.text(
+                        'Data da transação',
+                        en: 'Transaction date',
+                        es: 'Fecha de transacción',
+                      ),
                       style: TextStyle(color: Colors.white),
                     ),
                     subtitle: Text(
@@ -364,8 +446,8 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
                           height: 22,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text(
-                          'SALVAR',
+                      : Text(
+                          strings.text('SALVAR', en: 'SAVE', es: 'GUARDAR'),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1,
@@ -375,7 +457,11 @@ class _AdicionarTransacaoPageState extends State<AdicionarTransacaoPage> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Dica: depois de salvar, ela já aparece no Dashboard e no Histórico.',
+                strings.text(
+                  'Dica: depois de salvar, ela já aparece no Dashboard e no Histórico.',
+                  en: 'Tip: after saving, it appears on the Dashboard and History.',
+                  es: 'Consejo: después de guardar, aparece en el Panel y en el Historial.',
+                ),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.35),

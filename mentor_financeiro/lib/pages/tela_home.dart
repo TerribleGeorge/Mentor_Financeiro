@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../domain/finance/daily_limit_calculator.dart';
+import '../services/locale_ui_strings.dart';
+import '../services/localization_service.dart';
 import '../theme/classic_mode_style.dart';
 import '../theme/mentor_adaptive_visuals.dart';
 import '../services/finance_config_signals.dart';
@@ -22,6 +24,7 @@ class _TelaHomeState extends State<TelaHome> {
   double _porcentagem = 0;
   String? _alertaLimiteDiario;
   String? _infoLimiteDiario;
+  DailyLimitResult? _limiteResultado;
   String _nomeUsuario = 'Usuário';
   final ScrollController _scrollController = ScrollController();
 
@@ -54,6 +57,7 @@ class _TelaHomeState extends State<TelaHome> {
     _nomeUsuario = prefs.getString('nome_usuario') ?? 'Usuário';
 
     final limite = DailyLimitCalculator.computeFromPrefs(prefs);
+    _limiteResultado = limite;
     _limiteDiario = limite.displayLimit;
     _alertaLimiteDiario = limite.alertMessage;
     _infoLimiteDiario = limite.infoMessage;
@@ -91,11 +95,24 @@ class _TelaHomeState extends State<TelaHome> {
     );
   }
 
-  String _gerarSaudacao() {
+  String _gerarSaudacao(BuildContext context) {
+    final strings = LocaleUiStrings.of(context);
     final hora = DateTime.now().hour;
-    if (hora < 12) return 'Bom dia!';
-    if (hora < 18) return 'Boa tarde!';
-    return 'Boa noite!';
+    if (hora < 12) {
+      return strings.text('Bom dia!', en: 'Good morning!', es: '¡Buenos días!');
+    }
+    if (hora < 18) {
+      return strings.text(
+        'Boa tarde!',
+        en: 'Good afternoon!',
+        es: '¡Buenas tardes!',
+      );
+    }
+    return strings.text(
+      'Boa noite!',
+      en: 'Good evening!',
+      es: '¡Buenas noches!',
+    );
   }
 
   Color _corLimite() {
@@ -106,6 +123,8 @@ class _TelaHomeState extends State<TelaHome> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = LocaleUiStrings.of(context);
+    final result = _limiteResultado;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -125,7 +144,7 @@ class _TelaHomeState extends State<TelaHome> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _gerarSaudacao(),
+                          _gerarSaudacao(context),
                           style: const TextStyle(
                             color: Colors.white54,
                             fontSize: 14,
@@ -178,64 +197,91 @@ class _TelaHomeState extends State<TelaHome> {
                         ),
                       ),
                       child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "LIMITE HOJE",
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "R\$ ${_limiteDiario.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ).withFinancialShadows(context),
-                      ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: _porcentagem,
-                          backgroundColor: Colors.white12,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _corLimite(),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            strings.text(
+                              'LIMITE HOJE',
+                              en: 'TODAY\'S LIMIT',
+                              es: 'LÍMITE DE HOY',
+                            ),
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12,
+                            ),
                           ),
-                          minHeight: 6,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _limiteDiario > 0
-                            ? "${(_porcentagem * 100).toStringAsFixed(0)}% usado"
-                            : "Sem limite diário positivo",
-                        style: TextStyle(color: _corLimite(), fontSize: 12),
-                      ),
-                      if (_alertaLimiteDiario != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _alertaLimiteDiario!,
-                          style: TextStyle(
-                            color: Colors.amber.shade200,
-                            fontSize: 12,
-                            height: 1.35,
+                          const SizedBox(height: 8),
+                          Text(
+                            LocalizationService.formatCurrency(_limiteDiario),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ).withFinancialShadows(context),
                           ),
-                        ),
-                      ],
-                      if (_infoLimiteDiario != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _infoLimiteDiario!,
-                          style: TextStyle(
-                            color: Colors.cyanAccent.withValues(alpha: 0.9),
-                            fontSize: 11,
-                            height: 1.35,
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: _porcentagem,
+                              backgroundColor: Colors.white12,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                _corLimite(),
+                              ),
+                              minHeight: 6,
+                            ),
                           ),
-                        ),
-                      ],
-                    ],
-                  ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _limiteDiario > 0
+                                ? strings.text(
+                                    '${(_porcentagem * 100).toStringAsFixed(0)}% usado',
+                                    en: '${(_porcentagem * 100).toStringAsFixed(0)}% used',
+                                    es: '${(_porcentagem * 100).toStringAsFixed(0)}% usado',
+                                  )
+                                : strings.text(
+                                    'Sem limite diário positivo',
+                                    en: 'No positive daily limit',
+                                    es: 'Sin límite diario positivo',
+                                  ),
+                            style: TextStyle(color: _corLimite(), fontSize: 12),
+                          ),
+                          if (_alertaLimiteDiario != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              result == null
+                                  ? _alertaLimiteDiario!
+                                  : strings.text(
+                                      'Alerta: Você está com saldo negativo. Seu limite diário recomendado é ${LocalizationService.formatCurrency(0)} para evitar mais juros. Foque em cobrir o saldo de ${LocalizationService.formatCurrency(result.saldoAtual)}.',
+                                      en: 'Alert: Your balance is negative. Your recommended daily limit is ${LocalizationService.formatCurrency(0)} to avoid more interest. Focus on covering the balance of ${LocalizationService.formatCurrency(result.saldoAtual)}.',
+                                      es: 'Alerta: tu saldo es negativo. Tu límite diario recomendado es ${LocalizationService.formatCurrency(0)} para evitar más intereses. Enfócate en cubrir el saldo de ${LocalizationService.formatCurrency(result.saldoAtual)}.',
+                                    ),
+                              style: TextStyle(
+                                color: Colors.amber.shade200,
+                                fontSize: 12,
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
+                          if (_infoLimiteDiario != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              result == null
+                                  ? _infoLimiteDiario!
+                                  : strings.text(
+                                      'O limite calculado (${LocalizationService.formatCurrency(result.rawLimit)}) foi mostrado no teto de ${LocalizationService.formatCurrency(result.displayLimit)} por dia (ajustável em Configurar finanças).',
+                                      en: 'The calculated limit (${LocalizationService.formatCurrency(result.rawLimit)}) was shown at the daily cap of ${LocalizationService.formatCurrency(result.displayLimit)} (adjustable in Configure finances).',
+                                      es: 'El límite calculado (${LocalizationService.formatCurrency(result.rawLimit)}) se mostró con el techo diario de ${LocalizationService.formatCurrency(result.displayLimit)} (ajustable en Configurar finanzas).',
+                                    ),
+                              style: TextStyle(
+                                color: Colors.cyanAccent.withValues(alpha: 0.9),
+                                fontSize: 11,
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -263,8 +309,12 @@ class _TelaHomeState extends State<TelaHome> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  "GASTOS",
+                                Text(
+                                  strings.text(
+                                    'GASTOS',
+                                    en: 'SPENDING',
+                                    es: 'GASTOS',
+                                  ),
                                   style: TextStyle(
                                     color: Colors.white54,
                                     fontSize: 12,
@@ -272,7 +322,9 @@ class _TelaHomeState extends State<TelaHome> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  "R\$ ${_gastosHoje.toStringAsFixed(2)}",
+                                  LocalizationService.formatCurrency(
+                                    _gastosHoje,
+                                  ),
                                   style: const TextStyle(
                                     color: Colors.redAccent,
                                     fontSize: 18,
@@ -304,8 +356,12 @@ class _TelaHomeState extends State<TelaHome> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  "RECEBIDO",
+                                Text(
+                                  strings.text(
+                                    'RECEBIDO',
+                                    en: 'RECEIVED',
+                                    es: 'RECIBIDO',
+                                  ),
                                   style: TextStyle(
                                     color: Colors.white54,
                                     fontSize: 12,
@@ -313,7 +369,9 @@ class _TelaHomeState extends State<TelaHome> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  "R\$ ${_ganhosHoje.toStringAsFixed(2)}",
+                                  LocalizationService.formatCurrency(
+                                    _ganhosHoje,
+                                  ),
                                   style: const TextStyle(
                                     color: Colors.greenAccent,
                                     fontSize: 18,
@@ -341,14 +399,18 @@ class _TelaHomeState extends State<TelaHome> {
                       color: const Color(0xFF00D9FF),
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.school, color: Color(0xFF0F172A)),
-                        SizedBox(width: 12),
+                        const Icon(Icons.school, color: Color(0xFF0F172A)),
+                        const SizedBox(width: 12),
                         Text(
-                          "Explorar Conhecimento",
-                          style: TextStyle(
+                          strings.text(
+                            'Explorar Conhecimento',
+                            en: 'Explore Knowledge',
+                            es: 'Explorar conocimiento',
+                          ),
+                          style: const TextStyle(
                             color: Color(0xFF0F172A),
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -379,14 +441,18 @@ class _TelaHomeState extends State<TelaHome> {
                         color: const Color(0xFF00D9FF).withAlpha(128),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.psychology, color: Color(0xFF00D9FF)),
-                        SizedBox(width: 12),
+                        const Icon(Icons.psychology, color: Color(0xFF00D9FF)),
+                        const SizedBox(width: 12),
                         Text(
-                          "Descobrir meu Perfil",
-                          style: TextStyle(
+                          strings.text(
+                            'Descobrir meu Perfil',
+                            en: 'Discover my Profile',
+                            es: 'Descubrir mi perfil',
+                          ),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -410,14 +476,18 @@ class _TelaHomeState extends State<TelaHome> {
                       borderRadius: BorderRadius.circular(15),
                       border: Border.all(color: Colors.indigo.withAlpha(75)),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.school, color: Colors.indigo),
-                        SizedBox(width: 12),
+                        const Icon(Icons.school, color: Colors.indigo),
+                        const SizedBox(width: 12),
                         Text(
-                          "Conhecimento Financeiro",
-                          style: TextStyle(
+                          strings.text(
+                            'Conhecimento Financeiro',
+                            en: 'Financial Knowledge',
+                            es: 'Conocimiento financiero',
+                          ),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

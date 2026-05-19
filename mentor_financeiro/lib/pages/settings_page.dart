@@ -9,6 +9,7 @@ import '../services/theme_controller.dart';
 import '../services/currency_preference_controller.dart';
 import '../services/firebase_service.dart';
 import '../services/locale_controller.dart';
+import '../services/locale_ui_strings.dart';
 import '../core/constants/app_routes.dart';
 import '../core/navigation/mentor_navigation.dart';
 import '../core/navigation/subscription_paywall_flow.dart';
@@ -89,12 +90,17 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _mostrarAlterarSenha() async {
+    final strings = LocaleUiStrings.of(context);
     if (!_podeAlterarSenha) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Alteração de senha só está disponível para contas com e-mail e senha.',
+            strings.text(
+              'Alteração de senha só está disponível para contas com e-mail e senha.',
+              en: 'Password changes are only available for email and password accounts.',
+              es: 'El cambio de contraseña solo está disponible para cuentas con correo y contraseña.',
+            ),
           ),
         ),
       );
@@ -119,8 +125,12 @@ class _SettingsPageState extends State<SettingsPage> {
             color: SettingsPage.voidCyan.withValues(alpha: 0.35),
           ),
         ),
-        title: const Text(
-          'Alterar senha',
+        title: Text(
+          strings.text(
+            'Alterar senha',
+            en: 'Change password',
+            es: 'Cambiar contraseña',
+          ),
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         content: SingleChildScrollView(
@@ -131,9 +141,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 controller: atualCtrl,
                 obscureText: true,
                 style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Senha atual',
-                  labelStyle: TextStyle(color: Colors.white54),
+                decoration: InputDecoration(
+                  labelText: strings.text(
+                    'Senha atual',
+                    en: 'Current password',
+                    es: 'Contraseña actual',
+                  ),
+                  labelStyle: const TextStyle(color: Colors.white54),
                 ),
               ),
               const SizedBox(height: 12),
@@ -141,9 +155,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 controller: novaCtrl,
                 obscureText: true,
                 style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Nova senha',
-                  labelStyle: TextStyle(color: Colors.white54),
+                decoration: InputDecoration(
+                  labelText: strings.text(
+                    'Nova senha',
+                    en: 'New password',
+                    es: 'Nueva contraseña',
+                  ),
+                  labelStyle: const TextStyle(color: Colors.white54),
                 ),
               ),
               const SizedBox(height: 12),
@@ -151,9 +169,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 controller: confirmaCtrl,
                 obscureText: true,
                 style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Confirmar nova',
-                  labelStyle: TextStyle(color: Colors.white54),
+                decoration: InputDecoration(
+                  labelText: strings.text(
+                    'Confirmar nova',
+                    en: 'Confirm new password',
+                    es: 'Confirmar nueva',
+                  ),
+                  labelStyle: const TextStyle(color: Colors.white54),
                 ),
               ),
             ],
@@ -163,14 +185,14 @@ class _SettingsPageState extends State<SettingsPage> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
-              'Cancelar',
+              strings.text('Cancelar', en: 'Cancel', es: 'Cancelar'),
               style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              'Salvar',
+            child: Text(
+              strings.text('Salvar', en: 'Save', es: 'Guardar'),
               style: TextStyle(
                 color: SettingsPage.voidCyan,
                 fontWeight: FontWeight.w600,
@@ -198,8 +220,14 @@ class _SettingsPageState extends State<SettingsPage> {
     if (nova.length < 6) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A nova senha deve ter pelo menos 6 caracteres.'),
+          SnackBar(
+            content: Text(
+              strings.text(
+                'A nova senha deve ter pelo menos 6 caracteres.',
+                en: 'The new password must have at least 6 characters.',
+                es: 'La nueva contraseña debe tener al menos 6 caracteres.',
+              ),
+            ),
           ),
         );
       }
@@ -208,7 +236,15 @@ class _SettingsPageState extends State<SettingsPage> {
     if (nova != conf) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('A confirmação não coincide.')),
+          SnackBar(
+            content: Text(
+              strings.text(
+                'A confirmação não coincide.',
+                en: 'The confirmation does not match.',
+                es: 'La confirmación no coincide.',
+              ),
+            ),
+          ),
         );
       }
       return;
@@ -219,21 +255,44 @@ class _SettingsPageState extends State<SettingsPage> {
       await user.reauthenticateWithCredential(cred);
       await user.updatePassword(nova);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Senha atualizada.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              strings.text(
+                'Senha atualizada.',
+                en: 'Password updated.',
+                es: 'Contraseña actualizada.',
+              ),
+            ),
+          ),
+        );
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Falha ao alterar a senha.')),
+          SnackBar(
+            content: Text(
+              e.message ??
+                  strings.text(
+                    'Falha ao alterar a senha.',
+                    en: 'Failed to change password.',
+                    es: 'No se pudo cambiar la contraseña.',
+                  ),
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Não foi possível alterar a senha agora.'),
+          SnackBar(
+            content: Text(
+              strings.text(
+                'Não foi possível alterar a senha agora.',
+                en: 'Could not change the password right now.',
+                es: 'No se pudo cambiar la contraseña ahora.',
+              ),
+            ),
           ),
         );
       }
@@ -241,6 +300,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _logout() async {
+    final strings = LocaleUiStrings.of(context);
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -251,26 +311,30 @@ class _SettingsPageState extends State<SettingsPage> {
             color: SettingsPage.voidCyan.withValues(alpha: 0.35),
           ),
         ),
-        title: const Text(
-          'Terminar sessão',
+        title: Text(
+          strings.text('Terminar sessão', en: 'Sign out', es: 'Cerrar sesión'),
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        content: const Text(
-          'Tem a certeza que pretende sair?',
+        content: Text(
+          strings.text(
+            'Tem a certeza que pretende sair?',
+            en: 'Are you sure you want to sign out?',
+            es: '¿Seguro que quieres cerrar sesión?',
+          ),
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
-              'Cancelar',
+              strings.text('Cancelar', en: 'Cancel', es: 'Cancelar'),
               style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              'Sair',
+            child: Text(
+              strings.text('Sair', en: 'Sign out', es: 'Salir'),
               style: TextStyle(
                 color: Color(0xFFFF6B6B),
                 fontWeight: FontWeight.w600,
@@ -294,8 +358,14 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Não foi possível sair agora. Tente novamente.'),
+          SnackBar(
+            content: Text(
+              strings.text(
+                'Não foi possível sair agora. Tente novamente.',
+                en: 'Could not sign out right now. Try again.',
+                es: 'No se pudo cerrar sesión ahora. Inténtalo de nuevo.',
+              ),
+            ),
           ),
         );
       }
@@ -324,9 +394,10 @@ class _SettingsPageState extends State<SettingsPage> {
     final accentColor = scheme.primary;
     final successColor = scheme.secondary;
     final dividerColor = scheme.outlineVariant.withValues(alpha: 0.45);
+    final strings = LocaleUiStrings.of(context);
     final user = FirebaseAuth.instance.currentUser;
     final userEmail = user?.email;
-    final email = userEmail ?? 'Sem sessão iniciada';
+    final email = userEmail ?? strings.settingsNoSession;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -335,7 +406,7 @@ class _SettingsPageState extends State<SettingsPage> {
         elevation: 0,
         foregroundColor: textColor,
         title: Text(
-          'Definições',
+          strings.settingsTitle,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         iconTheme: IconThemeData(color: accentColor),
@@ -343,7 +414,7 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         children: [
-          _secTitle('Perfil'),
+          _secTitle(strings.settingsProfile),
           const SizedBox(height: 8),
           ListTile(
             contentPadding: EdgeInsets.zero,
@@ -378,11 +449,19 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: Icon(Icons.login_rounded, color: successColor),
               title: Text(
-                'Iniciar sessão',
+                strings.text(
+                  'Iniciar sessão',
+                  en: 'Sign in',
+                  es: 'Iniciar sesión',
+                ),
                 style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
-                'Ligue Google ou e-mail para sincronizar o perfil e dados na nuvem.',
+                strings.text(
+                  'Ligue Google ou e-mail para sincronizar o perfil e dados na nuvem.',
+                  en: 'Connect Google or email to sync your profile and data in the cloud.',
+                  es: 'Conecta Google o correo para sincronizar tu perfil y datos en la nube.',
+                ),
                 style: TextStyle(color: mutedColor, fontSize: 12),
               ),
               trailing: _chevron,
@@ -393,13 +472,25 @@ class _SettingsPageState extends State<SettingsPage> {
           ListTile(
             leading: Icon(Icons.lock_outline_rounded, color: accentColor),
             title: Text(
-              'Alterar palavra-passe',
+              strings.text(
+                'Alterar palavra-passe',
+                en: 'Change password',
+                es: 'Cambiar contraseña',
+              ),
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               _podeAlterarSenha
-                  ? 'Atualizar palavra-passe da conta'
-                  : 'Indisponível para login só com Google',
+                  ? strings.text(
+                      'Atualizar palavra-passe da conta',
+                      en: 'Update the account password',
+                      es: 'Actualizar la contraseña de la cuenta',
+                    )
+                  : strings.text(
+                      'Indisponível para login só com Google',
+                      en: 'Unavailable for Google-only sign-in',
+                      es: 'No disponible para inicio solo con Google',
+                    ),
               style: TextStyle(color: mutedColor, fontSize: 12),
             ),
             trailing: _chevron,
@@ -413,11 +504,25 @@ class _SettingsPageState extends State<SettingsPage> {
                 color: successColor,
               ),
               title: Text(
-                'Monitoramento por notificações',
+                strings.text(
+                  'Monitoramento por notificações',
+                  en: 'Notification monitoring',
+                  es: 'Monitoreo por notificaciones',
+                ),
                 style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
-                'Permissões, diagnóstico de leitura e bateria',
+                _isDeveloperAccount
+                    ? strings.text(
+                        'Permissões, diagnóstico de leitura e bateria',
+                        en: 'Permissions, reading diagnostics, and battery',
+                        es: 'Permisos, diagnóstico de lectura y batería',
+                      )
+                    : strings.text(
+                        'Permissões, privacidade e bateria',
+                        en: 'Permissions, privacy, and battery',
+                        es: 'Permisos, privacidad y batería',
+                      ),
                 style: TextStyle(color: mutedColor, fontSize: 12),
               ),
               trailing: _chevron,
@@ -429,7 +534,13 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ],
           Divider(height: 24, color: dividerColor),
-          _secTitle('Brilho (Material)'),
+          _secTitle(
+            strings.text(
+              'Brilho (Material)',
+              en: 'Brightness (Material)',
+              es: 'Brillo (Material)',
+            ),
+          ),
           const SizedBox(height: 4),
           ListTile(
             leading: Icon(
@@ -439,11 +550,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   : mutedColor,
             ),
             title: Text(
-              'Seguir sistema',
+              strings.text(
+                'Seguir sistema',
+                en: 'Follow system',
+                es: 'Seguir sistema',
+              ),
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
-              'Usar claro ou escuro conforme o SO',
+              strings.text(
+                'Usar claro ou escuro conforme o SO',
+                en: 'Use light or dark according to the OS',
+                es: 'Usar claro u oscuro según el sistema',
+              ),
               style: TextStyle(color: mutedColor, fontSize: 12),
             ),
             onTap: () => brightnessTheme.setThemeMode(ThemeMode.system),
@@ -456,11 +575,15 @@ class _SettingsPageState extends State<SettingsPage> {
                   : mutedColor,
             ),
             title: Text(
-              'Claro',
+              strings.text('Claro', en: 'Light', es: 'Claro'),
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
-              'Interface sempre clara',
+              strings.text(
+                'Interface sempre clara',
+                en: 'Always use light interface',
+                es: 'Interfaz siempre clara',
+              ),
               style: TextStyle(color: mutedColor, fontSize: 12),
             ),
             onTap: () => brightnessTheme.setThemeMode(ThemeMode.light),
@@ -473,17 +596,27 @@ class _SettingsPageState extends State<SettingsPage> {
                   : mutedColor,
             ),
             title: Text(
-              'Escuro',
+              strings.text('Escuro', en: 'Dark', es: 'Oscuro'),
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
-              'Interface sempre escura',
+              strings.text(
+                'Interface sempre escura',
+                en: 'Always use dark interface',
+                es: 'Interfaz siempre oscura',
+              ),
               style: TextStyle(color: mutedColor, fontSize: 12),
             ),
             onTap: () => brightnessTheme.setThemeMode(ThemeMode.dark),
           ),
           Divider(height: 24, color: dividerColor),
-          _secTitle('Aparência (Void)'),
+          _secTitle(
+            strings.text(
+              'Aparência (Void)',
+              en: 'Appearance (Void)',
+              es: 'Apariencia (Void)',
+            ),
+          ),
           const SizedBox(height: 4),
           ...AppThemeMode.values.map((mode) {
             final premiumOk = subscription.hasUnlockedPremium;
@@ -503,15 +636,19 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               subtitle: Text(
                 locked
-                    ? 'Premium · toque para ver planos'
-                    : mode.settingsSubtitle,
+                    ? strings.text(
+                        'Premium · toque para ver planos',
+                        en: 'Premium · tap to view plans',
+                        es: 'Premium · toca para ver planes',
+                      )
+                    : mode.settingsSubtitleText(strings),
                 style: TextStyle(color: mutedColor, fontSize: 12),
               ),
               onTap: () => _definirTema(mode, theme),
             );
           }),
           Divider(height: 24, color: dividerColor),
-          _secTitle('Idioma e moeda'),
+          _secTitle(strings.settingsLanguageAndCurrency),
           ListenableBuilder(
             listenable: Listenable.merge([
               LocaleController.instance,
@@ -534,7 +671,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: Icon(Icons.language, color: accentColor),
                     title: Text(
-                      'Idioma da app',
+                      strings.settingsAppLanguage,
                       style: TextStyle(
                         color: textColor,
                         fontWeight: FontWeight.w600,
@@ -542,7 +679,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     subtitle: Text(
                       languageUsesFallback
-                          ? '${LocaleController.languageLabel(selectableLanguageCode)} · textos em inglês'
+                          ? strings.text(
+                              '${LocaleController.languageLabel(selectableLanguageCode)} · textos em inglês',
+                              en: '${LocaleController.languageLabel(selectableLanguageCode)} · English fallback',
+                              es: '${LocaleController.languageLabel(selectableLanguageCode)} · textos en inglés',
+                            )
                           : LocaleController.languageLabel(
                               selectableLanguageCode,
                             ),
@@ -558,7 +699,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: Icon(Icons.payments_outlined, color: successColor),
                     title: Text(
-                      'Moeda de exibição',
+                      strings.settingsDisplayCurrency,
                       style: TextStyle(
                         color: textColor,
                         fontWeight: FontWeight.w600,
@@ -580,7 +721,9 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
           Divider(height: 24, color: dividerColor),
-          _secTitle('Assinatura'),
+          _secTitle(
+            strings.text('Assinatura', en: 'Subscription', es: 'Suscripción'),
+          ),
           ListTile(
             leading: Icon(
               subscription.isPremium
@@ -589,7 +732,11 @@ class _SettingsPageState extends State<SettingsPage> {
               color: subscription.isPremium ? successColor : accentColor,
             ),
             title: Text(
-              'Estado Premium',
+              strings.text(
+                'Estado Premium',
+                en: 'Premium status',
+                es: 'Estado Premium',
+              ),
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Padding(
@@ -604,7 +751,11 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Assinante activo',
+                          strings.text(
+                            'Assinante activo',
+                            en: 'Active subscriber',
+                            es: 'Suscriptor activo',
+                          ),
                           style: TextStyle(
                             color: successColor.withValues(alpha: 0.92),
                             fontWeight: FontWeight.w600,
@@ -617,7 +768,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Plano Free · anúncios activos',
+                          strings.text(
+                            'Plano Free · anúncios activos',
+                            en: 'Free plan · ads active',
+                            es: 'Plan Free · anuncios activos',
+                          ),
                           style: TextStyle(color: mutedColor, fontSize: 13),
                         ),
                         const SizedBox(height: 10),
@@ -644,8 +799,12 @@ class _SettingsPageState extends State<SettingsPage> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: const Text(
-                              'Upgrade para Pro',
+                            child: Text(
+                              strings.text(
+                                'Upgrade para Pro',
+                                en: 'Upgrade to Pro',
+                                es: 'Mejorar a Pro',
+                              ),
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.3,
@@ -662,11 +821,19 @@ class _SettingsPageState extends State<SettingsPage> {
           ListTile(
             leading: Icon(Icons.explore_outlined, color: accentColor),
             title: Text(
-              'Ver tour novamente',
+              strings.text(
+                'Ver tour novamente',
+                en: 'View tour again',
+                es: 'Ver tour de nuevo',
+              ),
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
-              'O guia da home Mentor volta a iniciar na próxima vez que abrir esse painel.',
+              strings.text(
+                'O guia da home Mentor volta a iniciar na próxima vez que abrir esse painel.',
+                en: 'The Mentor home guide will start again the next time you open that panel.',
+                es: 'La guía de la home Mentor se iniciará de nuevo la próxima vez que abras ese panel.',
+              ),
               style: TextStyle(color: mutedColor, fontSize: 13),
             ),
             trailing: _chevron,
@@ -674,9 +841,13 @@ class _SettingsPageState extends State<SettingsPage> {
               await UserPersonaService.instance.resetGuidedTourForReplay();
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text(
-                    'Tour reactivado. Abrimos a home Mentor — use Seguinte ou Saltar no guia.',
+                    strings.text(
+                      'Tour reactivado. Abrimos a home Mentor — use Seguinte ou Saltar no guia.',
+                      en: 'Tour reactivated. We opened Mentor home — use Next or Skip in the guide.',
+                      es: 'Tour reactivado. Abrimos la home Mentor — usa Siguiente o Saltar en la guía.',
+                    ),
                   ),
                 ),
               );
@@ -686,11 +857,19 @@ class _SettingsPageState extends State<SettingsPage> {
           ListTile(
             leading: Icon(Icons.waving_hand_outlined, color: accentColor),
             title: Text(
-              'Introdução ao app',
+              strings.text(
+                'Introdução ao app',
+                en: 'App introduction',
+                es: 'Introducción a la app',
+              ),
               style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
-              'Mensagem do Mentor: apoio, calma, regra das 3 perguntas e por que preencher os dados.',
+              strings.text(
+                'Mensagem do Mentor: apoio, calma, regra das 3 perguntas e por que preencher os dados.',
+                en: 'Mentor message: support, calm, the 3-question rule, and why filling in data matters.',
+                es: 'Mensaje del Mentor: apoyo, calma, regla de las 3 preguntas y por qué completar los datos.',
+              ),
               style: TextStyle(color: mutedColor, fontSize: 13),
             ),
             trailing: _chevron,
@@ -706,15 +885,23 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 24),
           ListTile(
             leading: const Icon(Icons.logout_rounded, color: Color(0xFFFF6B6B)),
-            title: const Text(
-              'Terminar sessão',
+            title: Text(
+              strings.text(
+                'Terminar sessão',
+                en: 'Sign out',
+                es: 'Cerrar sesión',
+              ),
               style: TextStyle(
                 color: Color(0xFFFF6B6B),
                 fontWeight: FontWeight.w600,
               ),
             ),
             subtitle: Text(
-              'Sair deste dispositivo',
+              strings.text(
+                'Sair deste dispositivo',
+                en: 'Sign out on this device',
+                es: 'Salir de este dispositivo',
+              ),
               style: TextStyle(color: mutedColor, fontSize: 13),
             ),
             trailing: _chevron,

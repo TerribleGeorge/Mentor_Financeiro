@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/navigation/post_login_navigation.dart';
 import '../services/firebase_service.dart';
+import '../services/locale_ui_strings.dart';
 
 class QuestionarioPage extends StatefulWidget {
   const QuestionarioPage({super.key});
@@ -20,17 +21,46 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
 
   static const List<String> _perfis = ["Conservador", "Moderado", "Arrojado"];
 
+  String _perfilLabel(BuildContext context, String perfil) {
+    final strings = LocaleUiStrings.of(context);
+    return switch (perfil) {
+      'Conservador' => strings.text(
+        'Conservador',
+        en: 'Conservative',
+        es: 'Conservador',
+      ),
+      'Moderado' => strings.text('Moderado', en: 'Moderate', es: 'Moderado'),
+      'Arrojado' => strings.text('Arrojado', en: 'Bold', es: 'Arriesgado'),
+      _ => perfil,
+    };
+  }
+
   Future<void> _salvar() async {
+    final strings = LocaleUiStrings.of(context);
     if (_profissao.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Preencha sua profissão")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            strings.text(
+              'Preencha sua profissão',
+              en: 'Enter your profession',
+              es: 'Completa tu profesión',
+            ),
+          ),
+        ),
+      );
       return;
     }
     if (_perfilInvestidor.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Selecione um perfil de investidor (Conservador, Moderado ou Arrojado).'),
+        SnackBar(
+          content: Text(
+            strings.text(
+              'Selecione um perfil de investidor (Conservador, Moderado ou Arrojado).',
+              en: 'Select an investor profile (Conservative, Moderate, or Bold).',
+              es: 'Selecciona un perfil de inversor (Conservador, Moderado o Arriesgado).',
+            ),
+          ),
         ),
       );
       return;
@@ -76,9 +106,13 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
         );
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Perfil salvo neste aparelho. Entre em uma conta para sincronizar.',
+              strings.text(
+                'Perfil salvo neste aparelho. Entre em uma conta para sincronizar.',
+                en: 'Profile saved on this device. Sign in to sync.',
+                es: 'Perfil guardado en este dispositivo. Inicia sesión para sincronizar.',
+              ),
             ),
           ),
         );
@@ -87,9 +121,13 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
       debugPrint('QuestionarioPage._salvar: $e\n$st');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Não foi possível guardar o perfil. Verifique a ligação à internet e tente novamente.',
+              strings.text(
+                'Não foi possível guardar o perfil. Verifique a ligação à internet e tente novamente.',
+                en: 'Could not save the profile. Check your internet connection and try again.',
+                es: 'No se pudo guardar el perfil. Revisa tu conexión a internet e inténtalo de nuevo.',
+              ),
             ),
           ),
         );
@@ -105,6 +143,7 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = LocaleUiStrings.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       body: SafeArea(
@@ -114,8 +153,12 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              const Text(
-                "Conte-nos sobre você",
+              Text(
+                strings.text(
+                  'Conte-nos sobre você',
+                  en: 'Tell us about yourself',
+                  es: 'Cuéntanos sobre ti',
+                ),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,
@@ -124,7 +167,11 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
               ),
               const SizedBox(height: 12),
               Text(
-                "Essas informações nos ajudam a personalizar sua experiência.",
+                strings.text(
+                  'Essas informações nos ajudam a personalizar sua experiência.',
+                  en: 'This information helps us personalize your experience.',
+                  es: 'Esta información nos ayuda a personalizar tu experiencia.',
+                ),
                 style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
               const SizedBox(height: 40),
@@ -132,8 +179,16 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                 onChanged: (v) => _profissao = v,
                 style: const TextStyle(color: Colors.white, fontSize: 16),
                 decoration: InputDecoration(
-                  labelText: "Qual é a sua profissão?",
-                  hintText: "Ex: Desenvolvedor, Professor, Empresário...",
+                  labelText: strings.text(
+                    'Qual é a sua profissão?',
+                    en: 'What is your profession?',
+                    es: '¿Cuál es tu profesión?',
+                  ),
+                  hintText: strings.text(
+                    'Ex: Desenvolvedor, Professor, Empresário...',
+                    en: 'Example: Developer, Teacher, Entrepreneur...',
+                    es: 'Ej.: Desarrollador, Profesor, Empresario...',
+                  ),
                   labelStyle: const TextStyle(color: Colors.white70),
                   hintStyle: TextStyle(color: Colors.white38),
                   filled: true,
@@ -153,8 +208,12 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                "Qual é o seu perfil de investidor?",
+              Text(
+                strings.text(
+                  'Qual é o seu perfil de investidor?',
+                  en: 'What is your investor profile?',
+                  es: '¿Cuál es tu perfil de inversor?',
+                ),
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 16,
@@ -198,7 +257,7 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                perfil,
+                                _perfilLabel(context, perfil),
                                 style: TextStyle(
                                   color: isSelected
                                       ? Colors.white
@@ -221,8 +280,16 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                 style: const TextStyle(color: Colors.white, fontSize: 16),
                 maxLines: 2,
                 decoration: InputDecoration(
-                  labelText: "Quais são os seus objetivos financeiros?",
-                  hintText: "Ex: Aposentar cedo, comprar casa...",
+                  labelText: strings.text(
+                    'Quais são os seus objetivos financeiros?',
+                    en: 'What are your financial goals?',
+                    es: '¿Cuáles son tus objetivos financieros?',
+                  ),
+                  hintText: strings.text(
+                    'Ex: Aposentar cedo, comprar casa...',
+                    en: 'Example: Retire early, buy a home...',
+                    es: 'Ej.: Jubilarme temprano, comprar casa...',
+                  ),
                   labelStyle: const TextStyle(color: Colors.white70),
                   hintStyle: TextStyle(color: Colors.white38),
                   filled: true,
@@ -260,8 +327,12 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                           height: 24,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text(
-                          "Continuar",
+                      : Text(
+                          strings.text(
+                            'Continuar',
+                            en: 'Continue',
+                            es: 'Continuar',
+                          ),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

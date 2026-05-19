@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../pages/paywall_screen.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/subscription_provider.dart';
 
 /// Modal para o tema Cyber: atalho para paywall / Google Play Billing.
@@ -16,16 +17,27 @@ abstract final class PremiumCyberPaywallDialog {
         return Consumer<SubscriptionProvider>(
           builder: (context, sub, _) {
             final scheme = Theme.of(context).colorScheme;
+            final strings = LocaleUiStrings.of(context);
             return AlertDialog(
               icon: Icon(Icons.hub_outlined, color: scheme.primary, size: 32),
-              title: const Text('Tema Cyber — Premium'),
+              title: Text(
+                strings.text(
+                  'Tema Cyber — Premium',
+                  en: 'Cyber Theme — Premium',
+                  es: 'Tema Cyber — Premium',
+                ),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'O tema Cyber faz parte da assinatura Premium. A subscrição é feita pela Google Play dentro do app.',
+                      strings.text(
+                        'O tema Cyber faz parte da assinatura Premium. A subscrição é feita pela Google Play dentro do app.',
+                        en: 'The Cyber theme is part of the Premium subscription. Subscription is handled by Google Play inside the app.',
+                        es: 'El tema Cyber forma parte de la suscripción Premium. La suscripción se realiza por Google Play dentro de la app.',
+                      ),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     if (sub.isLoading) ...[
@@ -60,7 +72,13 @@ abstract final class PremiumCyberPaywallDialog {
                               }
                             },
                       icon: const Icon(Icons.workspace_premium_outlined),
-                      label: const Text('Assinar mensal'),
+                      label: Text(
+                        strings.text(
+                          'Assinar mensal',
+                          en: 'Subscribe monthly',
+                          es: 'Suscribir mensual',
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 8),
                     TextButton(
@@ -74,7 +92,13 @@ abstract final class PremiumCyberPaywallDialog {
                                 ),
                               );
                             },
-                      child: const Text('Ver ecrã de assinatura'),
+                      child: Text(
+                        strings.text(
+                          'Ver ecrã de assinatura',
+                          en: 'View subscription screen',
+                          es: 'Ver pantalla de suscripción',
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -84,7 +108,9 @@ abstract final class PremiumCyberPaywallDialog {
                   onPressed: sub.isLoading
                       ? null
                       : () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Fechar'),
+                  child: Text(
+                    strings.text('Fechar', en: 'Close', es: 'Cerrar'),
+                  ),
                 ),
               ],
             );

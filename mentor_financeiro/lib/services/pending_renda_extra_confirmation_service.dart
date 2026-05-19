@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'daily_spend_limit_notifier.dart';
 import 'finance_config_signals.dart';
+import 'locale_ui_strings.dart';
 import 'localization_service.dart';
 import 'renda_extra_notification_increment.dart';
 
@@ -20,8 +21,7 @@ class PendingRendaExtraConfirmationService {
     required String uid,
     required String packageName,
     required int timestamp,
-  }) =>
-      '$uid|$packageName|$timestamp';
+  }) => '$uid|$packageName|$timestamp';
 
   static Future<bool> enqueueIfNew({
     required String uid,
@@ -30,7 +30,11 @@ class PendingRendaExtraConfirmationService {
     required double valor,
     required String resumo,
   }) async {
-    final id = _itemId(uid: uid, packageName: packageName, timestamp: timestamp);
+    final id = _itemId(
+      uid: uid,
+      packageName: packageName,
+      timestamp: timestamp,
+    );
     final prefs = await SharedPreferences.getInstance();
     final list = await _readList(prefs);
     if (list.any((e) => e['id'] == id)) return false;
@@ -40,12 +44,7 @@ class PendingRendaExtraConfirmationService {
       snippet = '${snippet.substring(0, 320)}…';
     }
 
-    list.insert(0, {
-      'id': id,
-      'uid': uid,
-      'valor': valor,
-      'resumo': snippet,
-    });
+    list.insert(0, {'id': id, 'uid': uid, 'valor': valor, 'resumo': snippet});
     while (list.length > _maxItems) {
       list.removeLast();
     }
@@ -79,28 +78,40 @@ class PendingRendaExtraConfirmationService {
         barrierDismissible: false,
         builder: (ctx) {
           final scheme = Theme.of(ctx).colorScheme;
+          final strings = LocaleUiStrings.of(ctx);
           return AlertDialog(
-            title: const Text('Renda extra'),
+            title: Text(
+              strings.text(
+                'Renda extra',
+                en: 'Extra income',
+                es: 'Ingreso extra',
+              ),
+            ),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Reconheci que você recebeu um valor na sua conta. '
-                    'Devo registrar como renda extra?',
-                    style: TextStyle(
-                      color: scheme.onSurface,
-                      height: 1.35,
+                    strings.text(
+                      'Reconheci que você recebeu um valor na sua conta. '
+                      'Devo registrar como renda extra?',
+                      en:
+                          'I detected that you received money in your account. '
+                          'Should I record it as extra income?',
+                      es:
+                          'Detecté que recibiste un valor en tu cuenta. '
+                          '¿Debo registrarlo como ingreso extra?',
                     ),
+                    style: TextStyle(color: scheme.onSurface, height: 1.35),
                   ),
                   const SizedBox(height: 14),
                   Text(
                     LocalizationService.formatCurrency(valor),
                     style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: scheme.primary,
-                        ),
+                      fontWeight: FontWeight.w800,
+                      color: scheme.primary,
+                    ),
                   ),
                   if (resumo.isNotEmpty) ...[
                     const SizedBox(height: 10),
@@ -121,11 +132,11 @@ class PendingRendaExtraConfirmationService {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Não'),
+                child: Text(strings.text('Não', en: 'No', es: 'No')),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Sim'),
+                child: Text(strings.text('Sim', en: 'Yes', es: 'Sí')),
               ),
             ],
           );
@@ -146,7 +157,9 @@ class PendingRendaExtraConfirmationService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> _readList(SharedPreferences prefs) async {
+  static Future<List<Map<String, dynamic>>> _readList(
+    SharedPreferences prefs,
+  ) async {
     final raw = prefs.getString(_prefsKey);
     if (raw == null || raw.isEmpty) return <Map<String, dynamic>>[];
     try {

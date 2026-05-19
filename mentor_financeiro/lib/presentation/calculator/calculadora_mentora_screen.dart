@@ -16,6 +16,7 @@ import '../../data/services/firebase_data_service.dart';
 import '../../domain/finance/compound_interest_calculator.dart';
 import '../../domain/mentorship/mentorship_engine.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/locale_ui_strings.dart';
 import '../../services/localization_service.dart';
 import '../../services/user_persona_service.dart';
 import '../../theme/mentor_adaptive_visuals.dart';
@@ -123,11 +124,14 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
         languageCode: lang,
       );
       if (kDebugMode) {
-        final ctxJson = context.read<UserPersonaService>().compoundLlmContext(
+        final ctxJson = context
+            .read<UserPersonaService>()
+            .compoundLlmContext(
               result: result,
               heuristicAdvice: advice,
               languageCode: lang,
-            ).toJson();
+            )
+            .toJson();
         debugPrint('MentorLlmContext (compound): $ctxJson');
       }
       setState(() {
@@ -167,8 +171,14 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Simulação salva na sua conta (nuvem).'),
+        SnackBar(
+          content: Text(
+            LocaleUiStrings.of(context).text(
+              'Simulação salva na sua conta (nuvem).',
+              en: 'Simulation saved to your cloud account.',
+              es: 'Simulación guardada en tu cuenta en la nube.',
+            ),
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -206,10 +216,7 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
         elevation: 0,
         title: Text(
           l10n.compoundCalculatorTitle,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -311,7 +318,10 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
                           child: Text(
                             'Após calcular, o gráfico compara o que você investiu com os juros acumulados.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: va.secondaryTextColor, height: 1.35),
+                            style: TextStyle(
+                              color: va.secondaryTextColor,
+                              height: 1.35,
+                            ),
                           ),
                         ),
                       ),
@@ -401,7 +411,9 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
               ),
               backgroundColor: chipBg,
               side: BorderSide(
-                color: isSel ? visual.accent : va.textColor.withValues(alpha: 0.24),
+                color: isSel
+                    ? visual.accent
+                    : va.textColor.withValues(alpha: 0.24),
               ),
             );
           }).toList(),
@@ -433,7 +445,9 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
           labelText: label,
           hintText: hint,
           labelStyle: TextStyle(color: va.secondaryTextColor),
-          hintStyle: TextStyle(color: va.secondaryTextColor.withValues(alpha: 0.45)),
+          hintStyle: TextStyle(
+            color: va.secondaryTextColor.withValues(alpha: 0.45),
+          ),
           prefixIcon: Icon(icon, color: visual.accent),
           filled: true,
           fillColor: fill,
@@ -485,7 +499,8 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
             if (states.contains(WidgetState.selected)) {
               return visual.accent;
             }
-            return Theme.of(context).cardTheme.color ?? context.mentorAdaptive.widgetColor;
+            return Theme.of(context).cardTheme.color ??
+                context.mentorAdaptive.widgetColor;
           }),
         ),
       ),
@@ -526,7 +541,8 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
             if (states.contains(WidgetState.selected)) {
               return visual.accent;
             }
-            return Theme.of(context).cardTheme.color ?? context.mentorAdaptive.widgetColor;
+            return Theme.of(context).cardTheme.color ??
+                context.mentorAdaptive.widgetColor;
           }),
         ),
       ),
@@ -556,7 +572,9 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
           l10n.compoundSummaryRealGain,
           LocalizationService.formatCurrency(r.realGain),
           Icons.shopping_cart_outlined,
-          valueColor: r.realGain >= 0 ? const Color(0xFF34D399) : const Color(0xFFF87171),
+          valueColor: r.realGain >= 0
+              ? const Color(0xFF34D399)
+              : const Color(0xFFF87171),
         ),
       ],
     );
@@ -635,7 +653,9 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
           rightTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -644,7 +664,9 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(right: 6),
                   child: Text(
-                    value == 0 ? '0' : LocalizationService.formatCurrency(value),
+                    value == 0
+                        ? '0'
+                        : LocalizationService.formatCurrency(value),
                     style: TextStyle(
                       color: va.secondaryTextColor.withValues(alpha: 0.65),
                       fontSize: 9,
@@ -768,7 +790,9 @@ class _CalculadoraMentoraScreenState extends State<CalculadoraMentoraScreen> {
           const SizedBox(height: 14),
           ..._advice.asMap().entries.map((e) {
             return Padding(
-              padding: EdgeInsets.only(bottom: e.key == _advice.length - 1 ? 0 : 12),
+              padding: EdgeInsets.only(
+                bottom: e.key == _advice.length - 1 ? 0 : 12,
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

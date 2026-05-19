@@ -10,6 +10,7 @@ import '../core/navigation/mentor_navigation.dart';
 import '../services/subscription_provider.dart';
 import '../services/mentoria_service.dart';
 import '../services/ad_manager_service.dart';
+import '../services/locale_ui_strings.dart';
 import '../theme/classic_mode_style.dart';
 import '../services/finance_config_signals.dart';
 import 'adicionar_transacao_page.dart';
@@ -80,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final strings = LocaleUiStrings.of(context);
     final subscription = context.watch<SubscriptionProvider>();
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -91,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            tooltip: 'Definições',
+            tooltip: strings.settingsTitle,
             icon: Icon(Icons.settings_outlined, color: scheme.primary),
             onPressed: () {
               Navigator.of(context).push<void>(
@@ -135,7 +137,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Olá, $_nomeUsuario',
+                                strings.text(
+                                  'Olá, $_nomeUsuario',
+                                  en: 'Hello, $_nomeUsuario',
+                                  es: 'Hola, $_nomeUsuario',
+                                ),
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.88),
                                   fontSize: 14,
@@ -147,7 +153,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Dashboard',
+                                strings.text(
+                                  'Dashboard',
+                                  en: 'Dashboard',
+                                  es: 'Panel',
+                                ),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 22,
@@ -208,7 +218,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
-                                      'Sem sessão na nuvem. Inicie sessão para guardar o perfil e sincronizar entre dispositivos.',
+                                      strings.text(
+                                        'Sem sessão na nuvem. Inicie sessão para guardar o perfil e sincronizar entre dispositivos.',
+                                        en: 'No cloud session. Sign in to save your profile and sync across devices.',
+                                        es: 'Sin sesión en la nube. Inicia sesión para guardar tu perfil y sincronizar entre dispositivos.',
+                                      ),
                                       style: TextStyle(
                                         color: Colors.white.withValues(
                                           alpha: 0.9,
@@ -228,7 +242,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                       context,
                                       AppRoutes.login,
                                     ),
-                                    child: const Text('Entrar'),
+                                    child: Text(
+                                      strings.text(
+                                        'Entrar',
+                                        en: 'Sign in',
+                                        es: 'Entrar',
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -311,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const CurrencyRatesHomeCard(),
                     const SizedBox(height: 24),
                     Text(
-                      'Recursos',
+                      strings.text('Recursos', en: 'Features', es: 'Recursos'),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -328,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _buildQuickAction(
                             context,
                             Icons.pie_chart,
-                            'Gráficos',
+                            strings.navCharts,
                             const Color(0xFF26DE81),
                             () {
                               mentorPushNamed(context, AppRoutes.graficos);
@@ -340,7 +360,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _buildQuickAction(
                             context,
                             Icons.history,
-                            'Histórico',
+                            strings.navHistory,
                             const Color(0xFFFECA57),
                             () {
                               mentorPushNamed(context, AppRoutes.historico);
@@ -410,10 +430,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// Rótulo de secção para a grelha de atalhos da home (modo clássico).
-  Widget _homeFeatureSectionTitle(
-    BuildContext context,
-    String title,
-  ) {
+  Widget _homeFeatureSectionTitle(BuildContext context, String title) {
     return Text(
       title,
       style: TextStyle(
@@ -436,6 +453,7 @@ class _HomeScreenState extends State<HomeScreen> {
       required Color color,
       required VoidCallback onTap,
       bool premium = false,
+
       /// Quando true, o card estica à célula (ex.: linha Premium com [Expanded]).
       bool expand = false,
     }) {
@@ -447,10 +465,7 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFF0D1118),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: color.withValues(alpha: 0.78),
-            width: 1.2,
-          ),
+          border: Border.all(color: color.withValues(alpha: 0.78), width: 1.2),
           boxShadow: [
             BoxShadow(
               color: color.withValues(alpha: 0.14),
@@ -552,12 +567,23 @@ class _HomeScreenState extends State<HomeScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _homeFeatureSectionTitle(context, 'Organização e registo'),
+            _homeFeatureSectionTitle(
+              context,
+              LocaleUiStrings.of(context).text(
+                'Organização e registo',
+                en: 'Organization and records',
+                es: 'Organización y registro',
+              ),
+            ),
             const SizedBox(height: 10),
             featureGrid2x2(<Widget>[
               tile(
                 icon: Icons.tune,
-                label: 'Renda e Gastos Fixos',
+                label: LocaleUiStrings.of(context).text(
+                  'Renda e Gastos Fixos',
+                  en: 'Income and Fixed Expenses',
+                  es: 'Ingresos y gastos fijos',
+                ),
                 color: const Color(0xFF00D9FF),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -567,7 +593,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               tile(
                 icon: Icons.edit_note,
-                label: 'Registro de Gastos',
+                label: LocaleUiStrings.of(context).text(
+                  'Registro de Gastos',
+                  en: 'Expense Entry',
+                  es: 'Registro de gastos',
+                ),
                 color: const Color(0xFF26DE81),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -577,13 +607,21 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               tile(
                 icon: Icons.flag,
-                label: 'Simulador de Metas',
+                label: LocaleUiStrings.of(context).text(
+                  'Simulador de Metas',
+                  en: 'Goals Simulator',
+                  es: 'Simulador de metas',
+                ),
                 color: const Color(0xFFFECA57),
                 onTap: () => mentorPushNamed(context, AppRoutes.metas),
               ),
               tile(
                 icon: Icons.menu_book,
-                label: 'Conteúdo Educacional',
+                label: LocaleUiStrings.of(context).text(
+                  'Conteúdo Educacional',
+                  en: 'Educational Content',
+                  es: 'Contenido educativo',
+                ),
                 color: const Color(0xFF6366F1),
                 onTap: () => mentorPushNamed(context, AppRoutes.conhecimento),
               ),
@@ -594,7 +632,9 @@ class _HomeScreenState extends State<HomeScreen> {
             premiumRow3(<Widget>[
               tile(
                 icon: Icons.psychology_alt,
-                label: 'Mentoria',
+                label: LocaleUiStrings.of(
+                  context,
+                ).text('Mentoria', en: 'Mentoring', es: 'Mentoría'),
                 color: const Color(0xFFFF4D4D),
                 premium: true,
                 expand: true,
@@ -602,19 +642,31 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               tile(
                 icon: Icons.query_stats,
-                label: 'Análise Personalizada',
+                label: LocaleUiStrings.of(context).text(
+                  'Análise Personalizada',
+                  en: 'Personalized Analysis',
+                  es: 'Análisis personalizado',
+                ),
                 color: const Color(0xFF00D9FF),
                 premium: true,
                 expand: true,
                 onTap: () => mentorPushNamed(
                   context,
                   AppRoutes.relatorios,
-                  arguments: 'Análise Personalizada',
+                  arguments: LocaleUiStrings.of(context).text(
+                    'Análise Personalizada',
+                    en: 'Personalized Analysis',
+                    es: 'Análisis personalizado',
+                  ),
                 ),
               ),
               tile(
                 icon: Icons.auto_graph,
-                label: 'Estratégias Avançadas',
+                label: LocaleUiStrings.of(context).text(
+                  'Estratégias Avançadas',
+                  en: 'Advanced Strategies',
+                  es: 'Estrategias avanzadas',
+                ),
                 color: const Color(0xFF6366F1),
                 premium: true,
                 expand: true,

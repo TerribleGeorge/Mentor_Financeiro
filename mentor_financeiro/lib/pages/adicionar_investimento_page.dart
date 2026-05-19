@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/investimento_model.dart';
 import '../services/global_equity_quote_service.dart';
 import '../services/investment_category_provider.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/ticker_market_resolver.dart';
 
 /// Cadastro de posição com tipos filtrados por [InvestmentCategoryProvider]
@@ -79,7 +80,11 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Sem cotação para "${result.yahooSymbol}". Verifique o ticker.',
+            LocaleUiStrings.of(context).text(
+              'Sem cotação para "${result.yahooSymbol}". Verifique o ticker.',
+              en: 'No quote for "${result.yahooSymbol}". Check the ticker.',
+              es: 'Sin cotización para "${result.yahooSymbol}". Revisa el ticker.',
+            ),
           ),
         ),
       );
@@ -93,8 +98,14 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
     if (user == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Faça login para guardar o investimento.'),
+        SnackBar(
+          content: Text(
+            LocaleUiStrings.of(context).text(
+              'Faça login para guardar o investimento.',
+              en: 'Sign in to save the investment.',
+              es: 'Inicia sesión para guardar la inversión.',
+            ),
+          ),
         ),
       );
       return;
@@ -103,7 +114,15 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
     final valor = _parseValor(_valorController.text);
     if (valor <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Indique um valor maior que zero.')),
+        SnackBar(
+          content: Text(
+            LocaleUiStrings.of(context).text(
+              'Indique um valor maior que zero.',
+              en: 'Enter an amount greater than zero.',
+              es: 'Indica un valor mayor que cero.',
+            ),
+          ),
+        ),
       );
       return;
     }
@@ -143,17 +162,29 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Investimento registado.'),
-          backgroundColor: Color(0xFF26DE81),
+        SnackBar(
+          content: Text(
+            LocaleUiStrings.of(context).text(
+              'Investimento registado.',
+              en: 'Investment saved.',
+              es: 'Inversión registrada.',
+            ),
+          ),
+          backgroundColor: const Color(0xFF26DE81),
         ),
       );
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Não foi possível guardar agora. Tente novamente.'),
+        SnackBar(
+          content: Text(
+            LocaleUiStrings.of(context).text(
+              'Não foi possível guardar agora. Tente novamente.',
+              en: 'Could not save right now. Try again.',
+              es: 'No se pudo guardar ahora. Inténtalo de nuevo.',
+            ),
+          ),
         ),
       );
     } finally {
@@ -164,17 +195,30 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
   @override
   Widget build(BuildContext context) {
     final cat = context.watch<InvestmentCategoryProvider>();
+    final strings = LocaleUiStrings.of(context);
     final opcoes = cat.registrationCategories;
     final scheme = Theme.of(context).colorScheme;
 
     if (opcoes.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Novo investimento')),
-        body: const Center(
+        appBar: AppBar(
+          title: Text(
+            strings.text(
+              'Novo investimento',
+              en: 'New investment',
+              es: 'Nueva inversión',
+            ),
+          ),
+        ),
+        body: Center(
           child: Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Text(
-              'Nenhum tipo de investimento disponível para esta região.',
+              strings.text(
+                'Nenhum tipo de investimento disponível para esta região.',
+                en: 'No investment type is available for this region.',
+                es: 'No hay ningún tipo de inversión disponible para esta región.',
+              ),
             ),
           ),
         ),
@@ -187,7 +231,13 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Novo investimento'),
+        title: Text(
+          strings.text(
+            'Novo investimento',
+            en: 'New investment',
+            es: 'Nueva inversión',
+          ),
+        ),
         backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
@@ -198,8 +248,16 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Região da loja/conta: ${cat.effectiveCountryCode} · '
-                '${cat.isBrazilMarket ? "catálogo Brasil" : "catálogo global"}',
+                strings.text(
+                  'Região da loja/conta: ${cat.effectiveCountryCode} · '
+                  '${cat.isBrazilMarket ? "catálogo Brasil" : "catálogo global"}',
+                  en:
+                      'Store/account region: ${cat.effectiveCountryCode} · '
+                      '${cat.isBrazilMarket ? "Brazil catalog" : "global catalog"}',
+                  es:
+                      'Región de tienda/cuenta: ${cat.effectiveCountryCode} · '
+                      '${cat.isBrazilMarket ? "catálogo Brasil" : "catálogo global"}',
+                ),
                 style: TextStyle(
                   color: scheme.onSurface.withValues(alpha: 0.75),
                 ),
@@ -207,9 +265,11 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: validTipo,
-                decoration: const InputDecoration(
-                  labelText: 'Tipo',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: LocaleUiStrings.of(
+                    context,
+                  ).text('Tipo', en: 'Type', es: 'Tipo'),
+                  border: const OutlineInputBorder(),
                 ),
                 items: opcoes
                     .map(
@@ -226,11 +286,18 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
                 controller: _tickerController,
                 textCapitalization: TextCapitalization.characters,
                 decoration: InputDecoration(
-                  labelText: 'Ticker do ativo (opcional)',
+                  labelText: LocaleUiStrings.of(context).text(
+                    'Ticker do ativo (opcional)',
+                    en: 'Asset ticker (optional)',
+                    es: 'Ticker del activo (opcional)',
+                  ),
                   hintText: 'AAPL · MSFT · PETR4 · VALE3',
                   border: const OutlineInputBorder(),
-                  helperText:
-                      'Identifica automaticamente B3 (ex.: PETR4) vs NASDAQ/NYSE (ex.: AAPL).',
+                  helperText: LocaleUiStrings.of(context).text(
+                    'Identifica automaticamente B3 (ex.: PETR4) vs NASDAQ/NYSE (ex.: AAPL).',
+                    en: 'Automatically detects B3 (ex: PETR4) vs NASDAQ/NYSE (ex: AAPL).',
+                    es: 'Detecta automáticamente B3 (ej.: PETR4) vs NASDAQ/NYSE (ej.: AAPL).',
+                  ),
                   suffixIcon: _buscandoTicker
                       ? const Padding(
                           padding: EdgeInsets.all(12),
@@ -242,7 +309,11 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
                         )
                       : IconButton(
                           icon: const Icon(Icons.search),
-                          tooltip: 'Buscar cotação (Yahoo Finance)',
+                          tooltip: LocaleUiStrings.of(context).text(
+                            'Buscar cotação (Yahoo Finance)',
+                            en: 'Search quote (Yahoo Finance)',
+                            es: 'Buscar cotización (Yahoo Finance)',
+                          ),
                           onPressed: _lookupTicker,
                         ),
                 ),
@@ -280,23 +351,41 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Valor (BRL)',
+                decoration: InputDecoration(
+                  labelText: LocaleUiStrings.of(
+                    context,
+                  ).text('Valor (BRL)', en: 'Amount (BRL)', es: 'Valor (BRL)'),
                   hintText: '0,00',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   prefixText: 'R\$ ',
                 ),
                 validator: (s) {
                   if (s == null || s.trim().isEmpty) {
-                    return 'Informe o valor';
+                    return LocaleUiStrings.of(context).text(
+                      'Informe o valor',
+                      en: 'Enter the amount',
+                      es: 'Informa el valor',
+                    );
                   }
-                  if (_parseValor(s) <= 0) return 'Valor inválido';
+                  if (_parseValor(s) <= 0) {
+                    return LocaleUiStrings.of(context).text(
+                      'Valor inválido',
+                      en: 'Invalid amount',
+                      es: 'Valor inválido',
+                    );
+                  }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               ListTile(
-                title: const Text('Data de referência'),
+                title: Text(
+                  LocaleUiStrings.of(context).text(
+                    'Data de referência',
+                    en: 'Reference date',
+                    es: 'Fecha de referencia',
+                  ),
+                ),
                 subtitle: Text(
                   '${_data.day.toString().padLeft(2, '0')}/${_data.month.toString().padLeft(2, '0')}/${_data.year}',
                 ),
@@ -315,9 +404,13 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
               TextFormField(
                 controller: _notasController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Notas (opcional)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: strings.text(
+                    'Notas (opcional)',
+                    en: 'Notes (optional)',
+                    es: 'Notas (opcional)',
+                  ),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 24),
@@ -329,7 +422,7 @@ class _AdicionarInvestimentoPageState extends State<AdicionarInvestimentoPage> {
                         width: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Guardar'),
+                    : Text(strings.text('Guardar', en: 'Save', es: 'Guardar')),
               ),
             ],
           ),

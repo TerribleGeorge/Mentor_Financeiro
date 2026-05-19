@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/suitability_engine.dart';
 import '../models/transacao_model.dart';
+import 'locale_controller.dart';
+import 'locale_ui_strings.dart';
 
 enum TipoDica { alerta, oportunidade, goldenDay, perigo, nenhuma }
 
@@ -38,6 +40,16 @@ class NotaSaudeFinanceira {
 class MentoriaService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  static String _currentText(
+    String pt, {
+    required String en,
+    required String es,
+  }) {
+    return LocaleUiStrings.forCode(
+      LocaleController.instance.locale.languageCode,
+    ).text(pt, en: en, es: es);
+  }
+
   // ==============================================================================
   // MÓDULOS / LIÇÕES (Mentoria v2)
   // ==============================================================================
@@ -72,26 +84,54 @@ class MentoriaService {
   static String profileMentoriaTitle(Profile profile) {
     switch (profile) {
       case Profile.conservador:
-        return 'Trilha Conservador';
+        return _currentText(
+          'Trilha Conservador',
+          en: 'Conservative Track',
+          es: 'Ruta conservadora',
+        );
       case Profile.moderado:
-        return 'Trilha Moderado';
+        return _currentText(
+          'Trilha Moderado',
+          en: 'Moderate Track',
+          es: 'Ruta moderada',
+        );
       case Profile.arrojado:
-        return 'Trilha Arrojado';
+        return _currentText(
+          'Trilha Arrojado',
+          en: 'Bold Track',
+          es: 'Ruta arriesgada',
+        );
     }
   }
 
   static String profileMentoriaDescription(Profile profile) {
     switch (profile) {
       case Profile.conservador:
-        return 'Base, proteção emocional, reserva e primeiros investimentos sem pressa.';
+        return _currentText(
+          'Base, proteção emocional, reserva e primeiros investimentos sem pressa.',
+          en: 'Foundation, emotional protection, reserve, and first investments without rushing.',
+          es: 'Base, protección emocional, reserva y primeras inversiones sin prisa.',
+        );
       case Profile.moderado:
-        return 'Você mantém a base conservadora disponível e avança para crescimento com controle, diversificação e metas maiores.';
+        return _currentText(
+          'Você mantém a base conservadora disponível e avança para crescimento com controle, diversificação e metas maiores.',
+          en: 'You keep the conservative foundation available and move toward controlled growth, diversification, and bigger goals.',
+          es: 'Mantienes la base conservadora disponible y avanzas hacia crecimiento con control, diversificación y metas mayores.',
+        );
       case Profile.arrojado:
-        return 'Você mantém as trilhas anteriores disponíveis e avança para expansão, risco calculado e proteção contra excesso de confiança.';
+        return _currentText(
+          'Você mantém as trilhas anteriores disponíveis e avança para expansão, risco calculado e proteção contra excesso de confiança.',
+          en: 'You keep the previous tracks available and move toward expansion, calculated risk, and protection against overconfidence.',
+          es: 'Mantienes las rutas anteriores disponibles y avanzas hacia expansión, riesgo calculado y protección contra exceso de confianza.',
+        );
     }
   }
 
   static List<MentoriaModule> modules({Profile profile = Profile.conservador}) {
+    final languageCode = LocaleController.instance.locale.languageCode;
+    if (!languageCode.toLowerCase().startsWith('pt')) {
+      return _globalProfileModules(profile, languageCode);
+    }
     switch (profile) {
       case Profile.conservador:
         return _conservativeModules;
@@ -1594,42 +1634,84 @@ class MentoriaService {
       }
     }
     if (streak >= 3) {
-      return const MentorLimitAlert(
-        title: 'Alerta do Mentor',
-        message:
-            'Você passou do seu limite diário por 3 dias seguidos. Hoje, use a regra do “adiar 24h” e corte 1 gasto automático.',
+      return MentorLimitAlert(
+        title: _currentText(
+          'Alerta do Mentor',
+          en: 'Mentor Alert',
+          es: 'Alerta del Mentor',
+        ),
+        message: _currentText(
+          'Você passou do seu limite diário por 3 dias seguidos. Hoje, use a regra do “adiar 24h” e corte 1 gasto automático.',
+          en: 'You exceeded your daily limit for 3 days in a row. Today, use the “delay 24h” rule and cut 1 automatic expense.',
+          es: 'Superaste tu límite diario durante 3 días seguidos. Hoy, usa la regla de “esperar 24h” y corta 1 gasto automático.',
+        ),
       );
     }
     return null;
   }
 
   static Future<Map<String, dynamic>?> buscarDadosUsuario(String uid) async {
-    final doc = await _firestore.collection('usuarios').doc(uid).get();
-    return doc.data();
+    try {
+      final doc = await _firestore.collection('usuarios').doc(uid).get();
+      return doc.data();
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        return null;
+      }
+      rethrow;
+    }
   }
 
   static Future<double> buscarSaldoConta(String uid) async {
-    final doc = await _firestore.collection('usuarios').doc(uid).get();
-    final saldo = doc.data()?['saldoConta'];
-    return saldo is num ? saldo.toDouble() : 0.0;
+    try {
+      final doc = await _firestore.collection('usuarios').doc(uid).get();
+      final saldo = doc.data()?['saldoConta'];
+      return saldo is num ? saldo.toDouble() : 0.0;
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        return 0.0;
+      }
+      rethrow;
+    }
   }
 
   static Future<double> buscarRendaMensal(String uid) async {
-    final doc = await _firestore.collection('usuarios').doc(uid).get();
-    final renda = doc.data()?['rendaMensal'];
-    return renda is num ? renda.toDouble() : 0.0;
+    try {
+      final doc = await _firestore.collection('usuarios').doc(uid).get();
+      final renda = doc.data()?['rendaMensal'];
+      return renda is num ? renda.toDouble() : 0.0;
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        return 0.0;
+      }
+      rethrow;
+    }
   }
 
   static Future<bool> usuarioTemInvestimentos(String uid) async {
-    final doc = await _firestore.collection('usuarios').doc(uid).get();
-    final investimentos = doc.data()?['temInvestimentos'];
-    return investimentos == true;
+    try {
+      final doc = await _firestore.collection('usuarios').doc(uid).get();
+      final investimentos = doc.data()?['temInvestimentos'];
+      return investimentos == true;
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        return false;
+      }
+      rethrow;
+    }
   }
 
   static Future<int> buscarQuantidadeDiasSemJuros(String uid) async {
-    final doc = await _firestore.collection('usuarios').doc(uid).get();
-    final dias = doc.data()?['diasSemJuros'];
-    return dias is int ? dias : 0;
+    try {
+      final doc = await _firestore.collection('usuarios').doc(uid).get();
+      final dias = doc.data()?['diasSemJuros'];
+      return dias is int ? dias : 0;
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        return 0;
+      }
+      rethrow;
+    }
   }
 
   static Future<List<DicaFinanceira>> gerarDicas({

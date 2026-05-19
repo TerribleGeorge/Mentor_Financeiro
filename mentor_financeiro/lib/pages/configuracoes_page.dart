@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/navigation/subscription_paywall_flow.dart';
 import '../services/app_theme_controller.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/subscription_provider.dart';
 import '../theme/theme_brand_assets.dart';
 
@@ -14,6 +15,7 @@ class ConfiguracoesPage extends StatelessWidget {
     final themeController = context.watch<AppThemeController>();
     final subscription = context.watch<SubscriptionProvider>();
     final scheme = Theme.of(context).colorScheme;
+    final strings = LocaleUiStrings.of(context);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -21,7 +23,11 @@ class ConfiguracoesPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'Personalização',
+          strings.text(
+            'Personalização',
+            en: 'Personalization',
+            es: 'Personalización',
+          ),
           style: TextStyle(color: scheme.onSurface),
         ),
         leading: IconButton(
@@ -34,15 +40,28 @@ class ConfiguracoesPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle(context, 'Temas devvoid'),
+            _buildSectionTitle(
+              context,
+              strings.text(
+                'Temas devvoid',
+                en: 'devvoid themes',
+                es: 'Temas devvoid',
+              ),
+            ),
             const SizedBox(height: 16),
             _buildThemeSelector(context, themeController, subscription),
             const SizedBox(height: 32),
-            _buildSectionTitle(context, 'Visualização'),
+            _buildSectionTitle(
+              context,
+              strings.text('Visualização', en: 'Preview', es: 'Vista previa'),
+            ),
             const SizedBox(height: 16),
-            _buildPreviewCard(themeController),
+            _buildPreviewCard(context, themeController),
             const SizedBox(height: 24),
-            _buildSectionTitle(context, 'Assinatura'),
+            _buildSectionTitle(
+              context,
+              strings.text('Assinatura', en: 'Subscription', es: 'Suscripción'),
+            ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: subscription.isLoading
@@ -53,9 +72,13 @@ class ConfiguracoesPage extends StatelessWidget {
                       if (!context.mounted) return;
                       if (ok) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
-                              'Assinatura ativa. Temas premium desbloqueados.',
+                              strings.text(
+                                'Assinatura ativa. Temas premium desbloqueados.',
+                                en: 'Subscription active. Premium themes unlocked.',
+                                es: 'Suscripción activa. Temas premium desbloqueados.',
+                              ),
                             ),
                           ),
                         );
@@ -76,7 +99,17 @@ class ConfiguracoesPage extends StatelessWidget {
                     )
                   : const Icon(Icons.workspace_premium_outlined, size: 20),
               label: Text(
-                subscription.isLoading ? 'A processar…' : 'Teste de assinatura',
+                subscription.isLoading
+                    ? strings.text(
+                        'A processar...',
+                        en: 'Processing...',
+                        es: 'Procesando...',
+                      )
+                    : strings.text(
+                        'Teste de assinatura',
+                        en: 'Subscription test',
+                        es: 'Prueba de suscripción',
+                      ),
               ),
             ),
             if (kDebugMode) ...[
@@ -88,14 +121,26 @@ class ConfiguracoesPage extends StatelessWidget {
                       .debugSimulatePremiumPurchase();
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Premium ativado para teste.'),
+                      SnackBar(
+                        content: Text(
+                          strings.text(
+                            'Premium ativado para teste.',
+                            en: 'Premium enabled for testing.',
+                            es: 'Premium activado para prueba.',
+                          ),
+                        ),
                       ),
                     );
                   }
                 },
                 icon: const Icon(Icons.science_outlined, size: 20),
-                label: const Text('Ativar premium para teste'),
+                label: Text(
+                  strings.text(
+                    'Ativar premium para teste',
+                    en: 'Enable premium for testing',
+                    es: 'Activar premium para prueba',
+                  ),
+                ),
               ),
             ],
           ],
@@ -182,7 +227,11 @@ class ConfiguracoesPage extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${theme.mode.displayName} desbloqueado.',
+                            LocaleUiStrings.of(context).text(
+                              '${theme.mode.displayName} desbloqueado.',
+                              en: '${theme.mode.displayName} unlocked.',
+                              es: '${theme.mode.displayName} desbloqueado.',
+                            ),
                           ),
                         ),
                       );
@@ -251,7 +300,11 @@ class ConfiguracoesPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPreviewCard(AppThemeController controller) {
+  Widget _buildPreviewCard(
+    BuildContext context,
+    AppThemeController controller,
+  ) {
+    final strings = LocaleUiStrings.of(context);
     return GlassCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -273,8 +326,12 @@ class ConfiguracoesPage extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Visualização',
+                  Text(
+                    strings.text(
+                      'Visualização',
+                      en: 'Preview',
+                      es: 'Vista previa',
+                    ),
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -282,7 +339,11 @@ class ConfiguracoesPage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Tema: ${controller.themeName}',
+                    strings.text(
+                      'Tema: ${controller.themeName}',
+                      en: 'Theme: ${controller.themeName}',
+                      es: 'Tema: ${controller.themeName}',
+                    ),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 12,
@@ -294,7 +355,11 @@ class ConfiguracoesPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Este é um exemplo de como seus cards e gráficos aparecerão com o tema selecionado.',
+            strings.text(
+              'Este é um exemplo de como seus cards e gráficos aparecerão com o tema selecionado.',
+              en: 'This is an example of how your cards and charts will look with the selected theme.',
+              es: 'Este es un ejemplo de cómo se verán tus tarjetas y gráficos con el tema seleccionado.',
+            ),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 14,

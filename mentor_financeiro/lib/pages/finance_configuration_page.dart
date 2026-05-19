@@ -23,6 +23,7 @@ import '../theme/classic_mode_style.dart';
 import '../services/daily_spend_limit_notifier.dart';
 import '../services/firebase_service.dart';
 import '../services/finance_config_signals.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/user_data_retention_service.dart';
 
 /// Configuração de renda, saldo e gastos fixos (persistência local + Firestore).
@@ -250,8 +251,9 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
       } else if (cap == 0) {
         _tetoLimiteDiarioController.text = '0';
       } else {
-        _tetoLimiteDiarioController.text =
-            cap == cap.roundToDouble() ? '${cap.round()}' : '$cap';
+        _tetoLimiteDiarioController.text = cap == cap.roundToDouble()
+            ? '${cap.round()}'
+            : '$cap';
       }
       _tetoSugestoes = DailyLimitCalculator.suggestDailySpendCaps(prefs);
     });
@@ -318,10 +320,10 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
     // não pode travar o usuário caso a conexão ou as regras recusem a escrita.
     if (uid != null) {
       unawaited(
-        FirebaseService.atualizarConfiguracoes(
-          uid,
-          configuracoes,
-        ).catchError((Object e, StackTrace st) {
+        FirebaseService.atualizarConfiguracoes(uid, configuracoes).catchError((
+          Object e,
+          StackTrace st,
+        ) {
           debugPrint('FinanceConfigurationPage sync: $e\n$st');
         }),
       );
@@ -336,6 +338,7 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
   // ==============================================================================
   @override
   Widget build(BuildContext context) {
+    final strings = LocaleUiStrings.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -343,9 +346,16 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
-        title: const Text(
-          'Configure suas Finanças',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          strings.text(
+            'Configure suas Finanças',
+            en: 'Configure your finances',
+            es: 'Configura tus finanzas',
+          ),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
@@ -356,24 +366,35 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
           children: [
             // Seção: RENDA
             _secao(
-              '💰 SUA RENDA',
+              strings.text('SUA RENDA', en: 'YOUR INCOME', es: 'TUS INGRESOS'),
               const Color(0xFF00D9FF),
               _campos.where((c) => c.ehRenda).toList(),
+              icon: '💰',
             ),
             const SizedBox(height: 30),
 
             _secao(
-              '🏦 SALDO NA CONTA',
+              strings.text(
+                'SALDO NA CONTA',
+                en: 'ACCOUNT BALANCE',
+                es: 'SALDO EN CUENTA',
+              ),
               const Color(0xFF38BDF8),
               _campos.where((c) => c.ehSaldoConta).toList(),
+              icon: '🏦',
             ),
             const SizedBox(height: 30),
 
             // Seção: GASTOS
             _secao(
-              '📋 SEUS GASTOS FIXOS',
+              strings.text(
+                'SEUS GASTOS FIXOS',
+                en: 'YOUR FIXED EXPENSES',
+                es: 'TUS GASTOS FIJOS',
+              ),
               Colors.redAccent,
               _campos.where((c) => !c.ehRenda && !c.ehSaldoConta).toList(),
+              icon: '📋',
             ),
             const SizedBox(height: 30),
 
@@ -402,9 +423,13 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
                         height: 24,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text(
-                        'SALVAR E CONTINUAR',
-                        style: TextStyle(
+                    : Text(
+                        strings.text(
+                          'SALVAR E CONTINUAR',
+                          en: 'SAVE AND CONTINUE',
+                          es: 'GUARDAR Y CONTINUAR',
+                        ),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -421,12 +446,17 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
   // ==============================================================================
   // SEÇÃO (AGRUPAMENTO)
   // ==============================================================================
-  Widget _secao(String titulo, Color cor, List<_CampoConfig> campos) {
+  Widget _secao(
+    String titulo,
+    Color cor,
+    List<_CampoConfig> campos, {
+    String? icon,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          titulo,
+          icon == null ? titulo : '$icon $titulo',
           style: TextStyle(
             color: cor,
             fontSize: 14,
@@ -494,7 +524,7 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
                     ),
                     Expanded(
                       child: Text(
-                        campo.nome,
+                        _campoNome(context, campo.nome),
                         style: TextStyle(
                           color: ativo ? Colors.white : Colors.white38,
                           fontWeight: FontWeight.w500,
@@ -517,7 +547,7 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
                   onChanged: (_) => setState(() {}),
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                   decoration: InputDecoration(
-                    hintText: campo.hint,
+                    hintText: _campoHint(context, campo.nome),
                     hintStyle: const TextStyle(color: Colors.white24),
                     filled: true,
                     fillColor: const Color(0xFF0F172A),
@@ -546,7 +576,11 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
                     // Valida se campo obrigatório está vazio
                     if ((_camposAtivos[campo.nome] ?? false) &&
                         (value == null || value.isEmpty)) {
-                      return 'Preencha ${campo.nome}';
+                      return LocaleUiStrings.of(context).text(
+                        'Preencha ${_campoNome(context, campo.nome)}',
+                        en: 'Fill in ${_campoNome(context, campo.nome)}',
+                        es: 'Completa ${_campoNome(context, campo.nome)}',
+                      );
                     }
                     return null;
                   },
@@ -558,6 +592,248 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
     );
   }
 
+  String _campoNome(BuildContext context, String nome) {
+    final s = LocaleUiStrings.of(context);
+    return switch (nome) {
+      'Renda Fixa' => s.text(
+        'Renda Fixa',
+        en: 'Fixed income',
+        es: 'Ingreso fijo',
+      ),
+      'Renda Extra' => s.text(
+        'Renda Extra',
+        en: 'Extra income',
+        es: 'Ingreso extra',
+      ),
+      'Saldo Atual' => s.text(
+        'Saldo Atual',
+        en: 'Current balance',
+        es: 'Saldo actual',
+      ),
+      'Aluguel' => s.text('Aluguel', en: 'Rent', es: 'Alquiler'),
+      'Pensão' => s.text('Pensão', en: 'Support payment', es: 'Pensión'),
+      'Condomínio' => s.text('Condomínio', en: 'Condo fee', es: 'Comunidad'),
+      'Financiamento (imóvel)' => s.text(
+        'Financiamento (imóvel)',
+        en: 'Mortgage',
+        es: 'Hipoteca',
+      ),
+      'IPTU (provisão mensal)' => s.text(
+        'IPTU (provisão mensal)',
+        en: 'Property tax provision',
+        es: 'Provisión de impuesto inmobiliario',
+      ),
+      'Internet' => s.text('Internet', en: 'Internet', es: 'Internet'),
+      'Luz' => s.text('Luz', en: 'Electricity', es: 'Electricidad'),
+      'Água / esgoto' => s.text(
+        'Água / esgoto',
+        en: 'Water / sewage',
+        es: 'Agua / alcantarillado',
+      ),
+      'Gás' => s.text('Gás', en: 'Gas', es: 'Gas'),
+      'Mercado' => s.text('Mercado', en: 'Groceries', es: 'Supermercado'),
+      'Plano de saúde' => s.text(
+        'Plano de saúde',
+        en: 'Health insurance',
+        es: 'Seguro de salud',
+      ),
+      'Educação (escola/curso)' => s.text(
+        'Educação (escola/curso)',
+        en: 'Education',
+        es: 'Educación',
+      ),
+      'Academia' => s.text('Academia', en: 'Gym', es: 'Gimnasio'),
+      'Transporte' => s.text('Transporte', en: 'Transport', es: 'Transporte'),
+      'Cartão' => s.text('Cartão', en: 'Card bill', es: 'Tarjeta'),
+      'Seguro' => s.text('Seguro', en: 'Insurance', es: 'Seguro'),
+      'Telefone / celular' => s.text(
+        'Telefone / celular',
+        en: 'Phone / mobile',
+        es: 'Teléfono / móvil',
+      ),
+      'Assinaturas digitais' => s.text(
+        'Assinaturas digitais',
+        en: 'Digital subscriptions',
+        es: 'Suscripciones digitales',
+      ),
+      'Reserva Emergência' => s.text(
+        'Reserva Emergência',
+        en: 'Emergency fund',
+        es: 'Fondo de emergencia',
+      ),
+      _ => nome,
+    };
+  }
+
+  String _campoHint(BuildContext context, String nome) {
+    final s = LocaleUiStrings.of(context);
+    return switch (nome) {
+      'Renda Fixa' => s.text(
+        'Seu salário mensal',
+        en: 'Your monthly salary',
+        es: 'Tu salario mensual',
+      ),
+      'Renda Extra' => s.text(
+        'Freelances, gorjetas; entradas (ex.: PIX recebido) podem somar aqui pelo monitor de notificações.',
+        en: 'Freelance work, tips, and incoming money can be added here by notification monitoring.',
+        es: 'Freelances, propinas y entradas de dinero pueden sumarse aquí por el monitoreo de notificaciones.',
+      ),
+      'Saldo Atual' => s.text(
+        'Saldo em conta (negativo se estiver no cheque especial)',
+        en: 'Account balance (negative if overdrafted)',
+        es: 'Saldo en cuenta (negativo si está en descubierto)',
+      ),
+      'Aluguel' => s.text(
+        'Valor do aluguel ou renda da casa',
+        en: 'Rent or housing payment',
+        es: 'Valor del alquiler o vivienda',
+      ),
+      'Pensão' => s.text(
+        'Pensão alimentícia ou acordo judicial',
+        en: 'Support payment or court agreement',
+        es: 'Pensión alimenticia o acuerdo judicial',
+      ),
+      'Condomínio' => s.text(
+        'Taxa condominial',
+        en: 'Condo fee',
+        es: 'Cuota de comunidad',
+      ),
+      'Financiamento (imóvel)' => s.text(
+        'Prestação do financiamento habitacional',
+        en: 'Monthly mortgage payment',
+        es: 'Cuota mensual de hipoteca',
+      ),
+      'IPTU (provisão mensal)' => s.text(
+        'Provisão mensal (IPTU e taxas do imóvel)',
+        en: 'Monthly provision for property taxes and fees',
+        es: 'Provisión mensual de impuestos y tasas del inmueble',
+      ),
+      'Internet' => s.text(
+        'Serviço de internet',
+        en: 'Internet service',
+        es: 'Servicio de internet',
+      ),
+      'Luz' => s.text(
+        'Conta de luz',
+        en: 'Electricity bill',
+        es: 'Factura de electricidad',
+      ),
+      'Água / esgoto' => s.text(
+        'Conta de água e esgoto',
+        en: 'Water and sewage bill',
+        es: 'Factura de agua y alcantarillado',
+      ),
+      'Gás' => s.text(
+        'Botijão ou gás encanado',
+        en: 'Cylinder or piped gas',
+        es: 'Bombona o gas canalizado',
+      ),
+      'Mercado' => s.text(
+        'Supermercado mensal',
+        en: 'Monthly groceries',
+        es: 'Supermercado mensual',
+      ),
+      'Plano de saúde' => s.text(
+        'Mensalidade de plano ou convênio',
+        en: 'Health plan monthly fee',
+        es: 'Mensualidad del seguro médico',
+      ),
+      'Educação (escola/curso)' => s.text(
+        'Mensalidades e cursos recorrentes',
+        en: 'Recurring school or course fees',
+        es: 'Mensualidades y cursos recurrentes',
+      ),
+      'Academia' => s.text(
+        'Academia ou esporte',
+        en: 'Gym or sports',
+        es: 'Gimnasio o deporte',
+      ),
+      'Transporte' => s.text(
+        'Transporte público / combustível',
+        en: 'Public transport / fuel',
+        es: 'Transporte público / combustible',
+      ),
+      'Cartão' => s.text(
+        'Cartão de crédito (fatura/mínimo)',
+        en: 'Credit card bill or minimum payment',
+        es: 'Factura o pago mínimo de tarjeta',
+      ),
+      'Seguro' => s.text(
+        'Seguro do carro / casa / vida',
+        en: 'Car / home / life insurance',
+        es: 'Seguro de coche / casa / vida',
+      ),
+      'Telefone / celular' => s.text(
+        'Linha móvel ou fixa',
+        en: 'Mobile or landline',
+        es: 'Línea móvil o fija',
+      ),
+      'Assinaturas digitais' => s.text(
+        'Streaming, apps, cloud, etc.',
+        en: 'Streaming, apps, cloud, etc.',
+        es: 'Streaming, apps, nube, etc.',
+      ),
+      'Reserva Emergência' => s.text(
+        'Valor para reserva mensal',
+        en: 'Monthly emergency fund amount',
+        es: 'Valor mensual para fondo de emergencia',
+      ),
+      _ => nome,
+    };
+  }
+
+  String _localizedCapSuggestionLabel(
+    BuildContext context,
+    DailySpendCapSuggestion suggestion,
+  ) {
+    final strings = LocaleUiStrings.of(context);
+    return switch (suggestion.id) {
+      'tight' => strings.text('Mais seguro', en: 'Safer', es: 'Más seguro'),
+      'balanced' => strings.text(
+        'Equilibrado',
+        en: 'Balanced',
+        es: 'Equilibrado',
+      ),
+      'loose' => strings.text('Com folga', en: 'Flexible', es: 'Con margen'),
+      'formula' => strings.text(
+        'Só a fórmula',
+        en: 'Formula only',
+        es: 'Solo la fórmula',
+      ),
+      _ => suggestion.label,
+    };
+  }
+
+  String _localizedCapSuggestionRationale(
+    BuildContext context,
+    DailySpendCapSuggestion suggestion,
+  ) {
+    final strings = LocaleUiStrings.of(context);
+    return switch (suggestion.id) {
+      'tight' => strings.text(
+        'Cerca de 35 % do guia — reduz risco de estourar o orçamento.',
+        en: 'About 35% of the guide value, reducing the risk of exceeding the budget.',
+        es: 'Cerca del 35% del valor guía, reduciendo el riesgo de superar el presupuesto.',
+      ),
+      'balanced' => strings.text(
+        'Cerca de 50 % do guia — equilíbrio entre proteção e flexibilidade.',
+        en: 'About 50% of the guide value, balancing protection and flexibility.',
+        es: 'Cerca del 50% del valor guía, equilibrando protección y flexibilidad.',
+      ),
+      'loose' => strings.text(
+        'Cerca de 70 % do guia — mais espaço para imprevistos do dia.',
+        en: 'About 70% of the guide value, with more room for daily surprises.',
+        es: 'Cerca del 70% del valor guía, con más margen para imprevistos del día.',
+      ),
+      'formula' => strings.text(
+        'Sem teto manual: o ecrã usa o valor integral da fórmula (pode ser alto com saldo grande na conta).',
+        en: 'No manual ceiling: the screen uses the full formula value, which can be high with a large account balance.',
+        es: 'Sin techo manual: la pantalla usa el valor completo de la fórmula, que puede ser alto con un saldo grande.',
+      ),
+      _ => suggestion.rationale,
+    };
+  }
+
   // ==============================================================================
   // TETO DO LIMITE DIÁRIO (GUIA "LIMITE HOJE")
   // ==============================================================================
@@ -566,7 +842,11 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '📈 TETO DO LIMITE DIÁRIO (GASTOS VARIÁVEIS)',
+          LocaleUiStrings.of(context).text(
+            '📈 TETO DO LIMITE DIÁRIO (GASTOS VARIÁVEIS)',
+            en: '📈 DAILY LIMIT CEILING (VARIABLE EXPENSES)',
+            es: '📈 TECHO DEL LÍMITE DIARIO (GASTOS VARIABLES)',
+          ),
           style: TextStyle(
             color: Colors.amber.shade200,
             fontSize: 14,
@@ -576,11 +856,22 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          'A fórmula usa renda, gastos fixos, saldo e dias no mês. O **teto** limita o guia '
-          '“Limite hoje”; o histórico e relatórios usam os gastos reais.\n'
-          '• Vazio = teto padrão R\$ ${kDefaultDailySpendCapBrl.round()}\n'
-          '• 0 = sem teto (mostra a fórmula inteira)\n'
-          'Sugestões abaixo usam os valores **já guardados** (salva as finanças e reabre esta página para atualizar).',
+          LocaleUiStrings.of(context).text(
+            'A fórmula usa renda, gastos fixos, saldo e dias no mês. O teto limita o guia “Limite hoje”; o histórico e relatórios usam os gastos reais.\n'
+            '• Vazio = teto padrão R\$ ${kDefaultDailySpendCapBrl.round()}\n'
+            '• 0 = sem teto (mostra a fórmula inteira)\n'
+            'Sugestões abaixo usam os valores já guardados (salva as finanças e reabre esta página para atualizar).',
+            en:
+                'The formula uses income, fixed expenses, balance, and days in the month. The ceiling limits the “Today limit” guide; history and reports use actual expenses.\n'
+                '• Empty = default R\$ ${kDefaultDailySpendCapBrl.round()} ceiling\n'
+                '• 0 = no ceiling (shows the full formula)\n'
+                'Suggestions below use values already saved. Save finances and reopen this page to refresh.',
+            es:
+                'La fórmula usa ingresos, gastos fijos, saldo y días del mes. El techo limita la guía “Límite de hoy”; historial e informes usan gastos reales.\n'
+                '• Vacío = techo predeterminado de R\$ ${kDefaultDailySpendCapBrl.round()}\n'
+                '• 0 = sin techo (muestra la fórmula completa)\n'
+                'Las sugerencias usan valores ya guardados. Guarda finanzas y vuelve a abrir esta página para actualizar.',
+          ),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.72),
             fontSize: 12,
@@ -589,7 +880,11 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Sugestões de teto',
+          LocaleUiStrings.of(context).text(
+            'Sugestões de teto',
+            en: 'Ceiling suggestions',
+            es: 'Sugerencias de techo',
+          ),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.85),
             fontSize: 13,
@@ -601,23 +896,28 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
           spacing: 8,
           runSpacing: 8,
           children: _tetoSugestoes.map((s) {
+            final label = _localizedCapSuggestionLabel(context, s);
+            final rationale = _localizedCapSuggestionRationale(context, s);
             return Tooltip(
-              message: s.rationale,
+              message: rationale,
               child: ActionChip(
                 label: Text(
-                  s.label,
+                  label,
                   style: const TextStyle(fontSize: 12, color: Colors.white),
                 ),
                 backgroundColor: const Color(0xFF1E293B),
-                side: BorderSide(color: Colors.amber.shade200.withValues(alpha: 0.5)),
+                side: BorderSide(
+                  color: Colors.amber.shade200.withValues(alpha: 0.5),
+                ),
                 onPressed: () {
                   setState(() {
                     if (s.usesFormulaWithoutCap) {
                       _tetoLimiteDiarioController.text = '0';
                     } else {
                       final v = s.valueBrl;
-                      _tetoLimiteDiarioController.text =
-                          v == v.roundToDouble() ? '${v.round()}' : v.toStringAsFixed(0);
+                      _tetoLimiteDiarioController.text = v == v.roundToDouble()
+                          ? '${v.round()}'
+                          : v.toStringAsFixed(0);
                     }
                   });
                 },
@@ -627,7 +927,11 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Valor do teto (manual)',
+          LocaleUiStrings.of(context).text(
+            'Valor do teto (manual)',
+            en: 'Ceiling amount (manual)',
+            es: 'Valor del techo (manual)',
+          ),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.85),
             fontSize: 13,
@@ -640,7 +944,11 @@ class _FinanceConfigurationPageState extends State<FinanceConfigurationPage> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           style: const TextStyle(color: Colors.white, fontSize: 16),
           decoration: InputDecoration(
-            hintText: 'Ex.: 80 ou deixe vazio para o padrão',
+            hintText: LocaleUiStrings.of(context).text(
+              'Ex.: 80 ou deixe vazio para o padrão',
+              en: 'Ex.: 80 or leave empty for the default',
+              es: 'Ej.: 80 o deja vacío para el valor predeterminado',
+            ),
             hintStyle: const TextStyle(color: Colors.white24),
             filled: true,
             fillColor: const Color(0xFF0F172A),

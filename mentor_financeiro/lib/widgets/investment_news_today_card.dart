@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/investment_news_item.dart';
 import '../services/investment_news_service.dart';
+import '../services/locale_ui_strings.dart';
 import '../theme/classic_mode_style.dart';
 
 class InvestmentNewsTodayCard extends StatefulWidget {
@@ -15,10 +16,20 @@ class InvestmentNewsTodayCard extends StatefulWidget {
 
 class _InvestmentNewsTodayCardState extends State<InvestmentNewsTodayCard> {
   late Future<List<InvestmentNewsItem>> _future;
+  String? _languageCode;
 
   @override
   void initState() {
     super.initState();
+    _future = InvestmentNewsService.instance.loadTodayNews();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final code = Localizations.localeOf(context).languageCode;
+    if (_languageCode == code) return;
+    _languageCode = code;
     _future = InvestmentNewsService.instance.loadTodayNews();
   }
 
@@ -31,6 +42,7 @@ class _InvestmentNewsTodayCardState extends State<InvestmentNewsTodayCard> {
   }
 
   Future<void> _openNews(InvestmentNewsItem item) async {
+    final strings = LocaleUiStrings.of(context);
     final uri = Uri.tryParse(item.url);
     if (uri == null) return;
 
@@ -42,8 +54,14 @@ class _InvestmentNewsTodayCardState extends State<InvestmentNewsTodayCard> {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(
-          const SnackBar(
-            content: Text('Não foi possível abrir a notícia agora.'),
+          SnackBar(
+            content: Text(
+              strings.text(
+                'Não foi possível abrir a notícia agora.',
+                en: 'Could not open the news right now.',
+                es: 'No se pudo abrir la noticia ahora.',
+              ),
+            ),
           ),
         );
     }
@@ -52,6 +70,7 @@ class _InvestmentNewsTodayCardState extends State<InvestmentNewsTodayCard> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final strings = LocaleUiStrings.of(context);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -79,7 +98,11 @@ class _InvestmentNewsTodayCardState extends State<InvestmentNewsTodayCard> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Notícias de hoje',
+                  strings.text(
+                    'Notícias de hoje',
+                    en: "Today's news",
+                    es: 'Noticias de hoy',
+                  ),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -97,8 +120,8 @@ class _InvestmentNewsTodayCardState extends State<InvestmentNewsTodayCard> {
                     color: const Color(0xFF26DE81).withValues(alpha: 0.62),
                   ),
                 ),
-                child: const Text(
-                  'Gratuito',
+                child: Text(
+                  strings.text('Gratuito', en: 'Free', es: 'Gratis'),
                   style: TextStyle(
                     color: Color(0xFF26DE81),
                     fontSize: 11,
@@ -108,7 +131,11 @@ class _InvestmentNewsTodayCardState extends State<InvestmentNewsTodayCard> {
               ),
               const SizedBox(width: 4),
               IconButton(
-                tooltip: 'Atualizar notícias',
+                tooltip: strings.text(
+                  'Atualizar notícias',
+                  en: 'Refresh news',
+                  es: 'Actualizar noticias',
+                ),
                 onPressed: _refresh,
                 icon: Icon(Icons.refresh, color: scheme.primary, size: 20),
               ),
@@ -139,7 +166,11 @@ class _InvestmentNewsTodayCardState extends State<InvestmentNewsTodayCard> {
                 return Padding(
                   padding: const EdgeInsets.only(top: 6, bottom: 4),
                   child: Text(
-                    'Não consegui atualizar agora. Tente novamente em alguns minutos.',
+                    strings.text(
+                      'Não consegui atualizar agora. Tente novamente em alguns minutos.',
+                      en: 'Could not refresh right now. Try again in a few minutes.',
+                      es: 'No se pudo actualizar ahora. Inténtalo de nuevo en unos minutos.',
+                    ),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.78),
                       height: 1.35,

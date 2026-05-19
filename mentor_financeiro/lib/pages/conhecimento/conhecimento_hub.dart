@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/locale_ui_strings.dart';
 import '../../services/subscription_provider.dart';
 import '../../widgets/ads/native_ad_card.dart';
 
@@ -34,6 +35,7 @@ class ConhecimentoHub extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = LocaleUiStrings.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -42,9 +44,12 @@ class ConhecimentoHub extends StatelessWidget {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        title: const Text(
-          'Conhecimento',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          strings.text('Conhecimento', en: 'Knowledge', es: 'Conocimiento'),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: ListView(
@@ -53,64 +58,124 @@ class ConhecimentoHub extends StatelessWidget {
           _buildCard(
             context,
             icone: Icons.trending_up,
-            titulo: 'Tipos de Investimento',
-            subtitulo: 'Entenda as opções do mercado',
+            titulo: strings.text(
+              'Tipos de Investimento',
+              en: 'Investment types',
+              es: 'Tipos de inversión',
+            ),
+            subtitulo: strings.text(
+              'Entenda as opções do mercado',
+              en: 'Understand market options',
+              es: 'Entiende las opciones del mercado',
+            ),
             rota: '/conhecimento/investimentos',
           ),
           const SizedBox(height: 16),
           _buildCard(
             context,
             icone: Icons.psychology,
-            titulo: 'Tipos de Estratégias',
-            subtitulo: 'Aprenda a investir melhor',
+            titulo: strings.text(
+              'Tipos de Estratégias',
+              en: 'Strategy types',
+              es: 'Tipos de estrategias',
+            ),
+            subtitulo: strings.text(
+              'Aprenda a investir melhor',
+              en: 'Learn to invest with more clarity',
+              es: 'Aprende a invertir con más claridad',
+            ),
             rota: '/conhecimento/estrategias',
           ),
           const SizedBox(height: 16),
           _buildCard(
             context,
             icone: Icons.menu_book,
-            titulo: 'Dicionário do Investidor',
-            subtitulo: 'Termos e conceitos essenciais',
+            titulo: strings.text(
+              'Dicionário do Investidor',
+              en: 'Investor dictionary',
+              es: 'Diccionario del inversor',
+            ),
+            subtitulo: strings.text(
+              'Termos e conceitos essenciais',
+              en: 'Essential terms and concepts',
+              es: 'Términos y conceptos esenciales',
+            ),
             rota: '/conhecimento/dicionario',
           ),
           const SizedBox(height: 16),
           _buildCard(
             context,
             icone: Icons.play_arrow,
-            titulo: 'Primeiros Passos',
-            subtitulo: 'Guia para começar a investir',
+            titulo: strings.text(
+              'Primeiros Passos',
+              en: 'First steps',
+              es: 'Primeros pasos',
+            ),
+            subtitulo: strings.text(
+              'Guia para começar a investir',
+              en: 'Guide to start investing',
+              es: 'Guía para empezar a invertir',
+            ),
             rota: '/conhecimento/primeiros-passos',
           ),
           const SizedBox(height: 16),
           _buildCard(
             context,
             icone: Icons.receipt_long,
-            titulo: 'Impostos e Declaração',
-            subtitulo: 'Entenda a tributação',
+            titulo: strings.text(
+              'Impostos e Declaração',
+              en: 'Taxes and reporting',
+              es: 'Impuestos y declaración',
+            ),
+            subtitulo: strings.text(
+              'Entenda a tributação',
+              en: 'Understand local tax rules',
+              es: 'Entiende las reglas fiscales locales',
+            ),
             rota: '/conhecimento/impostos',
           ),
           const SizedBox(height: 16),
           _buildCard(
             context,
             icone: Icons.dangerous,
-            titulo: 'Onde NÃO Investir',
-            subtitulo: 'Cuidado com armadilhas',
+            titulo: strings.text(
+              'Onde NÃO Investir',
+              en: 'Where not to invest',
+              es: 'Dónde no invertir',
+            ),
+            subtitulo: strings.text(
+              'Cuidado com armadilhas',
+              en: 'Watch out for traps',
+              es: 'Cuidado con trampas',
+            ),
             rota: '/conhecimento/perigos',
           ),
           const SizedBox(height: 16),
           _buildCard(
             context,
             icone: Icons.build,
-            titulo: 'Melhores Ferramentas',
-            subtitulo: 'Apps e sites essenciais',
+            titulo: strings.text(
+              'Melhores Ferramentas',
+              en: 'Best tools',
+              es: 'Mejores herramientas',
+            ),
+            subtitulo: strings.text(
+              'Apps e sites essenciais',
+              en: 'Useful apps and sites',
+              es: 'Apps y sitios útiles',
+            ),
             rota: '/conhecimento/ferramentas',
           ),
           const SizedBox(height: 16),
           _buildCard(
             context,
             icone: Icons.shield_outlined,
-            titulo: 'Golpes',
-            subtitulo: 'Como se proteger no dia a dia',
+            titulo: strings.text('Golpes', en: 'Scams', es: 'Estafas'),
+            subtitulo: strings.text(
+              'Como se proteger no dia a dia',
+              en: 'How to protect yourself day to day',
+              es: 'Cómo protegerte en el día a día',
+            ),
             rota: '/conhecimento/golpes',
           ),
           const SizedBox(height: 16),
@@ -154,19 +219,30 @@ class ConhecimentoHub extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          'Simulado de Conhecimento',
-                          style: TextStyle(
+                          strings.text(
+                            'Simulado de Conhecimento',
+                            en: 'Knowledge quiz',
+                            es: 'Simulado de conocimiento',
+                          ),
+                          style: const TextStyle(
                             color: Color(0xFF00D9FF),
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          'Teste seus conhecimentos',
-                          style: TextStyle(color: Colors.white54, fontSize: 13),
+                          strings.text(
+                            'Teste seus conhecimentos',
+                            en: 'Test your knowledge',
+                            es: 'Pon a prueba tus conocimientos',
+                          ),
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),

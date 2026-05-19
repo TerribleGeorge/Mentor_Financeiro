@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/classic_mode_style.dart';
 import '../theme/mentor_adaptive_visuals.dart';
 import '../services/firebase_service.dart';
+import '../services/locale_ui_strings.dart';
 import 'tela_login.dart';
 import 'questionario_page.dart';
 import 'settings_page.dart';
@@ -55,10 +56,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
       ).timeout(const Duration(seconds: 3), onTimeout: () => null);
       if (mounted) {
         setState(() {
-          _dadosUsuario = {
-            ...dadosLocais,
-            if (dados != null) ...dados,
-          };
+          _dadosUsuario = {...dadosLocais, if (dados != null) ...dados};
         });
       }
     }
@@ -67,6 +65,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final strings = LocaleUiStrings.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -78,7 +77,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Perfil',
+                      strings.settingsProfile,
                       style: TextStyle(
                         color: scheme.onSurface,
                         fontSize: 24,
@@ -99,9 +98,18 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
   Widget _buildProfileHeader() {
     final user = FirebaseAuth.instance.currentUser;
-    final nome = _dadosUsuario?['nome'] ?? user?.displayName ?? 'Usuário';
+    final strings = LocaleUiStrings.of(context);
+    final nome =
+        _dadosUsuario?['nome'] ??
+        user?.displayName ??
+        strings.text('Usuário', en: 'User', es: 'Usuario');
     final email =
-        FirebaseAuth.instance.currentUser?.email ?? 'Usuário não logado';
+        FirebaseAuth.instance.currentUser?.email ??
+        strings.text(
+          'Usuário não logado',
+          en: 'User not signed in',
+          es: 'Usuario sin sesión',
+        );
     final photoUrl = FirebaseAuth.instance.currentUser?.photoURL;
 
     return Container(
@@ -157,29 +165,56 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
 
   Widget _buildMenuItens() {
+    final strings = LocaleUiStrings.of(context);
     final itens = [
       {
         'icon': Icons.person_outline,
-        'label': 'Editar Perfil',
+        'label': strings.text(
+          'Editar Perfil',
+          en: 'Edit Profile',
+          es: 'Editar perfil',
+        ),
+        'action': 'edit_profile',
         'rota': '/perfil',
       },
       {
         'icon': Icons.settings_outlined,
-        'label': 'Configurações',
+        'label': strings.settingsTitle,
+        'action': 'settings',
         'rota': '/config',
       },
       {
         'icon': Icons.notifications_outlined,
-        'label': 'Notificações',
+        'label': strings.text(
+          'Notificações',
+          en: 'Notifications',
+          es: 'Notificaciones',
+        ),
+        'action': 'notifications',
         'rota': '/notif',
       },
       {
         'icon': Icons.workspace_premium_outlined,
-        'label': 'Assinatura',
+        'label': strings.text(
+          'Assinatura',
+          en: 'Subscription',
+          es: 'Suscripción',
+        ),
+        'action': 'subscription',
         'rota': '/assinatura',
       },
-      {'icon': Icons.help_outline, 'label': 'Ajuda', 'rota': '/ajuda'},
-      {'icon': Icons.logout, 'label': 'Sair', 'rota': '/sair'},
+      {
+        'icon': Icons.help_outline,
+        'label': strings.text('Ajuda', en: 'Help', es: 'Ayuda'),
+        'action': 'help',
+        'rota': '/ajuda',
+      },
+      {
+        'icon': Icons.logout,
+        'label': strings.text('Sair', en: 'Sign out', es: 'Salir'),
+        'action': 'sign_out',
+        'rota': '/sair',
+      },
     ];
 
     return Column(children: itens.map((item) => _buildMenuItem(item)).toList());
@@ -188,9 +223,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
   Widget _buildMenuItem(Map<String, dynamic> item) {
     final icon = item['icon'] as IconData;
     final label = item['label'] as String;
+    final action = item['action'] as String;
 
     return GestureDetector(
-      onTap: () => _onMenuItemTap(label),
+      onTap: () => _onMenuItemTap(action),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(16),
@@ -215,39 +251,40 @@ class _PerfilScreenState extends State<PerfilScreen> {
     );
   }
 
-  Future<void> _onMenuItemTap(String label) async {
-    switch (label) {
-      case 'Editar Perfil':
+  Future<void> _onMenuItemTap(String action) async {
+    switch (action) {
+      case 'edit_profile':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const QuestionarioPage()),
         );
         break;
-      case 'Configurações':
+      case 'settings':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const SettingsPage()),
         );
         break;
-      case 'Notificações':
+      case 'notifications':
         _showNotificationSettings();
         break;
-      case 'Assinatura':
+      case 'subscription':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const CustomerCenterScreen()),
         );
         break;
-      case 'Sair':
+      case 'sign_out':
         await _fazerLogout();
         break;
-      case 'Ajuda':
+      case 'help':
         _showAjuda();
         break;
     }
   }
 
   void _showNotificationSettings() {
+    final strings = LocaleUiStrings.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1E293B),
@@ -260,8 +297,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Notificações',
+            Text(
+              strings.text(
+                'Notificações',
+                en: 'Notifications',
+                es: 'Notificaciones',
+              ),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -271,12 +312,20 @@ class _PerfilScreenState extends State<PerfilScreen> {
             const SizedBox(height: 20),
             ListTile(
               leading: const Icon(Icons.receipt_long, color: Color(0xFF00D9FF)),
-              title: const Text(
-                'Leitura de Transações',
+              title: Text(
+                strings.text(
+                  'Leitura de Transações',
+                  en: 'Transaction Reading',
+                  es: 'Lectura de transacciones',
+                ),
                 style: TextStyle(color: Colors.white),
               ),
-              subtitle: const Text(
-                'Monitorar gastos via notifications',
+              subtitle: Text(
+                strings.text(
+                  'Monitorar gastos via notifications',
+                  en: 'Monitor expenses via notifications',
+                  es: 'Monitorear gastos por notificaciones',
+                ),
                 style: TextStyle(color: Colors.white54),
               ),
               trailing: Switch(
@@ -293,6 +342,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
 
   Future<void> _showAjuda() async {
+    final strings = LocaleUiStrings.of(context);
     final info = await PackageInfo.fromPlatform();
     if (!mounted) return;
     final versionLine =
@@ -309,8 +359,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Ajuda',
+            Text(
+              strings.text('Ajuda', en: 'Help', es: 'Ayuda'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -320,8 +370,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
             const SizedBox(height: 16),
             Text(versionLine, style: const TextStyle(color: Colors.white70)),
             const SizedBox(height: 8),
-            const Text(
-              'Precisa de pomoc? Entre em contato pelo email: soport@mentorfinanceiro.com',
+            Text(
+              strings.text(
+                'Precisa de ajuda? Entre em contato pelo email: suporte@mentorfinanceiro.com',
+                en: 'Need help? Contact us by email: support@mentorfinanceiro.com',
+                es: '¿Necesitas ayuda? Contáctanos por email: soporte@mentorfinanceiro.com',
+              ),
               style: TextStyle(color: Colors.white54),
             ),
           ],
@@ -331,27 +385,35 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
 
   Future<void> _fazerLogout() async {
+    final strings = LocaleUiStrings.of(context);
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1E293B),
-        title: const Text('Sair', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Tem certeza que deseja sair?',
+        title: Text(
+          strings.text('Sair', en: 'Sign out', es: 'Salir'),
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          strings.text(
+            'Tem certeza que deseja sair?',
+            en: 'Are you sure you want to sign out?',
+            es: '¿Seguro que quieres salir?',
+          ),
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'Cancelar',
+            child: Text(
+              strings.text('Cancelar', en: 'Cancel', es: 'Cancelar'),
               style: TextStyle(color: Colors.white54),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Sair',
+            child: Text(
+              strings.text('Sair', en: 'Sign out', es: 'Salir'),
               style: TextStyle(color: Color(0xFFFC5C65)),
             ),
           ),
@@ -371,8 +433,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Não foi possível sair agora. Tente novamente.'),
+            SnackBar(
+              content: Text(
+                strings.text(
+                  'Não foi possível sair agora. Tente novamente.',
+                  en: 'Could not sign out right now. Try again.',
+                  es: 'No se pudo salir ahora. Inténtalo de nuevo.',
+                ),
+              ),
             ),
           );
         }

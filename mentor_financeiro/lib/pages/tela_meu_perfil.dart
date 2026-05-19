@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/firebase_service.dart';
+import '../services/locale_ui_strings.dart';
 import '../core/config/app_secrets.dart';
 
 class TelaMeuPerfil extends StatefulWidget {
@@ -410,7 +411,11 @@ class _TelaMeuPerfilState extends State<TelaMeuPerfil> {
       child: ElevatedButton.icon(
         onPressed: _editarPerfil,
         icon: const Icon(Icons.edit),
-        label: const Text("Editar Perfil"),
+        label: Text(
+          LocaleUiStrings.of(
+            context,
+          ).text('Editar Perfil', en: 'Edit Profile', es: 'Editar perfil'),
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF00D9FF),
           foregroundColor: const Color(0xFF0F172A),

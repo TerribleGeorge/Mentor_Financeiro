@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/config/app_secrets.dart';
 import '../services/notification_listener_service.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/user_data_retention_service.dart';
 
 class NotificationMonitoringPage extends StatefulWidget {
@@ -17,8 +20,8 @@ class NotificationMonitoringPage extends StatefulWidget {
       _NotificationMonitoringPageState();
 }
 
-class _NotificationMonitoringPageState
-    extends State<NotificationMonitoringPage> with WidgetsBindingObserver {
+class _NotificationMonitoringPageState extends State<NotificationMonitoringPage>
+    with WidgetsBindingObserver {
   final _listener = NotificationListenerService();
   bool _enabled = true;
   bool _loading = true;
@@ -63,8 +66,9 @@ class _NotificationMonitoringPageState
     final hasPermission = Platform.isAndroid
         ? await _listener.verificarPermissao()
         : null;
-    final diagnostics =
-        await NotificationListenerService.carregarDiagnosticos();
+    final diagnostics = _isDeveloperAccount
+        ? await NotificationListenerService.carregarDiagnosticos()
+        : const <String>[];
     if (!mounted) return;
     setState(() {
       _enabled = v ?? true;
@@ -104,9 +108,16 @@ class _NotificationMonitoringPageState
     await _load();
   }
 
+  bool get _isDeveloperAccount {
+    final email = FirebaseAuth.instance.currentUser?.email;
+    return AppSecrets.isDeveloperUiAccount(email);
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final strings = LocaleUiStrings.of(context);
+    final isDeveloperAccount = _isDeveloperAccount;
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -114,7 +125,13 @@ class _NotificationMonitoringPageState
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
-        title: const Text('Monitoramento por notificações'),
+        title: Text(
+          strings.text(
+            'Monitoramento por notificações',
+            en: 'Notification monitoring',
+            es: 'Monitoreo por notificaciones',
+          ),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -131,26 +148,61 @@ class _NotificationMonitoringPageState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Segurança em primeiro lugar',
+                Text(
+                  strings.text(
+                    'Segurança em primeiro lugar',
+                    en: 'Security first',
+                    es: 'Seguridad ante todo',
+                  ),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'O Mentor Financeiro não acessa sua conta bancária e não pede senha. '
-                  'Ele apenas lê notificações no seu celular para identificar gastos e registrar no histórico.',
+                  strings.text(
+                    'O Mentor Financeiro não acessa sua conta bancária e não pede senha. Quando você autoriza o acesso a notificações, o app usa essa leitura apenas para reconhecer avisos de compras, pagamentos e gastos recebidos no seu próprio celular e registrar esses valores no histórico financeiro.',
+                    en: 'Mentor Financeiro does not access your bank account and does not ask for your password. When you allow notification access, the app uses that reading only to recognize purchase, payment, and expense alerts received on your own phone and record those values in your financial history.',
+                    es: 'Mentor Financeiro no accede a tu cuenta bancaria ni pide tu contraseña. Cuando autorizas el acceso a notificaciones, la app usa esa lectura solo para reconocer avisos de compras, pagos y gastos recibidos en tu propio celular y registrar esos valores en tu historial financiero.',
+                  ),
                   style: TextStyle(
                     color: scheme.onSurface.withValues(alpha: 0.75),
                     height: 1.35,
                   ),
                 ),
                 const SizedBox(height: 12),
-                _bullet('Não fazemos login em banco / cartão.'),
                 _bullet(
-                  'Não capturamos códigos (OTP), senha ou mensagens de segurança.',
+                  strings.text(
+                    'A permissão é necessária porque bancos e carteiras digitais enviam gastos como notificações do Android.',
+                    en: 'This permission is needed because banks and digital wallets send expenses as Android notifications.',
+                    es: 'Este permiso es necesario porque bancos y billeteras digitales envían gastos como notificaciones de Android.',
+                  ),
                 ),
                 _bullet(
-                  'Processamos e filtramos apenas gastos (compras/pagamentos).',
+                  strings.text(
+                    'Não fazemos login em banco / cartão.',
+                    en: 'We do not log in to banks or cards.',
+                    es: 'No iniciamos sesión en bancos ni tarjetas.',
+                  ),
+                ),
+                _bullet(
+                  strings.text(
+                    'Não capturamos códigos (OTP), senha ou mensagens de segurança.',
+                    en: 'We do not capture OTP codes, passwords, or security messages.',
+                    es: 'No capturamos códigos OTP, contraseñas ni mensajes de seguridad.',
+                  ),
+                ),
+                _bullet(
+                  strings.text(
+                    'O filtro procura apenas compras, pagamentos e transferências enviadas.',
+                    en: 'The filter only looks for purchases, payments, and sent transfers.',
+                    es: 'El filtro solo busca compras, pagos y transferencias enviadas.',
+                  ),
+                ),
+                _bullet(
+                  strings.text(
+                    'Você pode desligar o monitoramento nesta tela ou revogar a permissão nas configurações do Android.',
+                    en: 'You can turn off monitoring on this screen or revoke the permission in Android settings.',
+                    es: 'Puedes desactivar el monitoreo en esta pantalla o revocar el permiso en la configuración de Android.',
+                  ),
                 ),
               ],
             ),
@@ -180,17 +232,33 @@ class _NotificationMonitoringPageState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Ativar monitoramento',
+                      Text(
+                        strings.text(
+                          'Ativar monitoramento',
+                          en: 'Enable monitoring',
+                          es: 'Activar monitoreo',
+                        ),
                         style: TextStyle(fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         _enabled && (_androidPermissionGranted ?? true)
-                            ? 'Lendo apenas notificações de gastos'
+                            ? strings.text(
+                                'Usa notificações compatíveis para registrar gastos',
+                                en: 'Uses compatible notifications to record expenses',
+                                es: 'Usa notificaciones compatibles para registrar gastos',
+                              )
                             : _enabled
-                            ? 'Ative o acesso a notificações no Android'
-                            : 'Monitoramento pausado',
+                            ? strings.text(
+                                'Ative o acesso a notificações no Android',
+                                en: 'Enable notification access on Android',
+                                es: 'Activa el acceso a notificaciones en Android',
+                              )
+                            : strings.text(
+                                'Monitoramento pausado',
+                                en: 'Monitoring paused',
+                                es: 'Monitoreo pausado',
+                              ),
                         style: TextStyle(
                           color: scheme.onSurface.withValues(alpha: 0.7),
                           fontSize: 12,
@@ -235,8 +303,16 @@ class _NotificationMonitoringPageState
                   Expanded(
                     child: Text(
                       _androidPermissionGranted == true
-                          ? 'Permissão Android concedida para o Mentor Financeiro.'
-                          : 'Permissão Android ainda não concedida. Sem ela, o app não recebe notificações.',
+                          ? strings.text(
+                              'Permissão Android concedida. O app pode identificar notificações compatíveis de gastos neste aparelho.',
+                              en: 'Android permission granted. The app can identify compatible expense notifications on this device.',
+                              es: 'Permiso de Android concedido. La app puede identificar notificaciones compatibles de gastos en este dispositivo.',
+                            )
+                          : strings.text(
+                              'Permissão Android ainda não concedida. Sem ela, o app não consegue identificar automaticamente gastos enviados por notificações.',
+                              en: 'Android permission not granted yet. Without it, the app cannot automatically identify expenses sent by notifications.',
+                              es: 'Permiso de Android aún no concedido. Sin él, la app no puede identificar automáticamente gastos enviados por notificaciones.',
+                            ),
                       style: TextStyle(
                         color: scheme.onSurface.withValues(alpha: 0.75),
                         height: 1.35,
@@ -246,7 +322,7 @@ class _NotificationMonitoringPageState
                   const SizedBox(width: 12),
                   TextButton(
                     onPressed: _openAndroidPermission,
-                    child: const Text('Abrir'),
+                    child: Text(strings.text('Abrir', en: 'Open', es: 'Abrir')),
                   ),
                 ],
               ),
@@ -271,9 +347,13 @@ class _NotificationMonitoringPageState
                         color: scheme.primary,
                       ),
                       const SizedBox(width: 10),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Bateria e segundo plano',
+                          strings.text(
+                            'Bateria e segundo plano',
+                            en: 'Battery and background',
+                            es: 'Batería y segundo plano',
+                          ),
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
@@ -284,9 +364,11 @@ class _NotificationMonitoringPageState
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Em alguns telemóveis, a optimização de bateria atrasa ou impede o '
-                    'serviço de leitura de notificações até abrir o app. Abra as definições '
-                    'da app e defina bateria sem restrições, se disponível.',
+                    strings.text(
+                      'Em alguns telemóveis, a optimização de bateria atrasa ou impede o serviço de leitura de notificações até abrir o app. Abra as definições da app e defina bateria sem restrições, se disponível.',
+                      en: 'On some phones, battery optimization delays or blocks notification reading until you open the app. Open app settings and set battery to unrestricted, if available.',
+                      es: 'En algunos teléfonos, la optimización de batería retrasa o bloquea la lectura de notificaciones hasta que abres la app. Abre la configuración de la app y configura batería sin restricciones, si está disponible.',
+                    ),
                     style: TextStyle(
                       color: scheme.onSurface.withValues(alpha: 0.75),
                       height: 1.35,
@@ -299,9 +381,93 @@ class _NotificationMonitoringPageState
                     child: FilledButton.tonalIcon(
                       onPressed: _openBatterySettings,
                       icon: const Icon(Icons.open_in_new, size: 18),
-                      label: const Text('Abrir definições da app'),
+                      label: Text(
+                        strings.text(
+                          'Abrir definições da app',
+                          en: 'Open app settings',
+                          es: 'Abrir configuración de la app',
+                        ),
+                      ),
                     ),
                   ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+          if (isDeveloperAccount) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: scheme.surface.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: scheme.onSurface.withValues(alpha: 0.08),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Últimas leituras do listener',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Atualizar',
+                        onPressed: _syncAndLoad,
+                        icon: const Icon(Icons.refresh),
+                      ),
+                      IconButton(
+                        tooltip: 'Limpar',
+                        onPressed: _diagnostics.isEmpty
+                            ? null
+                            : _clearDiagnostics,
+                        icon: const Icon(Icons.delete_outline),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (_diagnostics.any((entry) => entry.contains('|suspeita:')))
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.orange.withValues(alpha: 0.45),
+                        ),
+                      ),
+                      child: const Text(
+                        'Há uma notificação suspeita recente. Confira pelo app oficial do banco antes de considerar esse gasto como verdadeiro.',
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontWeight: FontWeight.w700,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  if (_diagnostics.isEmpty)
+                    Text(
+                      'Nenhuma leitura registada. Toque em atualizar após uma notificação '
+                      'ou confira se o acesso a notificações está activo para o Mentor Financeiro.',
+                      style: TextStyle(
+                        color: scheme.onSurface.withValues(alpha: 0.7),
+                        height: 1.35,
+                      ),
+                    )
+                  else
+                    ..._diagnostics
+                        .take(20)
+                        .map((entry) => _diagnosticTile(entry)),
                 ],
               ),
             ),
@@ -316,85 +482,12 @@ class _NotificationMonitoringPageState
                 color: scheme.onSurface.withValues(alpha: 0.08),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Últimas leituras do listener',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Atualizar',
-                      onPressed: _syncAndLoad,
-                      icon: const Icon(Icons.refresh),
-                    ),
-                    IconButton(
-                      tooltip: 'Limpar',
-                      onPressed: _diagnostics.isEmpty
-                          ? null
-                          : _clearDiagnostics,
-                      icon: const Icon(Icons.delete_outline),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                if (_diagnostics.any((entry) => entry.contains('|suspeita:')))
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.orange.withValues(alpha: 0.45),
-                      ),
-                    ),
-                    child: const Text(
-                      'Há uma notificação suspeita recente. Confira pelo app oficial do banco antes de considerar esse gasto como verdadeiro.',
-                      style: TextStyle(
-                        color: Colors.orange,
-                        fontWeight: FontWeight.w700,
-                        height: 1.35,
-                      ),
-                    ),
-                  ),
-                if (_diagnostics.isEmpty)
-                  Text(
-                    'Nenhuma leitura registada. Toque em atualizar após uma notificação '
-                    'ou confira se o acesso a notificações está activo para o Mentor Financeiro.',
-                    style: TextStyle(
-                      color: scheme.onSurface.withValues(alpha: 0.7),
-                      height: 1.35,
-                    ),
-                  )
-                else
-                  ..._diagnostics
-                      .take(20)
-                      .map((entry) => _diagnosticTile(entry)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: scheme.surface.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: scheme.onSurface.withValues(alpha: 0.08),
-              ),
-            ),
             child: Text(
-              'Dica: você controla essa permissão também nas configurações do Android '
-              '(Acesso a notificações). Se desativar lá, o app não consegue ler nenhuma notificação.',
+              strings.text(
+                'Dica: você controla essa permissão também nas configurações do Android (Acesso a notificações). Se desativar lá, o app deixa de registrar gastos automaticamente a partir de notificações.',
+                en: 'Tip: you also control this permission in Android settings (Notification access). If you turn it off there, the app stops recording expenses automatically from notifications.',
+                es: 'Consejo: también controlas este permiso en la configuración de Android (Acceso a notificaciones). Si lo desactivas allí, la app deja de registrar gastos automáticamente desde notificaciones.',
+              ),
               style: TextStyle(
                 color: scheme.onSurface.withValues(alpha: 0.75),
                 height: 1.35,

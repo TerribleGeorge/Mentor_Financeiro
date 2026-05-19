@@ -12,6 +12,7 @@ import '../services/mentoria_service.dart';
 import '../services/transaction_refresh_signal.dart';
 import '../services/transaction_category_update_service.dart';
 import '../services/exchange_rate_service.dart';
+import '../services/locale_ui_strings.dart';
 import 'adicionar_transacao_page.dart';
 import '../theme/classic_mode_style.dart';
 import '../widgets/premium_wrapper.dart';
@@ -45,8 +46,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   /// Evita recalcular mentoria a cada frame quando os dados não mudaram.
   String? _mentoriaCacheKey;
 
-  Future<List<TransacaoModel>> _localMonthFuture =
-      Future.value(const <TransacaoModel>[]);
+  Future<List<TransacaoModel>> _localMonthFuture = Future.value(
+    const <TransacaoModel>[],
+  );
 
   void _rebindLocalMonthFuture() {
     final start = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
@@ -126,8 +128,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('Faça login para ver os relatórios')),
+      return Scaffold(
+        body: Center(
+          child: Text(
+            LocaleUiStrings.of(context).text(
+              'Faça login para ver os relatórios',
+              en: 'Sign in to view reports',
+              es: 'Inicia sesión para ver los informes',
+            ),
+          ),
+        ),
       );
     }
 
@@ -249,19 +259,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (!mounted) return;
                   MentoriaService.gerarDicas(
-                    uid: user.uid,
-                    transacoes: transacoesAll,
-                  ).then((dicas) {
-                    if (!mounted) return;
-                    setState(() => _dicas = dicas);
-                  });
+                        uid: user.uid,
+                        transacoes: transacoesAll,
+                      )
+                      .then((dicas) {
+                        if (!mounted) return;
+                        setState(() => _dicas = dicas);
+                      })
+                      .catchError((Object e, StackTrace st) {
+                        debugPrint(
+                          'MentoriaService.gerarDicas falhou: $e\n$st',
+                        );
+                        if (!mounted) return;
+                        setState(() => _dicas = const []);
+                      });
                   MentoriaService.calcularNotaSaude(
-                    uid: user.uid,
-                    transacoes: transacoesAll,
-                  ).then((nota) {
-                    if (!mounted) return;
-                    setState(() => _notaSaude = nota);
-                  });
+                        uid: user.uid,
+                        transacoes: transacoesAll,
+                      )
+                      .then((nota) {
+                        if (!mounted) return;
+                        setState(() => _notaSaude = nota);
+                      })
+                      .catchError((Object e, StackTrace st) {
+                        debugPrint(
+                          'MentoriaService.calcularNotaSaude falhou: $e\n$st',
+                        );
+                        if (!mounted) return;
+                        setState(() => _notaSaude = null);
+                      });
                 });
               }
 
@@ -357,10 +383,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     size: 20,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'CÂMBIO (ATUALIZA 1x/DIA)',
-                      style: TextStyle(
+                      LocaleUiStrings.of(context).text(
+                        'CÂMBIO (ATUALIZA 1x/DIA)',
+                        en: 'EXCHANGE RATES (UPDATES 1x/DAY)',
+                        es: 'CAMBIO (ACTUALIZA 1x/DÍA)',
+                      ),
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -370,7 +400,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   TextButton(
                     onPressed: () => Navigator.pushNamed(context, '/cambio'),
-                    child: const Text('Ver todas'),
+                    child: Text(
+                      LocaleUiStrings.of(
+                        context,
+                      ).text('Ver todas', en: 'View all', es: 'Ver todas'),
+                    ),
                   ),
                 ],
               ),
@@ -382,7 +416,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 )
               else if (data == null || usdBrl == null)
                 Text(
-                  'Sem dados (offline). Abra “Ver todas” quando estiver com internet.',
+                  LocaleUiStrings.of(context).text(
+                    'Sem dados (offline). Abra “Ver todas” quando estiver com internet.',
+                    en: 'No data (offline). Open “View all” when you are online.',
+                    es: 'Sin datos (offline). Abre “Ver todas” cuando tengas internet.',
+                  ),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -453,13 +491,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.show_chart, color: Colors.white70, size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.show_chart, color: Colors.white70, size: 20),
+              const SizedBox(width: 8),
               Text(
-                'DINHEIRO USADO (POR DIA)',
-                style: TextStyle(
+                LocaleUiStrings.of(context).text(
+                  'DINHEIRO USADO (POR DIA)',
+                  en: 'MONEY USED (PER DAY)',
+                  es: 'DINERO USADO (POR DÍA)',
+                ),
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -585,7 +627,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Nenhuma transação com este filtro. Use “Tudo” ou escolha outro tipo.',
+              LocaleUiStrings.of(context).text(
+                'Nenhuma transação com este filtro. Use “Tudo” ou escolha outro tipo.',
+                en: 'No transaction with this filter. Use “All” or choose another type.',
+                es: 'Ninguna transacción con este filtro. Usa “Todo” o elige otro tipo.',
+              ),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.85),
                 fontSize: 13,
@@ -605,7 +651,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const Icon(Icons.receipt_long, size: 80, color: Colors.white24),
           const SizedBox(height: 16),
           Text(
-            'Nenhuma transação encontrada',
+            LocaleUiStrings.of(context).text(
+              'Nenhuma transação encontrada',
+              en: 'No transaction found',
+              es: 'No se encontró ninguna transacción',
+            ),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.5),
               fontSize: 18,
@@ -613,7 +663,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Suas transações aparecerão aqui',
+            LocaleUiStrings.of(context).text(
+              'Suas transações aparecerão aqui',
+              en: 'Your transactions will appear here',
+              es: 'Tus transacciones aparecerán aquí',
+            ),
             style: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
           ),
         ],
@@ -631,11 +685,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildFilterChip('Tudo', null),
+          _buildFilterChip(
+            LocaleUiStrings.of(context).text('Tudo', en: 'All', es: 'Todo'),
+            null,
+          ),
           const SizedBox(width: 8),
-          _buildFilterChip('Débito', 'debito'),
+          _buildFilterChip(
+            LocaleUiStrings.of(
+              context,
+            ).text('Débito', en: 'Debit', es: 'Débito'),
+            'debito',
+          ),
           const SizedBox(width: 8),
-          _buildFilterChip('Crédito', 'credito'),
+          _buildFilterChip(
+            LocaleUiStrings.of(
+              context,
+            ).text('Crédito', en: 'Credit', es: 'Crédito'),
+            'credito',
+          ),
         ],
       ),
     );
@@ -744,17 +811,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.account_balance_wallet,
                 color: Colors.white70,
                 size: 20,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                'TOTAL DO MÊS',
-                style: TextStyle(
+                LocaleUiStrings.of(
+                  context,
+                ).text('TOTAL DO MÊS', en: 'MONTH TOTAL', es: 'TOTAL DEL MES'),
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -775,10 +844,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              _buildStatChip('${transacoes.length} transações', Icons.receipt),
+              _buildStatChip(
+                LocaleUiStrings.of(context).text(
+                  '${transacoes.length} transações',
+                  en: '${transacoes.length} transactions',
+                  es: '${transacoes.length} transacciones',
+                ),
+                Icons.receipt,
+              ),
               const SizedBox(width: 12),
               _buildStatChip(
-                '${_formatarMoeda(mediaDiaria)}/dia',
+                LocaleUiStrings.of(context).text(
+                  '${_formatarMoeda(mediaDiaria)}/dia',
+                  en: '${_formatarMoeda(mediaDiaria)}/day',
+                  es: '${_formatarMoeda(mediaDiaria)}/día',
+                ),
                 Icons.trending_up,
               ),
             ],
@@ -825,9 +905,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'GASTOS POR CATEGORIA',
-          style: TextStyle(
+        Text(
+          LocaleUiStrings.of(context).text(
+            'GASTOS POR CATEGORIA',
+            en: 'EXPENSES BY CATEGORY',
+            es: 'GASTOS POR CATEGORÍA',
+          ),
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -921,13 +1005,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.credit_card, color: Colors.white70, size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.credit_card, color: Colors.white70, size: 20),
+              const SizedBox(width: 8),
               Text(
-                'USO DO CARTÃO (CRÉDITO VS DÉBITO)',
-                style: TextStyle(
+                LocaleUiStrings.of(context).text(
+                  'USO DO CARTÃO (CRÉDITO VS DÉBITO)',
+                  en: 'CARD USE (CREDIT VS DEBIT)',
+                  es: 'USO DE TARJETA (CRÉDITO VS DÉBITO)',
+                ),
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -942,11 +1030,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             runSpacing: 10,
             children: [
               _buildStatChip(
-                'Crédito: ${_formatarMoeda(totalCredito)} (${credito.length})',
+                LocaleUiStrings.of(context).text(
+                  'Crédito: ${_formatarMoeda(totalCredito)} (${credito.length})',
+                  en: 'Credit: ${_formatarMoeda(totalCredito)} (${credito.length})',
+                  es: 'Crédito: ${_formatarMoeda(totalCredito)} (${credito.length})',
+                ),
                 Icons.credit_card,
               ),
               _buildStatChip(
-                'Débito: ${_formatarMoeda(totalDebito)} (${debito.length})',
+                LocaleUiStrings.of(context).text(
+                  'Débito: ${_formatarMoeda(totalDebito)} (${debito.length})',
+                  en: 'Debit: ${_formatarMoeda(totalDebito)} (${debito.length})',
+                  es: 'Débito: ${_formatarMoeda(totalDebito)} (${debito.length})',
+                ),
                 Icons.account_balance_wallet,
               ),
             ],
@@ -998,7 +1094,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
-                        final label = value.toInt() == 0 ? 'Crédito' : 'Débito';
+                        final label = value.toInt() == 0
+                            ? LocaleUiStrings.of(
+                                context,
+                              ).text('Crédito', en: 'Credit', es: 'Crédito')
+                            : LocaleUiStrings.of(
+                                context,
+                              ).text('Débito', en: 'Debit', es: 'Débito');
                         return Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
@@ -1080,9 +1182,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'ÚLTIMOS 7 DIAS',
-              style: TextStyle(
+            Text(
+              LocaleUiStrings.of(
+                context,
+              ).text('ÚLTIMOS 7 DIAS', en: 'LAST 7 DAYS', es: 'ÚLTIMOS 7 DÍAS'),
+              style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -1096,7 +1200,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                'Meta: ${_formatarMoeda(_metaDiaria)}/dia',
+                LocaleUiStrings.of(context).text(
+                  'Meta: ${_formatarMoeda(_metaDiaria)}/dia',
+                  en: 'Goal: ${_formatarMoeda(_metaDiaria)}/day',
+                  es: 'Meta: ${_formatarMoeda(_metaDiaria)}/día',
+                ),
                 style: const TextStyle(color: Colors.white54, fontSize: 10),
               ),
             ),
@@ -1209,23 +1317,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ANÁLISE CRÍTICA DO MÊS',
-                    style: TextStyle(
+                    LocaleUiStrings.of(context).text(
+                      'ANÁLISE CRÍTICA DO MÊS',
+                      en: 'MONTHLY CRITICAL ANALYSIS',
+                      es: 'ANÁLISIS CRÍTICO DEL MES',
+                    ),
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 1,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
-                    'Todas as transações do período. Use o lápis para corrigir categorias quando o automático falhar.',
-                    style: TextStyle(
+                    LocaleUiStrings.of(context).text(
+                      'Todas as transações do período. Use o lápis para corrigir categorias quando o automático falhar.',
+                      en: 'All transactions in the period. Use the pencil to correct categories when automatic detection fails.',
+                      es: 'Todas las transacciones del período. Usa el lápiz para corregir categorías cuando falle la detección automática.',
+                    ),
+                    style: const TextStyle(
                       color: Colors.white54,
                       fontSize: 12,
                       height: 1.35,
@@ -1237,9 +1353,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             TextButton(
               onPressed: () =>
                   mentorPushNamed(context, AppRoutes.principal, arguments: 2),
-              child: const Text(
-                'Histórico',
-                style: TextStyle(color: Color(0xFF00D9FF), fontSize: 12),
+              child: Text(
+                LocaleUiStrings.of(
+                  context,
+                ).text('Histórico', en: 'History', es: 'Historial'),
+                style: const TextStyle(color: Color(0xFF00D9FF), fontSize: 12),
               ),
             ),
           ],
@@ -1325,7 +1443,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      DateFormat('dd MMM', 'pt_BR').format(transacao.data),
+                      LocalizationService.formatDate(transacao.data),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.4),
                         fontSize: 11,
@@ -1338,7 +1456,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           if (TransactionCategoryUpdateService.canEdit(transacao))
             IconButton(
-              tooltip: 'Editar categoria',
+              tooltip: LocaleUiStrings.of(context).text(
+                'Editar categoria',
+                en: 'Edit category',
+                es: 'Editar categoría',
+              ),
               icon: const Icon(
                 Icons.edit_outlined,
                 color: Color(0xFF00D9FF),

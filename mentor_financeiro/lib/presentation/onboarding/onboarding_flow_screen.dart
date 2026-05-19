@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_routes.dart';
 import '../../services/firebase_service.dart';
+import '../../services/locale_ui_strings.dart';
 import '../../services/user_persona_service.dart';
 import '../../theme/mentor_adaptive_visuals.dart';
 import '../../widgets/mentor_readable_layer.dart';
@@ -20,26 +21,50 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   final PageController _controller = PageController();
   int _page = 0;
 
-  static const _slides = [
-    _SlideData(
-      title: 'O Mentor não é corretora',
-      body:
+  List<_SlideData> _slides(BuildContext context) {
+    final strings = LocaleUiStrings.of(context);
+    return [
+      _SlideData(
+        title: strings.text(
+          'O Mentor não é corretora',
+          en: 'Mentor is not a broker',
+          es: 'Mentor no es una corredora',
+        ),
+        body: strings.text(
           'Somos orientação: dados de mercado, simulações e papo reto para você decidir com mais clareza — em qualquer país.',
-      icon: Icons.psychology_outlined,
-    ),
-    _SlideData(
-      title: 'Perfil importa',
-      body:
+          en: 'We provide guidance: market data, simulations, and straight talk so you can decide with more clarity in any country.',
+          es: 'Somos orientación: datos de mercado, simulaciones y conversación directa para que decidas con más claridad en cualquier país.',
+        ),
+        icon: Icons.psychology_outlined,
+      ),
+      _SlideData(
+        title: strings.text(
+          'Perfil importa',
+          en: 'Profile matters',
+          es: 'El perfil importa',
+        ),
+        body: strings.text(
           'Iniciante, Estrategista, Arrojado ou Poupador: o tom das dicas muda para combinar com você.',
-      icon: Icons.tune,
-    ),
-    _SlideData(
-      title: 'Próximo: seu perfil',
-      body:
+          en: 'Beginner, Strategist, Bold, or Saver: the tone of the tips changes to match you.',
+          es: 'Principiante, Estratega, Arriesgado o Ahorrador: el tono de los consejos cambia para adaptarse a ti.',
+        ),
+        icon: Icons.tune,
+      ),
+      _SlideData(
+        title: strings.text(
+          'Próximo: seu perfil',
+          en: 'Next: your profile',
+          es: 'Siguiente: tu perfil',
+        ),
+        body: strings.text(
           'Em seguida, escolha como prefere ouvir o Mentor. Depois, o painel principal e a calculadora.',
-      icon: Icons.rocket_launch_outlined,
-    ),
-  ];
+          en: 'Next, choose how you prefer to hear from Mentor. Then comes the main dashboard and calculator.',
+          es: 'Luego, elige cómo prefieres escuchar a Mentor. Después vienen el panel principal y la calculadora.',
+        ),
+        icon: Icons.rocket_launch_outlined,
+      ),
+    ];
+  }
 
   @override
   void dispose() {
@@ -64,6 +89,8 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
   @override
   Widget build(BuildContext context) {
     final v = context.mentorAdaptive;
+    final slides = _slides(context);
+    final strings = LocaleUiStrings.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -74,22 +101,29 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => _finish(),
-                  child: Text('Pular', style: TextStyle(color: v.secondaryTextColor)),
+                  child: Text(
+                    strings.text('Pular', en: 'Skip', es: 'Saltar'),
+                    style: TextStyle(color: v.secondaryTextColor),
+                  ),
                 ),
               ),
               Expanded(
                 child: PageView.builder(
                   controller: _controller,
-                  itemCount: _slides.length,
+                  itemCount: slides.length,
                   onPageChanged: (i) => setState(() => _page = i),
                   itemBuilder: (context, i) {
-                    final s = _slides[i];
+                    final s = slides[i];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(s.icon, size: 72, color: const Color(0xFF00D9FF)),
+                          Icon(
+                            s.icon,
+                            size: 72,
+                            color: const Color(0xFF00D9FF),
+                          ),
                           const SizedBox(height: 28),
                           Text(
                             s.title,
@@ -118,7 +152,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                  _slides.length,
+                  slides.length,
                   (i) => Container(
                     margin: const EdgeInsets.all(4),
                     width: 8,
@@ -139,7 +173,7 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: () {
-                      if (_page < _slides.length - 1) {
+                      if (_page < slides.length - 1) {
                         _controller.nextPage(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeOut,
@@ -153,7 +187,19 @@ class _OnboardingFlowScreenState extends State<OnboardingFlowScreen> {
                       foregroundColor: const Color(0xFF0F172A),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: Text(_page < _slides.length - 1 ? 'Continuar' : 'Definir perfil'),
+                    child: Text(
+                      _page < slides.length - 1
+                          ? strings.text(
+                              'Continuar',
+                              en: 'Continue',
+                              es: 'Continuar',
+                            )
+                          : strings.text(
+                              'Definir perfil',
+                              en: 'Set profile',
+                              es: 'Definir perfil',
+                            ),
+                    ),
                   ),
                 ),
               ),

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/finance/daily_limit_calculator.dart';
 import '../services/exchange_rate_service.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/user_data_retention_service.dart';
 import 'finance_configuration_page.dart';
 
@@ -313,7 +314,13 @@ class _TelaMetasState extends State<TelaMetas> {
                   _calcular();
                 },
                 icon: const Icon(Icons.open_in_new, size: 18),
-                label: const Text('Abrir Renda e Gastos Fixos'),
+                label: Text(
+                  LocaleUiStrings.of(context).text(
+                    'Abrir Renda e Gastos Fixos',
+                    en: 'Open Income and Fixed Expenses',
+                    es: 'Abrir ingresos y gastos fijos',
+                  ),
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF00D9FF),
                   side: const BorderSide(color: Color(0xFF00D9FF)),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'locale_ui_strings.dart';
+
 class LocationService {
   static Future<bool> solicitarLocalizacaoSeNecessario() async {
     final status = await Permission.location.status;
@@ -63,32 +65,55 @@ class LocationService {
         position.longitude <= -28.84;
   }
 
-  static String getLocationDescription() {
-    return 'Para comparar investimentos locais (CDB/CDI) com taxas internacionais, '
-        'precisamos saber sua localização. Isso permite mostrar taxas equivalentes '
-        'de outros países e ajudá-lo a decidir entre investir no Brasil ou internacionalmente.';
+  static String getLocationDescription(BuildContext context) {
+    return LocaleUiStrings.of(context).text(
+      'Para comparar investimentos locais (CDB/CDI) com taxas internacionais, '
+      'precisamos saber sua localização. Isso permite mostrar taxas equivalentes '
+      'de outros países e ajudá-lo a decidir entre investir no Brasil ou internacionalmente.',
+      en:
+          'To compare local investments (CDB/CDI) with international rates, '
+          'we need your location. This lets us show equivalent rates from other '
+          'countries and help you decide between investing in Brazil or abroad.',
+      es:
+          'Para comparar inversiones locales (CDB/CDI) con tasas internacionales, '
+          'necesitamos tu ubicación. Esto permite mostrar tasas equivalentes de '
+          'otros países y ayudarte a decidir entre invertir en Brasil o internacionalmente.',
+    );
   }
 
   static Future<void> showLocationPermissionDialog(BuildContext context) async {
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Permissão de Localização Necessária'),
-        content: Text(getLocationDescription()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+      builder: (context) {
+        final strings = LocaleUiStrings.of(context);
+        return AlertDialog(
+          title: Text(
+            strings.text(
+              'Permissão de Localização Necessária',
+              en: 'Location Permission Required',
+              es: 'Permiso de ubicación necesario',
+            ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await solicitarLocalizacaoSeNecessario();
-            },
-            child: const Text('Permitir'),
-          ),
-        ],
-      ),
+          content: Text(getLocationDescription(context)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                strings.text('Cancelar', en: 'Cancel', es: 'Cancelar'),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await solicitarLocalizacaoSeNecessario();
+              },
+              child: Text(
+                strings.text('Permitir', en: 'Allow', es: 'Permitir'),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

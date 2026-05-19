@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../core/constants/app_routes.dart';
 import '../pages/cambio_screen.dart';
@@ -11,6 +12,7 @@ import '../pages/conhecimento/investimentos_menu.dart';
 import '../pages/conhecimento/perigos_page.dart';
 import '../pages/conhecimento/primeiros_passos_page.dart';
 import '../pages/conhecimento/golpes_page.dart';
+import '../pages/conhecimento/localized_knowledge_page.dart';
 import '../pages/main_navigation.dart';
 import '../pages/historico_screen.dart';
 import '../pages/relatorios_screen.dart';
@@ -36,6 +38,8 @@ import '../presentation/intro/intro_tour_screen.dart';
 import '../presentation/onboarding/onboarding_flow_screen.dart';
 import '../presentation/persona/persona_setup_screen.dart';
 import '../presentation/splash/splash_screen.dart';
+import '../services/locale_ui_strings.dart';
+import '../services/investment_category_provider.dart';
 
 /// Rotas nomeadas do app (navegação nativa centralizada).
 class MentorAppRouter {
@@ -98,7 +102,9 @@ class MentorAppRouter {
           builder: (_) => const SettingsPage(),
         );
       case AppRoutes.principal:
-        final idx = (settings.arguments is int) ? (settings.arguments as int) : 0;
+        final idx = (settings.arguments is int)
+            ? (settings.arguments as int)
+            : 0;
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => MainNavigation(initialIndex: idx),
@@ -146,15 +152,23 @@ class MentorAppRouter {
       case AppRoutes.conhecimentoEstrategias:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const PremiumWrapper(
-            feature: 'Estratégias avançadas',
-            child: EstrategiasMenu(),
+          builder: (context) => PremiumWrapper(
+            feature: LocaleUiStrings.of(context).text(
+              'Estratégias avançadas',
+              en: 'Advanced strategies',
+              es: 'Estrategias avanzadas',
+            ),
+            child: const EstrategiasMenu(),
           ),
         );
       case AppRoutes.conhecimentoDicionario:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const DicionarioPage(),
+          builder: (context) => _regionalKnowledgePage(
+            context,
+            legacy: const DicionarioPage(),
+            topic: KnowledgeTopic.dictionary,
+          ),
         );
       case AppRoutes.conhecimentoPrimeirosPassos:
         return MaterialPageRoute<void>(
@@ -164,22 +178,38 @@ class MentorAppRouter {
       case AppRoutes.conhecimentoImpostos:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const ImpostosDetalhePage(),
+          builder: (context) => _regionalKnowledgePage(
+            context,
+            legacy: const ImpostosDetalhePage(),
+            topic: KnowledgeTopic.taxes,
+          ),
         );
       case AppRoutes.conhecimentoPerigos:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const PerigosPage(),
+          builder: (context) => _regionalKnowledgePage(
+            context,
+            legacy: const PerigosPage(),
+            topic: KnowledgeTopic.risks,
+          ),
         );
       case AppRoutes.conhecimentoFerramentas:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const FerramentasPage(),
+          builder: (context) => _regionalKnowledgePage(
+            context,
+            legacy: const FerramentasPage(),
+            topic: KnowledgeTopic.tools,
+          ),
         );
       case AppRoutes.conhecimentoGolpes:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const GolpesPage(),
+          builder: (context) => _regionalKnowledgePage(
+            context,
+            legacy: const GolpesPage(),
+            topic: KnowledgeTopic.scams,
+          ),
         );
       case AppRoutes.simulado:
         return MaterialPageRoute<void>(
@@ -189,7 +219,11 @@ class MentorAppRouter {
       case AppRoutes.quizConhecimento:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const QuizConhecimentoPage(),
+          builder: (context) => _regionalKnowledgePage(
+            context,
+            legacy: const QuizConhecimentoPage(),
+            topic: KnowledgeTopic.quiz,
+          ),
         );
       case AppRoutes.upgrade:
         return MaterialPageRoute<void>(
@@ -206,9 +240,17 @@ class MentorAppRouter {
         final args = raw is MentoriaLessonArgs ? raw : null;
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => args == null
-              ? const Scaffold(
-                  body: Center(child: Text('Lição inválida')),
+          builder: (context) => args == null
+              ? Scaffold(
+                  body: Center(
+                    child: Text(
+                      LocaleUiStrings.of(context).text(
+                        'Lição inválida',
+                        en: 'Invalid lesson',
+                        es: 'Lección no válida',
+                      ),
+                    ),
+                  ),
                 )
               : MentoriaLessonScreen(args: args),
         );
@@ -244,5 +286,20 @@ class MentorAppRouter {
           builder: (_) => const HomeScreen(),
         );
     }
+  }
+
+  static Widget _regionalKnowledgePage(
+    BuildContext context, {
+    required Widget legacy,
+    required KnowledgeTopic topic,
+  }) {
+    final locale = Localizations.localeOf(context);
+    final lang = locale.languageCode.toLowerCase();
+    final isBrazil = Provider.of<InvestmentCategoryProvider>(
+      context,
+      listen: false,
+    ).isBrazilMarket;
+    if (isBrazil && lang == 'pt') return legacy;
+    return LocalizedKnowledgePage(topic: topic, isBrazil: isBrazil);
   }
 }

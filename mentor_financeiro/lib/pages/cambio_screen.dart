@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../services/exchange_rate_service.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/localization_service.dart';
 import '../services/regional_context_controller.dart';
 
@@ -91,6 +92,7 @@ class _CambioScreenState extends State<CambioScreen>
     final filtered = _query.isEmpty
         ? entries
         : entries.where((e) => e.key.contains(_query)).toList();
+    final strings = LocaleUiStrings.of(context);
 
     final lastUpdated = snap == null
         ? ''
@@ -100,8 +102,8 @@ class _CambioScreenState extends State<CambioScreen>
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
-        title: const Text(
-          'Moedas',
+        title: Text(
+          strings.text('Moedas', en: 'Currencies', es: 'Monedas'),
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -117,7 +119,11 @@ class _CambioScreenState extends State<CambioScreen>
           : snap == null
           ? Center(
               child: Text(
-                'Sem dados de câmbio (offline).',
+                strings.text(
+                  'Sem dados de câmbio (offline).',
+                  en: 'No exchange data (offline).',
+                  es: 'Sin datos de cambio (sin conexión).',
+                ),
                 style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
               ),
             )
@@ -129,7 +135,11 @@ class _CambioScreenState extends State<CambioScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Base local: ${snap.base} • Atualizado: $lastUpdated',
+                        strings.text(
+                          'Base local: ${snap.base} • Atualizado: $lastUpdated',
+                          en: 'Local base: ${snap.base} • Updated: $lastUpdated',
+                          es: 'Base local: ${snap.base} • Actualizado: $lastUpdated',
+                        ),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 12,
@@ -140,7 +150,11 @@ class _CambioScreenState extends State<CambioScreen>
                         controller: _searchCtrl,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          hintText: 'Buscar por código (ex: USD, EUR, JPY)',
+                          hintText: strings.text(
+                            'Buscar por código (ex: USD, EUR, JPY)',
+                            en: 'Search by code (ex: USD, EUR, JPY)',
+                            es: 'Buscar por código (ej.: USD, EUR, JPY)',
+                          ),
                           hintStyle: TextStyle(
                             color: Colors.white.withValues(alpha: 0.45),
                           ),
@@ -186,7 +200,11 @@ class _CambioScreenState extends State<CambioScreen>
                         ),
                         subtitle: Text(
                           e.value <= 0
-                              ? 'Cotação indisponível'
+                              ? strings.text(
+                                  'Cotação indisponível',
+                                  en: 'Rate unavailable',
+                                  es: 'Cotización no disponible',
+                                )
                               : '1 ${e.key} = ${_formatLocal(1 / e.value, snap.base)}',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.65),

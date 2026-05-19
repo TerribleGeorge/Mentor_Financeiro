@@ -62,6 +62,7 @@ class GooglePlayBillingService extends ChangeNotifier {
     _setLoading(true);
     _error = null;
     _hasActivePurchase = false;
+    _product = null;
 
     _available = await _iap.isAvailable();
     if (!_available) {
@@ -95,17 +96,18 @@ class GooglePlayBillingService extends ChangeNotifier {
       return;
     }
 
-    _product = response.productDetails.first;
-
-    // Pré-seleção do base plan (não obrigatório, só valida que existe)
-    if (basePlanId != null) {
-      final token = _tryResolveOfferToken(_product!, basePlanId: basePlanId);
-      if (token == null) {
-        _error =
-            'Não foi possível carregar este plano. Tente novamente em instantes.';
-      }
+    final selectedProduct = _selectProductForBasePlan(
+      response.productDetails,
+      basePlanId: basePlanId,
+    );
+    if (selectedProduct == null) {
+      _error =
+          'A Play Store não retornou uma oferta válida para este plano. Tente novamente em instantes.';
+      _setLoading(false);
+      return;
     }
 
+    _product = selectedProduct;
     _setLoading(false);
   }
 
@@ -131,33 +133,31 @@ class GooglePlayBillingService extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    final offerToken = basePlanId == null
-        ? _tryResolveOfferToken(p, preferFreeTrial: preferFreeTrial)
-        : _tryResolveOfferToken(
-            p,
-            basePlanId: basePlanId,
-            preferFreeTrial: preferFreeTrial,
-          );
-    if (basePlanId != null &&
-        p is GooglePlayProductDetails &&
-        offerToken == null) {
-      _error =
-          'Não foi possível abrir este plano. Tente novamente em instantes.';
-      notifyListeners();
-      return;
+    final PurchaseParam purchaseParam;
+    if (p is GooglePlayProductDetails) {
+      final offerToken = _tryResolveOfferToken(
+        p,
+        basePlanId: basePlanId,
+        preferFreeTrial: preferFreeTrial,
+      );
+      if (offerToken == null) {
+        _error =
+            'Não foi possível abrir este plano porque a Play Store não retornou uma oferta válida.';
+        notifyListeners();
+        return;
+      }
+
+      purchaseParam = GooglePlayPurchaseParam(
+        productDetails: p,
+        offerToken: offerToken,
+        applicationUserName: null,
+      );
+    } else {
+      purchaseParam = PurchaseParam(
+        productDetails: p,
+        applicationUserName: null,
+      );
     }
-
-    final param = PurchaseParam(productDetails: p, applicationUserName: null);
-
-    // Para assinaturas no Android, o offerToken é essencial quando existe.
-    // O plugin aceita via GooglePlayPurchaseParam.
-    final purchaseParam = (offerToken == null)
-        ? param
-        : GooglePlayPurchaseParam(
-            productDetails: p,
-            offerToken: offerToken,
-            applicationUserName: null,
-          );
 
     try {
       _setLoading(true);
@@ -218,6 +218,24 @@ class GooglePlayBillingService extends ChangeNotifier {
     notifyListeners();
   }
 
+  ProductDetails? _selectProductForBasePlan(
+    List<ProductDetails> products, {
+    String? basePlanId,
+  }) {
+    for (final product in products) {
+      if (product is! GooglePlayProductDetails) return product;
+
+      final token = _tryResolveOfferToken(
+        product,
+        basePlanId: basePlanId,
+        preferFreeTrial: true,
+      );
+      if (token != null) return product;
+    }
+
+    return null;
+  }
+
   /// Resolve o offerToken da Play (Android). Se [basePlanId] for fornecido,
   /// tenta casar. Quando pedido, prioriza a oferta que contém fase gratuita.
   String? _tryResolveOfferToken(
@@ -240,14 +258,29 @@ class GooglePlayBillingService extends ChangeNotifier {
         final hasFreePhase = offer.pricingPhases.any(
           (phase) => phase.priceAmountMicros == 0,
         );
-        if (hasFreePhase) return offer.offerIdToken;
+        final token = _normalizeOfferToken(offer.offerIdToken);
+        if (hasFreePhase && token != null) return token;
       }
     }
 
     if (basePlanId != null) {
-      return matchingOffers.first.offerIdToken;
+      for (final offer in matchingOffers) {
+        final token = _normalizeOfferToken(offer.offerIdToken);
+        if (token != null) return token;
+      }
+      return null;
     }
 
-    return matchingOffers.first.offerIdToken;
+    for (final offer in matchingOffers) {
+      final token = _normalizeOfferToken(offer.offerIdToken);
+      if (token != null) return token;
+    }
+
+    return null;
+  }
+
+  String? _normalizeOfferToken(String token) {
+    final trimmed = token.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 }

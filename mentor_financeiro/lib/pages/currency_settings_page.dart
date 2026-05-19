@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../services/currency_preference_controller.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/user_data_retention_service.dart';
 
 class CurrencySettingsPage extends StatelessWidget {
@@ -11,6 +12,7 @@ class CurrencySettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final strings = LocaleUiStrings.of(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -20,7 +22,7 @@ class CurrencySettingsPage extends StatelessWidget {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         foregroundColor: scheme.onSurface,
-        title: const Text('Moeda de exibição'),
+        title: Text(strings.settingsDisplayCurrency),
       ),
       body: ListenableBuilder(
         listenable: CurrencyPreferenceController.instance,
@@ -38,17 +40,32 @@ class CurrencySettingsPage extends StatelessWidget {
               if (index == 0) {
                 return _InfoCard(
                   icon: Icons.payments_outlined,
-                  title: 'Escolha como os valores aparecem',
-                  text:
-                      'A opção automática segue o idioma/região do app. As opções manuais trocam apenas a moeda exibida nos valores.',
+                  title: strings.text(
+                    'Escolha como os valores aparecem',
+                    en: 'Choose how values appear',
+                    es: 'Elige cómo aparecen los valores',
+                  ),
+                  text: strings.text(
+                    'A opção automática segue o idioma/região do app. As opções manuais trocam apenas a moeda exibida nos valores.',
+                    en: 'Automatic follows the app language/region. Manual options only change the currency displayed in values.',
+                    es: 'La opción automática sigue el idioma/región de la app. Las opciones manuales solo cambian la moneda mostrada en los valores.',
+                  ),
                 );
               }
 
               if (index == 1) {
                 return _CurrencyTile(
                   code: 'AUTO',
-                  title: 'Automática (idioma)',
-                  subtitle: 'Segue a moeda padrão do idioma/região',
+                  title: strings.text(
+                    'Automática (idioma)',
+                    en: 'Automatic (language)',
+                    es: 'Automática (idioma)',
+                  ),
+                  subtitle: strings.text(
+                    'Segue a moeda padrão do idioma/região',
+                    en: 'Follows the default currency for the language/region',
+                    es: 'Sigue la moneda predeterminada del idioma/región',
+                  ),
                   selected: selectedMode == 'AUTO',
                   onTap: () async {
                     await CurrencyPreferenceController.instance.setCurrencyMode(
@@ -66,7 +83,7 @@ class CurrencySettingsPage extends StatelessWidget {
               final option = options[index - 2];
               return _CurrencyTile(
                 code: option.code,
-                title: '${option.label} (${option.code})',
+                title: CurrencyPreferenceController.currencyLabel(option.code),
                 subtitle: option.symbol,
                 selected: selectedMode == option.code,
                 onTap: () async {

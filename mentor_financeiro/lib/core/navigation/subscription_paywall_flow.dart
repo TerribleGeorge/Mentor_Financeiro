@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../pages/paywall_screen.dart';
+import '../../services/locale_ui_strings.dart';
 import '../../services/subscription_provider.dart';
 
 /// Abre [PaywallScreen] e sincroniza estado via [SubscriptionProvider.refreshStatus].
@@ -22,8 +23,14 @@ Future<bool> presentPaywallAndRefresh(
   } catch (e) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Não foi possível abrir a assinatura agora.'),
+        SnackBar(
+          content: Text(
+            LocaleUiStrings.of(context).text(
+              'Não foi possível abrir a assinatura agora.',
+              en: 'Could not open the subscription screen right now.',
+              es: 'No se pudo abrir la suscripción ahora.',
+            ),
+          ),
         ),
       );
     }

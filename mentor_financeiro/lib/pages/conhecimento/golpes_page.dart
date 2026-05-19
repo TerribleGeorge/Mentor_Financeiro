@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../services/locale_ui_strings.dart';
+
 class GolpesPage extends StatelessWidget {
   const GolpesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (LocaleUiStrings.of(context).text('pt', en: 'en', es: 'es') != 'pt') {
+      return _fallbackPage(context);
+    }
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -26,7 +31,9 @@ class GolpesPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: scheme.surface.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: scheme.onSurface.withValues(alpha: 0.08)),
+              border: Border.all(
+                color: scheme.onSurface.withValues(alpha: 0.08),
+              ),
             ),
             child: Text(
               'Os golpes mudam de país para país, mas quase sempre seguem o mesmo padrão: '
@@ -52,7 +59,8 @@ class GolpesPage extends StatelessWidget {
           _scamPattern(
             context,
             index: 1,
-            title: '“Compra suspensa” ou “PIX em análise” (link de cancelamento)',
+            title:
+                '“Compra suspensa” ou “PIX em análise” (link de cancelamento)',
             example:
                 'BB: Compra de R\$ 2.499,90 em MAGAZINE LUIZA aguardando aprovação. '
                 'Caso NÃO tenha realizado, cancele agora em: ://link-falso.com',
@@ -128,12 +136,78 @@ class GolpesPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: scheme.surface.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: scheme.onSurface.withValues(alpha: 0.08)),
+              border: Border.all(
+                color: scheme.onSurface.withValues(alpha: 0.08),
+              ),
             ),
             child: Text(
               'Dica: em caso de dúvida, pare a transação e confirme no app oficial do banco. '
               'Pressa é o principal gatilho de golpes.',
-              style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.78), height: 1.35),
+              style: TextStyle(
+                color: scheme.onSurface.withValues(alpha: 0.78),
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _fallbackPage(BuildContext context) {
+    final strings = LocaleUiStrings.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: Text(strings.text('Golpes', en: 'Scams', es: 'Estafas')),
+        centerTitle: true,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            strings.text(
+              'Os golpes mudam de país para país, mas quase sempre seguem o mesmo padrão: urgência, link/telefone e pedido de ação imediata.',
+              en: 'Scams vary by country, but they usually follow the same pattern: urgency, a link or phone number, and a request for immediate action.',
+              es: 'Las estafas cambian según el país, pero casi siempre siguen el mismo patrón: urgencia, enlace o teléfono y pedido de acción inmediata.',
+            ),
+            style: TextStyle(
+              color: scheme.onSurface.withValues(alpha: 0.78),
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _tile(
+            context,
+            icon: Icons.sms_outlined,
+            title: strings.text(
+              'Links suspeitos (SMS/WhatsApp/e-mail)',
+              en: 'Suspicious links (SMS/WhatsApp/email)',
+              es: 'Enlaces sospechosos (SMS/WhatsApp/correo)',
+            ),
+            body: strings.text(
+              'Nunca clique em links para regularizar ou desbloquear conta. Abra sempre o app oficial do banco.',
+              en: 'Never tap links to regularize or unlock an account. Always open your bank’s official app yourself.',
+              es: 'Nunca pulses enlaces para regularizar o desbloquear una cuenta. Abre siempre la app oficial del banco.',
+            ),
+          ),
+          _tile(
+            context,
+            icon: Icons.pix_outlined,
+            title: strings.text(
+              'PIX errado / pedido de PIX',
+              en: 'Wrong transfer or payment request',
+              es: 'Transferencia equivocada o pedido de pago',
+            ),
+            body: strings.text(
+              'Confira nome, instituição e valor antes de confirmar qualquer transferência.',
+              en: 'Check the name, institution, and amount before confirming any transfer.',
+              es: 'Revisa nombre, institución y valor antes de confirmar cualquier transferencia.',
             ),
           ),
         ],
@@ -148,7 +222,10 @@ class GolpesPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF0D1118),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFF4D4D).withValues(alpha: 0.78), width: 1.2),
+        border: Border.all(
+          color: const Color(0xFFFF4D4D).withValues(alpha: 0.78),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFFFF4D4D).withValues(alpha: 0.14),
@@ -164,9 +241,15 @@ class GolpesPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFFFF4D4D).withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFFF4D4D).withValues(alpha: 0.42)),
+              border: Border.all(
+                color: const Color(0xFFFF4D4D).withValues(alpha: 0.42),
+              ),
             ),
-            child: const Icon(Icons.shield_outlined, color: Color(0xFFFF4D4D), size: 26),
+            child: const Icon(
+              Icons.shield_outlined,
+              color: Color(0xFFFF4D4D),
+              size: 26,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -184,7 +267,10 @@ class GolpesPage extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Checklist rápido para evitar golpes comuns.',
-                  style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.7), fontSize: 13),
+                  style: TextStyle(
+                    color: scheme.onSurface.withValues(alpha: 0.7),
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -214,18 +300,28 @@ class GolpesPage extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 2),
-            child: Icon(icon, color: scheme.primary.withValues(alpha: 0.9), size: 20),
+            child: Icon(
+              icon,
+              color: scheme.primary.withValues(alpha: 0.9),
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
                 const SizedBox(height: 6),
                 Text(
                   body,
-                  style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.75), height: 1.35),
+                  style: TextStyle(
+                    color: scheme.onSurface.withValues(alpha: 0.75),
+                    height: 1.35,
+                  ),
                 ),
               ],
             ),
@@ -250,7 +346,10 @@ class GolpesPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF0D1118),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFF4D4D).withValues(alpha: 0.55), width: 1.2),
+        border: Border.all(
+          color: const Color(0xFFFF4D4D).withValues(alpha: 0.55),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFFFF4D4D).withValues(alpha: 0.12),
@@ -271,7 +370,9 @@ class GolpesPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFFF4D4D).withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFF4D4D).withValues(alpha: 0.42)),
+                  border: Border.all(
+                    color: const Color(0xFFFF4D4D).withValues(alpha: 0.42),
+                  ),
                 ),
                 child: Text(
                   index.toString(),
@@ -311,7 +412,9 @@ class GolpesPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: scheme.surface.withValues(alpha: 0.55),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: scheme.onSurface.withValues(alpha: 0.08)),
+              border: Border.all(
+                color: scheme.onSurface.withValues(alpha: 0.08),
+              ),
             ),
             child: Text(
               example,
@@ -322,17 +425,9 @@ class GolpesPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _labelBlock(
-            context,
-            label: 'Por que é golpe?',
-            text: why,
-          ),
+          _labelBlock(context, label: 'Por que é golpe?', text: why),
           const SizedBox(height: 10),
-          _labelBlock(
-            context,
-            label: 'O que fazer',
-            text: whatToDo,
-          ),
+          _labelBlock(context, label: 'O que fazer', text: whatToDo),
         ],
       ),
     );
@@ -459,7 +554,9 @@ class GolpesPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: scheme.surface.withValues(alpha: 0.55),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: scheme.onSurface.withValues(alpha: 0.08)),
+              border: Border.all(
+                color: scheme.onSurface.withValues(alpha: 0.08),
+              ),
             ),
             child: Text(
               'Dica de ouro: se receber um SMS ou notificação estranha, feche tudo e abra o app do banco. '
@@ -488,7 +585,12 @@ class GolpesPage extends StatelessWidget {
               fontWeight: FontWeight.w900,
               fontSize: 12,
               letterSpacing: 0.6,
-              shadows: [Shadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 10)],
+              shadows: [
+                Shadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 10,
+                ),
+              ],
             ),
           ),
         ),
@@ -500,7 +602,12 @@ class GolpesPage extends StatelessWidget {
               fontWeight: FontWeight.w900,
               fontSize: 12,
               letterSpacing: 0.6,
-              shadows: [Shadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 10)],
+              shadows: [
+                Shadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 10,
+                ),
+              ],
             ),
           ),
         ),
@@ -555,4 +662,3 @@ class GolpesPage extends StatelessWidget {
     );
   }
 }
-

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/navigation/mentor_navigator.dart';
 import '../core/navigation/splash_route_observer.dart';
 import '../services/app_update_prompt.dart';
+import '../services/locale_ui_strings.dart';
 
 /// Após sair da splash, verifica se há atualização na loja e mostra um diálogo.
 class AppUpdatePromptHost extends StatefulWidget {
@@ -64,27 +65,50 @@ class _AppUpdatePromptHostState extends State<AppUpdatePromptHost> {
       barrierDismissible: true,
       builder: (innerContext) {
         final theme = Theme.of(innerContext);
+        final strings = LocaleUiStrings.of(innerContext);
         final versionLine = notice.versionLabel != null
-            ? '\n\nVersão na loja: ${notice.versionLabel}.'
+            ? strings.text(
+                '\n\nVersão na loja: ${notice.versionLabel}.',
+                en: '\n\nStore version: ${notice.versionLabel}.',
+                es: '\n\nVersión en la tienda: ${notice.versionLabel}.',
+              )
             : '';
         return AlertDialog(
-          title: const Text('Atualização disponível'),
+          title: Text(
+            strings.text(
+              'Atualização disponível',
+              en: 'Update available',
+              es: 'Actualización disponible',
+            ),
+          ),
           content: Text(
-            'Há uma nova versão do Mentor Financeiro na loja. '
-            'Atualize para ter as últimas melhorias e correções.$versionLine',
+            strings.text(
+              'Há uma nova versão do Mentor Financeiro na loja. '
+              'Atualize para ter as últimas melhorias e correções.$versionLine',
+              en:
+                  'A new version of Mentor Financeiro is available in the store. '
+                  'Update to get the latest improvements and fixes.$versionLine',
+              es:
+                  'Hay una nueva versión de Mentor Financeiro en la tienda. '
+                  'Actualiza para recibir las últimas mejoras y correcciones.$versionLine',
+            ),
             style: theme.textTheme.bodyMedium,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(innerContext).pop(),
-              child: const Text('Agora não'),
+              child: Text(
+                strings.text('Agora não', en: 'Not now', es: 'Ahora no'),
+              ),
             ),
             FilledButton(
               onPressed: () async {
                 Navigator.of(innerContext).pop();
                 await AppUpdatePrompt.startUpdateFlow();
               },
-              child: const Text('Atualizar'),
+              child: Text(
+                strings.text('Atualizar', en: 'Update', es: 'Actualizar'),
+              ),
             ),
           ],
         );

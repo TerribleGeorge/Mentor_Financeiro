@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'locale_ui_strings.dart';
 import '../theme/mentor_adaptive_visuals.dart';
 
 /// Temas predefinidos devvoid (sem imagem de fundo personalizada).
@@ -19,19 +20,42 @@ extension AppThemeModePremium on AppThemeMode {
 
 extension AppThemeModeLabels on AppThemeMode {
   String get displayName => switch (this) {
-        AppThemeMode.voidTheme => 'Void',
-        AppThemeMode.cyber => 'Cyber',
-        AppThemeMode.obsidian => 'Grimm',
-        AppThemeMode.glacier => 'Hive',
-      };
+    AppThemeMode.voidTheme => 'Void',
+    AppThemeMode.cyber => 'Cyber',
+    AppThemeMode.obsidian => 'Grimm',
+    AppThemeMode.glacier => 'Hive',
+  };
 
   /// Subtítulo na lista de Definições (preset Void).
   String get settingsSubtitle => switch (this) {
-        AppThemeMode.voidTheme => 'Preto absoluto · Hollow Knight',
-        AppThemeMode.cyber => 'Amarelo neon · cinza escuro · premium',
-        AppThemeMode.obsidian => 'Vermelho e preto · premium',
-        AppThemeMode.glacier => 'Laranja e preto · vespa · premium',
-      };
+    AppThemeMode.voidTheme => 'Preto absoluto · Hollow Knight',
+    AppThemeMode.cyber => 'Amarelo neon · cinza escuro · premium',
+    AppThemeMode.obsidian => 'Vermelho e preto · premium',
+    AppThemeMode.glacier => 'Laranja e preto · vespa · premium',
+  };
+
+  String settingsSubtitleText(LocaleUiStrings strings) => switch (this) {
+    AppThemeMode.voidTheme => strings.text(
+      'Preto absoluto · Hollow Knight',
+      en: 'Absolute black · Hollow Knight',
+      es: 'Negro absoluto · Hollow Knight',
+    ),
+    AppThemeMode.cyber => strings.text(
+      'Amarelo neon · cinza escuro · premium',
+      en: 'Neon yellow · dark gray · premium',
+      es: 'Amarillo neón · gris oscuro · premium',
+    ),
+    AppThemeMode.obsidian => strings.text(
+      'Vermelho e preto · premium',
+      en: 'Red and black · premium',
+      es: 'Rojo y negro · premium',
+    ),
+    AppThemeMode.glacier => strings.text(
+      'Laranja e preto · vespa · premium',
+      en: 'Orange and black · wasp · premium',
+      es: 'Naranja y negro · avispa · premium',
+    ),
+  };
 }
 
 class AppThemeController extends ChangeNotifier {
@@ -117,12 +141,12 @@ class AppThemeController extends ChangeNotifier {
   static const _neonLime = Color(0xFF26DE81);
 
   static List<Shadow> _softGlow(Color c) => [
-        Shadow(
-          color: c.withValues(alpha: 0.35),
-          blurRadius: 10,
-          offset: const Offset(0, 1.5),
-        ),
-      ];
+    Shadow(
+      color: c.withValues(alpha: 0.35),
+      blurRadius: 10,
+      offset: const Offset(0, 1.5),
+    ),
+  ];
 
   static TextTheme _applyLegibleDarkTextTheme(
     TextTheme base,
@@ -229,10 +253,7 @@ class AppThemeController extends ChangeNotifier {
     ),
     scaffoldBackgroundColor: Colors.white,
     useMaterial3: true,
-    cardTheme: const CardThemeData(
-      color: Color(0xFFF1F5F9),
-      elevation: 0,
-    ),
+    cardTheme: const CardThemeData(color: Color(0xFFF1F5F9), elevation: 0),
   );
 
   ThemeData _mergeAdaptiveLight(ThemeData base, MentorAdaptiveVisuals v) {
@@ -329,10 +350,7 @@ class AppThemeController extends ChangeNotifier {
           fontWeight: FontWeight.w600,
           fontSize: 16,
         ),
-        subtitleTextStyle: TextStyle(
-          color: v.secondaryTextColor,
-          fontSize: 13,
-        ),
+        subtitleTextStyle: TextStyle(color: v.secondaryTextColor, fontSize: 13),
       ),
     );
   }
@@ -359,9 +377,7 @@ class AppThemeController extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getInt(_themeKeyV2);
-    if (stored != null &&
-        stored >= 0 &&
-        stored < AppThemeMode.values.length) {
+    if (stored != null && stored >= 0 && stored < AppThemeMode.values.length) {
       _themeMode = AppThemeMode.values[stored];
     } else {
       _themeMode = AppThemeMode.voidTheme;

@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/finance/daily_limit_calculator.dart';
 import '../services/finance_config_signals.dart';
+import '../services/locale_ui_strings.dart';
+import '../services/localization_service.dart';
 import '../services/transaction_refresh_signal.dart';
 import '../theme/classic_mode_style.dart';
 
@@ -20,6 +22,7 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
   double _porcentagem = 0;
   String? _alertaLimiteDiario;
   String? _infoLimiteDiario;
+  DailyLimitResult? _limiteResultado;
   bool _loading = true;
 
   void _onFinanceConfigSaved() => _carregarDados();
@@ -45,6 +48,7 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
     final prefs = await SharedPreferences.getInstance();
 
     final limite = DailyLimitCalculator.computeFromPrefs(prefs);
+    _limiteResultado = limite;
     _limiteDiario = limite.displayLimit;
     _alertaLimiteDiario = limite.alertMessage;
     _infoLimiteDiario = limite.infoMessage;
@@ -62,6 +66,8 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final strings = LocaleUiStrings.of(context);
+    final result = _limiteResultado;
 
     if (_loading) {
       return Container(
@@ -90,10 +96,7 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF000000),
-            Color(0xFF07121B),
-          ],
+          colors: [Color(0xFF000000), Color(0xFF07121B)],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
@@ -112,7 +115,11 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Limite Hoje',
+            strings.text(
+              'Limite Hoje',
+              en: 'Today\'s limit',
+              es: 'Límite de hoy',
+            ),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.88),
               fontSize: 12,
@@ -121,7 +128,7 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
           ),
           const SizedBox(height: 4),
           Text(
-            'R\$ ${_limiteDiario.toStringAsFixed(2)}',
+            LocalizationService.formatCurrency(_limiteDiario),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 28,
@@ -145,8 +152,16 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
           const SizedBox(height: 8),
           Text(
             _limiteDiario > 0
-                ? 'R\$ ${_gastosHoje.toStringAsFixed(2)} gastos de R\$ ${_limiteDiario.toStringAsFixed(2)}'
-                : 'R\$ ${_gastosHoje.toStringAsFixed(2)} gastos hoje (limite R\$ 0,00)',
+                ? strings.text(
+                    '${LocalizationService.formatCurrency(_gastosHoje)} gastos de ${LocalizationService.formatCurrency(_limiteDiario)}',
+                    en: '${LocalizationService.formatCurrency(_gastosHoje)} spent of ${LocalizationService.formatCurrency(_limiteDiario)}',
+                    es: '${LocalizationService.formatCurrency(_gastosHoje)} gastados de ${LocalizationService.formatCurrency(_limiteDiario)}',
+                  )
+                : strings.text(
+                    '${LocalizationService.formatCurrency(_gastosHoje)} gastos hoje (limite ${LocalizationService.formatCurrency(0)})',
+                    en: '${LocalizationService.formatCurrency(_gastosHoje)} spent today (limit ${LocalizationService.formatCurrency(0)})',
+                    es: '${LocalizationService.formatCurrency(_gastosHoje)} gastados hoy (límite ${LocalizationService.formatCurrency(0)})',
+                  ),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.84),
               fontSize: 12,
@@ -155,7 +170,13 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
           if (_alertaLimiteDiario != null) ...[
             const SizedBox(height: 10),
             Text(
-              _alertaLimiteDiario!,
+              result == null
+                  ? _alertaLimiteDiario!
+                  : strings.text(
+                      'Alerta: Você está com saldo negativo. Seu limite diário recomendado é ${LocalizationService.formatCurrency(0)} para evitar mais juros. Foque em cobrir o saldo de ${LocalizationService.formatCurrency(result.saldoAtual)}.',
+                      en: 'Alert: Your balance is negative. Your recommended daily limit is ${LocalizationService.formatCurrency(0)} to avoid more interest. Focus on covering the balance of ${LocalizationService.formatCurrency(result.saldoAtual)}.',
+                      es: 'Alerta: tu saldo es negativo. Tu límite diario recomendado es ${LocalizationService.formatCurrency(0)} para evitar más intereses. Enfócate en cubrir el saldo de ${LocalizationService.formatCurrency(result.saldoAtual)}.',
+                    ),
               style: TextStyle(
                 color: const Color(0xFFFF6B6B),
                 fontSize: 11,
@@ -168,7 +189,13 @@ class _HomeDailyLimitPanelState extends State<HomeDailyLimitPanel> {
           if (_infoLimiteDiario != null) ...[
             const SizedBox(height: 10),
             Text(
-              _infoLimiteDiario!,
+              result == null
+                  ? _infoLimiteDiario!
+                  : strings.text(
+                      'O limite calculado (${LocalizationService.formatCurrency(result.rawLimit)}) foi mostrado no teto de ${LocalizationService.formatCurrency(result.displayLimit)} por dia (ajustável em Configurar finanças).',
+                      en: 'The calculated limit (${LocalizationService.formatCurrency(result.rawLimit)}) was shown at the daily cap of ${LocalizationService.formatCurrency(result.displayLimit)} (adjustable in Configure finances).',
+                      es: 'El límite calculado (${LocalizationService.formatCurrency(result.rawLimit)}) se mostró con el techo diario de ${LocalizationService.formatCurrency(result.displayLimit)} (ajustable en Configurar finanzas).',
+                    ),
               style: TextStyle(
                 color: Colors.cyanAccent.withValues(alpha: 0.85),
                 fontSize: 11,

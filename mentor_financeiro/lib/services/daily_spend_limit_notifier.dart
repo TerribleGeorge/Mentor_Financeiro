@@ -1,10 +1,11 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/finance/daily_limit_calculator.dart';
+import 'locale_controller.dart';
+import 'localization_service.dart';
 
 /// Avisos locais (Android) quando o gasto do dia se aproxima ou ultrapassa o guia
 /// "limite hoje" (teto + fórmula em [DailyLimitCalculator]).
@@ -28,9 +29,6 @@ class DailySpendLimitNotifier {
     if (d.length != 10) return null;
     return d;
   }
-
-  static String _fmtBrl(double v) =>
-      NumberFormat.currency(locale: 'pt_BR', symbol: r'R$').format(v);
 
   /// Chamar após gravar `gastos_YYYY-MM-DD` (ex.: notificação bancária).
   static Future<void> onSpendUpdated({
@@ -81,28 +79,55 @@ class DailySpendLimitNotifier {
     final String body;
     final int notifId;
     if (phase == 2) {
-      title = 'Limite diário ultrapassado';
-      body =
-          'Gastos de hoje (${_fmtBrl(spent)}) passaram do teu guia (${_fmtBrl(limit)}). Abre o Mentor Financeiro para rever.';
+      title = _text(
+        pt: 'Limite diário ultrapassado',
+        en: 'Daily limit exceeded',
+        es: 'Límite diario superado',
+      );
+      body = _text(
+        pt: 'Gastos de hoje (${_fmt(spent)}) passaram do teu guia (${_fmt(limit)}). Abre o Mentor Financeiro para rever.',
+        en: 'Today\'s spending (${_fmt(spent)}) exceeded your guide (${_fmt(limit)}). Open Mentor Financeiro to review it.',
+        es: 'Los gastos de hoy (${_fmt(spent)}) superaron tu guía (${_fmt(limit)}). Abre Mentor Financeiro para revisarlo.',
+      );
       notifId = 4211;
     } else {
-      title = 'Perto do limite de gastos hoje';
-      body =
-          'Já gastaste ${_fmtBrl(spent)} de ${_fmtBrl(limit)} (~${(ratio * 100).round()}%). Atenção ao teto do dia.';
+      title = _text(
+        pt: 'Perto do limite de gastos hoje',
+        en: 'Close to today\'s spending limit',
+        es: 'Cerca del límite de gastos de hoy',
+      );
+      body = _text(
+        pt: 'Já gastaste ${_fmt(spent)} de ${_fmt(limit)} (~${(ratio * 100).round()}%). Atenção ao teto do dia.',
+        en: 'You have spent ${_fmt(spent)} of ${_fmt(limit)} (~${(ratio * 100).round()}%). Watch today\'s cap.',
+        es: 'Ya gastaste ${_fmt(spent)} de ${_fmt(limit)} (~${(ratio * 100).round()}%). Atención al techo del día.',
+      );
       notifId = 4210;
     }
 
     try {
-      final ok = await _channel.invokeMethod<bool>('showDailyBudgetNotification', {
-        'title': title,
-        'body': body,
-        'notificationId': notifId,
-      });
+      final ok = await _channel.invokeMethod<bool>(
+        'showDailyBudgetNotification',
+        {'title': title, 'body': body, 'notificationId': notifId},
+      );
       if (ok == true) {
         await prefs.setInt(key, phase);
       }
     } on PlatformException catch (_) {
       // POST_NOTIFICATIONS negado ou canal indisponível.
     }
+  }
+
+  static String _fmt(double v) => LocalizationService.formatCurrency(v);
+
+  static String _text({
+    required String pt,
+    required String en,
+    required String es,
+  }) {
+    return switch (LocaleController.instance.locale.languageCode) {
+      'pt' => pt,
+      'es' => es,
+      _ => en,
+    };
   }
 }

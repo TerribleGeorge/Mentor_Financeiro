@@ -3,14 +3,47 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../services/locale_controller.dart';
+import '../services/locale_ui_strings.dart';
 import '../services/user_data_retention_service.dart';
 
-class LanguageSettingsPage extends StatelessWidget {
+class LanguageSettingsPage extends StatefulWidget {
   const LanguageSettingsPage({super.key});
+
+  @override
+  State<LanguageSettingsPage> createState() => _LanguageSettingsPageState();
+}
+
+class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
+  late String _pendingCode;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pendingCode = LocaleController.instance.locale.languageCode;
+  }
+
+  Future<void> _applyLanguage() async {
+    final code = _pendingCode;
+    setState(() => _saving = true);
+
+    await LocaleController.instance.setLanguageCode(code);
+    unawaited(UserDataRetentionService.instance.backupNow(reason: 'language'));
+
+    if (!mounted) return;
+    setState(() => _saving = false);
+
+    final label = LocaleController.languageLabel(code);
+    final strings = LocaleUiStrings.forCode(code);
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(strings.languageApplied(label))));
+  }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final strings = LocaleUiStrings.of(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -20,56 +53,83 @@ class LanguageSettingsPage extends StatelessWidget {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         foregroundColor: scheme.onSurface,
-        title: const Text('Idioma do app'),
+        title: Text(strings.languagePageTitle),
       ),
       body: ListenableBuilder(
         listenable: LocaleController.instance,
         builder: (context, _) {
           final selectedCode = LocaleController.instance.locale.languageCode;
+          final hasPendingChange = _pendingCode != selectedCode;
 
-          return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            itemCount: LocaleController.languageOptions.length + 1,
-            separatorBuilder: (_, index) => index == 0
-                ? const SizedBox(height: 12)
-                : const Divider(height: 1),
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return _InfoCard(
-                  icon: Icons.translate_outlined,
-                  title: 'Escolha o idioma da interface',
-                  text:
-                      'Português, inglês e espanhol têm tradução própria. Os demais idiomas usam textos em inglês até receberem tradução completa.',
-                );
-              }
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  itemCount: LocaleController.languageOptions.length + 1,
+                  separatorBuilder: (_, index) => index == 0
+                      ? const SizedBox(height: 12)
+                      : const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return _InfoCard(
+                        icon: Icons.translate_outlined,
+                        title: strings.languageInfoTitle,
+                        text: strings.languageInfoText,
+                      );
+                    }
 
-              final option = LocaleController.languageOptions[index - 1];
-              final selected = option.code == selectedCode;
-              final translated = LocaleController.isTranslatedLanguageCode(
-                option.code,
-              );
+                    final option = LocaleController.languageOptions[index - 1];
+                    final selected = option.code == _pendingCode;
+                    final translated =
+                        LocaleController.isTranslatedLanguageCode(option.code);
 
-              return ListTile(
-                leading: Icon(
-                  selected
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_off,
-                  color: selected ? scheme.primary : scheme.onSurfaceVariant,
+                    return ListTile(
+                      leading: Icon(
+                        selected
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_off,
+                        color: selected
+                            ? scheme.primary
+                            : scheme.onSurfaceVariant,
+                      ),
+                      title: Text(option.label),
+                      subtitle: translated
+                          ? Text(strings.nativeTranslation)
+                          : Text(strings.fallbackTranslation),
+                      onTap: _saving
+                          ? null
+                          : () => setState(() => _pendingCode = option.code),
+                    );
+                  },
                 ),
-                title: Text(option.label),
-                subtitle: translated
-                    ? const Text('Tradução nativa disponível')
-                    : const Text('Usa textos em inglês por enquanto'),
-                onTap: () async {
-                  await LocaleController.instance.setLanguageCode(option.code);
-                  unawaited(
-                    UserDataRetentionService.instance.backupNow(
-                      reason: 'language',
+              ),
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: hasPendingChange && !_saving
+                          ? _applyLanguage
+                          : null,
+                      icon: _saving
+                          ? SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: scheme.onPrimary,
+                              ),
+                            )
+                          : const Icon(Icons.check_circle_outline),
+                      label: Text(strings.apply),
                     ),
-                  );
-                },
-              );
-            },
+                  ),
+                ),
+              ),
+            ],
           );
         },
       ),

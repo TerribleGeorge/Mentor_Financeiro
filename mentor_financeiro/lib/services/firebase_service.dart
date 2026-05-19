@@ -213,10 +213,65 @@ class FirebaseService {
   // Return: User? (pode ser null se não logado)
   static User? get usuarioAtual => _auth.currentUser;
 
+  static Future<User?> loginGoogle() async {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return _loginGoogleComFirebaseProvider();
+    }
+
+    return _loginGoogleComGoogleSignIn();
+  }
+
+  // Login com Google no Android via Firebase Auth provider.
+  //
+  // Evita abrir diretamente a SignInHubActivity do google_sign_in, que pode
+  // falhar nativamente em alguns dispositivos antes de retornar erro ao Dart.
+  static Future<User?> _loginGoogleComFirebaseProvider() async {
+    try {
+      final provider = GoogleAuthProvider()
+        ..addScope('email')
+        ..addScope('profile')
+        ..setCustomParameters({'prompt': 'select_account'});
+
+      final userCredential = await _auth
+          .signInWithProvider(provider)
+          .timeout(_googleSignInTimeout + _firebaseAuthTimeout);
+      final user = userCredential.user;
+      if (user == null) {
+        throw GoogleLoginFailure('Login Google retornou usuário nulo.');
+      }
+      return user;
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          'PlatformException no login Google provider: code=${e.code} message=${e.message} details=${e.details}',
+        );
+      }
+      throw GoogleLoginFailure(_mensagemLoginGoogle(e.code), cause: e);
+    } on FirebaseAuthException catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          'FirebaseAuthException no login Google provider: code=${e.code} message=${e.message}',
+        );
+      }
+      throw GoogleLoginFailure(_mensagemLoginGoogle(e.code), cause: e);
+    } on TimeoutException catch (e) {
+      throw GoogleLoginFailure(
+        'O login demorou mais que o esperado. Verifique sua internet e tente novamente.',
+        cause: e,
+      );
+    } catch (e) {
+      if (kDebugMode) debugPrint("Erro no login Google provider: $e");
+      throw GoogleLoginFailure(
+        'Não foi possível concluir o login com Google. Tente novamente em instantes.',
+        cause: e,
+      );
+    }
+  }
+
   // Login com Google
   // Importance: SSO - login rápido sem senha
   // Impacto: Aumenta taxa de conversão de login
-  static Future<User?> loginGoogle() async {
+  static Future<User?> _loginGoogleComGoogleSignIn() async {
     try {
       await _googleSignIn.signOut().timeout(_googleSignInTimeout);
       final GoogleSignInAccount? googleUser = await _googleSignIn
@@ -279,6 +334,21 @@ class FirebaseService {
     } catch (e) {
       if (kDebugMode) debugPrint("Erro no login Google: $e");
       throw GoogleLoginFailure('Erro inesperado no login Google.', cause: e);
+    }
+  }
+
+  static String _mensagemLoginGoogle(String? code) {
+    switch (code) {
+      case 'account-exists-with-different-credential':
+        return 'Já existe uma conta com este e-mail usando outro método de login.';
+      case 'network-request-failed':
+        return 'Não foi possível conectar ao Google. Verifique sua internet e tente novamente.';
+      case 'popup-closed-by-user':
+      case 'canceled':
+      case 'sign_in_canceled':
+        return 'Login Google cancelado ou não concluído.';
+      default:
+        return 'Não foi possível concluir o login com Google. Tente novamente em instantes.';
     }
   }
 

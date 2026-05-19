@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../services/locale_ui_strings.dart';
+
 class TesouroDiretoDetailPage extends StatelessWidget {
   const TesouroDiretoDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (LocaleUiStrings.of(context).text('pt', en: 'en', es: 'es') != 'pt') {
+      return _fallbackPage(context);
+    }
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
@@ -68,6 +73,60 @@ class TesouroDiretoDetailPage extends StatelessWidget {
             const SizedBox(height: 32),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _fallbackPage(BuildContext context) {
+    final strings = LocaleUiStrings.of(context);
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0F172A),
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          strings.text(
+            'Guia: Tesouro Direto',
+            en: 'Guide: Brazilian Treasury Bonds',
+            es: 'Guía: Tesoro Directo',
+          ),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildSection(
+            icon: Icons.info_outline,
+            title: strings.text('O que é?', en: 'What is it?', es: '¿Qué es?'),
+            content: strings.text(
+              'É um programa do Tesouro Nacional para compra de títulos públicos por pessoas físicas.',
+              en: 'It is Brazil’s federal treasury bond program for individual investors. You lend money to the government in exchange for interest.',
+              es: 'Es el programa del Tesoro Nacional de Brasil para que personas físicas compren títulos públicos. Prestas dinero al gobierno a cambio de intereses.',
+            ),
+          ),
+          _buildSection(
+            icon: Icons.security,
+            title: strings.text(
+              'Riscos e Segurança',
+              en: 'Risk and safety',
+              es: 'Riesgos y seguridad',
+            ),
+            content: strings.text(
+              'Risco soberano baixo, com oscilação de preço se vender antes do vencimento.',
+              en: 'Credit risk is low, but prices can move if you sell before maturity. Check taxes, custody fees, and liquidity before investing.',
+              es: 'El riesgo de crédito es bajo, pero el precio puede oscilar si vendes antes del vencimiento. Revisa impuestos, custodia y liquidez antes de invertir.',
+            ),
+          ),
+        ],
       ),
     );
   }

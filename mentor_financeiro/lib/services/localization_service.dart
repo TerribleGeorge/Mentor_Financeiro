@@ -186,10 +186,14 @@ class LocalizationService {
 
   static String currencyLabel(String mode) {
     final normalized = mode.trim().toUpperCase();
-    if (normalized == 'AUTO') return 'Automática (idioma)';
+    if (normalized == 'AUTO') {
+      if (_currentLocale.languageCode == 'es') return 'Automática (idioma)';
+      if (_currentLocale.languageCode == 'pt') return 'Automática (idioma)';
+      return 'Automatic (language)';
+    }
     for (final option in currencyOptions) {
       if (option.code == normalized) {
-        return '${option.label} (${option.code})';
+        return '${currencyNameForCode(option.code)} (${option.code})';
       }
     }
     return normalized;
@@ -205,6 +209,7 @@ class LocalizationService {
 
   static String currencyNameForCode(String code) {
     final normalized = code.trim().toUpperCase();
+    if (_currentLocale.languageCode != 'pt') return normalized;
     for (final option in currencyOptions) {
       if (option.code == normalized) return option.label;
     }

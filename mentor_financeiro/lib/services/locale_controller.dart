@@ -12,7 +12,85 @@ class LocaleController extends ChangeNotifier {
   static const String prefsKey = 'idioma';
 
   /// Idiomas que têm ARB no projeto; outros idiomas fazem fallback em runtime.
-  static const Set<String> supportedLanguageCodes = {'pt', 'en', 'es'};
+  static const Set<String> supportedLanguageCodes = {
+    'pt',
+    'en',
+    'es',
+    'af',
+    'am',
+    'ar',
+    'as',
+    'az',
+    'be',
+    'bg',
+    'bn',
+    'bs',
+    'ca',
+    'cs',
+    'da',
+    'de',
+    'el',
+    'et',
+    'eu',
+    'fa',
+    'fi',
+    'fil',
+    'fr',
+    'gl',
+    'gsw',
+    'gu',
+    'he',
+    'hi',
+    'hr',
+    'hu',
+    'hy',
+    'id',
+    'is',
+    'it',
+    'ja',
+    'ka',
+    'kk',
+    'km',
+    'kn',
+    'ko',
+    'ky',
+    'lo',
+    'lt',
+    'lv',
+    'mk',
+    'ml',
+    'mn',
+    'mr',
+    'ms',
+    'my',
+    'nb',
+    'ne',
+    'nl',
+    'or',
+    'pa',
+    'pl',
+    'ps',
+    'ro',
+    'ru',
+    'si',
+    'sk',
+    'sl',
+    'sq',
+    'sr',
+    'sv',
+    'sw',
+    'ta',
+    'te',
+    'th',
+    'tl',
+    'tr',
+    'uk',
+    'ur',
+    'uz',
+    'vi',
+    'zh',
+    'zu',
+  };
 
   /// Idiomas que podem ser escolhidos manualmente no app.
   ///
@@ -126,6 +204,8 @@ class LocaleController extends ChangeNotifier {
         return const Locale('en', 'US');
       case 'es':
         return const Locale('es', 'ES');
+      case 'de':
+        return const Locale('de', 'DE');
       case 'pt':
         return const Locale('pt', 'BR');
       default:

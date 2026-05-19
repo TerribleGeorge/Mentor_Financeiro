@@ -5,6 +5,7 @@ import '../../content/content_repository.dart';
 import '../../content/investing_transition_strategy_content.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/investment_category_provider.dart';
+import '../../services/locale_ui_strings.dart';
 import 'tesouro_direto_completo_page.dart';
 import 'acoes_detalhe_page.dart';
 import 'cdb_detalhe_page.dart';
@@ -13,6 +14,7 @@ import 'fundos_detalhe_page.dart';
 import 'internacional_detalhe_page.dart';
 import 'investimento_sem_renda_fixa_page.dart';
 import 'cripto_detalhe_page.dart';
+import 'localized_knowledge_page.dart';
 import '../../widgets/mentor_menu_card.dart';
 
 class InvestimentosMenu extends StatelessWidget {
@@ -44,6 +46,7 @@ class InvestimentosMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final strings = LocaleUiStrings.of(context);
     final isBrazil = context.watch<InvestmentCategoryProvider>().isBrazilMarket;
     final items = ContentRepository.investmentMenuItems(
       l10n: l10n,
@@ -84,25 +87,42 @@ class InvestimentosMenu extends StatelessWidget {
               ),
             ),
           ],
-          ...items
-            .map(
-              (i) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: MentorMenuCard(
-                  icon: i.icon,
-                  title: i.title,
-                  subtitle: l10n.confirmarTransacao,
-                  accent: _accentForId(i.id),
-                  onTap: () => _openPage(context, i.id),
+          ...items.map(
+            (i) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: MentorMenuCard(
+                icon: i.icon,
+                title: i.title,
+                subtitle: strings.text(
+                  'Toque para abrir o guia',
+                  en: 'Tap to open the guide',
+                  es: 'Toca para abrir la guía',
                 ),
+                accent: _accentForId(i.id),
+                onTap: () => _openPage(context, i.id, isBrazil: isBrazil),
               ),
             ),
+          ),
         ],
       ),
     );
   }
 
-  void _openPage(BuildContext context, String id) {
+  void _openPage(BuildContext context, String id, {required bool isBrazil}) {
+    final lang = Localizations.localeOf(context).languageCode.toLowerCase();
+    if (!isBrazil || lang != 'pt') {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (_) => LocalizedKnowledgePage(
+            topic: KnowledgeTopic.investmentDetail,
+            investmentId: id,
+            isBrazil: isBrazil,
+          ),
+        ),
+      );
+      return;
+    }
     final page = switch (id) {
       'tesouro' => const TesouroDiretoCompletoPage(),
       'cdb' => const CDBDetalhePage(),
