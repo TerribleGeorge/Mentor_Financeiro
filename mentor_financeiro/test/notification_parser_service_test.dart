@@ -49,6 +49,27 @@ void main() {
       const t = 'agencia TED recebida R\$ 500,00';
       expect(NotificationParserService.isSpendingNotification(t), isFalse);
     });
+
+    test('bloqueia compra negada no crédito por saldo insuficiente', () {
+      const t =
+          'com.bank Compra negada no crédito por saldo insuficiente R\$ 89,90 em LOJA';
+      expect(NotificationParserService.isSpendingNotification(t), isFalse);
+      expect(NotificationParserService.parse(t), isNull);
+    });
+
+    test('bloqueia compra não autorizada mesmo com valor e cartão', () {
+      const t =
+          'com.bank Compra de R\$ 120,00 no cartão final 1234 não foi autorizada';
+      expect(NotificationParserService.isSpendingNotification(t), isFalse);
+      expect(NotificationParserService.parse(t), isNull);
+    });
+
+    test('bloqueia declined por limite insuficiente', () {
+      const t =
+          'com.bank Credit card purchase denied: insufficient limit - R\$ 30,00';
+      expect(NotificationParserService.isSpendingNotification(t), isFalse);
+      expect(NotificationParserService.parse(t), isNull);
+    });
   });
 
   group('NotificationParserService — compras e pagamentos (gasto)', () {
@@ -218,6 +239,15 @@ void main() {
     test('marca crédito quando texto menciona cartão de crédito', () {
       const t =
           'com.bank Cartão de crédito final 1234 - Compra R\$ 50,00 em LOJA';
+      expect(NotificationParserService.isSpendingNotification(t), isTrue);
+      final p = NotificationParserService.parse(t);
+      expect(p, isNotNull);
+      expect(p!.tipoPagamento, TipoPagamento.credito);
+    });
+
+    test('marca crédito quando texto menciona crédito com acento', () {
+      const t =
+          'com.bank Compra aprovada no crédito R\$ 75,00 em LOJA';
       expect(NotificationParserService.isSpendingNotification(t), isTrue);
       final p = NotificationParserService.parse(t);
       expect(p, isNotNull);
