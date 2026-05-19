@@ -12,11 +12,11 @@ Rakendus võib salvestada teie sisestatud või valikuliste funktsioonide abil tu
 
 ## 2. Mida rakendus ei tee
 
-- Ei küsi panga parooli, kaarti ega digitaalset rahakotti.
+- See ei küsi panga parooli, kaarti ega digitaalset rahakotti.
 - Ei pääse teie pangakontole juurde.
-- Ei liiguta raha.
-- Ei tee teie nimel makseid, Pixi, ülekandeid ega investeeringuid.
-- Ei nõua kaardi turvakoodi.
+- Raha ei liiguta.
+- See ei tee teie nimel makseid, Pixi, ülekandeid ega investeeringuid.
+- Ei küsi kaardi turvakoodi.
 - Ei nõua pangakoodi OTP.
 - Ei müü teie isikuandmeid.
 
@@ -24,10 +24,10 @@ Rakendus võib salvestada teie sisestatud või valikuliste funktsioonide abil tu
 
 Olenevalt kasutatavast ressursist saab rakendus kasutada:
 
-- Logige sisse Firebase Authentication kaudu.
+- Logige sisse Firebase Authentication.
 - Cloud Firestore autentitud kasutajaga seotud andmetega.
 - Turvareeglid kasutaja enda andmetele juurdepääsu piiramiseks.
-- SDK-de ja kasutatavate teenustega krüpteeritud side.
+- Kasutatavate SDK-de ja teenustega krüpteeritud suhtlus.
 - Firebase Crashlytics tehniliste vigade tuvastamiseks ja probleemide lahendamiseks.
 - Android lubasid taotletakse ainult siis, kui need on seotud rakenduse funktsioonidega.
 - Kohalik salvestusseade eelistuste, teema, vahemälu ja seadme andmete jaoks.
@@ -41,10 +41,10 @@ Kui see on lubatud, saab rakendus lugeda toetatud teatisi, et tuvastada kulutusi
 Riskide vähendamiseks:
 
 - Rakendus teavitab teid enne seadetesse suunamist loa andmise põhjusest.
-- Juurdepääsu saab igal ajal Android seadetes tühistada.
+- Juurdepääsu saab igal ajal tühistada Android seadetes.
 - Filter otsib ühilduvaid finantssündmusi, mitte isiklikke vestlusi.
-- Rakendus püüab ignoreerida OTP koode, paroole, turvakoode ja autentimissõnumeid.
-- Rakendus ei kasuta seda funktsiooni pankadele, kaartidele või digitaalsetele rahakottidele juurdepääsuks.
+- Rakendus üritab ignoreerida OTP koode, paroole, turvakoode ja autentimissõnumeid.
+- Rakendus ei kasuta seda funktsiooni pankadele, kaartidele ega digitaalsetele rahakottidele juurdepääsuks.
 
 Sellest hoolimata võivad teatised sisaldada tundlikke andmeid. Kasutage seda funktsiooni ainult siis, kui nõustute seda tüüpi töötlemisega.
 
@@ -64,12 +64,12 @@ Saate neid õigusi juhtida Android seadetes.
 
 Oma andmete kaitsmiseks tehke järgmist.
 
-- Kasutage seadme ekraanilukku.
+- Kasutage oma seadmes ekraanilukku.
 - Ärge jagage oma kontot.
 - Hoidke rakendust ja Android värskendatuna.
-- tühistage load, mida te enam kasutada ei soovi.
+- Tühistage load, mida te enam kasutada ei soovi.
 - Enne otsuste tegemist kontrollige automaatselt tuvastatud tehinguid.
-- Ärge registreerige rakenduses teavet, mida te ei soovi säilitada.
+- Ärge registreerige rakenduses andmeid, mida te ei soovi säilitada.
 - Kui te ei soovi uuendada, tühistage tellimus otse aadressil Google Play.
 
 ## 7. Piirangud
@@ -90,4 +90,4 @@ Võimalusel lisage:
 - Android versioon.
 - Rakenduse versioon.
 - Probleemi kirjeldus.
-- Ekraanipildid ilma paroolide, koodide või liigsete andmete paljastamiseta.
+- Ekraanipildid ilma paroole, koode või liigseid andmeid paljastamata.

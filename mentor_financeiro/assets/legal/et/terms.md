@@ -19,11 +19,11 @@ Mentor Financeiro ei ole:
 - registreeritud investeerimisnõustaja;
 - diplomeeritud finantsplaneerija;
 - kindlustusselts;
-- makseviis;
+- maksevahendid;
 - krediidiasutus;
 - investeerimiskorralduste täitmise platvorm.
 
-## 2. Hariduslik kasutamine ja isikupärastatud soovituste puudumine
+## 2. Õppekasutus ja isikupärastatud soovituste puudumine
 
 Hariduse ja korralduse jaoks pakutakse sisu, simulatsioone, hoiatusi, graafikuid, võrdlusi, soovitusi, mentortekste ja investeerimisteavet.
 
@@ -64,7 +64,7 @@ See funktsioon:
 - ei pääse pangakontole;
 - ei küsi panga parooli;
 - ei liiguta raha;
-- kasutab filtreid OTP koodide, paroolide ja turvateadete vältimiseks;
+- kasutab filtreid, et vältida OTP koode, paroole ja turvasõnumeid;
 - võib teha vigu, tehinguid tuvastamata jätta või teavet valesti klassifitseerida.
 
 Teie vastutate kirjete automaatse ülevaatamise ja vajadusel parandamise eest.
@@ -89,14 +89,16 @@ Me ei vastuta väliste reklaamijate toodete, teenuste, pakkumiste ega sisu eest.
 
 ## 8. Vastuvõetav kasutamine
 
-Nõustute mitte:- kasutage rakendust pettuste, kuritarvitamise, rahapesu, õigusrikkumiste või kolmandate isikute kahjustamise eesmärgil;
+Nõustute mitte:
+
+- kasutada rakendust pettuste, kuritarvitamise, rahapesu, õigusrikkumiste või kolmandate isikute kahjustamise eesmärgil;
 - proovige pääseda juurde teiste kasutajate andmetele;
-- turvalisusest, limiitidest, liitumislepingust, maksemüürist või tehnilistest mehhanismidest möödaminek;
-- pöördprojekteerida, kopeerida, muuta või levitada rakendust ilma loata;
+- turvalisusest, limiitidest, tellimustest, maksemüürist või tehnilistest mehhanismidest mööda hiilima;
+- rakendust ilma loata pöördprojekteerida, kopeerida, muuta või edasi levitada;
 - automatiseerida kuritahtlikku kasutamist, koormata teenuseid üle või segada nende tööd;
 - sisestage sisu, mis on ebaseaduslik, solvav, eksitav või rikub kolmandate isikute õigusi.
 
-## 9. Kolmanda osapoole teenused
+## 9. Kolmandate isikute teenused
 
 Rakendus sõltub kolmanda osapoole teenustest, nagu Firebase, Google Play, AdMob, turuplatsi API-d, Android süsteem ja sisselogimisteenuse pakkujad.
 
@@ -114,7 +116,7 @@ Rakenduse nimi Mentor Financeiro, liides, tekstid, organisatsioon, kood, visuaal
 
 Rakenduse kasutamine ei anna teile intellektuaalomandit üle.
 
-## 12. Vastutuse piirang
+## 12. Vastutuse piiramine
 
 Mentor Financeiro ei vastuta seadusega lubatud ulatuses:
 
@@ -123,7 +125,7 @@ Mentor Financeiro ei vastuta seadusega lubatud ulatuses:
 - kasutaja sisestatud andmevead;
 - valed automaatsed klassifikatsioonid;
 - Interneti-rikked, Firebase, Google Play, Android, API-d või kolmandad osapooled;
-- kättesaamatus, kohalike andmete kadumine, seadme probleemid või tühistatud luba;
+- kättesaamatus, kohalike andmete kadu, seadme probleemid või tühistatud luba;
 - investeerimistulemused, kasumlikkus, maksud, tasud või turutingimused.
 
 Miski nendes tingimustes ei välista õigusi, mida ei saa seadusega piirata.
@@ -146,7 +148,7 @@ Võime neid kasutustingimusi värskendada, et kajastada muudatusi rakenduses, fu
 
 Ülaosas olev kuupäev näitab praegust versiooni. Rakenduse jätkuv kasutamine pärast muudatusi tähendab nõustumist uuendatud versiooniga, kui see on seadusega lubatud.
 
-## 16. Kohaldatav seadus ja kontakt
+## 16. Kohaldatav õigus ja kontakt
 
 Neid tingimusi tõlgendatakse vastavalt kasutajale ja rakenduse eest vastutavale isikule kohaldatavatele õigusaktidele, sealhulgas Brasiilia standarditele, kui need on kohaldatavad.
 

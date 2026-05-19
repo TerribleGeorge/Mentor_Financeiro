@@ -16,12 +16,12 @@ Mentor Financeiro ez da:
 
 - bankua;
 - artekaria;
-- Inbertsioen aholkulari erregistratua;
+- erregistratutako inbertsioen aholkularia;
 - finantza-planifikatzaile ziurtatua;
 - aseguru konpainia;
-- ordainketa-metodoa;
+- ordaintzeko modua;
 - kreditu-erakundea;
-- Inbertsio-aginduak exekutatzeko plataforma.
+- inbertsio-aginduak exekutatzeko plataforma.
 
 ## 2. Hezkuntza erabilera eta gomendio pertsonalizaturik eza
 
@@ -53,7 +53,7 @@ Aplikazioak datu hauek antolatu, prozesatu, bistaratu, sinkronizatu eta aztertu 
 
 Erregistroak berrikusi behar dituzu, batez ere jakinarazpenen bidez inportatutako edo automatikoki identifikatutako datuak, finantza-erabakiak hartu aurretik.
 
-## 5. Jakinarazpenen jarraipena
+## 5. Jakinarazpenen Jarraipena
 
 Aplikazioak Android jakinarazpenen jarraipena egiteko aukerako funtzio bat eskain dezake gastuak, erosketak, ordainketak, harpidetzak eta transferentziak onartzen diren jakinarazpenetan identifikatzeko.
 
@@ -63,9 +63,9 @@ Ezaugarri hau:
 - edozein unetan desaktibatu daiteke;
 - ez da banku-kontura sartzen;
 - ez du bankuko pasahitzik eskatzen;
-- ez du dirua mugitzen;
+- ez du dirurik mugitzen;
 - iragazkiak erabiltzen ditu OTP kodeak, pasahitzak eta segurtasun mezuak saihesteko;
-- akatsak egin ditzake, transakzioak identifikatu ez edo informazioa gaizki sailkatu.
+- akatsak egin ditzake, transakzioak identifikatzea ez edo informazioa gaizki sailkatu.
 
 Beharrezkoa denean erregistroak automatikoki berrikusi eta zuzentzeaz arduratzen zara.
 
@@ -89,12 +89,14 @@ Ez gara kanpoko iragarleen produktu, zerbitzu, eskaintza edo edukien erantzule.
 
 ## 8. Erabilera onargarria
 
-Ez duzula onartzen duzu:- Erabili aplikazioa iruzurra, gehiegikeria, dirua zuritzea, lege-urraketa edo hirugarrenei kalte egiteko;
-- Saiatu beste erabiltzaile batzuen datuak sartzen;
-- saihestu segurtasuna, mugak, harpidetza, paywall edo mekanismo teknikoak;
-- Alderantzizko ingeniaritza egin, kopiatu, aldatu edo birbanatu aplikazioa baimenik gabe;
+Ez duzula onartzen duzu:
+
+- erabili aplikazioa iruzurra, gehiegikeria, dirua zuritzea, lege-urraketa edo hirugarrenei kalte egiteko;
+- beste erabiltzaile batzuen datuak sartzen saiatzea;
+- segurtasuna, mugak, harpidetza, paywall edo mekanismo teknikoak saihestu;
+- alderantzizko ingeniaritza egin, kopiatu, aldatu edo birbanatu aplikazioa baimenik gabe;
 - erabilera okerra automatizatzea, zerbitzuak gainkargatzea edo haien funtzionamendua oztopatzea;
-- legez kanpokoa, iraingarria, engainagarria edo hirugarrenen eskubideak urratzen dituen edukia txertatu.
+- txertatu legez kanpokoa, iraingarria, engainagarria edo hirugarrenen eskubideak urratzen dituen edukia.
 
 ## 9. Hirugarrenen zerbitzuak
 
@@ -118,13 +120,13 @@ Aplikazioa erabiltzeak ez dizu jabetza intelektuala transferitzen.
 
 Legeak onartzen duen neurrian, Mentor Financeiro ez da erantzukizunik izango:
 
-- aplikazioan oinarritutako finantza-erabakiak;
+- aplikazioan oinarrituta hartutako finantza-erabakiak;
 - galerak, galerak, irabaziak edo aukera galduak;
 - erabiltzaileak sartutako datuen akatsak;
 - sailkapen automatiko okerrak;
 - Interneteko hutsegiteak, Firebase, Google Play, Android, APIak edo hirugarrenak;
 - erabilgarritasunik eza, tokiko datuen galera, gailuaren arazoak edo baimena ezeztatua;
-- inbertsioen emaitzak, errentagarritasuna, zergak, tasak edo merkatu-baldintzak.
+- inbertsioaren emaitzak, errentagarritasuna, zergak, tasak edo merkatu-baldintzak.
 
 Baldintza hauetan ezerk ez ditu baztertzen legeak mugatu ezin dituen eskubideak.
 
@@ -146,7 +148,7 @@ Erabilera-baldintza hauek egunera ditzakegu aplikazioan, eginbideetan, harpidetz
 
 Goiko datak uneko bertsioa adierazten du. Aldaketen ondoren aplikazioa etengabe erabiltzeak bertsio eguneratuarekin adostea esan nahi du, legeak baimentzen duenean.
 
-## 16. Aplikatu beharreko legea eta harremana
+## 16. Indarreko legea eta harremana
 
 Baldintza hauek erabiltzaileari eta aplikazioaren arduradunari aplikatzen zaion legediaren arabera interpretatzen dira, hala badagokio Brasilgo estandarrak barne.
 

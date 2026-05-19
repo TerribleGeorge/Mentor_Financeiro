@@ -15,9 +15,9 @@ Aplikacija može pohraniti financijske podatke koje ste unijeli ili identificira
 - Ne traži bankovnu lozinku, karticu ili digitalni novčanik.
 - Ne pristupa vašem bankovnom računu.
 - Ne pomera novac.
-- Ne vrši plaćanja, Pix, transfere ili ulaganja na vaše ime.
-- Ne traži sigurnosni kod kartice.
-- Ne traži bankovni kod OTP.
+- Ne vrši plaćanja, Pix, transfere ili ulaganja u vaše ime.
+- Ne zahtijeva sigurnosni kod kartice.
+- Ne zahtijeva bankovni kod OTP.
 - Ne prodaje vaše lične podatke.
 
 ## 3. Korištene tehničke mjere
@@ -25,10 +25,10 @@ Aplikacija može pohraniti financijske podatke koje ste unijeli ili identificira
 Ovisno o korištenom resursu, aplikacija može koristiti:
 
 - Prijava putem Firebase Authentication.
-- Cloud Firestore s podacima pridruženim autentificiranom korisniku.
+- Cloud Firestore s podacima povezanim s provjerenim korisnikom.
 - Sigurnosna pravila za ograničavanje pristupa vlastitim podacima korisnika.
 - Komunikacija šifrirana pomoću SDK-ova i korištenih usluga.
-- Firebase Crashlytics za identifikaciju tehničkih grešaka i rješavanje problema.
+- Firebase Crashlytics za identifikaciju tehničkih grešaka i ispravljanje problema.
 - Android dozvole se traže samo kada se odnose na funkcije aplikacije.
 - Lokalna pohrana za postavke, temu, keš memoriju i podatke uređaja.
 
@@ -64,12 +64,12 @@ Ovim dozvolama upravljate u postavkama Android.
 
 Da zaštitite svoje podatke:
 
-- Koristite zaključavanje ekrana na uređaju.
+- Koristite zaključavanje ekrana na svom uređaju.
 - Nemojte dijeliti svoj račun.
 - Održavajte aplikaciju i Android ažuriranim.
 - Opozovite dozvole koje više ne želite koristiti.
 - Provjerite automatski identificirane transakcije prije donošenja odluka.
-- Ne registrujte informacije koje ne želite da zadržite u aplikaciji.
+- Nemojte registrirati informacije koje ne želite zadržati u aplikaciji.
 - Otkažite pretplatu direktno na Google Play kada ne želite da je obnovite.
 
 ## 7. Ograničenja
@@ -87,7 +87,7 @@ Ako primijetite čudno ponašanje, nepravilan pristup, netačne podatke, sumnju 
 Uključite, ako je moguće:
 
 - Model uređaja.
-- Verzija Android.
+- Android verzija.
 - Verzija aplikacije.
 - Opis problema.
-- Snimke ekrana bez otkrivanja lozinki, kodova ili prevelikih podataka.
+- Snimci ekrana bez otkrivanja lozinki, kodova ili prevelikih podataka.

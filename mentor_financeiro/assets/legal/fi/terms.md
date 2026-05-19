@@ -17,11 +17,11 @@ Mentor Financeiro ei ole:
 - pankki;
 - välittäjä;
 - rekisteröity sijoitusneuvoja;
-- sertifioitu taloussuunnittelija;
+- sertifioitu rahoitussuunnittelija;
 - vakuutusyhtiö;
-- maksutapa;
+- maksuvälineet;
 - luottolaitos;
-- alusta sijoitustoimeksiantojen toteuttamiselle.
+- sijoitustoimeksiantojen toteuttamisalusta.
 
 ## 2. Koulutuskäyttö ja henkilökohtaisten suositusten puute
 
@@ -39,7 +39,7 @@ Olet vastuussa:
 
 - antaa oikeat tiedot;
 - ylläpitää suojattua pääsyä sähköpostiisi ja laitteeseesi;
-- suojata salasanasi ja tilisi;
+- suojaa salasanasi ja tilisi;
 - älä jaa valtuustietoja;
 - varoittaa epäillystä väärinkäytöstä.
 
@@ -65,7 +65,7 @@ Tämä ominaisuus:
 - ei kysy pankin salasanaa;
 - ei liikuta rahaa;
 - käyttää suodattimia välttääkseen OTP-koodeja, salasanoja ja turvaviestejä;
-- saattaa tehdä virheitä, epäonnistua tapahtumien tunnistamisessa tai luokitella tietoja väärin.
+- voi tehdä virheitä, jättää tunnistamatta tapahtumia tai luokitella tietoja väärin.
 
 Olet vastuussa tietueiden automaattisesta tarkistamisesta ja korjaamisesta tarvittaessa.
 
@@ -89,12 +89,14 @@ Emme ole vastuussa ulkopuolisten mainostajien tuotteista, palveluista, tarjouksi
 
 ## 8. Hyväksyttävä käyttö
 
-Hyväksyt, että et:- käyttää sovellusta petokseen, väärinkäyttöön, rahanpesuun, lain rikkomiseen tai kolmansien osapuolien vahingoittamiseen;
+Hyväksyt, että et:
+
+- käyttää sovellusta petokseen, väärinkäyttöön, rahanpesuun, lain rikkomiseen tai kolmansien osapuolien vahingoittamiseen;
 - yrittää päästä käsiksi muiden käyttäjien tietoihin;
-- ohittaa suojauksen, rajoitukset, tilaukset, maksumuurin tai tekniset mekanismit;
-- Suunnittele, kopioi, muokkaa tai jakelee sovellusta uudelleen ilman lupaa;
+- kiertää turvallisuutta, rajoja, tilauksia, maksumuureja tai teknisiä mekanismeja;
+- palauttaa, kopioida, muokata tai jakaa sovellusta ilman lupaa;
 - automatisoida väärinkäyttöä, ylikuormittaa palveluita tai häiritä niiden toimintaa;
-- lisää sisältöä, joka on laitonta, loukkaavaa, harhaanjohtavaa tai loukkaa kolmansien osapuolten oikeuksia.
+- lisää laitonta, loukkaavaa, harhaanjohtavaa tai kolmansien osapuolten oikeuksia loukkaavaa sisältöä.
 
 ## 9. Kolmannen osapuolen palvelut
 
@@ -124,7 +126,7 @@ Lain sallimassa laajuudessa Mentor Financeiro ei ole vastuussa:
 - virheelliset automaattiset luokitukset;
 - Internet-häiriöt, Firebase, Google Play, Android, API tai kolmannet osapuolet;
 - käytettävyys, paikallisten tietojen katoaminen, laiteongelmat tai peruutettu lupa;
-- sijoitustulokset, kannattavuus, verot, maksut tai markkinaolosuhteet.
+- sijoitustuloksista, kannattavuudesta, veroista, maksuista tai markkinaolosuhteista.
 
 Mikään näissä ehdoissa ei sulje pois oikeuksia, joita ei voida rajoittaa lailla.
 

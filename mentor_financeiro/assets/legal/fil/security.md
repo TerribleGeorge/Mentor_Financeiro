@@ -12,10 +12,10 @@ Maaaring mag-imbak ang app ng data sa pananalapi na ipinasok mo o natukoy ng mga
 
 ## 2. Ano ang hindi ginagawa ng app
 
-- Hindi humihingi ng password sa bangko, card o digital wallet.
+- Hindi ito humihingi ng password sa bangko, card o digital wallet.
 - Hindi ina-access ang iyong bank account.
 - Hindi gumagalaw ng pera.
-- Hindi gumagawa ng mga pagbabayad, Pix, paglilipat o pamumuhunan sa iyong pangalan.
+- Hindi ito nagsasagawa ng mga pagbabayad, Pix, paglilipat o pamumuhunan sa iyong pangalan.
 - Hindi humihiling ng code ng seguridad ng card.
 - Hindi humihiling ng bank code OTP.
 - Hindi nagbebenta ng iyong personal na data.
@@ -27,10 +27,10 @@ Depende sa resource na ginamit, magagamit ng app ang:
 - Mag-log in ni Firebase Authentication.
 - Cloud Firestore na may data na nauugnay sa na-authenticate na user.
 - Mga panuntunan sa seguridad upang paghigpitan ang pag-access sa sariling data ng user.
-- Komunikasyon na naka-encrypt ng mga SDK at serbisyong ginamit.
-- Firebase Crashlytics upang matukoy ang mga teknikal na pagkakamali at ayusin ang mga problema.
+- Komunikasyon na naka-encrypt ng mga SDK at serbisyong ginagamit.
+- Firebase Crashlytics upang matukoy ang mga teknikal na pagkakamali at iwasto ang mga problema.
 - Android na mga pahintulot ay hiniling lamang kapag nauugnay sa mga feature ng app.
-- Lokal na imbakan para sa mga kagustuhan, tema, cache at data ng device.
+- Lokal na storage para sa mga kagustuhan, tema, cache at data ng device.
 
 ## 4. Pagsubaybay sa Abiso
 
@@ -42,8 +42,8 @@ Upang mabawasan ang mga panganib:
 
 - Ipinapaalam sa iyo ng app ang dahilan ng pahintulot bago ka idirekta sa mga setting.
 - Maaaring bawiin ang access anumang oras sa mga setting ng Android.
-- Hinahanap ng filter ang mga katugmang kaganapan sa pananalapi, hindi mga personal na pag-uusap.
-- Sinusubukan ng app na huwag pansinin ang OTP code, password, security code at mga mensahe sa pagpapatunay.
+- Ang filter ay naghahanap ng mga katugmang kaganapan sa pananalapi, hindi mga personal na pag-uusap.
+- Sinusubukan ng app na huwag pansinin ang OTP code, password, security code, at mga mensahe sa pagpapatunay.
 - Hindi ginagamit ng app ang feature na ito para ma-access ang mga bangko, card o digital wallet.
 
 Gayunpaman, ang mga notification ay maaaring maglaman ng sensitibong data. Gamitin lang ang feature na ito kung sumasang-ayon ka sa ganitong uri ng pagproseso.
@@ -53,7 +53,7 @@ Gayunpaman, ang mga notification ay maaaring maglaman ng sensitibong data. Gamit
 Maaaring humiling ang app ng:
 
 - **Internet:** koneksyon sa Firebase, Google Play, mga API at online na mapagkukunan.
-- **Mga Notification:** nagpapadala ng mga alerto mula sa app mismo.
+- **Mga Notification:** pagpapadala ng mga alerto mula sa app mismo.
 - **Lokasyon:** adaptasyon ng nilalaman o paghahambing sa bansa/rehiyon, kapag pinahintulutan.
 - **Access sa Android notification:** opsyonal na pagkakakilanlan ng mga gastos mula sa mga katugmang notification.
 - **Mga in-app na pagbili:** Premium subscription ng Google Play.
@@ -64,13 +64,13 @@ Kinokontrol mo ang mga pahintulot na ito sa mga setting ng Android.
 
 Para protektahan ang iyong data:
 
-- Gamitin ang lock ng screen sa device.
+- Gamitin ang lock ng screen sa iyong device.
 - Huwag ibahagi ang iyong account.
 - Panatilihing na-update ang app at Android.
 - Bawiin ang mga pahintulot na hindi mo na gustong gamitin.
-- Suriin ang awtomatikong natukoy na mga transaksyon bago gumawa ng mga desisyon.
-- Huwag magrehistro ng impormasyon na hindi mo gustong panatilihin sa application.
-- Kanselahin ang mga subscription nang direkta sa Google Play kapag ayaw mong mag-renew.
+- Suriin ang mga awtomatikong natukoy na transaksyon bago gumawa ng mga desisyon.
+- Huwag magrehistro ng impormasyon na hindi mo gustong itago sa application.
+- Direktang kanselahin ang mga subscription sa Google Play kapag ayaw mong mag-renew.
 
 ## 7. Mga Limitasyon
 
@@ -78,7 +78,7 @@ Walang application, server, operating system o cloud service na 100% secure. Sa 
 
 Ang Mentor Financeiro ay naglalayong bawasan ang mga panganib sa makatwirang paraan, ngunit dapat kang magpanatili ng mga kopya o sariling kontrol ng mahahalagang impormasyon sa pananalapi.
 
-## 8. Mga insidente at pakikipag-ugnayan
+## 8. Mga insidente at contact
 
 Kung may napansin kang kakaibang gawi, hindi tamang pag-access, maling data, pinaghihinalaang paglabag sa seguridad o problema sa mga sensitibong pahintulot, mangyaring makipag-ugnayan sa:
 
@@ -87,7 +87,7 @@ Kung may napansin kang kakaibang gawi, hindi tamang pag-access, maling data, pin
 Isama, kung maaari:
 
 - Modelo ng device.
-- Bersyon ng Android.
+- Android na bersyon.
 - Bersyon ng app.
 - Paglalarawan ng problema.
 - Mga screenshot nang hindi inilalantad ang mga password, code o labis na data.

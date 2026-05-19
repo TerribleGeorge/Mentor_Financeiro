@@ -19,11 +19,11 @@ Mentor Financeiro není:
 - registrovaný investiční poradce;
 - certifikovaný finanční plánovač;
 - pojišťovna;
-- způsob platby;
+- platební prostředky;
 - úvěrová instituce;
 - platforma pro provádění investičních příkazů.
 
-## 2. Využití ve vzdělávání a nedostatek personalizovaných doporučení
+## 2. Vzdělávací využití a nedostatek personalizovaných doporučení
 
 Obsah, simulace, upozornění, grafy, srovnání, návrhy, mentorské texty a investiční informace jsou poskytovány pro vzdělávání a organizaci.
 
@@ -45,7 +45,7 @@ Jste odpovědní za:
 
 Můžeme omezit, pozastavit nebo ukončit přístup, pokud dojde ke zneužití, podvodu, porušení těchto podmínek, bezpečnostnímu riziku nebo právnímu požadavku.
 
-## 4. Údaje zadané vámi
+## 4. Vámi zadané údaje
 
 Jste zodpovědní za data, která zaregistrujete v aplikaci, včetně výdajů, cílů, limitů, historie, profilových informací a preferencí.
 
@@ -53,7 +53,7 @@ Aplikace může tato data organizovat, zpracovávat, zobrazovat, synchronizovat 
 
 Před finančním rozhodnutím byste měli zkontrolovat záznamy, zejména data importovaná nebo automaticky identifikovaná oznámeními.
 
-## 5. Monitorování oznámení
+## 5. Sledování oznámení
 
 Aplikace může nabízet volitelnou funkci sledování oznámení Android k identifikaci výdajů, nákupů, plateb, předplatných a převodů v podporovaných oznámeních.
 
@@ -89,12 +89,14 @@ Neneseme odpovědnost za produkty, služby, nabídky nebo obsah od externích in
 
 ## 8. Přijatelné použití
 
-Souhlasíte, že nebudete:- používat aplikaci k podvodům, zneužívání, praní špinavých peněz, porušení zákona nebo poškození třetích stran;
+Souhlasíte, že nebudete:
+
+- používat aplikaci k podvodům, zneužívání, praní špinavých peněz, porušování právních předpisů nebo poškozování třetích stran;
 - pokusit se získat přístup k datům od jiných uživatelů;
-- obejít zabezpečení, limity, předplatné, paywall nebo technické mechanismy;
+- obcházet zabezpečení, limity, předplatné, paywall nebo technické mechanismy;
 - zpětně analyzovat, kopírovat, upravovat nebo redistribuovat aplikaci bez oprávnění;
 - automatizovat zneužití, přetěžovat služby nebo zasahovat do jejich provozu;
-- vkládat obsah, který je nezákonný, urážlivý, zavádějící nebo porušuje práva třetích stran.
+- vkládat obsah, který je nezákonný, urážlivý, zavádějící nebo který porušuje práva třetích stran.
 
 ## 9. Služby třetích stran
 
@@ -122,8 +124,8 @@ V maximálním rozsahu povoleném zákonem nenese Mentor Financeiro odpovědnost
 - ztráty, ztráty, ušlý zisk nebo ztracené příležitosti;
 - chyby dat zadané uživatelem;
 - nesprávné automatické klasifikace;
-- selhání internetu, Firebase, Google Play, Android, API nebo třetích stran;
-- nedostupnost, ztráta místních dat, problémy se zařízením nebo zrušené oprávnění;
+- selhání internetu, Firebase, Google Play, Android, rozhraní API nebo třetích stran;
+- nedostupnost, ztráta místních dat, problémy se zařízením nebo zrušené povolení;
 - investiční výsledky, ziskovost, daně, poplatky nebo podmínky na trhu.
 
 Nic v těchto podmínkách nevylučuje práva, která nemohou být omezena zákonem.
@@ -142,7 +144,7 @@ Používáním aplikace berete na vědomí, že finanční údaje mohou být cit
 
 ## 15. Změny těchto podmínek
 
-Tyto Podmínky použití můžeme aktualizovat, aby odrážely změny aplikace, funkcí, předplatného, právních požadavků nebo služeb třetích stran.
+Tyto Podmínky použití můžeme aktualizovat, aby odrážely změny aplikace, funkcí, předplatného, ​​právních požadavků nebo služeb třetích stran.
 
 Datum v horní části označuje aktuální verzi. Pokračování v používání aplikace po změnách znamená souhlas s aktualizovanou verzí, pokud to umožňuje zákon.
 

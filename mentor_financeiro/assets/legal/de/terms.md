@@ -19,11 +19,11 @@ Mentor Financeiro ist nicht:
 - registrierter Anlageberater;
 - zertifizierter Finanzplaner;
 - Versicherungsgesellschaft;
-- Zahlungsmethode;
+- Zahlungsmittel;
 - Kreditinstitut;
 - Plattform zur Ausführung von Investitionsaufträgen.
 
-## 2. Bildungszweck und fehlende personalisierte Empfehlung
+## 2. Bildungsnutzung und fehlende personalisierte Empfehlung
 
 Zur Aufklärung und Organisation werden Inhalte, Simulationen, Alarme, Grafiken, Vergleiche, Vorschläge, Mentoring-Texte und Anlageinformationen bereitgestellt.
 
@@ -39,8 +39,8 @@ Sie sind verantwortlich für:
 
 - korrekte Informationen bereitstellen;
 - Sorgen Sie für einen sicheren Zugriff auf Ihre E-Mails und Ihr Gerät.
-- Schützen Sie Ihr Passwort und Ihr Konto;
-- Anmeldeinformationen nicht weitergeben;
+- Schützen Sie Ihr Passwort und Ihr Konto.
+- Geben Sie keine Anmeldeinformationen weiter.
 - warnen vor Missbrauchsverdacht.
 
 Wir können den Zugriff einschränken, aussetzen oder beenden, wenn Missbrauch, Betrug, Verstöße gegen diese Bedingungen, Sicherheitsrisiken oder gesetzliche Anforderungen vorliegen.
@@ -60,7 +60,7 @@ Die App bietet möglicherweise eine optionale Android-Benachrichtigungsverfolgun
 Diese Funktion:
 
 - hängt von der manuellen Erlaubnis ab, die Sie in Android erteilt haben;
-- kann jederzeit deaktiviert werden;
+- jederzeit deaktivierbar;
 - greift nicht auf das Bankkonto zu;
 - fragt nicht nach einem Bankpasswort;
 - bewegt kein Geld;
@@ -89,10 +89,12 @@ Wir übernehmen keine Verantwortung für Produkte, Dienstleistungen, Angebote od
 
 ## 8. Akzeptable Verwendung
 
-Sie stimmen zu, Folgendes nicht zu tun:- die App für Betrug, Missbrauch, Geldwäsche, Rechtsverstöße oder Schädigung Dritter nutzen;
+Sie stimmen zu, Folgendes nicht zu tun:
+
+- die App für Betrug, Missbrauch, Geldwäsche, Rechtsverstöße oder Schädigung Dritter nutzen;
 - versuchen, auf Daten anderer Benutzer zuzugreifen;
-- Sicherheit, Limits, Abonnements, Paywall oder technische Mechanismen umgehen;
-- die App ohne Genehmigung zurückentwickeln, kopieren, modifizieren oder weiterverbreiten;
+- Sicherheit, Beschränkungen, Abonnements, Paywall oder technische Mechanismen umgehen;
+- die App ohne Genehmigung zurückzuentwickeln, zu kopieren, zu modifizieren oder weiterzuverbreiten;
 - missbräuchliche Nutzung automatisieren, Dienste überlasten oder deren Betrieb beeinträchtigen;
 - Inhalte einfügen, die rechtswidrig, anstößig, irreführend sind oder die Rechte Dritter verletzen.
 
@@ -118,11 +120,11 @@ Durch die Nutzung der App wird kein geistiges Eigentum auf Sie übertragen.
 
 Soweit gesetzlich zulässig, ist Mentor Financeiro nicht verantwortlich für:
 
-- Finanzentscheidungen, die auf der Grundlage der App getroffen werden;
+- finanzielle Entscheidungen, die auf der Grundlage der App getroffen werden;
 - Verluste, Verluste, entgangene Gewinne oder verpasste Chancen;
-- vom Benutzer eingegebene Datenfehler;
+- Vom Benutzer eingegebene Datenfehler;
 - falsche automatische Klassifizierungen;
-- Internetfehler, Firebase, Google Play, Android, APIs oder Dritte;
+- Internetausfälle, Firebase, Google Play, Android, APIs oder Dritte;
 - Nichtverfügbarkeit, Verlust lokaler Daten, Geräteprobleme oder widerrufene Erlaubnis;
 - Anlageergebnisse, Rentabilität, Steuern, Gebühren oder Marktbedingungen.
 

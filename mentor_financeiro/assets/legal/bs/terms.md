@@ -17,11 +17,11 @@ Mentor Financeiro nije:
 - banka;
 - broker;
 - registrovani investicijski savjetnik;
-- sertifikovani finansijski planer;
+- certificirani finansijski planer;
 - osiguravajuće društvo;
-- način plaćanja;
+- sredstva plaćanja;
 - kreditna institucija;
-- platforma za izvršavanje investicionih naloga.
+- platforma za izvršenje investicionih naloga.
 
 ## 2. Obrazovna upotreba i nedostatak personaliziranih preporuka
 
@@ -40,7 +40,7 @@ Vi ste odgovorni za:
 - dati tačne informacije;
 - održavati siguran pristup vašoj e-pošti i uređaju;
 - zaštitite svoju lozinku i nalog;
-- ne dijele akreditive;
+- ne dijelite vjerodajnice;
 - upozoriti na sumnju na zloupotrebu.
 
 Možemo ograničiti, suspendovati ili ukinuti pristup ako postoji zloupotreba, prijevara, kršenje ovih uslova, sigurnosni rizik ili zakonski zahtjev.
@@ -60,10 +60,10 @@ Aplikacija može ponuditi opcionalnu funkciju praćenja obavijesti Android za id
 Ova karakteristika:
 
 - zavisi od ručne dozvole koju ste dali u Android;
-- može se deaktivirati u bilo koje vrijeme;
+- može se deaktivirati u bilo kojem trenutku;
 - ne pristupa bankovnom računu;
 - ne traži bankovnu lozinku;
-- ne premešta novac;
+- ne pomiče novac;
 - koristi filtere za izbjegavanje OTP kodova, lozinki i sigurnosnih poruka;
 - mogu pogriješiti, ne identificirati transakcije ili pogrešno klasificirati informacije.
 
@@ -83,17 +83,19 @@ Premium resursi se mogu mijenjati, prilagođavati, uklanjati ili zamijeniti, u s
 
 ## 7. Reklame
 
-Aplikacija može prikazivati reklame. Oglase mogu pružati treće strane, kao što je Google AdMob, ovisno o njihovim pravilima i postavkama vašeg računa/uređaja.
+Aplikacija može prikazivati ​​reklame. Oglase mogu pružati treće strane, kao što je Google AdMob, ovisno o njihovim pravilima i postavkama vašeg računa/uređaja.
 
 Nismo odgovorni za proizvode, usluge, ponude ili sadržaje vanjskih oglašivača.
 
 ## 8. Prihvatljiva upotreba
 
-Saglasni ste da ne:- koristiti aplikaciju za prevaru, zloupotrebu, pranje novca, kršenje zakona ili nanošenje štete trećim licima;
-- pokušajte pristupiti podacima drugih korisnika;
+Saglasni ste da ne:
+
+- koristiti aplikaciju za prevaru, zloupotrebu, pranje novca, kršenje zakona ili nanošenje štete trećim stranama;
+- pokušaj pristupa podacima drugih korisnika;
 - zaobići sigurnost, ograničenja, pretplatu, paywall ili tehničke mehanizme;
 - obrnuti inženjering, kopirati, modificirati ili redistribuirati aplikaciju bez ovlaštenja;
-- automatiziraju zloupotrebu, preopterećuju usluge ili ometaju njihov rad;
+- automatizirati zloupotrebu, preopteretiti usluge ili ometati njihov rad;
 - ubacite sadržaj koji je nezakonit, uvredljiv, obmanjujući ili koji krši prava trećih strana.
 
 ## 9. Usluge trećih strana
@@ -118,7 +120,7 @@ Korištenje aplikacije ne prenosi intelektualno vlasništvo na vas.
 
 U najvećoj mjeri dozvoljenoj zakonom, Mentor Financeiro nije odgovoran za:
 
-- finansijske odluke donesene na osnovu aplikacije;
+- finansijske odluke donesene na temelju aplikacije;
 - gubici, gubici, izgubljena dobit ili izgubljene prilike;
 - greške u podacima koje je unio korisnik;
 - netačne automatske klasifikacije;

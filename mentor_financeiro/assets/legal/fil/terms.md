@@ -21,7 +21,7 @@ Mentor Financeiro ay hindi:
 - kompanya ng seguro;
 - paraan ng pagbabayad;
 - institusyon ng kredito;
-- platform para sa pagpapatupad ng mga order sa pamumuhunan.
+- platform ng pagpapatupad ng order sa pamumuhunan.
 
 ## 2. Pang-edukasyon na paggamit at kakulangan ng personalized na rekomendasyon
 
@@ -41,7 +41,7 @@ Ikaw ay responsable para sa:
 - panatilihin ang secure na access sa iyong email at device;
 - protektahan ang iyong password at account;
 - huwag magbahagi ng mga kredensyal;
-- magbabala tungkol sa pinaghihinalaang maling paggamit.
+- babala ng pinaghihinalaang maling paggamit.
 
 Maaari naming limitahan, suspindihin o wakasan ang pag-access kung mayroong pang-aabuso, panloloko, paglabag sa mga tuntuning ito, panganib sa seguridad o legal na kinakailangan.
 
@@ -61,10 +61,10 @@ Ang tampok na ito:
 
 - depende sa manu-manong pahintulot na ibinigay mo sa Android;
 - maaaring i-deactivate anumang oras;
-- hindi ina-access ang bank account;
+- hindi naa-access ang bank account;
 - hindi humihingi ng password sa bangko;
 - hindi gumagalaw ng pera;
-- gumagamit ng mga filter upang maiwasan ang OTP code, password at mga mensaheng pangseguridad;
+- gumagamit ng mga filter upang maiwasan ang OTP code, password at mga mensaheng panseguridad;
 - maaaring magkamali, hindi matukoy ang mga transaksyon o maling uri ng impormasyon.
 
 Responsibilidad mong awtomatikong suriin at itama ang mga talaan kung kinakailangan.
@@ -81,7 +81,7 @@ Ang pagkansela sa subscription ay pumipigil sa mga singil sa hinaharap, ngunit h
 
 Premium ang mga mapagkukunan ay maaaring magbago, ayusin, alisin o palitan, napapailalim sa mga naaangkop na karapatan.
 
-## 7. Mga Advertisement
+## 7. Mga patalastas
 
 Ang app ay maaaring magpakita ng mga ad. Ang mga ad ay maaaring ibigay ng mga third party, gaya ng Google AdMob, depende sa kanilang mga patakaran at mga setting ng iyong account/device.
 
@@ -89,12 +89,14 @@ Hindi kami mananagot para sa mga produkto, serbisyo, alok o nilalaman mula sa mg
 
 ## 8. Katanggap-tanggap na paggamit
 
-Sumasang-ayon ka na hindi:- gamitin ang app para sa panloloko, pang-aabuso, money laundering, legal na paglabag o pinsala sa mga third party;
+Sumasang-ayon ka na hindi:
+
+- gamitin ang app para sa panloloko, pang-aabuso, money laundering, legal na paglabag o pinsala sa mga third party;
 - subukang i-access ang data mula sa ibang mga gumagamit;
-- bypass ang seguridad, mga limitasyon, subscription, paywall o mga teknikal na mekanismo;
+- iwasan ang seguridad, mga limitasyon, subscription, paywall o mga teknikal na mekanismo;
 - reverse engineer, kopyahin, baguhin o muling ipamahagi ang app nang walang pahintulot;
 - i-automate ang mapang-abusong paggamit, sobrang karga ng mga serbisyo o makagambala sa kanilang operasyon;
-- magpasok ng nilalamang ilegal, nakakasakit, nakakapanlinlang o lumalabag sa mga karapatan ng mga ikatlong partido.
+- magpasok ng nilalamang labag sa batas, nakakasakit, nakakapanlinlang o lumalabag sa mga karapatan ng mga ikatlong partido.
 
 ## 9. Mga serbisyo ng third-party
 
@@ -124,7 +126,7 @@ Sa sukdulang pinahihintulutan ng batas, ang Mentor Financeiro ay hindi mananagot
 - maling awtomatikong pag-uuri;
 - mga pagkabigo sa internet, Firebase, Google Play, Android, mga API o mga third party;
 - hindi magagamit, pagkawala ng lokal na data, mga problema sa device o binawi na pahintulot;
-- mga resulta ng pamumuhunan, kakayahang kumita, mga buwis, bayad o kundisyon ng merkado.
+- mga resulta ng pamumuhunan, kakayahang kumita, buwis, bayad o kundisyon ng merkado.
 
 Wala sa mga tuntuning ito ang nagbubukod ng mga karapatan na hindi maaaring limitahan ng batas.
 

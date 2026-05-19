@@ -20,15 +20,15 @@ Um Rechte im Zusammenhang mit Ihren Daten auszuüben, Fragen zu stellen oder die
 
 **george.guimares@gmail.com**
 
-## 2. Zusammenfassung im Klartext
+## 2. Zusammenfassung in einfacher Sprache
 
-- Die App hilft Ihnen bei der Organisation von Ausgaben, Zielen, Limits, Finanzhistorie, Investitionen und Bildungsinhalten.
+- Die App hilft Ihnen, Ausgaben, Ziele, Limits, Finanzhistorie, Investitionen und Bildungsinhalte zu organisieren.
 - Um bestimmte Funktionen zu nutzen, können Sie sich über Firebase Authentication mit E-Mail/Passwort, Google-Konto, Apple-Konto oder Inkognito-Modus anmelden.
 - Die von Ihnen bereitgestellten Finanzdaten wie Ausgaben, Ziele, Limits, Profil und Präferenzen können zur Synchronisierung und Kontoführung in Firebase/Cloud Firestore gespeichert werden.
 - Die App nutzt Google/Firebase-Dienste für Anmeldung, Datenbank, Push-Benachrichtigungen, Analysen und Fehlerdiagnose.
 - Die App verwendet möglicherweise Google AdMob, um Anzeigen anzuzeigen.
 - Premium wird von Google Play Billing innerhalb der App selbst verarbeitet.
-- Der Standort ist optional und wird nur verwendet, wenn Sie dies autorisieren, beispielsweise um Investitionsvergleiche an das Land oder den lokalen Kontext anzupassen.
+- Der Standort ist optional und wird nur verwendet, wenn Sie die Erlaubnis erteilen, beispielsweise um Investitionsvergleiche an das Land oder den lokalen Kontext anzupassen.
 - Die Benachrichtigungsüberwachungsfunktion ist optional. Wenn Sie den Benachrichtigungszugriff auf dem Android aktivieren, kann die App den Titel und Text unterstützter Benachrichtigungen lesen, um Käufe, Zahlungen und Überweisungen zu identifizieren und diese in Finanzunterlagen umzuwandeln. Die App greift nicht auf Ihr Bankkonto zu und fragt nicht nach einem Passwort.
 - Von Ihnen zur Personalisierung ausgewählte Bilder können lokal auf dem Gerät gespeichert werden.
 - Sie können die Löschung Ihres Kontos und Ihrer Daten über die in dieser Richtlinie angegebene E-Mail-Adresse beantragen.
@@ -39,12 +39,12 @@ Abhängig davon, wie Sie die Anwendung nutzen, verarbeiten wir möglicherweise d
 
 ### 3.1 Konto- und Identifikationsdaten
 
-- Name, der bei der Registrierung angegeben wurde.
+- Bei der Registrierung angegebener Name.
 - E-Mail.
 - Firebase (UID) Benutzer-ID.
 - Verwendete Anmeldemethode.
 - Profilfoto, sofern vom Login-Anbieter bereitgestellt.
-– Premium-Abonnementstatus, der dem Profil zugeordnet ist.
+- Premium Abonnementstatus, der dem Profil zugeordnet ist.
 - Technische Daten, die zur Aufrechterhaltung der Sitzung und zur Synchronisierung von Informationen erforderlich sind.
 
 ### 3.2 Von Ihnen eingegebene Finanzdaten
@@ -59,13 +59,15 @@ Diese Daten können in praktischer Hinsicht sensibel sein, da sie Aspekte Ihres 
 ### 3.3 Abonnement- und Kaufdaten
 
 - Gekauftes Produkt, Abonnementstatus, Zeitraum, Verlängerung, Kaufwiederherstellung und technische Kennungen, die zur Bestätigung von Premium erforderlich sind.
-- Käufe, Stornierungen, Verlängerungen, Rückerstattungen und Gebühren werden von Google Play gemäß den Google-Konto- und Store-Regeln verarbeitet.
+- Kauf, Stornierung, Verlängerung, Rückerstattung und Abrechnung werden von Google Play gemäß den Google-Konto- und Store-Regeln verarbeitet.
 
 Die App erfasst oder speichert keine Kartennummern, Kartenprüfcodes oder Bankzahlungsdaten.
 
-### 3.4 Nutzungs-, Diagnose- und Leistungsdaten- Nutzungs- und Interaktionsereignisse in der App, z. B. aufgerufene Bildschirme, verwendete Ressourcen und abgeschlossene Abläufe.
-- Aggregierte oder technische Daten zum Verständnis der Produktstabilität, Leistung und Verbesserung.
-- Fehlerberichte und Diagnosen von Firebase Crashlytics, sofern zutreffend, einschließlich technischer Geräteinformationen, App-Version, Betriebssystem, Fehlerprotokollen und Benutzerkennung, sofern konfiguriert.
+### 3.4 Nutzungs-, Diagnose- und Leistungsdaten
+
+- Nutzungs- und Interaktionsereignisse in der App, z. B. aufgerufene Bildschirme, verwendete Ressourcen und abgeschlossene Abläufe.
+- Aggregierte oder technische Daten, um Produktstabilität, Leistung und Verbesserung zu verstehen.
+- Absturzberichte und Diagnosen von Firebase Crashlytics, sofern zutreffend, einschließlich technischer Geräteinformationen, App-Version, Betriebssystem, Fehlerprotokollen und Benutzer-ID, sofern konfiguriert.
 
 ### 3.5 Push-Benachrichtigungsdaten
 
@@ -77,7 +79,7 @@ Wenn Sie Benachrichtigungen von der App zulassen, können wir Folgendes verarbei
 
 Sie können in den Android-Einstellungen steuern, ob Benachrichtigungen zulässig sind.
 
-### 3.6 Eingelesene Benachrichtigungsdaten Android
+### 3.6 Eingelesene Benachrichtigungsdaten in Android
 
 Die Benachrichtigungsüberwachung ist eine optionale Funktion. Es funktioniert nur, wenn Sie den Benachrichtigungszugriff manuell in den Android-Einstellungen aktivieren.
 
@@ -87,9 +89,9 @@ Wichtige Maßnahmen dieser Funktion:
 
 - Die App greift nicht auf Ihr Bankkonto zu.
 - Die App loggt sich nicht bei Banken, Karten oder digitalen Geldbörsen ein.
-- Die App fragt nicht nach einem Bankpasswort.
+- Die App fragt nicht nach einem Banking-Passwort.
 - Die App wendet Filter an, um die Erfassung von Sicherheitscodes, OTP, Passwörtern und Authentifizierungsnachrichten zu vermeiden.
-- Der Schwerpunkt des Filters liegt auf der Identifizierung kompatibler Käufe, Zahlungen, gesendeter Überweisungen und Finanzbewegungen.
+- Der Fokus des Filters liegt auf der Identifizierung kompatibler Käufe, Zahlungen, gesendeter Überweisungen und Finanzbewegungen.
 - Sie können die Funktion in der App deaktivieren oder die Berechtigung in den Android-Einstellungen widerrufen.
 
 Auch mit Filtern können Benachrichtigungen vertrauliche Informationen enthalten. Aktivieren Sie diese Funktion nur, wenn Sie diese Art der Verarbeitung verstehen und akzeptieren.
@@ -123,17 +125,19 @@ Wir verwenden Daten, um:
 - Senden Sie Benachrichtigungen von der App selbst, sofern dies zulässig ist.
 - Verarbeiten Sie unterstützte Finanzbenachrichtigungen, wenn Sie diese Funktion aktivieren.
 - Passen Sie Anlageinhalte an den lokalen Kontext an, wenn die Lokalisierung zulässig ist.
-- Verbessern Sie Stabilität, Leistung, Sicherheit und Anwendungserfahrung.
-- Gesetzliche Verpflichtungen einhalten, auf Anfragen reagieren und Missbrauch verhindern.
+- Verbessern Sie Stabilität, Leistung, Sicherheit und Anwendungserlebnis.
+- Halten Sie rechtliche Verpflichtungen ein, reagieren Sie auf Anfragen und verhindern Sie Missbrauch.
 - Gegebenenfalls Werbung schalten.
 
 ## 5. Rechtsgrundlagen
 
-Wenn LGPD gilt, kann sich die Verarbeitung auf eine oder mehrere Rechtsgrundlagen stützen, darunter:- Durchführung von Vertrags- oder Vorverfahren zur Bereitstellung von Anwendungsressourcen.
+Wenn LGPD gilt, kann sich die Verarbeitung auf eine oder mehrere Rechtsgrundlagen stützen, darunter:
+
+- Durchführung von Vertrags- oder Vorverfahren, Bereitstellung von Anwendungsressourcen.
 - Einwilligung für optionale Berechtigungen wie Standort, Push-Benachrichtigungen und Zugriff auf Android-Benachrichtigungen.
 - Berechtigtes Interesse an Sicherheit, Diagnose, Produktverbesserung, Missbrauchsprävention und proportionalen Statistiken.
 - Einhaltung gesetzlicher oder behördlicher Verpflichtungen, sofern erforderlich.
-- Regelmäßige Ausübung der Rechte in behördlichen, gerichtlichen oder außergerichtlichen Verfahren.
+- Regelmäßige Ausübung von Rechten in behördlichen, gerichtlichen oder außergerichtlichen Verfahren.
 
 Sie können optionale Einwilligungen in den App- oder Betriebssystemeinstellungen widerrufen, dies kann jedoch zu Funktionseinschränkungen führen.
 
@@ -160,10 +164,10 @@ Dienste wie Firebase, Google Play, AdMob und andere Anbieter verarbeiten möglic
 
 Wir bewahren Daten so lange auf, wie es für die Bereitstellung des Antrags, die Erfüllung der in dieser Richtlinie beschriebenen Zwecke, die Einhaltung gesetzlicher Verpflichtungen, die Beilegung von Streitigkeiten, die Verhinderung von Betrug und die Aufrechterhaltung der Sicherheit erforderlich ist.
 
-Allgemein:
+Im Allgemeinen:
 
-- Kontodaten und Finanzdaten in der Cloud bleiben so lange bestehen, wie das Konto besteht oder bis eine gültige Löschanfrage gestellt wird.
-- Lokale Daten bleiben möglicherweise auf dem Gerät, bis Sie sie löschen, App-Daten löschen oder die App deinstallieren.
+- Kontodaten und Finanzdaten in der Cloud bleiben so lange bestehen, wie das Konto besteht oder bis ein gültiger Löschantrag gestellt wird.
+- Lokale Daten bleiben möglicherweise auf Ihrem Gerät, bis Sie sie löschen, App-Daten löschen oder die App deinstallieren.
 - Diagnosedaten, Analysen und Protokolle können für vom Anbieter festgelegte Zeiträume aufbewahrt werden.
 - Kaufinformationen können gemäß den Steuer-, Handels- und Geschäftsregeln in Google Play verbleiben.
 - Anonymisierte oder aggregierte Daten können gespeichert werden, ohne Sie zu identifizieren.
@@ -175,30 +179,32 @@ Wir ergreifen angemessene technische und organisatorische Maßnahmen zum Schutz 
 - Authentifizierung durch Firebase.
 - Zugriffsregeln in der Datenbank, um Daten auf den entsprechenden Benutzer zu beschränken.
 - Durch die verwendeten SDKs und APIs verschlüsselte Kommunikation.
-– Verwendung von Android-Berechtigungen nur im Zusammenhang mit App-Ressourcen.
+- Verwendung von Android-Berechtigungen nur im Zusammenhang mit App-Ressourcen.
 - Filtert bei der Überwachung von Benachrichtigungen, um Sicherheitscodes, OTP, Passwörter und Authentifizierungsnachrichten zu vermeiden.
-- Fehlerdiagnose zur Fehlerkorrektur und Verbesserung der Stabilität.
+- Fehlerdiagnose zur Behebung von Fehlern und Verbesserung der Stabilität.
 
 Kein System ist 100 % sicher. Sie sollten außerdem Ihr Gerät schützen, eine Bildschirmsperre verwenden, ein sicheres Passwort verwenden, die Weitergabe Ihres Kontos vermeiden und die App aktualisieren, wenn eine neue Version veröffentlicht wird.
 
 ## 10. Ihre Kontrollen
 
-Sie können:
+Du kannst:
 
 - Bearbeiten oder löschen Sie Informationen innerhalb der App, sofern diese Funktion vorhanden ist.
 - Deaktivieren Sie Push-Benachrichtigungen in den Android-Einstellungen.
 - Standort in den Android-Einstellungen widerrufen.
 - Widerrufen Sie den Zugriff auf Benachrichtigungen in den Android-Einstellungen.
-- Kündigen oder verwalten Sie das Abonnement über Google Play.
+- Abonnement über Google Play kündigen oder verwalten.
 - Löschen Sie lokale App-Daten oder deinstallieren Sie die App.
 - Fordern Sie Zugriff, Korrektur oder Löschung per Kontakt-E-Mail an.
 
 ## 11. Konto- und Datenlöschung
 
-So beantragen Sie die Löschung Ihres Kontos und Ihrer Daten:1. Senden Sie eine E-Mail an **george.guimares@gmail.com**.
+So beantragen Sie die Löschung Ihres Kontos und Ihrer Daten:
+
+1. Senden Sie eine E-Mail an **george.guimares@gmail.com**.
 2. Verwenden Sie den Betreff **"Datenlöschung - Mentor Financeiro"** oder **"LGPD - Mentor Financeiro"**.
 3. Geben Sie die E-Mail-Adresse des Kontos, die Anmeldemethode oder eine andere Kennung ein, die beim Auffinden des Profils hilft.
-4. Geben Sie an, ob Sie die vollständige Löschung der Konto-/Cloud-Daten oder die Löschung bestimmter Kategorien wünschen, sofern dies technisch möglich ist.
+4. Geben Sie an, ob Sie die Konto-/Cloud-Daten vollständig oder bestimmte Kategorien löschen möchten, sofern dies technisch möglich ist.
 
 Wir können eine Identitätsbestätigung anfordern, um unrechtmäßige Löschungen zu vermeiden.
 
@@ -206,15 +212,15 @@ Folgendes kann je nach Bedarf ausgeschlossen oder aufgehoben werden:
 
 - Benutzerprofil und Dokumente in Cloud Firestore.
 - In der Cloud gespeicherte Ausgaben, Ziele, Präferenzen, Finanzhistorie und Einstellungen.
-– FCM-Token, das dem Profil zugeordnet ist, wenn es gespeichert wird.
-- Konto in Firebase Authentication, wenn eine vollständige und technisch sinnvolle Löschung beantragt wird.
+- FCM-Token, das dem Profil zugeordnet ist, wenn es gespeichert wird.
+- Konto in Firebase Authentication, auf Wunsch vollständige und technisch sinnvolle Löschung.
 
 Sie können länger bleiben:
 
 - Anonymisierte oder aggregierte Daten.
 - Aufzeichnungen, die zur Einhaltung gesetzlicher Vorschriften, zur Betrugsprävention, zur Sicherheit oder zur Verteidigung von Rechten erforderlich sind.
 - Von Google Play verwalteter Verlauf der Käufe, Zahlungen und Abonnements.
-- Daten, die direkt von Drittanbietern gemäß deren Richtlinien verarbeitet werden.
+- Daten werden direkt von Drittanbietern gemäß deren Richtlinien verarbeitet.
 
 Wir werden uns bemühen, innerhalb von 30 Werktagen auf gültige Anfragen zu antworten, es sei denn, es handelt sich um komplexe, gesetzliche Verpflichtungen oder es ist eine zusätzliche Überprüfung erforderlich.
 
@@ -226,11 +232,11 @@ Vorbehaltlich des geltenden Rechts können Sie Folgendes anfordern:
 - Zugriff auf Daten.
 - Korrektur unvollständiger, ungenauer oder veralteter Daten.
 - Anonymisierung, Sperrung oder Löschung unnötiger, übermäßiger oder nicht konformer Daten.
-- Informationen zum Teilen.
+- Informationen teilen.
 - Widerruf der Einwilligung.
-- Gegebenenfalls Löschung von Daten, die aufgrund einer Einwilligung verarbeitet werden.
+- Gegebenenfalls Löschung der auf Grundlage einer Einwilligung verarbeiteten Daten.
 - Portabilität, sofern gesetzlich vorgeschrieben und technisch möglich.
-- Überprüfung automatisierter Entscheidungen, sofern zutreffend.
+- Gegebenenfalls Überprüfung automatisierter Entscheidungen.
 
 Um diese Rechte auszuüben, senden Sie eine E-Mail an **george.guimares@gmail.com**.
 

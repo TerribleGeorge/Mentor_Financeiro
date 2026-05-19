@@ -12,13 +12,13 @@ Aplikace může ukládat finanční údaje, které jste zadali nebo identifikova
 
 ## 2. Co aplikace nedělá
 
-- Nežádá o bankovní heslo, kartu nebo digitální peněženku.
+- Nepožaduje bankovní heslo, kartu ani digitální peněženku.
 - Nemá přístup k vašemu bankovnímu účtu.
 - Nepřesouvá peníze.
 - Neprovádí platby, Pix, převody ani investice vaším jménem.
 - Nevyžaduje bezpečnostní kód karty.
 - Nevyžaduje kód banky OTP.
-- Neprodává vaše osobní údaje.
+- Vaše osobní údaje neprodává.
 
 ## 3. Použitá technická opatření
 
@@ -28,7 +28,7 @@ V závislosti na použitém zdroji může aplikace používat:
 - Cloud Firestore s daty spojenými s ověřeným uživatelem.
 - Bezpečnostní pravidla pro omezení přístupu k vlastním datům uživatele.
 - Komunikace je šifrována pomocí sad SDK a používaných služeb.
-- Firebase Crashlytics k identifikaci technických závad a opravě problémů.
+- Firebase Crashlytics k identifikaci technických závad a nápravě problémů.
 - Oprávnění Android jsou požadována pouze v souvislosti s funkcemi aplikace.
 - Místní úložiště pro předvolby, téma, mezipaměť a data zařízení.
 
@@ -42,8 +42,8 @@ Ke snížení rizik:
 
 - Aplikace vás informuje o důvodu povolení, než vás přesměruje do nastavení.
 - Přístup lze kdykoli zrušit v nastavení Android.
-- Filtr vyhledává kompatibilní finanční události, nikoli osobní konverzace.
-- Aplikace se snaží ignorovat OTP kódy, hesla, bezpečnostní kódy a ověřovací zprávy.
+- Filtr hledá kompatibilní finanční události, nikoli osobní konverzace.
+- Aplikace se pokouší ignorovat OTP kódy, hesla, bezpečnostní kódy a ověřovací zprávy.
 - Aplikace tuto funkci nepoužívá pro přístup k bankám, kartám nebo digitálním peněženkám.
 
 I tak mohou oznámení obsahovat citlivá data. Tuto funkci používejte pouze v případě, že souhlasíte s tímto typem zpracování.
@@ -60,11 +60,11 @@ Aplikace může vyžadovat:
 
 Tato oprávnění ovládáte v nastavení Android.
 
-## 6. Vaše role v bezpečnosti
+## 6. Váš podíl na bezpečnosti
 
 Chcete-li chránit svá data:
 
-- Použijte zámek obrazovky na zařízení.
+- Použijte zámek obrazovky na svém zařízení.
 - Nesdílejte svůj účet.
 - Udržujte aplikaci a Android aktualizované.
 - Zrušte oprávnění, která již nechcete používat.
@@ -87,7 +87,7 @@ Pokud zaznamenáte podivné chování, nesprávný přístup, nesprávná data, 
 Pokud je to možné, zahrňte:
 
 - Model zařízení.
-- Verze Android.
+- verze Android.
 - Verze aplikace.
 - Popis problému.
 - Snímky obrazovky bez odhalení hesel, kódů nebo nadměrného množství dat.

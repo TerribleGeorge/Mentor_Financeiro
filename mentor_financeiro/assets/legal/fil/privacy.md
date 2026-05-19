@@ -28,9 +28,9 @@ Upang gamitin ang mga karapatan na nauugnay sa iyong data, magtanong o humiling 
 - Gumagamit ang app ng mga serbisyo ng Google/Firebase para sa pag-login, database, push notification, analytics at fault diagnosis.
 - Maaaring gumamit ang app ng Google AdMob upang magpakita ng mga ad.
 - Ang Premium ay pinoproseso ng Google Play Billing sa loob mismo ng app.
-- Opsyonal ang lokasyon at ginagamit lang kapag pinahintulutan mo ito, halimbawa para iakma ang mga paghahambing sa pamumuhunan sa bansa o lokal na konteksto.
-- Ang tampok na pagsubaybay sa notification ay opsyonal. Kung ie-enable mo ang access sa notification sa Android, mababasa ng app ang pamagat at text ng mga sinusuportahang notification para matukoy ang mga pagbili, pagbabayad, at paglilipat at gawin itong mga financial record. Hindi ina-access ng app ang iyong bank account at hindi humihingi ng password.
-- Ang mga larawang pinili mo para sa pag-personalize ay maaaring maiimbak nang lokal sa device.
+- Opsyonal ang lokasyon at ginagamit lang kapag nagbigay ka ng pahintulot, halimbawa para iakma ang mga paghahambing sa pamumuhunan sa bansa o lokal na konteksto.
+- Ang tampok na pagsubaybay sa abiso ay opsyonal. Kung ie-enable mo ang access sa notification sa Android, mababasa ng app ang pamagat at text ng mga sinusuportahang notification para matukoy ang mga pagbili, pagbabayad, at paglilipat at gawin itong mga financial record. Hindi ina-access ng app ang iyong bank account at hindi humihingi ng password.
+- Ang mga larawang pinili mo para sa pag-personalize ay maaaring lokal na iimbak sa device.
 - Maaari kang humiling ng pagtanggal ng account at data sa pamamagitan ng email na nakasaad sa patakarang ito.
 
 ## 3. Data na maaari naming iproseso
@@ -40,39 +40,41 @@ Depende sa kung paano mo ginagamit ang application, maaari naming iproseso ang m
 ### 3.1 Data ng account at pagkakakilanlan
 
 - Pangalan na ibinigay sa pagpaparehistro.
-- Email.
+- E-mail.
 - Firebase (UID) identifier ng user.
 - Ginamit ang paraan ng pag-login.
 - Larawan sa profile, kapag ibinigay ng provider ng pag-login.
-- Premium status ng subscription na nauugnay sa profile.
+- Premium estado ng subscription na nauugnay sa profile.
 - Teknikal na data na kinakailangan upang mapanatili ang session at i-synchronize ang impormasyon.
 
 ### 3.2 Data sa pananalapi na ipinasok mo
 
 - Mga gastos, gastos, kita, kategorya, kasaysayan ng pananalapi at mga transaksyon.
 - Mga layunin, limitasyon, pagpaplano, pangarap at kagustuhan sa pananalapi.
-- Impormasyong ginamit sa mga graph, ulat, pagsusuri at awtomatikong pag-mentoring sa loob ng app.
+- Impormasyong ginagamit sa mga graph, ulat, pagsusuri at awtomatikong pag-mentoring sa loob ng app.
 - Profile ng mamumuhunan, mga layunin at sagot na ibinigay sa mga talatanungan o mga screen ng pagpaplano.
 
 Maaaring maging sensitibo ang data na ito sa praktikal na kahulugan, dahil ipinapakita nito ang mga aspeto ng iyong buhay pinansyal. Samakatuwid, dapat ka lamang magrehistro ng impormasyon na nais mong panatilihin sa application.
 
 ### 3.3 Data ng subscription at pagbili
 
-- Binili na produkto, katayuan ng subscription, panahon, pag-renew, pagpapanumbalik ng pagbili at mga teknikal na pagkakakilanlan na kinakailangan upang kumpirmahin ang Premium.
-- Ang mga pagbili, pagkansela, pag-renew, refund at pagsingil ay pinoproseso ng Google Play, alinsunod sa mga panuntunan ng Google account at store.
+- Ang biniling produkto, katayuan ng subscription, panahon, pag-renew, pagpapanumbalik ng pagbili at mga teknikal na pagkakakilanlan ay kinakailangan upang kumpirmahin ang Premium.
+- Ang pagbili, pagkansela, pag-renew, refund, at pagsingil ay pinoproseso ng Google Play, alinsunod sa mga panuntunan ng Google account at store.
 
 Ang app ay hindi nangongolekta o nag-iimbak ng mga numero ng card, mga code ng seguridad ng card o mga detalye ng pagbabayad sa bangko.
 
-### 3.4 Data ng paggamit, diagnostic at performance- Mga kaganapan sa paggamit at pakikipag-ugnayan sa app, halimbawa mga screen na na-access, mga mapagkukunang ginamit at nakumpleto ang mga daloy.
-- Pinagsama-sama o teknikal na data upang maunawaan ang katatagan, pagganap at pagpapabuti ng produkto.
-- Mga ulat ng pagkakamali at diagnostic ng Firebase Crashlytics, kapag naaangkop, kabilang ang teknikal na impormasyon ng device, bersyon ng app, operating system, mga log ng error at identifier ng user kapag na-configure.
+### 3.4 Data ng paggamit, diagnostic at performance
+
+- Mga kaganapan sa paggamit at pakikipag-ugnayan sa app, halimbawa mga screen na na-access, mga mapagkukunang ginamit at mga daloy na nakumpleto.
+- Pinagsama-sama o teknikal na data upang maunawaan ang katatagan, pagganap, at pagpapabuti ng produkto.
+- Mga ulat ng pag-crash at diagnostic ng Firebase Crashlytics, kung saan naaangkop, kabilang ang teknikal na impormasyon ng device, bersyon ng app, operating system, mga log ng error, at identifier ng user kapag na-configure.
 
 ### 3.5 Data ng push notification
 
 Kung papayagan mo ang mga notification mula sa app, maaari naming pangasiwaan ang:
 
 - Firebase Cloud Messaging token (FCM).
-- Mga kagustuhang nauugnay sa pagtanggap ng mga abiso.
+- Mga kagustuhang nauugnay sa pagtanggap ng mga notification.
 - Mga paksa o mga segment na kinakailangan para sa pagpapadala ng mga komunikasyon mula sa mismong application.
 
 Makokontrol mo kung pinapayagan ang mga notification sa mga setting ng Android.
@@ -87,8 +89,8 @@ Mahahalagang hakbang ng tampok na ito:
 
 - Hindi ina-access ng app ang iyong bank account.
 - Ang app ay hindi nagla-log in sa mga bangko, card o digital wallet.
-- Ang app ay hindi humihingi ng password sa bangko.
-- Naglalapat ang app ng mga filter upang maiwasan ang pagkuha ng mga code ng seguridad, OTP, mga password at mga mensahe sa pagpapatunay.
+- Ang app ay hindi humihingi ng password sa pagbabangko.
+- Ang app ay naglalapat ng mga filter upang maiwasan ang pagkuha ng mga security code, OTP, mga password at mga mensahe sa pagpapatunay.
 - Ang pokus ng filter ay upang matukoy ang mga katugmang pagbili, pagbabayad, paglilipat na ipinadala at mga paggalaw sa pananalapi.
 - Maaari mong i-disable ang feature sa app o bawiin ang pahintulot sa mga setting ng Android.
 
@@ -117,11 +119,11 @@ Maaaring kumonsulta ang app sa mga panlabas na API para sa mga exchange rate, qu
 Ginagamit namin ang data upang:
 
 - Lumikha at panatilihin ang iyong account.
-- I-sync ang mga gastos, layunin, kagustuhan, kasaysayan at mga setting.
+- I-sync ang paggasta, layunin, kagustuhan, kasaysayan at mga setting.
 - Ipakita ang mga dashboard, graph, ulat, limitasyon at personalized na nilalaman.
 - Payagan ang mga pagbili, pagpapanumbalik at pagpapatunay ng Premium.
 - Magpadala ng mga notification mula sa app mismo, kapag pinapayagan.
-- Iproseso ang suportadong pampinansyal na mga abiso, kung pinagana mo ang tampok na ito.
+- Iproseso ang mga suportadong pampinansyal na abiso, kung pinagana mo ang feature na ito.
 - Iangkop ang nilalaman ng pamumuhunan sa lokal na konteksto, kapag pinahintulutan ang localization.
 - Pagbutihin ang katatagan, pagganap, seguridad at karanasan sa aplikasyon.
 - Sumunod sa mga legal na obligasyon, tumugon sa mga kahilingan at maiwasan ang pang-aabuso.
@@ -129,8 +131,10 @@ Ginagamit namin ang data upang:
 
 ## 5. Mga legal na batayan
 
-Kapag nalalapat ang LGPD, ang pagpoproseso ay maaaring umasa sa isa o higit pang mga legal na batayan, kabilang ang:- Pagpapatupad ng kontrata o mga paunang pamamaraan, upang maihatid ang mga mapagkukunan ng aplikasyon.
-- Pahintulot, para sa mga opsyonal na pahintulot gaya ng lokasyon, push notification at access sa Android notification.
+Kapag nalalapat ang LGPD, ang pagpoproseso ay maaaring umasa sa isa o higit pang mga legal na batayan, kabilang ang:
+
+- Pagpapatupad ng kontrata o mga paunang pamamaraan, upang maihatid ang mga mapagkukunan ng aplikasyon.
+- Pahintulot, para sa mga opsyonal na pahintulot gaya ng lokasyon, push notification, at access sa Android notification.
 - Lehitimong interes, para sa kaligtasan, pagsusuri, pagpapabuti ng produkto, pag-iwas sa pang-aabuso at proporsyonal na istatistika.
 - Pagsunod sa mga legal o regulasyong obligasyon, kung kinakailangan.
 - Regular na paggamit ng mga karapatan, sa administratibo, hudisyal o extrajudicial na paglilitis.
@@ -152,7 +156,7 @@ Maaari naming ibahagi o payagan ang pagproseso ng data ng mga provider na kinaka
 
 Ang mga third party na ito ay maaaring magproseso ng data alinsunod sa kanilang sariling mga tuntunin, patakaran at setting.
 
-## 7. International transfer
+## 7. Internasyonal na paglilipat
 
 Ang mga serbisyo tulad ng Firebase, Google Play, AdMob at iba pang mga provider ay maaaring magproseso ng data sa mga server na matatagpuan sa labas ng Brazil. Sa pamamagitan ng paggamit ng app, kinikilala mo na maaaring mangyari ang internasyonal na pagpoproseso na ito, napapailalim sa naaangkop na mga panuntunan sa proteksyon ng data at mga tuntunin ng mga provider.
 
@@ -162,22 +166,22 @@ Pinapanatili namin ang data hangga't kinakailangan upang maihatid ang aplikasyon
 
 Sa pangkalahatan:
 
-- Ang data ng account at data ng pananalapi sa cloud ay mananatili hangga't umiiral ang account o hanggang sa isang wastong kahilingan sa pagtanggal.
-- Maaaring manatili ang lokal na data sa device hanggang sa burahin mo, i-clear ang data ng app, o i-uninstall ang app.
+- Ang data ng account at data ng pananalapi sa cloud ay mananatili hangga't umiiral ang account o hanggang sa magawa ang isang wastong kahilingan sa pagtanggal.
+- Maaaring manatili ang lokal na data sa iyong device hanggang sa burahin mo, i-clear ang data ng app, o i-uninstall ang app.
 - Maaaring panatilihin ang diagnostic data, analytics at mga log para sa mga panahong tinukoy ng mga provider.
-- Maaaring manatili ang impormasyon sa pagbili sa Google Play ayon sa mga patakaran sa buwis, komersyal at tindahan.
+- Ang impormasyon sa pagbili ay maaaring manatili sa Google Play ayon sa mga patakaran sa buwis, komersyal at tindahan.
 - Maaaring itago ang anonymized o pinagsama-samang data nang hindi ka nakikilala.
 
 ## 9. Seguridad
 
 Gumagamit kami ng mga makatwirang teknikal at pang-organisasyong hakbang upang protektahan ang data, kabilang ang:
 
-- Pagpapatunay ni Firebase.
+- Pagpapatotoo ni Firebase.
 - I-access ang mga panuntunan sa database upang limitahan ang data sa kaukulang user.
 - Komunikasyon na naka-encrypt ng mga SDK at API na ginamit.
-- Paggamit ng Android na mga pahintulot lamang kapag nauugnay sa mga mapagkukunan ng app.
+- Paggamit lang ng Android na mga pahintulot kapag nauugnay sa mga mapagkukunan ng app.
 - Mga filter kapag sinusubaybayan ang mga abiso upang maiwasan ang mga code ng seguridad, OTP, mga password at mga mensahe sa pagpapatunay.
-- Fault diagnosis upang itama ang mga error at pagbutihin ang katatagan.
+- Fault diagnosis para ayusin ang mga error at pagbutihin ang katatagan.
 
 Walang sistema na 100% secure. Dapat mo ring protektahan ang iyong device, gumamit ng lock ng screen, panatilihin ang malakas na password, iwasang ibahagi ang iyong account at i-update ang app kapag may inilabas na bagong bersyon.
 
@@ -191,13 +195,15 @@ Maaari mong:
 - Bawiin ang access sa mga notification sa mga setting ng Android.
 - Kanselahin o pamahalaan ang subscription sa pamamagitan ng Google Play.
 - I-clear ang data ng lokal na app o i-uninstall ang app.
-- Humiling ng access, pagwawasto o pagtanggal sa pamamagitan ng contact email.
+- Humiling ng access, pagwawasto o pagtanggal sa pamamagitan ng email sa pakikipag-ugnayan.
 
 ## 11. Pagtanggal ng account at data
 
-Upang humiling ng pagtanggal ng account at data:1. Magpadala ng email sa **george.guimares@gmail.com**.
+Upang humiling ng pagtanggal ng account at data:
+
+1. Magpadala ng email sa **george.guimares@gmail.com**.
 2. Gamitin ang paksa **"Pagtanggal ng Data - Mentor Financeiro"** o **"LGPD - Mentor Financeiro"**.
-3. Ipasok ang email ng account, paraan ng pag-login o iba pang identifier na tumutulong na mahanap ang profile.
+3. Ilagay ang email ng account, paraan ng pag-log in o iba pang identifier na tumutulong na mahanap ang profile.
 4. Ipahiwatig kung gusto mo ng kabuuang pagtanggal ng data ng account/cloud o pagtanggal ng mga partikular na kategorya, kapag posible sa teknikal.
 
 Maaari kaming humiling ng kumpirmasyon ng pagkakakilanlan upang maiwasan ang mga hindi nararapat na pagtanggal.
@@ -207,11 +213,11 @@ Ang mga sumusunod ay maaaring ibukod o i-unlink, kung naaangkop:
 - Profile ng user at mga dokumento sa Cloud Firestore.
 - Paggastos, layunin, kagustuhan, kasaysayan ng pananalapi at mga setting na naka-save sa cloud.
 - FCM token na nauugnay sa profile, kapag inimbak.
-- Account sa Firebase Authentication, kapag hiniling ang kabuuan at naaangkop na teknikal na pagtanggal.
+- Account sa Firebase Authentication, kapag hiniling sa kabuuan at naaangkop sa teknikal na pagtanggal.
 
 Maaari silang manatili nang mas matagal:
 
-- Anonymize o pinagsama-samang data.
+- Anonymized o pinagsama-samang data.
 - Mga rekord na kinakailangan para sa legal na pagsunod, pag-iwas sa pandaraya, seguridad o pagtatanggol sa mga karapatan.
 - Kasaysayan ng mga pagbili, pagbabayad at subscription na pinananatili ng Google Play.
 - Direktang naproseso ang data ng mga third-party na provider alinsunod sa kanilang mga patakaran.
@@ -226,7 +232,7 @@ Alinsunod sa naaangkop na batas, maaari kang humiling ng:
 - Access sa data.
 - Pagwawasto ng hindi kumpleto, hindi tumpak o hindi napapanahong data.
 - Anonymization, pagharang o pagtanggal ng hindi kailangan, labis o hindi sumusunod na data.
-- Impormasyon tungkol sa pagbabahagi.
+- Pagbabahagi ng impormasyon.
 - Pagbawi ng pahintulot.
 - Pagtanggal ng data na naproseso batay sa pahintulot, kapag naaangkop.
 - Portability, kapag kinokontrol at teknikal na posible.
@@ -234,7 +240,7 @@ Alinsunod sa naaangkop na batas, maaari kang humiling ng:
 
 Upang gamitin ang mga karapatang ito, magpadala ng email sa **george.guimares@gmail.com**.
 
-## 13. Mga bata at kabataan
+## 13. Mga bata at tinedyer
 
 Ang aplikasyon ay hindi naglalayong sa mga batang wala pang 13 taong gulang. Kung nauunawaan ng isang legal na tagapag-alaga na ang isang bata ay nagbigay ng data sa app, dapat silang makipag-ugnayan sa amin upang masuri namin ang pagtanggal.
 

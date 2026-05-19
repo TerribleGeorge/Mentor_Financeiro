@@ -19,9 +19,9 @@ Mentor Financeiro er ikke:
 - registreret investeringsrådgiver;
 - certificeret finansiel planlægger;
 - forsikringsselskab;
-- betalingsmetode;
+- betalingsmidler;
 - kreditinstitut;
-- platform til udførelse af investeringsordrer.
+- platform for eksekvering af investeringsordrer.
 
 ## 2. Pædagogisk brug og mangel på personlig anbefaling
 
@@ -39,7 +39,7 @@ Du er ansvarlig for:
 
 - give korrekte oplysninger;
 - opretholde sikker adgang til din e-mail og enhed;
-- Beskyt din adgangskode og din konto;
+- beskytte din adgangskode og din konto;
 - del ikke legitimationsoplysninger;
 - advare om mistanke om misbrug.
 
@@ -53,7 +53,7 @@ Appen kan organisere, behandle, vise, synkronisere og analysere disse data for a
 
 Du bør gennemgå optegnelser, især data importeret eller automatisk identificeret ved meddelelser, før du træffer økonomiske beslutninger.
 
-## 5. Notifikationsovervågning
+## 5. Underretningsovervågning
 
 Appen tilbyder muligvis en valgfri Android notifikationssporingsfunktion til at identificere udgifter, køb, betalinger, abonnementer og overførsler i understøttede notifikationer.
 
@@ -89,8 +89,10 @@ Vi er ikke ansvarlige for produkter, tjenester, tilbud eller indhold fra ekstern
 
 ## 8. Acceptabel brug
 
-Du accepterer ikke at:- bruge appen til bedrageri, misbrug, hvidvaskning af penge, lovovertrædelse eller skade på tredjeparter;
-- prøv at få adgang til data fra andre brugere;
+Du accepterer ikke at:
+
+- bruge appen til bedrageri, misbrug, hvidvaskning af penge, lovovertrædelse eller skade på tredjeparter;
+- forsøg på at få adgang til data fra andre brugere;
 - omgå sikkerhed, grænser, abonnement, betalingsmur eller tekniske mekanismer;
 - reverse engineering, kopiere, ændre eller videredistribuere appen uden tilladelse;
 - automatisere misbrug, overbelaste tjenester eller forstyrre deres drift;
@@ -108,7 +110,7 @@ Vi søger at holde appen i gang, men vi garanterer ikke fortsat tilgængelighed,
 
 Vi kan opdatere, rette, fjerne, erstatte eller afbryde funktioner, især af tekniske, juridiske, sikkerhedsmæssige, forretningsmæssige eller produktforbedrende årsager.
 
-## 11. Intellektuel ejendom
+## 11. Intellektuel ejendomsret
 
 Navnet Mentor Financeiro, interface, tekster, organisation, kode, visuelle elementer, ressourcer og indhold af appen tilhører udvikleren eller licensgiverne, undtagen tredjepartsindhold.
 
@@ -136,11 +138,11 @@ Sletning af appen fra enheden annullerer ikke automatisk et aktivt abonnement. B
 
 ## 14. Privatliv og sikkerhed
 
-Brugen af data er forklaret i fortrolighedspolitikken. Sikkerhedspraksis er forklaret på sikkerhedssiden.
+Brugen af ​​data er forklaret i fortrolighedspolitikken. Sikkerhedspraksis er forklaret på sikkerhedssiden.
 
 Ved at bruge appen anerkender du, at finansielle data kan være følsomme, og at du skal holde din enhed beskyttet.
 
-## 15. Ændringer til disse vilkår
+## 15. Ændringer af disse vilkår
 
 Vi kan opdatere disse vilkår for brug for at afspejle ændringer i appen, funktioner, abonnementer, juridiske krav eller tredjepartstjenester.
 

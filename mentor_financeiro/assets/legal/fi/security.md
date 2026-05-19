@@ -12,10 +12,10 @@ Sovellus voi tallentaa syöttämiäsi tai valinnaisilla ominaisuuksilla tunniste
 
 ## 2. Mitä sovellus ei tee
 
-- Ei kysy pankin salasanaa, korttia tai digitaalista lompakkoa.
-- Ei käytä pankkitiliäsi.
+- Se ei kysy pankin salasanaa, korttia tai digitaalista lompakkoa.
+- Ei pääse pankkitilillesi.
 - Ei liikuta rahaa.
-- Ei suorita maksuja, Pixiä, siirtoja tai sijoituksia nimissäsi.
+- Se ei suorita maksuja, Pixiä, siirtoja tai sijoituksia sinun nimissäsi.
 - Ei pyydä kortin turvakoodia.
 - Ei pyydä pankkitunnusta OTP.
 - Ei myy henkilötietojasi.
@@ -27,7 +27,7 @@ Käytetystä resurssista riippuen sovellus voi käyttää:
 - Kirjaudu sisään Firebase Authentication.
 - Cloud Firestore todennettuun käyttäjään liittyvillä tiedoilla.
 - Turvasäännöt, joilla rajoitetaan pääsyä käyttäjän omiin tietoihin.
-- SDK:iden ja käytettyjen palveluiden salaama viestintä.
+- Viestintä on salattu käytettyjen SDK:iden ja palveluiden avulla.
 - Firebase Crashlytics teknisten vikojen tunnistamiseen ja ongelmien korjaamiseen.
 - Android käyttöoikeuksia pyydetään vain, kun ne liittyvät sovelluksen ominaisuuksiin.
 - Paikallinen tallennustila asetuksille, teemalle, välimuistille ja laitetiedoille.
@@ -43,7 +43,7 @@ Riskien vähentämiseksi:
 - Sovellus ilmoittaa sinulle luvan syyn ennen kuin ohjaa sinut asetuksiin.
 - Käyttöoikeus voidaan peruuttaa milloin tahansa Android-asetuksissa.
 - Suodatin etsii yhteensopivia taloustapahtumia, ei henkilökohtaisia ​​keskusteluja.
-- Sovellus yrittää ohittaa OTP-koodit, salasanat, turvakoodit ja todennusviestit.
+- Sovellus yrittää ohittaa OTP-koodit, salasanat, suojakoodit ja todennusviestit.
 - Sovellus ei käytä tätä ominaisuutta pankkien, korttien tai digitaalisten lompakoiden käyttämiseen.
 
 Siitä huolimatta ilmoitukset voivat sisältää arkaluonteisia tietoja. Käytä tätä ominaisuutta vain, jos hyväksyt tämän tyyppisen käsittelyn.
@@ -53,7 +53,7 @@ Siitä huolimatta ilmoitukset voivat sisältää arkaluonteisia tietoja. Käytä
 Sovellus voi pyytää:
 
 - **Internet:** yhteys Firebase-, Google Play-, sovellusliittymiin ja verkkoresursseihin.
-- **Ilmoitukset:** hälytysten lähettäminen itse sovelluksesta.
+- **Ilmoitukset:** lähettää hälytyksiä itse sovelluksesta.
 - **Sijainti:** sisällön mukauttaminen tai vertailut maahan/alueeseen, jos se on sallittua.
 - **Pääsy Android-ilmoituksiin:** valinnainen kulujen tunnistaminen yhteensopivista ilmoituksista.
 - **Sovelluksen sisäiset ostot:** Premium tilaus Google Play.
@@ -64,7 +64,7 @@ Voit hallita näitä käyttöoikeuksia Android-asetuksissa.
 
 Tietojesi suojaaminen:
 
-- Käytä laitteen näytön lukitusta.
+- Käytä laitteesi näytön lukitusta.
 - Älä jaa tiliäsi.
 - Pidä sovellus ja Android päivitettyinä.
 - Peruuta käyttöoikeudet, joita et enää halua käyttää.
@@ -87,7 +87,7 @@ Jos huomaat outoa käyttäytymistä, epäasianmukaista pääsyä, vääriä tiet
 Sisällytä, jos mahdollista:
 
 - Laitteen malli.
-- Versio Android.
+- Android versio.
 - Sovelluksen versio.
 - Kuvaus ongelmasta.
 - Kuvakaappaukset paljastamatta salasanoja, koodeja tai liikaa tietoja.

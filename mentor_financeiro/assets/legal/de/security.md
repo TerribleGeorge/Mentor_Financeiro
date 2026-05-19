@@ -12,10 +12,10 @@ Die App kann von Ihnen eingegebene oder durch optionale Funktionen identifiziert
 
 ## 2. Was die App nicht macht
 
-- Fragt nicht nach einem Bankpasswort, einer Karte oder einer digitalen Geldbörse.
+- Es wird nicht nach einem Bankpasswort, einer Karte oder einer digitalen Geldbörse gefragt.
 - Greift nicht auf Ihr Bankkonto zu.
 - Bewegt kein Geld.
-- Führt keine Zahlungen, Pix, Überweisungen oder Investitionen in Ihrem Namen durch.
+- Es werden keine Zahlungen, Pix, Überweisungen oder Investitionen in Ihrem Namen vorgenommen.
 - Fordert keinen Kartensicherheitscode an.
 - Bankleitzahl OTP wird nicht angefordert.
 - Verkauft Ihre persönlichen Daten nicht.
@@ -24,11 +24,11 @@ Die App kann von Ihnen eingegebene oder durch optionale Funktionen identifiziert
 
 Abhängig von der verwendeten Ressource kann die App Folgendes verwenden:
 
-- Anmeldung per Firebase Authentication.
-– Cloud Firestore mit Daten, die dem authentifizierten Benutzer zugeordnet sind.
+- Anmeldung durch Firebase Authentication.
+- Cloud Firestore mit Daten, die dem authentifizierten Benutzer zugeordnet sind.
 - Sicherheitsregeln zur Einschränkung des Zugriffs auf die eigenen Daten des Benutzers.
 - Durch die verwendeten SDKs und Dienste verschlüsselte Kommunikation.
-- Firebase Crashlytics zur Identifizierung technischer Störungen und zur Behebung von Problemen.
+- Firebase Crashlytics, um technische Störungen zu erkennen und Probleme zu beheben.
 - Android-Berechtigungen werden nur angefordert, wenn sie sich auf App-Funktionen beziehen.
 - Lokaler Speicher für Einstellungen, Theme, Cache und Gerätedaten.
 
@@ -53,8 +53,8 @@ Dennoch können Benachrichtigungen sensible Daten enthalten. Nutzen Sie diese Fu
 Die App kann Folgendes anfordern:
 
 - **Internet:** Verbindung zu Firebase, Google Play, APIs und Online-Ressourcen.
-- **Benachrichtigungen:** Senden von Benachrichtigungen von der App selbst.
-- **Standort:** Anpassung von Inhalten oder Vergleichen an das Land/die Region, sofern genehmigt.
+- **Benachrichtigungen:** Senden von Benachrichtigungen über die App selbst.
+- **Standort:** Anpassung von Inhalten oder Vergleichen an das Land/die Region, sofern autorisiert.
 - **Zugriff auf Android-Benachrichtigungen:** optionale Identifizierung von Ausgaben aus kompatiblen Benachrichtigungen.
 - **In-App-Käufe:** Premium-Abonnement von Google Play.
 
@@ -64,7 +64,7 @@ Sie steuern diese Berechtigungen in den Android-Einstellungen.
 
 Um Ihre Daten zu schützen:
 
-- Verwenden Sie die Bildschirmsperre auf dem Gerät.
+- Verwenden Sie die Bildschirmsperre auf Ihrem Gerät.
 - Geben Sie Ihr Konto nicht weiter.
 - Halten Sie die App und Android auf dem neuesten Stand.
 - Widerrufen Sie Berechtigungen, die Sie nicht mehr verwenden möchten.
@@ -87,7 +87,7 @@ Wenn Sie seltsames Verhalten, unzulässigen Zugriff, falsche Daten, vermutete Si
 Fügen Sie, wenn möglich, Folgendes hinzu:
 
 - Gerätemodell.
-- Version von Android.
+- Android-Version.
 - App-Version.
 - Beschreibung des Problems.
 - Screenshots, ohne Passwörter, Codes oder übermäßige Daten preiszugeben.

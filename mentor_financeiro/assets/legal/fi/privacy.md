@@ -20,17 +20,17 @@ Jos haluat käyttää tietoihisi liittyviä oikeuksia, esittää kysymyksiä tai
 
 **george.guimares@gmail.com**
 
-## 2. Yhteenveto selkeällä kielellä
+## 2. Yhteenveto yksinkertaisella kielellä
 
-- Sovellus auttaa järjestämään kuluja, tavoitteita, rajoja, taloushistoriaa, sijoituksia ja koulutussisältöä.
+- Sovellus auttaa sinua järjestämään kuluja, tavoitteita, rajoja, taloushistoriaa, sijoituksia ja koulutussisältöä.
 - Voit käyttää tiettyjä ominaisuuksia kirjautumalla sisään sähköpostilla/salasanalla, Google-tilillä, Apple-tilillä tai incognito-tilassa Firebase Authentication:n kautta.
 - Antamasi taloustiedot, kuten kulut, tavoitteet, rajoitukset, profiili ja mieltymykset, voidaan tallentaa kansioon Firebase/Cloud Firestore synkronointia ja tilin käyttöä varten.
 - Sovellus käyttää Google/Firebase-palveluita kirjautumiseen, tietokantaan, push-ilmoituksiin, analytiikkaan ja vikadiagnostiikkaan.
 - Sovellus voi käyttää Google AdMob-merkkiä mainosten näyttämiseen.
 - Premium käsittelee Google Play Billing itse sovelluksessa.
-- Sijainti on valinnainen ja sitä käytetään vain, kun annat sille luvan, esimerkiksi mukauttaaksesi sijoitusvertailuja maan tai paikallisen kontekstin mukaan.
-- Ilmoitusten valvontaominaisuus on valinnainen. Jos otat käyttöön ilmoitusten käytön Android-laitteessa, sovellus voi lukea tuettujen ilmoitusten otsikot ja tekstit tunnistaakseen ostot, maksut ja siirrot ja muuttaa ne taloustietueiksi. Sovellus ei pääse pankkitilillesi eikä kysy salasanaa.
-- Räätälöintiäsi valitsemasi kuvat voidaan tallentaa paikallisesti laitteeseen.
+- Sijainti on valinnainen ja sitä käytetään vain, kun annat luvan, esimerkiksi mukauttaaksesi sijoitusvertailuja maan tai paikallisen kontekstin mukaan.
+- Ilmoitusten valvontatoiminto on valinnainen. Jos otat käyttöön ilmoitusten käytön Android-laitteessa, sovellus voi lukea tuettujen ilmoitusten otsikot ja tekstit tunnistaakseen ostot, maksut ja siirrot ja muuttaa ne taloustietueiksi. Sovellus ei pääse pankkitilillesi eikä kysy salasanaa.
+- Mukautettaviksi valitsemasi kuvat voidaan tallentaa paikallisesti laitteeseen.
 - Voit pyytää tilin ja tietojen poistamista tässä käytännössä mainitulla sähköpostilla.
 
 ## 3. Tiedot, joita saatamme käsitellä
@@ -39,12 +39,12 @@ Riippuen siitä, miten käytät sovellusta, saatamme käsitellä seuraavia tieto
 
 ### 3.1 Tili- ja tunnistetiedot
 
-- Rekisteröinnin yhteydessä ilmoitettu nimi.
+- Ilmoittautumisen yhteydessä annettu nimi.
 - Sähköposti.
 - Firebase (UID) käyttäjätunnus.
 - Käytetty kirjautumistapa.
-- Profiilikuva, jos kirjautumispalvelu tarjoaa.
-- profiiliin liittyvä Premium tilaustila.
+- Profiilikuva, kun kirjautumispalvelun tarjoaja on sen antanut.
+- Premium profiiliin liittyvä tilaustila.
 - Tekniset tiedot, joita tarvitaan istunnon ylläpitämiseen ja tietojen synkronointiin.
 
 ### 3.2 Antamasi taloudelliset tiedot
@@ -59,13 +59,15 @@ Nämä tiedot voivat olla arkaluonteisia käytännön mielessä, koska ne paljas
 ### 3.3 Tilaus- ja ostotiedot
 
 - Ostettu tuote, tilauksen tila, kausi, uusiminen, oston palautus ja tekniset tunnisteet vaaditaan vahvistamaan Premium.
-- Google Play käsittelee ostot, peruutukset, uusimiset, hyvitykset ja veloitukset Google-tilin ja kaupan sääntöjen mukaisesti.
+- Google Play käsittelee oston, peruutuksen, uusimisen, hyvityksen ja laskutuksen Google-tilin ja kaupan sääntöjen mukaisesti.
 
 Sovellus ei kerää tai tallenna korttinumeroita, kortin turvakoodeja tai pankkimaksutietoja.
 
-### 3.4 Käyttö-, diagnostiikka- ja suorituskykytiedot- Sovelluksen käyttö- ja vuorovaikutustapahtumat, esimerkiksi käytetyt näytöt, käytetyt resurssit ja suoritetut virrankulut.
-- Koottuja tai teknisiä tietoja tuotteen vakauden, suorituskyvyn ja parannusten ymmärtämiseksi.
-- Firebase Crashlytics:n vikaraportit ja -diagnostiikka tarvittaessa, mukaan lukien laitteen tekniset tiedot, sovellusversio, käyttöjärjestelmä, virhelokit ja käyttäjän tunniste, kun ne on määritetty.
+### 3.4 Käyttö-, diagnostiikka- ja suorituskykytiedot
+
+- Sovelluksen käyttö- ja vuorovaikutustapahtumat, esimerkiksi käytetyt näytöt, käytetyt resurssit ja suoritetut virrankulut.
+- Kootut tai tekniset tiedot tuotteen vakauden, suorituskyvyn ja parannusten ymmärtämiseksi.
+- Firebase Crashlytics:n kaatumisraportit ja diagnostiikka tarvittaessa, mukaan lukien laitteen tekniset tiedot, sovelluksen versio, käyttöjärjestelmä, virhelokit ja käyttäjän tunniste, kun ne on määritetty.
 
 ### 3.5 Push-ilmoitustiedot
 
@@ -108,7 +110,7 @@ Kun valitset kuvan sovelluksen visuaaliseksi mukauttamiseksi, se voidaan tallent
 
 Sovellus voi näyttää mainoksia Google AdMob:n kautta. Google voi käsitellä laitetunnisteita, käyttötietoja, teknisiä tietoja ja mainossignaaleja Googlen omien käytäntöjen ja käyttäjän mainosasetusten mukaisesti.
 
-### 3.10 Tiedot ulkoisista markkinoiden sovellusliittymistä
+### 3.10 Ulkoisten markkinoiden sovellusliittymien tiedot
 
 Sovellus voi hakea ulkopuolisia sovellusliittymiä valuuttakursseihin, noteerauksiin, indekseihin tai markkinatietoihin. Nämä kyselyt sisältävät yleensä haettavia parametreja, kuten valuutta, omaisuus, maa tai symboli. Rekisteröityjä henkilökohtaisia ​​taloustietojasi ei tarvitse lähettää näiden tietojen saamiseksi.
 
@@ -117,21 +119,23 @@ Sovellus voi hakea ulkopuolisia sovellusliittymiä valuuttakursseihin, noteerauk
 Käytämme tietoja:
 
 - Luo ja ylläpidä tiliäsi.
-- Synkronoi kulut, tavoitteet, mieltymykset, historia ja asetukset.
+- Synkronoi kulutus, tavoitteet, mieltymykset, historia ja asetukset.
 - Näytä kojelaudat, kaaviot, raportit, rajoitukset ja personoitu sisältö.
-- Salli Premium:n ostot, palauttaminen ja validointi.
+- Salli kohteen Premium ostaminen, palauttaminen ja vahvistaminen.
 - Lähetä ilmoituksia itse sovelluksesta, kun se on sallittua.
 - Käsittele tuetut talousilmoitukset, jos otat tämän ominaisuuden käyttöön.
 - Mukauta sijoitussisältöä paikalliseen kontekstiin, kun lokalisointi on sallittu.
 - Paranna vakautta, suorituskykyä, turvallisuutta ja sovelluskokemusta.
-- Noudata lakisääteisiä velvoitteita, vastaa pyyntöihin ja ehkäise väärinkäyttöä.
+- Noudata lakisääteisiä velvoitteita, vastaa pyyntöihin ja estä väärinkäyttö.
 - Näytä mainoksia tarvittaessa.
 
 ## 5. Oikeusperustat
 
-Kun LGPD sovelletaan, käsittely voi perustua yhteen tai useampaan oikeusperustaan, mukaan lukien:- Sopimuksen toteuttaminen tai alustavat menettelyt hakemusresurssien toimittamiseksi.
-- Suostumus valinnaisille luville, kuten sijainti, push-ilmoitukset ja pääsy Android-ilmoituksiin.
-- Perusteltu etu turvallisuuteen, diagnoosiin, tuotteiden parantamiseen, väärinkäytösten ehkäisyyn ja suhteellisiin tilastoihin.
+Kun LGPD sovelletaan, käsittely voi perustua yhteen tai useampaan oikeusperustaan, mukaan lukien:
+
+- Sopimuksen toteuttaminen tai alustavat menettelyt hakemusresurssien toimittamiseksi.
+- Suostumus valinnaisiin käyttöoikeuksiin, kuten sijaintiin, push-ilmoituksiin ja Android-ilmoitusten käyttöön.
+- Oikeutettu etu turvallisuuteen, diagnoosiin, tuotteiden parantamiseen, väärinkäytösten ehkäisyyn ja suhteellisiin tilastoihin.
 - Lakisääteisten velvoitteiden noudattaminen tarvittaessa.
 - Säännöllinen oikeuksien käyttö hallinnollisissa, oikeudellisissa tai oikeuden ulkopuolisissa menettelyissä.
 
@@ -145,9 +149,9 @@ Voimme jakaa tai sallia palveluntarjoajien tietojen käsittelyn, jotka ovat tarp
 
 - **Google Firebase**: Firebase Authentication, Cloud Firestore, Firebase Cloud Messaging, Firebase Analytics ja Firebase Crashlytics.
 - **Google-sisäänkirjautuminen / Apple-sisäänkirjautuminen**: kirjaudu sisään kolmannen osapuolen tilin kautta, kun valitset sen.
-- **Google Play Billing**: tilausten, ostosten, peruutusten, Premium:n palauttamisen ja tilan käsittely.
+- **Google Play Billing**: tilausten, ostojen, peruutusten, palautusten ja Premium-tilan käsittely.
 - **Google AdMob**: mainosten näyttäminen ja mittaaminen.
-- **Markkina-, valuutta- tai hintatarjoussovellusliittymät**: sovelluksessa käytettyjen julkisten tai markkinataloudellisten tietojen tarkastelu.
+- **Markkina-, valuutta- tai noteeraussovellusliittymät**: sovelluksessa käytettyjen julkisten tai markkinoiden taloustietojen tarkastelu.
 - **Android-järjestelmäpalvelut**: käyttöoikeudet, ilmoitukset ja laiteresurssit.
 
 Nämä kolmannet osapuolet voivat käsitellä tietoja omien ehtojensa, käytäntöjensä ja asetustensa mukaisesti.
@@ -156,16 +160,16 @@ Nämä kolmannet osapuolet voivat käsitellä tietoja omien ehtojensa, käytänt
 
 Palvelut, kuten Firebase, Google Play, AdMob ja muut palveluntarjoajat voivat käsitellä tietoja Brasilian ulkopuolella sijaitsevilla palvelimilla. Käyttämällä sovellusta hyväksyt, että tätä kansainvälistä käsittelyä voi tapahtua sovellettavien tietosuojasääntöjen ja palveluntarjoajien ehtojen mukaisesti.
 
-## 8. Säilyttäminen
+## 8. Säilytys
 
 Säilytämme tietoja niin kauan kuin on tarpeen sovelluksen toimittamiseksi, tässä käytännössä kuvattujen tarkoitusten täyttämiseksi, lakisääteisten velvoitteiden noudattamiseksi, riitojen ratkaisemiseksi, petosten estämiseksi ja turvallisuuden ylläpitämiseksi.
 
-Yleisesti:
+Yleensä:
 
-- Tilitiedot ja taloustiedot pilvessä säilyvät niin kauan kuin tili on olemassa tai voimassa olevaan poistopyyntöön asti.
-- Paikalliset tiedot voivat jäädä laitteeseen, kunnes poistat, tyhjennät sovellustiedot tai poistat sovelluksen.
+- Tilitiedot ja taloustiedot pilvessä säilyvät niin kauan kuin tili on olemassa tai kunnes tehdään kelvollinen poistopyyntö.
+- Paikalliset tiedot voivat jäädä laitteellesi, kunnes poistat, tyhjennät sovelluksen tiedot tai poistat sovelluksen.
 - Diagnostiikkatiedot, analytiikka ja lokit voidaan säilyttää palveluntarjoajien määrittämiä ajanjaksoja.
-- Ostotiedot voivat jäädä tiedostoon Google Play vero-, kauppa- ja kauppasääntöjen mukaisesti.
+- Ostotiedot voivat jäädä Google Play:iin vero-, kaupallisten ja kaupan sääntöjen mukaisesti.
 - Anonymisoituja tai koottuja tietoja voidaan säilyttää ilman, että sinua tunnistetaan.
 
 ## 9. Turvallisuus
@@ -173,8 +177,8 @@ Yleisesti:
 Käytämme kohtuullisia teknisiä ja organisatorisia toimenpiteitä tietojen suojaamiseksi, mukaan lukien:
 
 - Todennus: Firebase.
-- Pääsysäännöt tietokantaan rajoittamaan tiedot vastaavalle käyttäjälle.
-- Käytetyillä SDK:illa ja API:illa salattu viestintä.
+- Pääsysäännöt tietokantaan rajoittaaksesi tiedot vastaavalle käyttäjälle.
+- Viestintä on salattu käytettyjen SDK:iden ja API:iden avulla.
 - Android-oikeuksien käyttö vain, kun se liittyy sovellusresursseihin.
 - Suodattaa ilmoituksia valvottaessa suojakoodien, OTP, salasanojen ja todennusviestien välttämiseksi.
 - Vikadiagnoosi virheiden korjaamiseksi ja vakauden parantamiseksi.
@@ -190,12 +194,14 @@ Voit:
 - Peruuta sijainti Android-asetuksissa.
 - Peruuta ilmoitusten käyttöoikeus Android-asetuksissa.
 - Peruuta tai hallinnoi tilausta Google Play:n kautta.
-- Tyhjennä paikalliset sovellustiedot tai poista sovellus.
+- Tyhjennä paikalliset sovelluksen tiedot tai poista sovellus.
 - Pyydä pääsyä, korjausta tai poistamista sähköpostilla.
 
 ## 11. Tilin ja tietojen poistaminen
 
-Tilin ja tietojen poistamisen pyytäminen:1. Lähetä sähköposti osoitteeseen **george.guimares@gmail.com**.
+Tilin ja tietojen poistamisen pyytäminen:
+
+1. Lähetä sähköpostia osoitteeseen **george.guimares@gmail.com**.
 2. Käytä aihetta **"Tietojen poistaminen - Mentor Financeiro"** tai **"LGPD - Mentor Financeiro"**.
 3. Anna tilin sähköpostiosoite, kirjautumistapa tai muu tunniste, joka auttaa paikantamaan profiilin.
 4. Ilmoita, haluatko tilin/pilvitietojen täydellisen poistamisen vai tiettyjen luokkien poistamisen, jos se on teknisesti mahdollista.
@@ -206,15 +212,15 @@ Seuraavat voidaan tarvittaessa sulkea pois tai poistaa linkittämättä:
 
 - Käyttäjäprofiili ja asiakirjat kohteessa Cloud Firestore.
 - Kulutus, tavoitteet, mieltymykset, taloushistoria ja asetukset tallennettu pilveen.
-- profiiliin liitetty FCM -tunnus, kun se on tallennettu.
-- Tili Firebase Authentication:ssa, kun täydellistä ja teknisesti soveltuvaa poistamista pyydetään.
+- FCM -tunnus, joka liittyy profiiliin, kun se on tallennettu.
+- Tili Firebase Authentication, pyydettäessä täydellinen ja teknisesti soveltuva poisto.
 
 Ne voivat viipyä pidempään:
 
 - Anonymisoitu tai koostettu data.
-- Lainmukaisuuden, petosten ehkäisemisen, turvallisuuden tai oikeuksien puolustamisen edellyttämät tiedot.
+- Tietueet, joita tarvitaan lainmukaisuuden, petosten ehkäisemisen, turvallisuuden tai oikeuksien puolustamisen kannalta.
 - Google Play:n ylläpitämä osto-, maksu- ja tilaushistoria.
-- Kolmannen osapuolen palveluntarjoajien suoraan käsittelemät tiedot käytäntöjensä mukaisesti.
+- Kolmannen osapuolen tarjoajien suoraan käsittelemät tiedot käytäntöjensä mukaisesti.
 
 Pyrimme vastaamaan kelvollisiin pyyntöihin 30 arkipäivän kuluessa, ellei monimutkainen, lakisääteinen velvoite tai lisävahvistuksen tarvetta ole.
 
@@ -222,11 +228,11 @@ Pyrimme vastaamaan kelvollisiin pyyntöihin 30 arkipäivän kuluessa, ellei moni
 
 Sovellettavan lain mukaisesti voit pyytää:
 
-- Hoidon olemassaolon vahvistus.
+- Vahvistus hoidon olemassaolosta.
 - Pääsy tietoihin.
-- Puutteellisten, epätarkkojen tai vanhentuneiden tietojen korjaaminen.
+- Epätäydellisten, epätarkkojen tai vanhentuneiden tietojen korjaaminen.
 - Tarpeettomien, liiallisten tai vaatimustenvastaisten tietojen anonymisointi, estäminen tai poistaminen.
-- Tietoa jakamisesta.
+- Tietojen jakaminen.
 - Suostumuksen peruuttaminen.
 - Suostumuksen perusteella käsiteltyjen tietojen poistaminen soveltuvin osin.
 - Siirrettävyys, kun se on säänneltyä ja teknisesti mahdollista.

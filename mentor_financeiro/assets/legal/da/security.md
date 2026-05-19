@@ -12,10 +12,10 @@ Appen kan gemme økonomiske data indtastet af dig eller identificeret ved valgfr
 
 ## 2. Hvad app'en ikke gør
 
-- Spørger ikke om bankadgangskode, kort eller digital tegnebog.
+- Den beder ikke om en bankadgangskode, kort eller digital tegnebog.
 - Får ikke adgang til din bankkonto.
 - Flytter ikke penge.
-- Foretager ikke betalinger, Pix, overførsler eller investeringer i dit navn.
+- Det foretager ikke betalinger, Pix, overførsler eller investeringer i dit navn.
 - Anmoder ikke om kortsikkerhedskode.
 - Anmoder ikke om bankkode OTP.
 - Sælger ikke dine personlige data.
@@ -28,11 +28,11 @@ Afhængigt af den anvendte ressource kan appen bruge:
 - Cloud Firestore med data knyttet til den godkendte bruger.
 - Sikkerhedsregler for at begrænse adgangen til brugerens egne data.
 - Kommunikation krypteret af de anvendte SDK'er og tjenester.
-- Firebase Crashlytics til at identificere tekniske fejl og løse problemer.
+- Firebase Crashlytics for at identificere tekniske fejl og rette problemer.
 - Android-tilladelser anmodes kun om, når de er relateret til appfunktioner.
 - Lokal lagring til præferencer, tema, cache og enhedsdata.
 
-## 4. Notifikationsovervågning
+## 4. Underretningsovervågning
 
 Notifikationsovervågning er valgfri og kræver manuel aktivering på Android.
 
@@ -42,8 +42,8 @@ For at reducere risici:
 
 - Appen informerer dig om årsagen til tilladelsen, før den dirigerer dig til indstillingerne.
 - Adgang kan til enhver tid tilbagekaldes i indstillingerne for Android.
-- Filteret søger efter kompatible økonomiske begivenheder, ikke personlige samtaler.
-- Appen forsøger at ignorere OTP koder, adgangskoder, sikkerhedskoder og godkendelsesmeddelelser.
+- Filteret leder efter kompatible økonomiske begivenheder, ikke personlige samtaler.
+- Appen forsøger at ignorere OTP-koder, adgangskoder, sikkerhedskoder og godkendelsesmeddelelser.
 - Appen bruger ikke denne funktion til at få adgang til banker, kort eller digitale tegnebøger.
 
 Alligevel kan meddelelser indeholde følsomme data. Brug kun denne funktion, hvis du accepterer denne type behandling.
@@ -52,10 +52,10 @@ Alligevel kan meddelelser indeholde følsomme data. Brug kun denne funktion, hvi
 
 Appen kan anmode om:
 
-- **Internet:** forbindelse til Firebase, Google Play, API'er og online ressourcer.
+- **Internet:** forbindelse til Firebase, Google Play, API'er og onlineressourcer.
 - **Meddelelser:** sender advarsler fra selve appen.
 - **Placering:** tilpasning af indhold eller sammenligninger til landet/regionen, når det er godkendt.
-- **Adgang til Android notifikationer:** valgfri identifikation af udgifter fra kompatible notifikationer.
+- **Adgang til Android meddelelser:** valgfri identifikation af udgifter fra kompatible meddelelser.
 - **Køb i appen:** Premium abonnement af Google Play.
 
 Du kontrollerer disse tilladelser i indstillingerne for Android.
@@ -64,7 +64,7 @@ Du kontrollerer disse tilladelser i indstillingerne for Android.
 
 For at beskytte dine data:
 
-- Brug skærmlås på enheden.
+- Brug skærmlås på din enhed.
 - Del ikke din konto.
 - Hold appen og Android opdateret.
 - Tilbagekald tilladelser, du ikke længere ønsker at bruge.
@@ -87,7 +87,7 @@ Hvis du bemærker mærkelig adfærd, ukorrekt adgang, forkerte data, formodet si
 Medtag, hvis det er muligt:
 
 - Enhedsmodel.
-- Version af Android.
+- Android version.
 - App version.
 - Beskrivelse af problemet.
 - Skærmbilleder uden at afsløre adgangskoder, koder eller overdreven data.

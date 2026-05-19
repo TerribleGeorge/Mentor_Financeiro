@@ -19,9 +19,9 @@ Mentor Financeiro no és:
 - assessor d'inversions registrat;
 - planificador financer certificat;
 - companyia d'assegurances;
-- forma de pagament;
+- mitjans de pagament;
 - entitat de crèdit;
-- Plataforma per executar ordres d'inversió.
+- Plataforma d'execució d'ordres d'inversió.
 
 ## 2. Ús educatiu i manca de recomanació personalitzada
 
@@ -40,12 +40,12 @@ Ets responsable de:
 - proporcionar informació correcta;
 - mantenir un accés segur al vostre correu electrònic i dispositiu;
 - protegir la vostra contrasenya i el vostre compte;
-- no compartir credencials;
+- no compartiu credencials;
 - advertir sobre sospita d'ús indegut.
 
 Podem limitar, suspendre o cancel·lar l'accés si hi ha abús, frau, violació d'aquests termes, risc de seguretat o requisit legal.
 
-## 4. Dades introduïdes per tu
+## 4. Dades introduïdes per vostè
 
 Sou responsable de les dades que registreu a l'aplicació, incloses les despeses, els objectius, els límits, l'historial, la informació del perfil i les preferències.
 
@@ -53,7 +53,7 @@ L'aplicació pot organitzar, processar, mostrar, sincronitzar i analitzar aquest
 
 Abans de prendre decisions financeres, hauríeu de revisar els registres, especialment les dades importades o identificades automàticament per les notificacions.
 
-## 5. Monitorització de notificacions
+## 5. Seguiment de notificacions
 
 L'aplicació pot oferir una funció de seguiment de notificacions Android opcional per identificar despeses, compres, pagaments, subscripcions i transferències a les notificacions admeses.
 
@@ -89,10 +89,12 @@ No som responsables dels productes, serveis, ofertes o continguts d'anunciants e
 
 ## 8. Ús acceptable
 
-Vostè accepta no:- utilitzar l'aplicació per frau, abús, blanqueig de diners, violació legal o dany a tercers;
+Vostè accepta no:
+
+- utilitzar l'aplicació per frau, abús, blanqueig de diners, violació legal o dany a tercers;
 - intentar accedir a dades d'altres usuaris;
-- evitar seguretat, límits, subscripció, mur de pagament o mecanismes tècnics;
-- fer enginyeria inversa, copiar, modificar o redistribuir l'aplicació sense autorització;
+- eludir seguretat, límits, subscripció, mur de pagament o mecanismes tècnics;
+- realitzar enginyeria inversa, copiar, modificar o redistribuir l'aplicació sense autorització;
 - automatitzar l'ús abusiu, sobrecarregar serveis o interferir amb el seu funcionament;
 - inserir contingut il·legal, ofensiu, enganyós o que vulneri els drets de tercers.
 
@@ -124,7 +126,7 @@ En la mesura màxima permesa per la llei, Mentor Financeiro no es fa responsable
 - classificacions automàtiques incorrectes;
 - errors d'Internet, Firebase, Google Play, Android, API o tercers;
 - indisponibilitat, pèrdua de dades locals, problemes amb el dispositiu o permís revocat;
-- resultats de la inversió, rendibilitat, impostos, comissions o condicions de mercat.
+- resultats d'inversió, rendibilitat, impostos, comissions o condicions de mercat.
 
 Res d'aquests termes exclou drets que la llei no pugui limitar.
 
@@ -134,13 +136,13 @@ Podeu deixar d'utilitzar l'aplicació en qualsevol moment, suprimir dades locals
 
 Suprimir l'aplicació del dispositiu no cancel·la automàticament una subscripció activa. Per cancel·lar càrrecs futurs, utilitzeu Google Play.
 
-## 14. Privadesa i seguretat
+## 14. Privacitat i seguretat
 
 L'ús de les dades s'explica a la Política de Privacitat. Les pràctiques de seguretat s'expliquen a la pàgina Seguretat.
 
 En utilitzar l'aplicació, reconeixeu que les dades financeres poden ser sensibles i que heu de mantenir el dispositiu protegit.
 
-## 15. Canvis a aquests termes
+## 15. Canvis d'aquestes condicions
 
 És possible que actualitzem aquestes Condicions d'ús per reflectir canvis a l'aplicació, funcions, subscripcions, requisits legals o serveis de tercers.
 

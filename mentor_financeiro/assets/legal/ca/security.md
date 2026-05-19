@@ -18,21 +18,21 @@ L'aplicació pot emmagatzemar les dades financeres introduïdes per vostè o ide
 - No realitza pagaments, Pix, transferències o inversions al teu nom.
 - No demana el codi de seguretat de la targeta.
 - No demana el codi bancari OTP.
-- No ven les teves dades personals.
+- No ven les vostres dades personals.
 
 ## 3. Mesures tècniques utilitzades
 
 Segons el recurs utilitzat, l'aplicació pot utilitzar:
 
 - Inicieu sessió per Firebase Authentication.
-- Cloud Firestore amb les dades associades a l'usuari autenticat.
+- Cloud Firestore amb dades associades a l'usuari autenticat.
 - Normes de seguretat per restringir l'accés a les dades pròpies de l'usuari.
 - Comunicació xifrada pels SDK i serveis utilitzats.
-- Firebase Crashlytics per identificar errors tècnics i solucionar problemes.
+- Firebase Crashlytics per identificar avaries tècniques i corregir problemes.
 - Els permisos Android només es demanen quan estan relacionats amb les funcions de l'aplicació.
 - Emmagatzematge local per a preferències, tema, memòria cau i dades del dispositiu.
 
-## 4. Monitorització de notificacions
+## 4. Seguiment de notificacions
 
 La supervisió de notificacions és opcional i requereix l'activació manual al Android.
 
@@ -55,7 +55,7 @@ L'aplicació pot demanar:
 - **Internet:** connexió a Firebase, Google Play, API i recursos en línia.
 - **Notificacions:** enviant alertes des de la pròpia aplicació.
 - **Ubicació:** adaptació del contingut o comparacions al país/regió, quan s'autoritzi.
-- **Accés a notificacions Android:** identificació opcional de despeses a partir de notificacions compatibles.
+- **Accés a les notificacions Android:** identificació opcional de despeses a partir de notificacions compatibles.
 - **Compres des de l'aplicació:** subscripció a Premium per Google Play.
 
 Controleu aquests permisos a la configuració de Android.
@@ -64,13 +64,13 @@ Controleu aquests permisos a la configuració de Android.
 
 Per protegir les vostres dades:
 
-- Utilitzeu el bloqueig de pantalla al dispositiu.
+- Utilitza el bloqueig de pantalla al teu dispositiu.
 - No compartiu el vostre compte.
-- Mantenir l'aplicació i Android actualitzats.
+- Manteniu l'aplicació i Android actualitzats.
 - Revoca els permisos que ja no vulguis utilitzar.
 - Comproveu les transaccions identificades automàticament abans de prendre decisions.
 - No registreu informació que no voleu conservar a l'aplicació.
-- Cancel·leu les subscripcions directament a Google Play quan no vulgueu renovar-les.
+- Cancel·la les subscripcions directament a Google Play quan no vulguis renovar-les.
 
 ## 7. Limitacions
 
@@ -87,7 +87,7 @@ Si observeu un comportament estrany, accés inadequat, dades incorrectes, sospit
 Incloeu, si és possible:
 
 - Model de dispositiu.
-- Versió de Android.
+- Versió Android.
 - Versió de l'aplicació.
 - Descripció del problema.
 - Captures de pantalla sense exposar contrasenyes, codis o dades excessives.
