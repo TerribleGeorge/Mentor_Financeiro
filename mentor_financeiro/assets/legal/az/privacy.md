@@ -23,15 +23,15 @@ Məlumatlarınızla bağlı hüquqlardan istifadə etmək, suallar vermək və y
 ## 2. Sadə dildə xülasə
 
 - Tətbiq sizə xərcləri, məqsədləri, məhdudiyyətləri, maliyyə tarixini, investisiyaları və təhsil məzmununu təşkil etməyə kömək edir.
-- Müəyyən funksiyalardan istifadə etmək üçün Firebase Authentication vasitəsilə e-poçt/parol, Google hesabı, Apple hesabı və ya inkoqnito rejimi ilə daxil ola bilərsiniz.
-- Xərclər, məqsədlər, limitlər, profil və üstünlüklər kimi təqdim etdiyiniz maliyyə məlumatları sinxronizasiya və hesabın işləməsi üçün Firebase/Cloud Firestore-da saxlanıla bilər.
+- Müəyyən funksiyalardan istifadə etmək üçün siz Firebase Authentication vasitəsilə e-poçt/parol, Google hesabı, Apple hesabı və ya inkoqnito rejimi ilə daxil ola bilərsiniz.
+- Xərclər, məqsədlər, limitlər, profil və üstünlüklər kimi təqdim etdiyiniz maliyyə məlumatları sinxronizasiya və hesabın işləməsi üçün Firebase/Cloud Firestore-də yadda saxlanıla bilər.
 - Tətbiq giriş, verilənlər bazası, təkan bildirişləri, analitika və nasazlıq diaqnozu üçün Google/Firebase xidmətlərindən istifadə edir.
 - Tətbiq reklamları göstərmək üçün Google AdMob istifadə edə bilər.
 - Premium tətbiqin özündə Google Play Billing tərəfindən işlənir.
-- Məkan isteğe bağlıdır və yalnız siz icazə verdiyiniz zaman istifadə olunur, məsələn, investisiya müqayisələrini ölkə və ya yerli kontekstə uyğunlaşdırmaq üçün.
-- Bildiriş monitorinqi xüsusiyyəti isteğe bağlıdır. Android üzərində bildiriş girişini aktiv etsəniz, proqram satınalmaları, ödənişləri və köçürmələri müəyyən etmək və onları maliyyə qeydlərinə çevirmək üçün dəstəklənən bildirişlərin başlığını və mətnini oxuya bilər. Proqram bank hesabınıza daxil olmur və parol tələb etmir.
+- Məkan isteğe bağlıdır və yalnız siz icazə verdikdə istifadə olunur, məsələn, investisiya müqayisələrini ölkə və ya yerli kontekstə uyğunlaşdırmaq üçün.
+- Bildiriş monitorinqi funksiyası isteğe bağlıdır. Android üzərində bildiriş girişini aktiv etsəniz, proqram satınalmaları, ödənişləri və köçürmələri müəyyən etmək və onları maliyyə qeydlərinə çevirmək üçün dəstəklənən bildirişlərin başlığını və mətnini oxuya bilər. Proqram bank hesabınıza daxil olmur və parol tələb etmir.
 - Fərdiləşdirmə üçün seçdiyiniz şəkillər cihazda lokal olaraq saxlanıla bilər.
-- Bu siyasətdə göstərilən e-poçt vasitəsilə hesab və məlumatların silinməsini tələb edə bilərsiniz.
+- Siz bu siyasətdə göstərilən e-poçt vasitəsilə hesab və məlumatların silinməsini tələb edə bilərsiniz.
 
 ## 3. Biz emal edə biləcəyimiz məlumatlar
 
@@ -44,28 +44,30 @@ Tətbiqdən necə istifadə etdiyinizdən asılı olaraq, biz aşağıdakı məl
 - Firebase (UID) istifadəçi identifikatoru.
 - Giriş metodundan istifadə olunur.
 - Giriş provayderi tərəfindən təqdim edildikdə profil şəkli.
-- Premium profillə əlaqəli abunə statusu.
+- Premium profillə əlaqəli abunə vəziyyəti.
 - Sessiyanı saxlamaq və məlumatı sinxronlaşdırmaq üçün lazım olan texniki məlumatlar.
 
 ### 3.2 Sizin daxil etdiyiniz maliyyə məlumatları
 
 - Xərclər, xərclər, gəlirlər, kateqoriyalar, maliyyə tarixi və əməliyyatlar.
-- Məqsədlər, məhdudiyyətlər, planlaşdırma, maliyyə arzuları və üstünlükləri.
+- Məqsədlər, məhdudiyyətlər, planlaşdırma, maliyyə xəyalları və üstünlüklər.
 - Proqram daxilində qrafiklərdə, hesabatlarda, təhlillərdə və avtomatik mentorluqda istifadə olunan məlumatlar.
 - Anketlərdə və ya planlaşdırma ekranlarında təqdim olunan investor profili, məqsədləri və cavabları.
 
 Bu məlumatlar praktiki mənada həssas ola bilər, çünki maliyyə həyatınızın aspektlərini ortaya qoyur. Buna görə də, yalnız ərizədə saxlamaq istədiyiniz məlumatları qeyd etməlisiniz.
 
-### 3.3 Abunəlik və alış məlumatları
+### 3.3 Abunəlik və satınalma məlumatları
 
-- Premium təsdiq üçün tələb olunan alınmış məhsul, abunə statusu, müddət, yeniləmə, alışın bərpası və texniki identifikatorlar.
-- Satınalmalar, ləğvlər, yeniləmələr, geri ödəmələr və ödənişlər Google hesabı və mağaza qaydalarına uyğun olaraq Google Play tərəfindən işlənir.
+- Premium təsdiq etmək üçün tələb olunan alınmış məhsul, abunə statusu, müddət, yeniləmə, alışın bərpası və texniki identifikatorlar.
+- Satınalma, ləğvetmə, yeniləmə, geri ödəmə və hesablama Google hesabı və mağaza qaydalarına uyğun olaraq Google Play tərəfindən həyata keçirilir.
 
 Tətbiq kart nömrələrini, kartın təhlükəsizlik kodlarını və ya bank ödəniş məlumatlarını toplamır və saxlamır.
 
-### 3.4 İstifadə, diaqnostika və performans məlumatları- Tətbiqdə istifadə və qarşılıqlı əlaqə hadisələri, məsələn, daxil olan ekranlar, istifadə olunan resurslar və axınlar tamamlandı.
-- Məhsulun sabitliyini, performansını və təkmilləşdirilməsini anlamaq üçün ümumiləşdirilmiş və ya texniki məlumatlar.
-- Mümkün olduqda Firebase Crashlytics tərəfindən nasazlıq hesabatları və diaqnostika, o cümlədən cihazın texniki məlumatları, proqram versiyası, əməliyyat sistemi, xəta qeydləri və konfiqurasiya edildikdə istifadəçi identifikatoru.
+### 3.4 İstifadə, diaqnostika və performans məlumatları
+
+- Tətbiqdəki istifadə və qarşılıqlı əlaqə hadisələri, məsələn, daxil olan ekranlar, istifadə olunan resurslar və tamamlanan axınlar.
+- Məhsulun sabitliyini, performansını və təkmilləşdirilməsini anlamaq üçün ümumi və ya texniki məlumatlar.
+- Cihazın texniki məlumatı, tətbiq versiyası, əməliyyat sistemi, xəta qeydləri və konfiqurasiya edildikdə istifadəçi identifikatoru daxil olmaqla, müvafiq hallarda Firebase Crashlytics tərəfindən qəza hesabatları və diaqnostika.
 
 ### 3.5 Push bildiriş məlumatı
 
@@ -87,14 +89,14 @@ Bu xüsusiyyətin vacib tədbirləri:
 
 - Proqram bank hesabınıza daxil deyil.
 - Tətbiq banklara, kartlara və ya rəqəmsal pul kisələrinə daxil olmur.
-- Proqram bank parolunu tələb etmir.
+- Proqram bank parolu tələb etmir.
 - Tətbiq təhlükəsizlik kodları, OTP, parollar və autentifikasiya mesajlarının tutulmaması üçün filtrlər tətbiq edir.
 - Süzgəcin əsas məqsədi uyğun alışları, ödənişləri, göndərilən köçürmələri və maliyyə hərəkətlərini müəyyən etməkdir.
 - Siz proqramda funksiyanı söndürə və ya Android parametrlərində icazəni ləğv edə bilərsiniz.
 
 Filtrlər olsa belə, bildirişlərdə həssas məlumatlar ola bilər. Yalnız bu cür emalları başa düşsəniz və qəbul edirsinizsə, bu funksiyanı aktivləşdirin.
 
-### 3.7 Məkan
+### 3.7 Yer
 
 Tətbiq müqayisələri, məzmunu və ya investisiya kontekstini ölkəyə/regiona uyğunlaşdırmaq üçün Android tərəfindən verilən icazəyə əsasən təxmini və ya dəqiq yer tələb edə bilər.
 
@@ -112,28 +114,30 @@ Proqram Google AdMob vasitəsilə reklam göstərə bilər. Google cihaz identif
 
 Tətbiq valyuta məzənnələri, kotirovkalar, indekslər və ya bazar məlumatları üçün xarici API-lərə müraciət edə bilər. Bu sorğular adətən axtarılan valyuta, aktiv, ölkə və ya simvol kimi parametrləri əhatə edir. Bu məlumatı əldə etmək üçün qeydiyyatdan keçmiş şəxsi maliyyə məlumatlarınızı göndərmək lazım deyil.
 
-## 4. Məlumatları nə üçün istifadə edirik
+## 4. Verilənləri nə üçün istifadə edirik
 
 Biz datadan istifadə edirik:
 
 - Hesabınızı yaradın və qoruyun.
 - Xərcləri, məqsədləri, üstünlükləri, tarixçəni və parametrləri sinxronlaşdırın.
-- Tabloları, qrafikləri, hesabatları, limitləri və fərdiləşdirilmiş məzmunu göstərin.
-- Premium alışına, bərpasına və təsdiqlənməsinə icazə verin.
-- İcazə verildikdə proqramın özündən bildirişlər göndərin.
+- Panelləri, qrafikləri, hesabatları, limitləri və fərdiləşdirilmiş məzmunu göstərin.
+- Premium alışına, bərpasına və təsdiqinə icazə verin.
+- İcazə verildikdə, tətbiqin özündən bildirişlər göndərin.
 - Bu funksiyanı aktivləşdirsəniz, dəstəklənən maliyyə bildirişlərini emal edin.
 - Lokalizasiyaya icazə verildikdə investisiya məzmununu yerli kontekstə uyğunlaşdırın.
 - Sabitlik, performans, təhlükəsizlik və tətbiq təcrübəsini təkmilləşdirin.
-- Qanuni öhdəliklərə riayət etmək, sorğulara cavab vermək və sui-istifadənin qarşısını almaq.
+- Qanuni öhdəliklərə əməl edin, sorğulara cavab verin və sui-istifadənin qarşısını alın.
 - Mümkün olduqda reklamları göstərin.
 
 ## 5. Hüquqi əsaslar
 
-LGPD tətbiq edildikdə, emal bir və ya bir neçə hüquqi əsasa əsaslana bilər, o cümlədən:- Müqavilə və ya ilkin prosedurların icrası, müraciət resurslarının çatdırılması.
+LGPD tətbiq edildikdə, emal bir və ya bir neçə hüquqi əsasa əsaslana bilər, o cümlədən:
+
+- Müqavilə və ya ilkin prosedurların icrası, ərizə resurslarının çatdırılması.
 - Məkan, təkan bildirişləri və Android bildirişlərinə giriş kimi əlavə icazələr üçün razılıq.
 - Təhlükəsizlik, diaqnostika, məhsulun təkmilləşdirilməsi, sui-istifadənin qarşısının alınması və mütənasib statistika üçün qanuni maraq.
-- Zəruri hallarda qanuni və ya normativ öhdəliklərə riayət etmək.
-- İnzibati, məhkəmə və ya məhkəmədənkənar proseslərdə hüquqların müntəzəm olaraq həyata keçirilməsi.
+- Zəruri hallarda hüquqi və ya tənzimləyici öhdəliklərə riayət etmək.
+- İnzibati, məhkəmə və ya məhkəmədənkənar proseslərdə hüquqların müntəzəm həyata keçirilməsi.
 
 Siz proqram və ya əməliyyat sistemi parametrlərində isteğe bağlı razılıqları ləğv edə bilərsiniz, lakin bu, funksionallığı məhdudlaşdıra bilər.
 
@@ -145,14 +149,14 @@ Biz proqramın işləməsi üçün lazım olan provayderlər tərəfindən məlu
 
 - **Google Firebase**: Firebase Authentication, Cloud Firestore, Firebase Cloud Messaging, Firebase Analytics və Firebase Crashlytics.
 - **Google Girişi / Apple Girişi**: seçdiyiniz zaman üçüncü tərəf hesabı vasitəsilə daxil olun.
-- **Google Play Billing**: Premium abunəliklərinin, alışlarının, ləğvlərinin, bərpasının və statusunun işlənməsi.
+- **Google Play Billing**: abunəliklərin, alışların, ləğvlərin, Premium statusunun bərpası və işlənməsi.
 - **Google AdMob**: reklamların göstərilməsi və ölçülməsi.
 - **Bazar, valyuta və ya kotirovka API-ləri**: tətbiqdə istifadə olunan ictimai və ya bazar maliyyə məlumatlarının məsləhətləşməsi.
 - **Android sistem xidmətləri**: icazələr, bildirişlər və cihaz resursları.
 
 Bu üçüncü tərəflər məlumatları öz şərtlərinə, siyasətlərinə və parametrlərinə uyğun emal edə bilərlər.
 
-## 7. Beynəlxalq köçürmə
+## 7. Beynəlxalq transfer
 
 Firebase, Google Play, AdMob və digər provayderlər kimi xidmətlər Braziliyadan kənarda yerləşən serverlərdə məlumatları emal edə bilər. Tətbiqdən istifadə etməklə, bu beynəlxalq emalın müvafiq məlumatların qorunması qaydalarına və provayderlərin şərtlərinə uyğun olaraq baş verə biləcəyini qəbul edirsiniz.
 
@@ -162,9 +166,9 @@ Tətbiqi çatdırmaq, bu siyasətdə təsvir olunan məqsədləri yerinə yetirm
 
 Ümumilikdə:
 
-- Buluddakı hesab məlumatları və maliyyə məlumatları hesab mövcud olduğu müddətdə və ya etibarlı silinmə sorğusuna qədər qalır.
-- Siz proqram məlumatlarını silənə, silənə və ya proqramı silənə qədər yerli məlumatlar cihazda qala bilər.
-- Diaqnostik məlumatlar, analitika və qeydlər provayderlər tərəfindən müəyyən edilmiş dövrlər üçün saxlanıla bilər.
+- Buluddakı hesab məlumatları və maliyyə məlumatları hesab mövcud olduğu müddətdə və ya etibarlı silinmə sorğusu edilənə qədər qalır.
+- Siz proqram məlumatlarını silənə, silənə və ya proqramı silənə qədər yerli məlumatlar cihazınızda qala bilər.
+- Diaqnostik məlumatlar, analitika və qeydlər provayderlər tərəfindən müəyyən edilmiş dövrlər ərzində saxlanıla bilər.
 - Alış məlumatları vergi, ticarət və mağaza qaydalarına uyğun olaraq Google Play-də qala bilər.
 - Anonimləşdirilmiş və ya ümumiləşdirilmiş məlumatlar sizi tanımadan saxlanıla bilər.
 
@@ -176,7 +180,7 @@ Biz məlumatları qorumaq üçün ağlabatan texniki və təşkilati tədbirlər
 - Verilənləri müvafiq istifadəçi ilə məhdudlaşdırmaq üçün verilənlər bazasında giriş qaydaları.
 - İstifadə olunan SDK və API-lər tərəfindən şifrələnmiş rabitə.
 - Android icazələrindən yalnız proqram resursları ilə əlaqəli olduqda istifadə edin.
-- Təhlükəsizlik kodları, OTP, parollar və autentifikasiya mesajlarının qarşısını almaq üçün bildirişləri izləyərkən filtrlər.
+- Təhlükəsizlik kodları, OTP, parollar və autentifikasiya mesajlarından qaçmaq üçün bildirişləri izləyərkən filtrlər.
 - Səhvləri düzəltmək və sabitliyi yaxşılaşdırmaq üçün səhv diaqnozu.
 
 Heç bir sistem 100% təhlükəsiz deyil. Siz həmçinin cihazınızı qorumalı, ekran kilidindən istifadə etməli, güclü parol saxlamalı, hesabınızı paylaşmaqdan çəkinməli və yeni versiya çıxan zaman proqramı yeniləməlisiniz.
@@ -186,35 +190,37 @@ Heç bir sistem 100% təhlükəsiz deyil. Siz həmçinin cihazınızı qorumalı
 Siz edə bilərsiniz:
 
 - Bu funksiya mövcud olduqda proqram daxilində məlumatları redaktə edin və ya silin.
-- Android parametrlərində təkan bildirişlərini söndürün.
-- Android parametrlərində yeri ləğv edin.
+- Android parametrlərində təkan bildirişlərini deaktiv edin.
+- Android parametrlərində məkanı ləğv edin.
 - Android parametrlərində bildirişlərə girişi ləğv edin.
-- Google Play vasitəsilə abunəni ləğv edin və ya idarə edin.
+- Google Play vasitəsilə abunəliyi ləğv edin və ya idarə edin.
 - Yerli proqram məlumatlarını silin və ya proqramı silin.
 - Əlaqə e-poçtu vasitəsilə giriş, düzəliş və ya silinmə tələb edin.
 
 ## 11. Hesabın və məlumatların silinməsi
 
-Hesabın və məlumatların silinməsini tələb etmək üçün:1. **george.guimares@gmail.com** ünvanına e-poçt göndərin.
-2. **"Məlumatların Silinməsi - Mentor Financeiro"** və ya **"LGPD - Mentor Financeiro"** mövzusundan istifadə edin.
-3. Profilin yerini tapmağa kömək edən hesab e-poçtunu, giriş metodunu və ya digər identifikatoru daxil edin.
+Hesabın və məlumatların silinməsini tələb etmək üçün:
+
+1. **george.guimares@gmail.com** ünvanına e-poçt göndərin.
+2. **"Məlumatların silinməsi - Mentor Financeiro"** və ya **"LGPD - Mentor Financeiro"** mövzusundan istifadə edin.
+3. Profili tapmağa kömək edən hesab e-poçtunu, giriş metodunu və ya digər identifikatoru daxil edin.
 4. Texniki cəhətdən mümkün olduqda hesabın/bulud məlumatlarının tamamilə silinməsini və ya xüsusi kateqoriyaların silinməsini istədiyinizi göstərin.
 
 Biz yersiz silinmələrin qarşısını almaq üçün şəxsiyyətin təsdiqini tələb edə bilərik.
 
 Aşağıdakılar müvafiq olaraq xaric edilə və ya əlaqəsi kəsilə bilər:
 
-- Cloud Firestore-də istifadəçi profili və sənədlər.
-- Xərclər, məqsədlər, üstünlüklər, maliyyə tarixçəsi və buludda saxlanılan parametrlər.
+- İstifadəçi profili və sənədlər Cloud Firestore.
+- Xərclər, məqsədlər, üstünlüklər, maliyyə tarixçəsi və parametrlər buludda saxlanılır.
 - FCM token saxlanıldıqda profillə əlaqələndirilir.
-- Firebase Authentication-də hesab, ümumi və texniki cəhətdən müvafiq silinmə tələb olunduqda.
+- Firebase Authentication-də hesab, tələb olunduqda ümumi və texniki cəhətdən tətbiq olunan silinmə.
 
 Onlar daha çox qala bilərlər:
 
 - Anonimləşdirilmiş və ya ümumiləşdirilmiş məlumatlar.
 - Qanuna uyğunluq, saxtakarlığın qarşısının alınması, təhlükəsizlik və ya hüquqların müdafiəsi üçün zəruri olan qeydlər.
 - Google Play tərəfindən saxlanılan alışların, ödənişlərin və abunəliklərin tarixi.
-- Siyasətlərinə uyğun olaraq üçüncü tərəf provayderlər tərəfindən birbaşa emal edilən məlumatlar.
+- Siyasətlərinə uyğun olaraq üçüncü tərəf təminatçıları tərəfindən birbaşa emal edilən məlumatlar.
 
 Mürəkkəb, qanuni öhdəlik və ya əlavə yoxlamaya ehtiyac olmadığı halda, etibarlı sorğulara 30 iş günü ərzində cavab verməyə çalışacağıq.
 
@@ -226,7 +232,7 @@ Mövcud qanuna uyğun olaraq, siz tələb edə bilərsiniz:
 - Məlumata giriş.
 - Natamam, qeyri-dəqiq və ya köhnəlmiş məlumatların düzəldilməsi.
 - Lazımsız, həddindən artıq və ya uyğun olmayan məlumatların anonimləşdirilməsi, bloklanması və ya silinməsi.
-- Paylaşım haqqında məlumat.
+- Məlumat mübadiləsi.
 - Razılığın ləğvi.
 - Müvafiq olduqda, razılıq əsasında işlənmiş məlumatların silinməsi.
 - Tənzimlənən və texniki cəhətdən mümkün olduqda daşınma qabiliyyəti.

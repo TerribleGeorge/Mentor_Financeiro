@@ -10,9 +10,9 @@ Mentor Financeiro bank hesabına birbaşa giriş tələb etmədən, bank parolun
 
 Tətbiq sizin daxil etdiyiniz və ya əlavə funksiyalarla müəyyən edilmiş maliyyə məlumatlarını saxlaya bilər, buna görə də biz təhlükəsizliyi məhsulun mərkəzi hissəsi kimi qəbul edirik.
 
-## 2. Proqram nə etmir
+## 2. Proqramın nə etmədiyi
 
-- Bank parolu, kart və ya rəqəmsal pul kisəsi tələb etmir.
+- O, bank parolu, kart və ya rəqəmsal pul kisəsi tələb etmir.
 - Bank hesabınıza daxil deyil.
 - Pul köçürmür.
 - Sizin adınıza ödənişlər, Pix, köçürmələr və ya investisiyalar etmir.
@@ -28,11 +28,11 @@ Tətbiq sizin daxil etdiyiniz və ya əlavə funksiyalarla müəyyən edilmiş m
 - Cloud Firestore təsdiqlənmiş istifadəçi ilə əlaqəli məlumatlarla.
 - İstifadəçinin öz məlumatlarına girişi məhdudlaşdırmaq üçün təhlükəsizlik qaydaları.
 - SDK-lar və istifadə edilən xidmətlər tərəfindən şifrələnmiş rabitə.
-- Firebase Crashlytics texniki nasazlıqları müəyyən etmək və problemləri aradan qaldırmaq üçün.
-- Android icazələr yalnız proqram xüsusiyyətləri ilə əlaqəli olduqda tələb olunur.
+- Firebase Crashlytics texniki nasazlıqları müəyyən etmək və problemləri düzəltmək üçün.
+- Android icazələr yalnız proqram funksiyaları ilə əlaqəli olduqda tələb olunur.
 - Tercihlər, mövzu, keş və cihaz məlumatları üçün yerli yaddaş.
 
-## 4. Bildiriş Monitorinqi
+## 4. Bildirişlərin monitorinqi
 
 Bildiriş monitorinqi isteğe bağlıdır və Android üzərində əl ilə aktivləşdirmə tələb olunur.
 
@@ -53,9 +53,9 @@ Bununla belə, bildirişlərdə həssas məlumatlar ola bilər. Bu funksiyadan y
 Tətbiq tələb edə bilər:
 
 - **İnternet:** Firebase, Google Play, API-lərə və onlayn resurslara qoşulma.
-- ** Bildirişlər: ** proqramın özündən xəbərdarlıqların göndərilməsi.
-- **Yer:** icazə verildikdə məzmunun və ya müqayisələrin ölkəyə/regiona uyğunlaşdırılması.
-- **Android bildirişlərinə giriş:** uyğun bildirişlərdən xərclərin isteğe bağlı müəyyən edilməsi.
+- **Bildirişlər:** proqramın özündən xəbərdarlıqların göndərilməsi.
+- **Yer:** icazə verildikdə məzmunun ölkəyə/regiona uyğunlaşdırılması və ya müqayisəsi.
+- **Android bildirişlərinə giriş:** Uyğun bildirişlərdən xərclərin isteğe bağlı müəyyən edilməsi.
 - **Tətbiqdaxili satınalmalar:** Google Play tərəfindən Premium abunəliyi.
 
 Siz bu icazələrə Android parametrlərində nəzarət edirsiniz.
@@ -64,13 +64,13 @@ Siz bu icazələrə Android parametrlərində nəzarət edirsiniz.
 
 Məlumatlarınızı qorumaq üçün:
 
-- Cihazda ekran kilidindən istifadə edin.
+- Cihazınızda ekran kilidindən istifadə edin.
 - Hesabınızı paylaşmayın.
 - Tətbiqi və Android yeniləməsini saxlayın.
 - Artıq istifadə etmək istəmədiyiniz icazələri ləğv edin.
 - Qərar qəbul etməzdən əvvəl avtomatik müəyyən edilmiş əməliyyatları yoxlayın.
-- Tətbiqdə saxlamaq istəmədiyiniz məlumatları qeydiyyatdan keçirməyin.
-- Yeniləmək istəmədiyiniz zaman abunələri birbaşa Google Play saytında ləğv edin.
+- Tətbiqdə saxlamaq istəmədiyiniz məlumatları qeyd etməyin.
+- Yeniləmək istəmədiyiniz zaman abunələri birbaşa Google Play ünvanında ləğv edin.
 
 ## 7. Məhdudiyyətlər
 

@@ -1,4 +1,4 @@
-# İstifadə Şərtləri - Mentor Financeiro
+# İstifadə şərtləri - Mentor Financeiro
 
 **Son yenilənmə:** 19 may 2026-cı il
 
@@ -19,9 +19,9 @@ Mentor Financeiro deyil:
 - qeydiyyatdan keçmiş investisiya məsləhətçisi;
 - sertifikatlı maliyyə planlayıcısı;
 - sığorta şirkəti;
-- ödəniş üsulu;
+- ödəniş vasitələri;
 - kredit təşkilatı;
-- investisiya sifarişlərinin icrası üçün platforma.
+- investisiya sifarişi icra platforması.
 
 ## 2. Təhsildə istifadə və fərdi tövsiyələrin olmaması
 
@@ -89,9 +89,11 @@ Biz kənar reklamçılardan məhsul, xidmət, təklif və ya məzmuna görə mə
 
 ## 8. Məqbul istifadə
 
-Siz razılaşırsınız:- proqramdan fırıldaqçılıq, sui-istifadə, çirkli pulların yuyulması, qanun pozuntusu və ya üçüncü şəxslərə zərər vurmaq üçün istifadə edin;
-- digər istifadəçilərin məlumatlarına daxil olmağa çalışın;
-- təhlükəsizlik, limitlər, abunə, ödəniş divarı və ya texniki mexanizmlərdən yan keçmək;
+Siz razılaşırsınız:
+
+- proqramdan fırıldaqçılıq, sui-istifadə, çirkli pulların yuyulması, qanun pozuntusu və ya üçüncü şəxslərə zərər vurmaq üçün istifadə etmək;
+- digər istifadəçilərin məlumatlarına daxil olmağa cəhd;
+- təhlükəsizlik, limitlər, abunə, ödəniş divarı və ya texniki mexanizmlərdən yayınmaq;
 - icazəsiz tətbiqi tərsinə çevirmək, kopyalamaq, dəyişdirmək və ya yenidən yaymaq;
 - sui-istifadəni avtomatlaşdırmaq, xidmətləri həddən artıq yükləmək və ya onların işinə mane olmaq;
 - qeyri-qanuni, təhqiredici, aldadıcı və ya üçüncü şəxslərin hüquqlarını pozan məzmun daxil edin.
@@ -121,9 +123,9 @@ Qanunla icazə verilən maksimum dərəcədə, Mentor Financeiro aşağıdakıla
 - proqram əsasında qəbul edilən maliyyə qərarları;
 - itkilər, itkilər, itirilmiş mənfəət və ya itirilmiş imkanlar;
 - istifadəçi tərəfindən daxil edilmiş məlumat səhvləri;
-- səhv avtomatik təsnifatlar;
+- yanlış avtomatik təsnifatlar;
 - internet xətaları, Firebase, Google Play, Android, API və ya üçüncü tərəflər;
-- əlçatmazlıq, yerli məlumatların itirilməsi, cihaz problemləri və ya icazənin ləğvi;
+- əlçatmazlıq, yerli məlumatların itirilməsi, cihaz problemləri və ya ləğv edilmiş icazə;
 - investisiya nəticələri, gəlirlilik, vergilər, ödənişlər və ya bazar şərtləri.
 
 Bu şərtlərdə heç bir şey qanunla məhdudlaşdırıla bilməyən hüquqları istisna etmir.
@@ -146,7 +148,7 @@ Tətbiqə, funksiyalara, abunəliklərə, qanuni tələblərə və ya üçüncü
 
 Yuxarıdakı tarix cari versiyanı göstərir. Dəyişikliklərdən sonra tətbiqin davamlı istifadəsi qanunla icazə verildiyi təqdirdə yenilənmiş versiya ilə razılaşma deməkdir.
 
-## 16. Qüvvədə olan qanun və əlaqə
+## 16. Tətbiq olunan qanun və əlaqə
 
 Bu şərtlər istifadəçiyə və tətbiqə cavabdeh olan şəxsə tətbiq edilən qanunvericiliyə, o cümlədən müvafiq hallarda Braziliya standartlarına uyğun şərh edilir.
 
